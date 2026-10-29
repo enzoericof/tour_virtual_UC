@@ -29,7 +29,7 @@ La Cantina de CyT es el recinto definido para este repositorio; conservar ese no
 
 Se requieren primera persona, movimiento libre, acceso a los recintos, paneles informativos, biblioteca de trabajos, registro e inicio de sesión, publicación de trabajos propios y administración de paneles.
 
-Se trabaja con la referencia de cinco integrantes, pendiente de completar la nómina. La consigna exige interacción entre usuarios para **más de cuatro alumnos** y agente IA para **más de seis**. Incluir chat en tiempo real en la planificación. El agente IA y el recorrido guiado con IA están fuera del alcance inicial; revisar el requisito si cambia el tamaño del grupo.
+El equipo está formado por **seis integrantes**; la nómina está pendiente de registrar. La consigna exige interacción entre usuarios para **más de cuatro alumnos** y agente IA para **más de seis** (siete o más). Con seis integrantes, el chat en tiempo real es obligatorio y debe incluirse en la planificación. El agente IA y el recorrido guiado con IA no son obligatorios para este equipo y están fuera del alcance inicial; revisar el requisito si cambia el tamaño del grupo.
 
 ## Stack acordado
 

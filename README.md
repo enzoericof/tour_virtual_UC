@@ -6,7 +6,7 @@ Visita virtual en primera persona a la Facultad de Ciencias y Tecnología de la 
 
 ## Equipo y colaboración
 
-El desarrollo y la documentación se construyen entre los integrantes del grupo. Se toma como referencia un equipo de cinco integrantes; la nómina y la asignación individual de tareas están pendientes de registrar.
+El desarrollo y la documentación se construyen entre los **seis integrantes** del grupo. La nómina y la asignación individual de tareas están pendientes de registrar.
 
 ## Objetivo
 
@@ -39,7 +39,7 @@ La Cantina de CyT sustituye a Bedelía en el alcance definido para este reposito
 | Chat | Mensajería en tiempo real entre visitantes conectados. |
 | Entrega | Sitio publicado y/o máquina virtual operativa, con instrucciones de configuración y puesta en marcha. |
 
-Según la consigna, la interacción entre usuarios es obligatoria cuando participan **más de cuatro alumnos**. Se incluye el chat en el alcance inicial. El agente IA y el recorrido guiado con IA son obligatorios únicamente cuando participan **más de seis alumnos** y quedan fuera de esta base; si cambia la cantidad de integrantes, se revisará el alcance.
+Según la consigna, la interacción entre usuarios es obligatoria cuando participan **más de cuatro alumnos**. Para este equipo de **seis integrantes**, el chat es obligatorio y se incluye en el alcance inicial. El agente IA y el recorrido guiado con IA son obligatorios únicamente cuando participan **más de seis alumnos** (siete o más), por lo que quedan fuera de esta base; si cambia la cantidad de integrantes, se revisará el alcance.
 
 ### Criterios de implementación del recorrido
 
