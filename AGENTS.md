@@ -24,6 +24,12 @@ El recorrido incluye:
 4. Planta baja del bloque de laboratorios.
 5. Primer piso de aulas.
 6. Escaleras, patios y pasillos comunes.
+7. Bedelía.
+8. Segundo piso.
+9. Tercer piso.
+10. Baños.
+11. Bloque G.
+12. Estacionamiento.
 
 La Cantina de CyT es el recinto definido para este repositorio; conservar ese nombre y ese alcance en documentación, interfaz, identificadores y tareas. El README registra el ajuste respecto a la consigna recibida y su validación docente pendiente.
 
