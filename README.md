@@ -71,7 +71,7 @@ La configuración de Compose está limitada a la máquina local. Para un desplie
 
 ## Controles
 
-La vista general incluye ahora el conjunto del campus, con huellas cartográficas contrastadas con la referencia de Google Maps. Los controles **Campus completo**, **Vista de planta** y **Mi facultad** permiten pasar de la distribución general al modelo cercano de CyT. El mapa interactivo utiliza la misma base y señala los puntos de visita de la facultad. Ver [fuentes, coordenadas y límites de fidelidad](docs/base-geografica.md).
+La vista general incluye el conjunto del campus como contexto cartográfico. CyT se reconstruye desde la vista aérea marcada del equipo: Bloque G inclinado, patio triangular, anexos al noreste, estacionamiento al sur y caminos conectados. Los controles **Campus completo**, **Vista de planta**, **Plano de CyT** y **Mi facultad** permiten revisar esa distribución. El plano y el recorrido comparten la misma geometría; se eliminó la arboleda generada. Ver [fuentes, coordenadas y límites de fidelidad](docs/base-geografica.md).
 
 | Acción | Control |
 | --- | --- |

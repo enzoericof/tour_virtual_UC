@@ -16,3 +16,14 @@ Pendientes: recorrido completo por todas las escaleras, dispositivos móviles f�
 - Comparación conjunta de la referencia satelital y la vista de planta registrada en `design-qa.md`. Las capturas se guardan localmente en `.local/references/`, fuera de Git.
 
 No se repitieron las pruebas del backend en esta iteración: su código no cambió. La ejecución con PostgreSQL/Docker y la validación de detalles de cada sector conservan los pendientes indicados arriba.
+
+## Corrección de la distribución de CyT — 31/10/2026
+
+- Se sustituyó el modelo cercano antiguo por una reconstrucción registrada sobre la vista aérea anotada del Drive del equipo. Bloque G, anexos, patio y estacionamiento comparten una única geometría en las vistas y el recorrido.
+- Diez pruebas del frontend aprobadas. Las tres nuevas protegen el ángulo de G, registro de alturas, posición relativa de sectores y conectividad completa de la red peatonal.
+- TypeScript y compilación Vite correctos.
+- Revisión visual en el navegador interno a 920 × 764: las cuatro vistas, mapa compartido, selección de espacios, acceso desde «Comenzar recorrido», movimiento y pausa en el acceso, llegada y caminata en la galería del primer piso.
+- El control alternativo de arrastrar funciona ante la restricción de Pointer Lock del navegador interno.
+- Comparación de referencia y plano en `.local/references/faculty-distribution-comparison.jpg`; diagnóstico y límites actualizados en `design-qa.md`. La evaluación anterior no bastaba para validar CyT y queda sustituida.
+
+Pendientes: mediciones reales, validación por el equipo de las proporciones y detalles, caminata completa por todas las escaleras y recintos, y los pendientes de integración anteriores. No hubo cambios de backend en esta corrección.

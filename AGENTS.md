@@ -77,9 +77,10 @@ Separar la geometría 3D de los contenidos administrables. Usar identificadores 
 
 ### Base general y detalle de CyT
 
-- El escenario general y el plano interactivo comparten `frontend/src/data/campus-layout.json`. Consultar `docs/base-geografica.md` antes de mover bloques o cambiar coordenadas.
+- El contexto general usa `frontend/src/data/campus-layout.json`. CyT usa `frontend/src/data/faculty-blueprint.ts`, registrado desde la vista aérea marcada del equipo en Drive. El escenario y el plano consumen ambas fuentes. Consultar `docs/base-geografica.md` antes de mover bloques o cambiar coordenadas.
 - Mantener `X` hacia el este, `Z` hacia el sur y `Y` vertical. Los puntos de visita del modelo cercano pasan por `facultyToWorld`; conservar sus identificadores para los contenidos del backend.
-- La vista del campus completo utiliza las huellas cartográficas. «Mi facultad» y el modo a pie muestran el modelo cercano existente, pendiente de validación por sectores.
+- CyT tiene una única geometría en campus completo, «Mi facultad», «Plano de CyT» y modo a pie. No recuperar la disposición anterior de bloques paralelos ni duplicar los anexos con volúmenes OSM. El Bloque G es oblicuo respecto al Bloque 1; Cantina, Manfred y Bedelía se ubican según la referencia anotada.
+- Mantener conectada la red peatonal y despejadas las circulaciones. No generar bosques ni agregar árboles para rellenar el terreno; se conservan cuatro árboles de referencia en CyT y pocos en el contexto.
 - Afinar interiores, anexos y fachadas con referencias identificadas. Los árboles, vehículos y alturas del contexto son aproximaciones; no presentarlos como un relevamiento exacto.
 - Mantener la atribución de OpenStreetMap. Las capturas locales de Google Maps sirven para comparar la distribución; no son texturas del escenario.
 

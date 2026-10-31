@@ -1,46 +1,43 @@
-# Revisión visual — base general del campus
+# Revisión visual de la distribución de CyT
 
-Fecha: 31/10/2026. Alcance: reemplazar la distribución aislada anterior por una base general de Santa Librada; conservar el recorrido cercano de CyT para la siguiente etapa de correcciones por sectores. La referencia se utiliza para la geografía, no para reproducir la interfaz de Google Maps ni para afirmar fidelidad fotográfica.
+Fecha: 31/10/2026.
 
-## Evidencia
+## Corrección del diagnóstico anterior
 
-- Referencia: enlace de Google Maps aportado por el equipo, documentado en `docs/base-geografica.md`.
-- Captura de referencia: `.local/references/campus-google-maps.jpg`.
-- Estado anterior: `.local/references/campus-before.jpg`.
-- Implementación revisada: `.local/references/campus-plan-v2.jpg`.
-- Comparación conjunta: `.local/references/campus-comparison.jpg`.
-- Vista: norte arriba en ambos casos. Viewport: 920 × 764 píxeles CSS; ambas capturas tienen 920 × 764 píxeles. Comparación 1:1 de píxeles, sin escalado de densidad. No se trató el mapa satelital y la maqueta como imágenes del mismo estilo.
+La revisión inicial de la base general fue insuficiente: comprobó el contexto OSM, pero dejó los bloques y anexos del recorrido cercano en posiciones incorrectas. El usuario rechazó esa distribución y la sobrecarga de árboles. El resultado anterior «passed» queda sustituido por esta revisión; no demuestra fidelidad de la facultad.
 
-Las capturas son evidencia local excluida de Git; no se distribuyen como recursos del producto. La referencia pública y los datos cartográficos permiten repetir la comparación.
+## Referencia y evidencia
 
-## Historial de comparación
+Referencia principal: [vista aérea anotada del equipo](https://drive.google.com/file/d/1nqROQLGTXraAKXHkl4VRuzc5UGMFQnyW/view), junto con las fotos sectoriales del Drive documentadas en `docs/base-geografica.md`.
 
-1. La vista anterior mostraba dos bloques paralelos sobre un terreno rectangular aislado. No representaba el conjunto de facultades, la red de estacionamientos ni la relación con las canchas y el sector sur. Se sustituyó la vista lejana por huellas y trazados cartográficos compartidos con el plano.
-2. En la primera revisión de la implementación, los rótulos se reducían demasiado al alejarse y el borde norte quedaba bajo los controles. Se mantuvo el tamaño de lectura de los rótulos, se reservó espacio para la barra superior y se repitió la captura.
-3. La comparación conjunta posterior muestra CyT al noroeste, los edificios de contexto al noreste, los estacionamientos centrales y orientales, y las canchas y masa arbolada al oeste y sur. Los controles de planta permanecen libres y CyT resulta identificable. Las diferencias de textura, vegetación individual y altura se reconocen como aproximaciones de esta fase.
+Evidencia local excluida de Git:
 
-## Superficies verificadas
+- `.local/references/drive-aerial-0.jpg`: referencia anotada, 560 × 508.
+- `.local/references/faculty-rebuilt-plan.jpg`: vista de planta de la aplicación, 920 × 764.
+- `.local/references/faculty-rebuilt-overview.jpg`: galerías y patio desde la cámara orbital.
+- `.local/references/faculty-rebuilt-gallery.jpg`: galería a pie.
+- `.local/references/faculty-distribution-comparison.jpg`: referencia y plano juntos para comparar relaciones espaciales.
 
-- **Tipografía:** se conservan las fuentes y jerarquías de la aplicación. Los rótulos del campus mantienen lectura al alejar la cámara. No se pretende igualar la tipografía cartográfica de Google.
-- **Distribución y espaciado:** los edificios, calles, estacionamientos y canchas usan una base de coordenadas común. El plano reserva margen para los controles persistentes. El mapa del diálogo conserva su desplazamiento vertical normal y una leyenda seleccionable.
-- **Colores:** la maqueta distingue techos, pavimentos, vegetación y el sector de CyT; el estilo esquemático se conserva. No se presenta la paleta como una captura satelital.
-- **Imágenes y recursos:** se mantienen las fotografías y los GLB existentes. La cartografía es geometría nativa del escenario solicitado; no se sustituyeron fotografías por imágenes generadas. Los interiores capturados siguen siendo escenas independientes.
-- **Contenido:** las otras facultades se presentan como contexto cuando no hay identificación confirmada; los sectores interiores conservan sus identificadores y su estado provisional. Bedelía permanece incluida. Se mantiene el equipo de seis integrantes.
+La referencia es una imagen con perspectiva; el plano de la aplicación tiene norte arriba. La comparación evalúa orientación relativa, adyacencias y continuidad, no equivalencia fotográfica ni distancias de un relevamiento.
 
-La comparación focal de CyT, estacionamientos y canchas se hizo dentro de la imagen conjunta, donde sus posiciones relativas son visibles. El objetivo no incluye validar fachadas ni detalles interiores contra las fotos en esta fase.
+## Hallazgos corregidos
 
-## Interacción y errores
+- Los bloques ya no son paralelos. G tiene techo azul y tres niveles; Bloque 1, techo claro y cuatro niveles. El patio entre ambos forma una cuña triangular.
+- Manfred, Bedelía, plaza y Cantina se trasladaron al extremo oriental/noreste indicado en la referencia.
+- El estacionamiento de CyT se representa como área verde al sur de G.
+- Galerías, patio, plaza, anexos y estacionamiento comparten una red peatonal continua.
+- La misma geometría aparece en el plano, la vista lejana y el recorrido cercano. Se eliminó el modelo antiguo y los volúmenes OSM duplicados de esa zona.
+- Se retiró la generación masiva de árboles. Cuatro ejemplares pequeños conservan referencias de los patios.
+- Se incorporaron columnas, barandas, pisos rojos con bandas, puertas con sobreluz, cerchas, escaleras exteriores, fachada acristalada de Cantina y panelería de Manfred.
+- Los controles de vista ya pueden seleccionarse con la lista de espacios abierta. Se corrigió el punto de entrada junto a la unión de los bloques y la llegada a la galería del primer piso.
+- Se redujo el velo de la interfaz y se ajustó la precisión de profundidad de la cámara lejana para evitar manchas entre suelo y pavimento.
 
-Comprobados en el navegador: las tres vistas, apertura del plano y selección de un espacio, entrada al escaneo del laboratorio, entrada a pie en CyT, movimiento y pausa, y retorno a la vista general.
+La tipografía y navegación existentes se conservan. Las imágenes aéreas son referencias; el mural es un recorte de la fotografía del pilar, y los demás materiales continúan siendo procedurales.
 
-La captura del cursor está restringida en el navegador interno: se comprobó que funciona el modo alternativo de arrastrar. Su mensaje de Pointer Lock aparece en consola; no se detectaron otros errores nuevos durante la revisión. No se efectuó validación en móviles físicos ni se declara como realizado un recorrido exhaustivo por todas las escaleras.
+## Comprobaciones y límites
 
-## Pendientes de la siguiente etapa
+Se revisaron las cuatro vistas, la entrada desde «Comenzar recorrido», el movimiento y pausa en el acceso, la llegada al primer piso y el movimiento sobre su galería. Las pruebas de datos comprueban el ángulo entre bloques, registro de alturas, pertenencia de anexos y conectividad de todos los caminos.
 
-- Validar con el equipo la correspondencia de anexos, Cantina, Sala Manfred y el segundo bloque del modelo cercano.
-- Ajustar alturas, fachadas y materiales por sector con fotografías identificadas.
-- Refinar la vegetación individual. Su distribución actual comunica las áreas verdes a escala del campus y no constituye un relevamiento de árboles.
+El navegador interno restringe Pointer Lock; funciona la alternativa de arrastrar. No se declara una caminata completa por todas las escaleras ni la validación de medidas reales. No se probaron dispositivos móviles físicos.
 
-Sin hallazgos P0/P1/P2 pendientes dentro del alcance de esta base general. Los detalles anteriores corresponden a la siguiente etapa solicitada por el usuario.
-
-final result: passed
+Resultado: corregida la distribución relativa según la imagen anotada. **Fidelidad dimensional y validación completa por sectores pendientes.** Esta revisión no sustituye la aprobación del equipo ni da por terminada la réplica.

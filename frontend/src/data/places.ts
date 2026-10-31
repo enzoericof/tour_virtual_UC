@@ -1,4 +1,5 @@
 import { facultyToWorld } from "./campus-geometry";
+import { facultyVisitPoints } from "./faculty-blueprint";
 
 export type Place = {
   id: string;
@@ -12,7 +13,7 @@ export type Place = {
   scan?: string;
   status: "scan" | "reference" | "pending";
 };
-export const facultyPlaces: Place[] = [
+const originalPlaces: Place[] = [
   {
     id: "acceso",
     name: "Pasillos de acceso",
@@ -197,6 +198,10 @@ export const facultyPlaces: Place[] = [
     status: "reference",
   },
 ];
+export const facultyPlaces: Place[] = originalPlaces.map((p) => ({
+  ...p,
+  position: facultyVisitPoints[p.id] ?? p.position,
+}));
 export const places: Place[] = facultyPlaces.map((p) => ({
   ...p,
   position: facultyToWorld(p.position),

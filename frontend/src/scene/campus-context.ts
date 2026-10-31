@@ -1,5 +1,6 @@
 import * as T from "three";
 import { layout, campusBounds, insidePolygon, distanceToSegment, FACULTY_MAIN, FACULTY_LABS, type Point } from "../data/campus-geometry";
+import { inFacultyZone } from "../data/faculty-blueprint";
 
 export function createCampusContext() {
   const group = new T.Group(), colliders = new T.Group();
@@ -41,11 +42,8 @@ export function createCampusContext() {
   base.receiveShadow = true; group.add(base);
   const floor = new T.Mesh(baseGeo); floor.scale.copy(base.scale); floor.position.copy(base.position); colliders.add(floor);
   polygon(layout.boundary, ground, -0.025);
-  layout.parking.forEach((p) => polygon(p.points, parking, 0.008));
-  layout.roads.forEach((r) => strip(r.points, r.width, road));
-  // CyT's pedestrian connections remain provisional until the next survey.
-  strip([[-22, -135], [-15, -145], [29, -166], [47, -189]], 2.8, road, 0.045);
-  strip([[-57, -128], [-52, -120], [-45, -114]], 2.4, road, 0.045);
+  layout.parking.filter((p) => !inFacultyZone(p.points)).forEach((p) => polygon(p.points, parking, 0.008));
+  layout.roads.filter((r) => !inFacultyZone(r.points)).forEach((r) => strip(r.points, r.width, road));
 
   const lineMat = new T.LineBasicMaterial({ color: "#e1e8ce" });
   function line(points: T.Vector3[], closed = false) {
@@ -70,6 +68,7 @@ export function createCampusContext() {
   });
 
   for (const [i, building] of layout.buildings.entries()) {
+    if (inFacultyZone(building.points)) continue;
     const detailed = [FACULTY_MAIN, FACULTY_LABS].includes(building.id);
     const height = building.id === FACULTY_MAIN ? 14 : building.id === FACULTY_LABS ? 10.5 : building.levels * 3.4 + 0.5;
     const body = polygon(building.points, wall, 0.03, height);
@@ -98,28 +97,26 @@ export function createCampusContext() {
 
   let seed = 73161;
   const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
-  function free(x: number, z: number, inParking = false) {
+  function free(x: number, z: number) {
     const point = [x, z];
     return insidePolygon(point, layout.boundary)
       && !layout.buildings.some((b) => insidePolygon(point, b.points) || b.points.some((a, i) => distanceToSegment(point, a, b.points[(i + 1) % b.points.length]) < 3.2))
       && !layout.pitches.some((p) => insidePolygon(point, p.points))
-      && (inParking || !layout.parking.some((p) => insidePolygon(point, p.points)))
+      && !layout.parking.some((p) => insidePolygon(point, p.points))
       && !layout.roads.some((r) => r.points.some((p, i) => i && distanceToSegment(point, r.points[i - 1], p) < r.width / 2 + 2.1));
   }
-  const trees: [number, number][] = [];
-  for (let x = campusBounds.minX; x <= campusBounds.maxX; x += 8.5)
-    for (let z = campusBounds.minZ; z <= campusBounds.maxZ; z += 8.5) {
-      const px = x + (random() - 0.5) * 6, pz = z + (random() - 0.5) * 6;
-      const density = pz > 10 && px < 155 ? 0.83 : pz > -85 && px < 150 ? 0.6 : 0.18;
-      if (random() < density && free(px, pz)) trees.push([px, pz]);
-    }
-  for (const x of [222, 253, 283]) for (let z = -65; z <= 20; z += 13)
-    if (free(x, z, true)) trees.push([x, z]);
+  // Sparse reference trees only: keep the campus layout and paths unobstructed.
+  const treeCandidates: [number, number][] = [
+    [-140, -70], [-110, 85], [-80, 160], [-50, 235], [-15, 305],
+    [80, 365], [140, 310], [160, 215], [210, 88], [300, -15],
+    [320, -180], [115, -225],
+  ];
+  const trees = treeCandidates.filter(([x, z]) => free(x, z));
   const trunks = new T.InstancedMesh(new T.CylinderGeometry(0.25, 0.4, 1, 5), material("#655744"), trees.length);
   const leaves = new T.InstancedMesh(new T.IcosahedronGeometry(1, 1), material("#416745"), trees.length * 2);
   const dummy = new T.Object3D(), color = new T.Color();
   trees.forEach(([x, z], i) => {
-    const h = 6 + random() * 7, radius = 3.2 + random() * 2.5;
+    const h = 5 + random() * 2, radius = 2.2 + random() * 0.8;
     dummy.position.set(x, h / 2, z); dummy.scale.set(1, h, 1); dummy.rotation.set(0, 0, 0); dummy.updateMatrix(); trunks.setMatrixAt(i, dummy.matrix);
     for (let k = 0; k < 2; k++) {
       dummy.position.set(x + k * 0.9, h - k * 1.4, z + k * 0.7);
@@ -136,7 +133,7 @@ export function createCampusContext() {
     const xs = area.points.map((p) => p[0]), zs = area.points.map((p) => p[1]);
     for (let x = Math.min(...xs) + 4; x < Math.max(...xs) - 3; x += 7)
       for (let z = Math.min(...zs) + 4; z < Math.max(...zs) - 3; z += 13)
-        if (random() > 0.35 && insidePolygon([x, z], area.points) && !layout.roads.some((r) => r.points.some((p, i) => i && distanceToSegment([x, z], r.points[i - 1], p) < 4.6))) carPoints.push([x, z]);
+      if (!inFacultyZone(area.points) && random() > 0.35 && insidePolygon([x, z], area.points) && !layout.roads.some((r) => r.points.some((p, i) => i && distanceToSegment([x, z], r.points[i - 1], p) < 4.6))) carPoints.push([x, z]);
   }
   const cars = new T.InstancedMesh(baseGeo, material("#eee9dc"), carPoints.length);
   const carColors = ["#e3e0d4", "#455663", "#9d5245", "#757b75"];

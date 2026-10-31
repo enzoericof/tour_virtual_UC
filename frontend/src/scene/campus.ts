@@ -1,5 +1,5 @@
 import * as T from "three";
-import { createFaculty } from "./faculty";
+import { createFaculty } from "./faculty-reconstruction";
 import { createCampusContext } from "./campus-context";
 import { facultyPose } from "../data/campus-geometry";
 
@@ -17,8 +17,8 @@ export function createCampus() {
   group.add(context.group, faculty.group);
   colliders.add(context.colliders, faculty.colliders);
   function setDetail(detail: boolean) {
-    faculty.group.visible = detail;
-    context.facultyVolumes.forEach((mesh) => { mesh.visible = !detail; });
+    faculty.group.visible = true;
+    context.facultyVolumes.forEach((mesh) => { mesh.visible = false; });
     context.group.children.forEach((mesh) => {
       if (mesh.userData.contextLabel) mesh.visible = !detail;
     });

@@ -5,7 +5,7 @@ import { createCampus } from "./campus";
 import { Walker } from "../navigation/walker";
 import { places, type Place } from "../data/places";
 import { campusBounds, campusCenter, facultyToWorld } from "../data/campus-geometry";
-export type CampusView = "campus" | "plan" | "faculty";
+export type CampusView = "campus" | "plan" | "faculty" | "faculty-plan";
 export class TourEngine {
   readonly scene = new T.Scene();
   readonly camera = new T.PerspectiveCamera(52, 1, 0.08, 2600);
@@ -15,12 +15,12 @@ export class TourEngine {
   readonly campus = createCampus();
   private scan: T.Group | null = null;
   private loading = 0;
-  private sun = new T.DirectionalLight(0xfff2d6, 3);
-  private hemi = new T.HemisphereLight(0xdbeaf4, 0x80935d, 2.6);
+  private sun = new T.DirectionalLight(0xfff2d6, 2.4);
+  private hemi = new T.HemisphereLight(0xdbeaf4, 0xb1ada0, 1.7);
   private previous = performance.now();
   private frame = 0;
   private current = "campus";
-  private spawn = new T.Vector3(...facultyToWorld([28, 0.1, 4]));
+  private spawn = new T.Vector3(...places.find((p) => p.id === "acceso")!.position);
   private canvas: HTMLCanvasElement;
   onProgress = (_text: string, _percent: number) => {};
   onMode = (_mode: string) => {};
@@ -37,7 +37,7 @@ export class TourEngine {
     this.renderer.shadowMap.type = T.PCFShadowMap;
     this.renderer.outputColorSpace = T.SRGBColorSpace;
     this.renderer.toneMapping = T.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
+    this.renderer.toneMappingExposure = 0.96;
     this.canvas = this.renderer.domElement;
     this.canvas.setAttribute("aria-label", "Escenario 3D del campus");
     container.append(this.canvas);
@@ -103,6 +103,13 @@ export class TourEngine {
     this.previous = now;
     this.walker.update(dt);
     if (this.orbit.enabled) this.orbit.update();
+    // Far views need depth precision for ground, paving and grass surfaces.
+    const near = this.orbit.enabled && this.current === "campus"
+      ? T.MathUtils.clamp(this.orbit.getDistance() / 150, 0.08, 8) : 0.08;
+    if (Math.abs(this.camera.near - near) > 0.01) {
+      this.camera.near = near;
+      this.camera.updateProjectionMatrix();
+    }
     this.renderer.render(this.scene, this.camera);
     this.frame++;
     if (this.frame % 45 === 0) {
@@ -140,12 +147,16 @@ export class TourEngine {
     this.walker.enabled = false;
     this.orbit.enabled = true;
     if (this.current === "campus") {
-      this.campus.setDetail(mode === "faculty");
+      this.campus.setDetail(mode === "faculty" || mode === "faculty-plan");
       this.orbit.maxDistance = 2000;
-      if (mode === "faculty") {
+      if (mode === "faculty-plan") {
+        const focus = new T.Vector3(...facultyToWorld([10, 0, 11]));
+        this.orbit.target.copy(focus);
+        this.camera.position.copy(focus).add(new T.Vector3(0, 165, 0.01));
+      } else if (mode === "faculty") {
         const focus = new T.Vector3(...facultyToWorld([0, 1, 10]));
         this.orbit.target.copy(focus);
-        this.camera.position.copy(focus).add(new T.Vector3(85, 78, 102));
+        this.camera.position.copy(focus).add(new T.Vector3(-100, 66, 0));
       } else {
         this.orbit.target.set(campusCenter[0], 0, campusCenter[1]);
         const span = Math.max(campusBounds.maxZ - campusBounds.minZ, (campusBounds.maxX - campusBounds.minX) / this.camera.aspect);
@@ -191,7 +202,7 @@ export class TourEngine {
       this.walker.setWorld(this.campus.colliders);
       this.spawn = place
         ? new T.Vector3(...place.position).add(new T.Vector3(0, 0.15, 0))
-        : new T.Vector3(...facultyToWorld([28, 0.1, 4]));
+        : new T.Vector3(...places.find((p) => p.id === "acceso")!.position);
       if (place) {
         this.walker.teleport(this.spawn);
         this.walker.enabled = true;

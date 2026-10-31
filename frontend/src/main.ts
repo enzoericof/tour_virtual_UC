@@ -1,5 +1,5 @@
 import "./style.css";
-import { TourEngine } from "./scene/engine";
+import { TourEngine, type CampusView } from "./scene/engine";
 import { places, photoUrl, statusLabel, type Place } from "./data/places";
 import { icon } from "./ui/icons";
 import {
@@ -30,7 +30,7 @@ $("#app").innerHTML = `
  <section class="intro" id="intro"><div class="eyebrow"><span class="dot"></span> TU FACULTAD, DESDE OTRA PERSPECTIVA</div><h1>Un campus.<br>Muchas <em>historias.</em></h1><p>Recorré sus pasillos, descubrí sus espacios<br>y encontrate con la comunidad.</p><button class="primary" id="begin">Comenzar recorrido ${icon("arrow")}</button><div class="intro-note">${icon("walk")} Primera persona <span>·</span> Exploración libre</div></section>
  <aside class="explorer" id="explorer"><div class="section-top"><div><span class="eyebrow">DESCUBRÍ EL CAMPUS</span><h2>Elegí tu próximo lugar</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="scan">Escaneos 3D <span>3</span></button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div><div class="explorer-foot">${icon("layers")} Primera versión · referencias reales</div></aside>
  <div class="location-chip" id="location-chip">${icon("pin")}<div><strong id="location-name">Campus Santa Librada</strong><span id="location-floor">Vista general · distribución aproximada</span></div></div>
- <div class="view-switcher" role="group" aria-label="Vistas del campus"><button data-view="campus" aria-pressed="true">Campus completo</button><button data-view="plan" aria-pressed="false">Vista de planta</button><button data-view="faculty" aria-pressed="false">Mi facultad</button></div>
+ <div class="view-switcher" role="group" aria-label="Vistas del campus"><button data-view="campus" aria-pressed="true">Campus completo</button><button data-view="plan" aria-pressed="false">Vista de planta</button><button data-view="faculty-plan" aria-pressed="false">Plano de CyT</button><button data-view="faculty" aria-pressed="false">Mi facultad</button></div>
  <div class="tools"><button id="overview" class="icon-btn" title="Vista general" aria-label="Vista general">${icon("cube")}</button><button id="map-btn" class="icon-btn" title="Mapa del campus" aria-label="Mapa del campus">${icon("map")}</button><button id="quality" class="icon-btn" title="Cambiar calidad gráfica" aria-label="Cambiar calidad gráfica">${icon("sun")}</button><button id="fullscreen" class="icon-btn" title="Pantalla completa" aria-label="Pantalla completa">${icon("expand")}</button><button id="help" class="icon-btn" title="Ayuda" aria-label="Ayuda">${icon("help")}</button></div>
  <div class="bottom-bar"><span class="edition">UC <i>/</i> TOUR VIRTUAL <span>2026</span></span><div class="control-hint" id="control-hint">Arrastrá para girar <span>·</span> Rueda para acercarte</div><span class="performance"><i></i><span id="fps">—</span> FPS</span></div>
  <div class="walk-prompt hidden" id="walk-prompt"><span id="walk-prompt-text">Listo para explorar</span><button class="primary" id="resume">${icon("walk")} Entrar al recorrido</button><small>W A S D para moverte · Mouse para mirar · Esc para salir</small><button class="text-btn" id="inspect">Ver modelo completo</button></div>
@@ -235,19 +235,19 @@ $("#inspect").onclick = () => {
 $("#overview").onclick = () => {
   void setCampusView("campus");
 };
-async function setCampusView(mode: "campus" | "plan" | "faculty") {
+async function setCampusView(mode: CampusView) {
   if (engine.location !== "campus") await engine.go();
   engine.overview(mode);
   selected = null;
   renderPlaces();
   $("#intro").classList.add("hidden");
   $("#explorer").classList.add("collapsed");
-  $("#location-name").textContent = mode === "faculty" ? "Ciencias y Tecnología" : "Campus Santa Librada";
-  $("#location-floor").textContent = mode === "faculty" ? "Recorrido de la facultad · por validar" : mode === "plan" ? "Vista de planta · norte hacia arriba" : "Campus completo · base cartográfica";
+  $("#location-name").textContent = mode.startsWith("faculty") ? "Ciencias y Tecnología" : "Campus Santa Librada";
+  $("#location-floor").textContent = mode === "faculty" ? "Bloques y conexiones · referencia del equipo" : mode === "faculty-plan" ? "Plano de CyT · norte hacia arriba" : mode === "plan" ? "Vista de planta · norte hacia arriba" : "Campus completo · base cartográfica";
   document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === mode)));
 }
 document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => {
-  b.onclick = () => { void setCampusView(b.dataset.view as "campus" | "plan" | "faculty"); };
+  b.onclick = () => { void setCampusView(b.dataset.view as CampusView); };
 });
 $("#home").onclick = () => {
   void visit();
