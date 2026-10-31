@@ -30,15 +30,18 @@ test("Road cropping preserves crossing segments while excluding remote and paral
   assert.equal(clipSegment([11,1],[11,9],bounds), null);
 });
 
-test("The existing faculty coordinates are registered to the actual CyT footprint", () => {
+test("The faculty plan is registered to the actual CyT footprint without distorting its measurements", () => {
   const footprint = layout.buildings.find((b) => b.id === FACULTY_MAIN).points.slice(0, 4);
-  const center = facultyToWorld([0, 0, -5.2]);
+  const center = facultyToWorld([0, 0, 0]);
   assert.ok(Math.abs(center[0] - footprint.reduce((s, p) => s + p[0], 0) / 4) < 0.01);
   assert.ok(Math.abs(center[2] - footprint.reduce((s, p) => s + p[1], 0) / 4) < 0.01);
-  const entrance = facultyToWorld([28, 0.1, 4]);
+  const length = facultyToWorld([75, 0, 0]), depth = facultyToWorld([0, 0, 12]);
+  assert.ok(Math.abs(Math.hypot(length[0] - center[0], length[2] - center[2]) - 75) < 1e-9, "Rotation and translation only");
+  assert.ok(Math.abs(Math.hypot(depth[0] - center[0], depth[2] - center[2]) - 12) < 1e-9);
+  const entrance = facultyToWorld([41.5, 0.15, 4.75]);
   assert.ok(insidePolygon([entrance[0], entrance[2]], layout.boundary));
-  const upperFloor = facultyToWorld([5, 10.5, -7]);
-  assert.equal(upperFloor[1], 10.5, "Georeferencing must preserve the scanned floor height");
+  const upperFloor = facultyToWorld([0, 10.5, -1.5]);
+  assert.equal(upperFloor[1], 10.5, "Georeferencing must preserve the floor height");
 });
 
 test("The north-up map contains the campus boundary and the visitor's entrance", () => {

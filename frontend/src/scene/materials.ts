@@ -4,25 +4,15 @@ export function random() {
   seed = (seed * 1664525 + 1013904223) >>> 0;
   return seed / 4294967296;
 }
-function texture(kind: "brick" | "tile" | "grass" | "concrete") {
+function texture(kind: "tile" | "grass" | "concrete") {
   const c = document.createElement("canvas");
   c.width = c.height = 512;
   const g = c.getContext("2d")!;
-  if (kind === "brick") {
-    g.fillStyle = "#b4a395";
+  if (kind === "tile") {
+    // Baldosas claras de las aulas (fotos IMG_5635, IMG_5653); 0,4 m por pieza.
+    g.fillStyle = "#c9c4b8";
     g.fillRect(0, 0, 512, 512);
-    for (let y = 0; y < 16; y++)
-      for (let x = -1; x < 9; x++) {
-        const v = random();
-        g.fillStyle = `hsl(${17 + v * 10} 42% ${42 + v * 15}%)`;
-        g.fillRect(x * 64 + (y % 2) * 32 + 2, y * 32 + 2, 60, 28);
-        g.fillStyle = "#ffffff0d";
-        g.fillRect(x * 64 + (y % 2) * 32 + 4, y * 32 + 3, 56, 2);
-      }
-  } else if (kind === "tile") {
-    g.fillStyle = "#a9776d";
-    g.fillRect(0, 0, 512, 512);
-    g.strokeStyle = "#6f6963";
+    g.strokeStyle = "#a59f93";
     g.lineWidth = 3;
     for (let i = 0; i <= 512; i += 128) {
       g.beginPath();
@@ -51,27 +41,73 @@ function texture(kind: "brick" | "tile" | "grass" | "concrete") {
   t.anisotropy = 8;
   return t;
 }
-const brickMap = () => texture("brick");
+
+/** Texturas derivadas del escaneo del pasillo del tercer piso (scripts/extract-scan-textures.py).
+ * Cada valor es el tamaño real, en metros, que cubre una repetición; debe coincidir con
+ * frontend/public/assets/textures/textures.json (lo comprueba npm test). */
+export const scanTextures = {
+  ladrillo: [1.08, 1.184],
+  "granito-franja": [1.286, 1.286],
+  granito: [0.9, 0.9],
+  hormigon: [2.0, 0.983],
+  lamas: [2.0, 0.96],
+  "chapa-cubierta": [0.6, 0.42],
+} as const;
+
+const loader = new T.TextureLoader();
+function scanMaterial(name: keyof typeof scanTextures, options: T.MeshStandardMaterialParameters = {},
+  tile: readonly number[] = scanTextures[name]) {
+  const map = loader.load(`/assets/textures/${name}.webp`);
+  map.wrapS = map.wrapT = T.RepeatWrapping;
+  map.colorSpace = T.SRGBColorSpace;
+  map.anisotropy = 8;
+  const material = new T.MeshStandardMaterial({ map, ...options });
+  // Las piezas calculan sus coordenadas de textura en metros con este tamaño.
+  material.userData.tile = tile;
+  return material;
+}
+/** Materiales con mosaico procedural: se reparten en metros igual que los del escaneo. */
+function tiled(map: T.Texture, tile: readonly number[], options: T.MeshStandardMaterialParameters = {}) {
+  const material = new T.MeshStandardMaterial({ map, ...options });
+  material.userData.tile = tile;
+  return material;
+}
+
 export function makeMaterials() {
+  const louver = scanMaterial("lamas", { roughness: 0.65, metalness: 0.15, side: T.DoubleSide });
+  // El cerramiento del ascensor comparte la textura de las lamas, más claro y de una sola cara.
+  const elevatorLouver = louver.clone();
+  elevatorLouver.color.setScalar(1.55);
+  elevatorLouver.side = T.FrontSide;
   return {
-    brick: new T.MeshStandardMaterial({ map: brickMap(), roughness: 0.95 }),
-    concrete: new T.MeshStandardMaterial({ color: "#e2dfd0", roughness: 0.9 }),
-    tile: new T.MeshStandardMaterial({ map: texture("tile"), roughness: 0.74 }),
-    stone: new T.MeshStandardMaterial({
-      map: texture("concrete"),
-      roughness: 0.95,
-    }),
-    grass: new T.MeshStandardMaterial({ map: texture("grass"), roughness: 1 }),
+    brick: scanMaterial("ladrillo", { roughness: 0.95 }),
+    concrete: scanMaterial("hormigon", { roughness: 0.92 }),
+    // Franjas cada cuarto de módulo (5 m / 4), como en el escaneo (5,14 m / 4).
+    galleryFloor: scanMaterial("granito-franja", { roughness: 0.55 }, [1.25, 1.25]),
+    granite: scanMaterial("granito", { roughness: 0.6 }),
+    louver,
+    elevatorLouver,
+    roofUnder: scanMaterial("chapa-cubierta", { roughness: 0.85 }),
+    tile: tiled(texture("tile"), [1.6, 1.6], { roughness: 0.7 }),
+    stone: tiled(texture("concrete"), [4, 4], { roughness: 0.95 }),
+    grass: tiled(texture("grass"), [4, 4], { roughness: 1 }),
+    plaster: new T.MeshStandardMaterial({ color: "#e6e2d6", roughness: 0.92 }),
     metal: new T.MeshStandardMaterial({
-      color: "#48606b",
-      roughness: 0.56,
-      metalness: 0.45,
+      color: "#4f6370",
+      roughness: 0.5,
+      metalness: 0.5,
+    }),
+    steel: new T.MeshStandardMaterial({ color: "#6d808c", roughness: 0.45, metalness: 0.6 }),
+    canopy: new T.MeshStandardMaterial({
+      color: "#5f7384",
+      roughness: 0.55,
+      metalness: 0.35,
+      side: T.DoubleSide,
     }),
     roof: new T.MeshStandardMaterial({
       color: "#a7ada6",
       roughness: 0.68,
       metalness: 0.2,
-      side: T.DoubleSide,
     }),
     glass: new T.MeshStandardMaterial({
       color: "#62868a",
@@ -80,13 +116,13 @@ export function makeMaterials() {
       transparent: true,
       opacity: 0.45,
     }),
-    wood: new T.MeshStandardMaterial({ color: "#a54b35", roughness: 0.85 }),
+    wood: new T.MeshStandardMaterial({ color: "#b4532f", roughness: 0.8 }),
     bark: new T.MeshStandardMaterial({ color: "#594b39", roughness: 1 }),
     leaves: [0x536b36, 0x617942, 0x788c4c, 0x405d35].map(
       (color) => new T.MeshStandardMaterial({ color, roughness: 1 }),
     ),
     asphalt: new T.MeshStandardMaterial({ color: "#81847c", roughness: 1 }),
-    blue: new T.MeshStandardMaterial({ color: "#1a4263", roughness: 0.7 }),
+    blue: new T.MeshStandardMaterial({ color: "#2b5d8c", roughness: 0.6, metalness: 0.3 }),
     white: new T.MeshStandardMaterial({ color: "#ece9da", roughness: 0.9 }),
   };
 }

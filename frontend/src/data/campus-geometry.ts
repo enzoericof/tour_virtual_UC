@@ -72,7 +72,7 @@ export function distanceToSegment(point: Point, a: Point, b: Point) {
   return Math.hypot(point[0] - a[0] - t * dx, point[1] - a[1] - t * dz);
 }
 
-export function footprintPose(id: string, width: number, depth: number) {
+export function footprintPose(id: string) {
   const p = layout.buildings.find((b) => b.id === id)!.points.slice(0, 4);
   if (p[1][0] < p[0][0]) p.push(...p.splice(0, 2));
   const x = p.reduce((s, q) => s + q[0], 0) / 4;
@@ -80,15 +80,18 @@ export function footprintPose(id: string, width: number, depth: number) {
   return {
     x, z,
     angle: Math.atan2(p[1][1] - p[0][1], p[1][0] - p[0][0]),
-    scaleX: Math.hypot(p[1][0] - p[0][0], p[1][1] - p[0][1]) / width,
-    scaleZ: Math.hypot(p[2][0] - p[1][0], p[2][1] - p[1][1]) / depth,
+    length: Math.hypot(p[1][0] - p[0][0], p[1][1] - p[0][1]),
+    width: Math.hypot(p[2][0] - p[1][0], p[2][1] - p[1][1]),
   };
 }
 
-export const facultyPose = footprintPose(FACULTY_MAIN, 64, 13);
+/** Centro y orientación de la huella OSM del Bloque 1 (75,0 × 13,4 m). */
+export const facultyPose = footprintPose(FACULTY_MAIN);
 
+/** Plano de CyT (metros, centro del Bloque 1) → mundo. Solo gira y traslada: las medidas del
+ * plano se conservan; no se estira hacia la huella OSM. */
 export function facultyToWorld(position: readonly number[]): [number, number, number] {
-  const p = facultyPose, x = position[0] * p.scaleX, z = (position[2] + 5.2) * p.scaleZ;
+  const p = facultyPose, x = position[0], z = position[2];
   return [p.x + x * Math.cos(p.angle) - z * Math.sin(p.angle), position[1],
     p.z + x * Math.sin(p.angle) + z * Math.cos(p.angle)];
 }

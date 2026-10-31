@@ -7,11 +7,12 @@ export function createCampus() {
   const faculty = createFaculty(), context = createCampusContext();
   const group = new T.Group(), colliders = new T.Group();
   const pose = facultyPose;
+  // Igual que facultyToWorld: giro y traslación, sin escala, para conservar las medidas.
   const matrix = new T.Matrix4().compose(
     new T.Vector3(pose.x, 0, pose.z),
     new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), -pose.angle),
-    new T.Vector3(pose.scaleX, 1, pose.scaleZ),
-  ).multiply(new T.Matrix4().makeTranslation(0, 0, 5.2));
+    new T.Vector3(1, 1, 1),
+  );
   faculty.group.applyMatrix4(matrix);
   faculty.colliders.applyMatrix4(matrix);
   group.add(context.group, faculty.group);

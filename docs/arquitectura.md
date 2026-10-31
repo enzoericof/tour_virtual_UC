@@ -1,9 +1,52 @@
-# Arquitectura
+# Arquitectura y contratos
 
-Frontend: Three.js directo, TypeScript estricto y Vite. Carga diferida de tres GLB, escena general, navegación con cápsula y colisiones, galerías y paneles. El catálogo está en frontend/src/data/places.ts.
+Monolito: el backend Spring Boot sirve la API, el WebSocket y, en Docker, el frontend compilado (mismo origen). Solo el backend accede a la base. Versiones: [README](../README.md#stack).
 
-Backend: Java 25, Spring Boot, REST, Spring Security y sesiones HttpOnly con CSRF. Persistencia mediante JPA y migraciones Flyway. PostgreSQL es la base del despliegue; H2 se usa únicamente en el perfil local.
+## Componentes
 
-Las rutas /api/auth gestionan registro, inicio y cierre de sesión y CSRF. /api/works permite consultar trabajos y modificar los propios. /api/panels permite lectura pública y gestión administrativa. El chat autenticado usa WebSocket/STOMP en /ws, envío a /app/chat y recepción en /topic/campus. La identidad del remitente procede de la sesión del servidor.
+| Capa | Contenido |
+| --- | --- |
+| Frontend `frontend/src` | Three.js directo, TypeScript estricto, Vite. `data/` (catálogo `places.ts`, geografía), `scene/`, `navigation/` (cápsula, colisiones, gravedad), `services/` (`api.ts` REST, `chat.ts` STOMP), `ui/`. Los 3 GLB (`laboratorio`, `aula-p3`, `pasillo-p3`) se cargan bajo demanda. |
+| Backend `py.edu.uc.tour` | `users` (registro, login), `security` (sesiones, CSRF, alta de ADMIN), `content` (trabajos y paneles), `chat`. |
+| Datos | JPA + Flyway (`V1__initial_schema.sql`: `campus_user`, `work`, `panel`; `ddl-auto=validate`). PostgreSQL 18 en entrega; H2 en modo PostgreSQL solo con el perfil `local`. |
+| Despliegue | `Dockerfile` en 3 etapas (build del frontend → copia a `static/` del JAR → JRE). `compose.yaml`: `app` (8080, solo en 127.0.0.1) y `database` (sin puerto publicado, volumen `campus-data`). |
 
-Docker integra la compilación del frontend como contenido estático del backend. No hay sincronización de avatares ni historial persistente de chat en esta versión. La biblioteca administra enlaces, no archivos subidos.
+## API REST `/api/v1`
+
+Convenciones: JSON; errores `{"message": "..."}`; cookie de sesión `JSESSIONID` (HttpOnly, SameSite=Lax, `Secure` si `COOKIE_SECURE=true`, 60 min). **Toda petición POST/PUT/DELETE exige CSRF, incluidos registro, login y logout**: pedir `GET /auth/csrf` y enviar `token` en el encabezado `headerName`. El token se invalida al iniciar sesión; pedir otro.
+
+| Ruta | Acceso | Entrada | Respuesta |
+| --- | --- | --- | --- |
+| `GET /health` | pública | — | 200 `{status, version}` |
+| `GET /auth/csrf` | pública | — | 200 `{token, headerName}` |
+| `POST /auth/register` | pública | `name` ≤80, `email` válido ≤180, `password` 10–72 (≤72 bytes UTF-8) | 201 `{id, name, email, role}`; 409 correo repetido |
+| `POST /auth/login` | pública | `email`, `password` ≤72 | 200 usuario; 401 credenciales |
+| `POST /auth/logout` | sesión | — | 204; borra `JSESSIONID` |
+| `GET /auth/me` | sesión | — | 200 usuario; 401 |
+| `GET /works` | pública | — | 200 hasta 100 trabajos, más recientes primero: `{id, title, description, url, author, ownerId}` |
+| `POST /works` | sesión | `title` ≤140, `description` ≤2000, `url` ≤2048 | 201 trabajo |
+| `PUT /works/{id}` | propietario | igual que POST | 200; 403 si no es propio; 404 |
+| `DELETE /works/{id}` | propietario | — | 204; 403; 404 |
+| `GET /panels[?placeId=]` | pública | — | 200 `[{id, placeId, title, body, url}]` |
+| `POST /panels` | `ADMIN` | `placeId` `[a-z0-9-]{1,80}`, `title` ≤140, `body` ≤5000, `url` opcional ≤2048 | 201 panel |
+| `PUT /panels/{id}` | `ADMIN` | igual que POST | 200; 404 |
+| `DELETE /panels/{id}` | `ADMIN` | — | 204; 404 |
+
+- Errores comunes: 400 validación («Revisá los campos obligatorios y sus límites de longitud.») o enlace inválido; 401 sin sesión; 403 sin permiso o CSRF inválido; 409 integridad.
+- Enlaces (`url`): solo `http`/`https` con host y sin credenciales embebidas. La biblioteca guarda enlaces, no archivos.
+- `placeId` solo se valida por formato, no contra `places.ts`. Los paneles iniciales (Flyway) cubren `acceso`, `laboratorio`, `pasillo-p3`, `aula-p3`, `cantina-cyt` y `patio`; el resto de los espacios no tiene panel hasta que un administrador lo cree.
+- Roles: registro crea `USER`. `ADMIN` se crea al arrancar con `ADMIN_EMAIL` y `ADMIN_PASSWORD` (≥12 caracteres, ≤72 bytes) solo si el correo no existe. Contraseñas con BCrypt (coste 12).
+
+## Chat (STOMP sobre WebSocket)
+
+| Paso | Detalle |
+| --- | --- |
+| Conexión | `/ws`; exige sesión y origen igual a `APP_ORIGIN` (local: `http://127.0.0.1:5173`). El `CONNECT` debe llevar `X-CSRF-TOKEN`. Mensaje ≤4096 bytes. |
+| Enviar | `SEND /app/chat` con `{text}` (1–500 caracteres). Cualquier otro destino se rechaza. |
+| Recibir | `SUBSCRIBE /topic/campus` → `{name, text, sentAt}`. `name` sale de la sesión del servidor, no del cliente. Única suscripción permitida. |
+
+Broker en memoria: una sola instancia de backend, sin historial.
+
+## No incluido en esta versión
+
+Avatares sincronizados, historial de chat, subida de archivos, agente IA y despliegue público.
