@@ -52,7 +52,7 @@ El backend escucha en `127.0.0.1:8080`. Vite redirige `/api` y `/ws` al backend;
 
 El perfil `local` usa H2 en modo PostgreSQL y conserva sus datos en `backend/.local/`. Es una alternativa para desarrollar sin Docker; **la base prevista para la entrega sigue siendo PostgreSQL 18**. H2 no reemplaza la validación final con PostgreSQL.
 
-Para crear un administrador inicial, establecer `ADMIN_EMAIL` y `ADMIN_PASSWORD` antes de iniciar el backend (mínimo 12 caracteres, máximo 72 bytes). No hay contraseñas predeterminadas ni un administrador incorporado. El alta se realiza únicamente si ese correo no existe; no cambia permisos de cuentas existentes. Con ese usuario, ingresar a **Mi cuenta → Administrar paneles**.
+Para crear un administrador inicial, establecer `ADMIN_EMAIL` y `ADMIN_PASSWORD` antes de iniciar el backend (mínimo 12 caracteres, máximo 72 bytes; las cuentas de visitantes piden mínimo 10 caracteres y máximo 72 bytes). No hay contraseñas predeterminadas ni un administrador incorporado. El alta se realiza únicamente si ese correo no existe; no cambia permisos de cuentas existentes. Con ese usuario, ingresar a **Mi cuenta → Administrar paneles**.
 
 ## Ejecución integrada con PostgreSQL
 
@@ -71,13 +71,13 @@ La configuración de Compose está limitada a la máquina local. Para un desplie
 
 ## Controles
 
-La vista general se limita a **CyT, canchas y estacionamientos cercanos**. Se mantienen el Bloque G inclinado y el patio triangular. Después del bloque de aulas aparecen la **plaza techada**, una **plaza abierta** y la **cantina girada hacia esa plaza**, junto a Electrónica e Informática, según la aclaración del equipo y las nuevas capturas. Los controles **Sector CyT**, **Vista de planta**, **Plano de CyT** y **Mi facultad** permiten revisar el modelo. El mapa y el recorrido comparten la distribución. Ver [fuentes, coordenadas y límites de fidelidad](docs/base-geografica.md).
+Cuatro vistas: **Sector CyT**, **Vista de planta**, **Plano de CyT** y **Mi facultad**. El mapa y el recorrido comparten una sola distribución ([ids, fuentes, coordenadas y límites](docs/base-geografica.md)).
 
 | Acción | Control |
 | --- | --- |
 | Caminar | W A S D o flechas |
 | Mirar | Mouse; arrastrar si la captura del cursor no está disponible |
-| Caminar más rápido | Shift |
+| Caminar más rápido | Shift izquierdo |
 | Saltar pequeños desniveles | Espacio |
 | Información del espacio cercano | E |
 | Pausar y liberar cursor | Esc |
@@ -92,7 +92,7 @@ En dispositivos táctiles se pueden inspeccionar modelos, mapas y fotos. El reco
 | Gráficos | Three.js 0.187.0 directo |
 | Frontend | TypeScript 5.9.3 estricto, Vite 8.3.5, HTML/CSS |
 | Herramientas | Node.js 24 LTS, npm y package-lock.json |
-| Backend | Java 25 LTS, Spring Boot 4.1.2, Maven Wrapper 3.9.11 |
+| Backend | Java 25 LTS, Spring Boot 4.1.2, Maven 3.9.11 (vía Maven Wrapper 3.3.4) |
 | Persistencia de entrega | PostgreSQL 18, JPA/Hibernate, Flyway |
 | Sesiones | Spring Security, cookies HttpOnly y CSRF |
 | Chat | WebSocket + STOMP, cliente @stomp/stompjs 7.5.0 |
@@ -115,8 +115,9 @@ backend/src/main/java/py/edu/uc/tour/
   content/        trabajos y paneles
   chat/           WebSocket y mensajería
 backend/src/main/resources/db/migration/  esquema y paneles iniciales
-docs/             arquitectura, contratos, referencias y verificación
-scripts/          preparación de recursos desde copias locales
+docs/             arquitectura y contratos de API, base geográfica, referencias, verificación, pendientes
+design-qa.md      última revisión visual
+scripts/          preparación de recursos e importación del mapa OSM
 ```
 
 ## Verificación

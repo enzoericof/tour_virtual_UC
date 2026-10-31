@@ -1,10 +1,16 @@
-# Próximas tareas
+# Pendientes
 
-- Validar dimensiones, ubicación y conectividad de los edificios con el equipo.
-- Completar referencias del segundo piso y baños, y mejorar las áreas reconstruidas.
-- Revisar todas las escaleras y colisiones; limpiar huecos de escaneos y alinear sus coordenadas.
-- Probar rendimiento en móviles y una sesión simultánea con seis usuarios.
-- Implementar presencia y movimiento de avatares compartidos si el alcance acordado lo requiere.
-- Verificar Docker con PostgreSQL, configuración de producción y despliegue HTTPS.
-- Repetir la prueba ampliada de edición de trabajos y completar pruebas visuales de cuentas y biblioteca.
-- Registrar los seis integrantes, sus roles y fechas sin asignaciones supuestas.
+Responsables y fechas: **sin asignar** (no se registran por suposición). Estado de las pruebas: [verificacion.md](verificacion.md).
+
+| Tarea | Criterio de terminado |
+| --- | --- |
+| Validar con el equipo medidas, ubicación y conectividad de los edificios | Confirmación del equipo y medidas o fotos registradas en [base-geografica.md](base-geografica.md) |
+| Cantina: fachada, dimensiones, forma de cubierta e interior; interior de Electrónica e Informática | Referencias recibidas e incorporadas a `faculty-blueprint.ts` / `faculty-reconstruction.ts` |
+| Referencias de segundo piso y baños | `piso-2` y `banos` pasan de `pending` a `reference` en `places.ts` |
+| Escaleras y colisiones; huecos de los escaneos; alinear sus coordenadas con el campus | Recorrido sin atascos hasta todos los recintos de [AGENTS.md](../AGENTS.md) |
+| Rendimiento en móviles y sesión con seis usuarios simultáneos | Medición registrada en verificacion.md |
+| Avatares compartidos | Decisión del equipo sobre si el alcance lo requiere; hoy no es requisito asumido |
+| Docker + PostgreSQL, configuración de producción y HTTPS | `docker compose up --build` funcionando con datos persistentes tras reiniciar |
+| Pruebas visuales de cuentas y biblioteca | Resultado registrado en verificacion.md (el backend ya tiene cobertura automática) |
+| Registrar los seis integrantes, sus roles y fechas | Nómina aportada por el equipo, sin asignaciones supuestas |
+| Higiene del repositorio | Decidir entre corregir el `.gitignore` o documentar `git add -f` como práctica; mover fuera del repo los originales sin seguimiento de la raíz; revisar el nombre `FACULTY_LABS` |
