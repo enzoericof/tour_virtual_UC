@@ -11,3 +11,22 @@ frontend/public/assets/scans/*.glb
 frontend/public/assets/photos/
 frontend/public/assets/manifest.json
 output/
+
+# Java / Spring Boot
+build/
+*.class
+*.jar
+*.war
+hs_err_pid*
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Variables de entorno y credenciales locales
+.env.*
+!.env.example
+
+# Logs adicionales
+spring.log
