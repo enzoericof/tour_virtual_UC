@@ -4,9 +4,11 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { createCampus } from "./campus";
 import { Walker } from "../navigation/walker";
 import { places, type Place } from "../data/places";
+import { campusBounds, campusCenter, facultyToWorld } from "../data/campus-geometry";
+export type CampusView = "campus" | "plan" | "faculty";
 export class TourEngine {
   readonly scene = new T.Scene();
-  readonly camera = new T.PerspectiveCamera(52, 1, 0.08, 500);
+  readonly camera = new T.PerspectiveCamera(52, 1, 0.08, 2600);
   readonly renderer: T.WebGLRenderer;
   readonly orbit: OrbitControls;
   readonly walker: Walker;
@@ -18,7 +20,7 @@ export class TourEngine {
   private previous = performance.now();
   private frame = 0;
   private current = "campus";
-  private spawn = new T.Vector3(28, 0.1, 4);
+  private spawn = new T.Vector3(...facultyToWorld([28, 0.1, 4]));
   private canvas: HTMLCanvasElement;
   onProgress = (_text: string, _percent: number) => {};
   onMode = (_mode: string) => {};
@@ -40,17 +42,17 @@ export class TourEngine {
     this.canvas.setAttribute("aria-label", "Escenario 3D del campus");
     container.append(this.canvas);
     this.scene.background = new T.Color("#d4e2e3");
-    this.scene.fog = new T.Fog("#d4e2e3", 100, 230);
-    this.sun.position.set(-35, 65, 28);
+    this.scene.fog = new T.Fog("#d4e2e3", 1200, 2500);
+    this.sun.position.set(-240, 500, 240);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
     Object.assign(this.sun.shadow.camera, {
-      left: -65,
-      right: 65,
-      top: 65,
-      bottom: -65,
+      left: -450,
+      right: 450,
+      top: 450,
+      bottom: -450,
       near: 0.5,
-      far: 150,
+      far: 1300,
     });
     this.sun.shadow.bias = -0.0005;
     this.sun.shadow.normalBias = 0.035;
@@ -59,9 +61,9 @@ export class TourEngine {
     this.orbit.enableDamping = true;
     this.orbit.maxPolarAngle = Math.PI * 0.48;
     this.orbit.minDistance = 4;
-    this.orbit.maxDistance = 150;
-    this.orbit.target.set(2, 1, 10);
-    this.camera.position.set(82, 65, 97);
+    this.orbit.maxDistance = 2000;
+    this.orbit.target.set(campusCenter[0], 0, campusCenter[1]);
+    this.camera.position.set(campusCenter[0] + 480, 640, campusCenter[1] + 760);
     this.orbit.update();
     this.walker = new Walker(this.camera, this.canvas);
     this.walker.setWorld(this.campus.colliders);
@@ -125,6 +127,7 @@ export class TourEngine {
     return best;
   }
   startWalking() {
+    if (this.current === "campus") this.campus.setDetail(true);
     if (!this.walker.enabled) {
       this.walker.teleport(this.spawn);
       this.camera.lookAt(this.spawn.clone().add(new T.Vector3(-10, 1.5, -2)));
@@ -132,14 +135,28 @@ export class TourEngine {
     this.orbit.enabled = false;
     this.walker.walk();
   }
-  overview() {
+  overview(mode: CampusView = "campus") {
     this.walker.pause();
     this.walker.enabled = false;
     this.orbit.enabled = true;
     if (this.current === "campus") {
-      this.camera.position.set(82, 65, 97);
-      this.orbit.target.set(2, 1, 10);
-      this.orbit.maxDistance = 150;
+      this.campus.setDetail(mode === "faculty");
+      this.orbit.maxDistance = 2000;
+      if (mode === "faculty") {
+        const focus = new T.Vector3(...facultyToWorld([0, 1, 10]));
+        this.orbit.target.copy(focus);
+        this.camera.position.copy(focus).add(new T.Vector3(85, 78, 102));
+      } else {
+        this.orbit.target.set(campusCenter[0], 0, campusCenter[1]);
+        const span = Math.max(campusBounds.maxZ - campusBounds.minZ, (campusBounds.maxX - campusBounds.minX) / this.camera.aspect);
+        const fit = span / (2 * Math.tan(T.MathUtils.degToRad(this.camera.fov / 2))) * 1.4;
+        if (mode === "plan") {
+          // Leave room above the campus for the persistent view controls.
+          const focusZ = campusCenter[1] - span * 0.12;
+          this.orbit.target.z = focusZ;
+          this.camera.position.set(campusCenter[0], fit, focusZ + 0.01);
+        } else this.camera.position.copy(this.orbit.target).add(new T.Vector3(fit * 0.40, fit * 0.54, fit * 0.63));
+      }
     } else if (this.scan) {
       const b = new T.Box3().setFromObject(this.scan),
         size = b.getSize(new T.Vector3()),
@@ -169,11 +186,12 @@ export class TourEngine {
       this.campus.group.visible = true;
       this.sun.visible = this.hemi.visible = true;
       this.scene.background = new T.Color("#d4e2e3");
-      this.scene.fog = new T.Fog("#d4e2e3", 100, 230);
+      this.scene.fog = new T.Fog("#d4e2e3", 1200, 2500);
+      this.campus.setDetail(Boolean(place));
       this.walker.setWorld(this.campus.colliders);
       this.spawn = place
         ? new T.Vector3(...place.position).add(new T.Vector3(0, 0.15, 0))
-        : new T.Vector3(28, 0.1, 4);
+        : new T.Vector3(...facultyToWorld([28, 0.1, 4]));
       if (place) {
         this.walker.teleport(this.spawn);
         this.walker.enabled = true;

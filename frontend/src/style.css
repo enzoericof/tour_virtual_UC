@@ -481,6 +481,47 @@ h2 {
   width: 18px;
   height: 18px;
 }
+.view-switcher {
+  position: fixed;
+  top: 113px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 3px;
+  padding: 5px;
+  z-index: 4;
+  border: 1px solid #d4decf;
+  border-radius: 12px;
+  background: #fbfbf0f2;
+  box-shadow: 0 5px 24px #243c3010;
+}
+.view-switcher button {
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #637567;
+  white-space: nowrap;
+}
+.view-switcher button[aria-pressed="true"] {
+  background: #294f3d;
+  color: #fbfbf0;
+}
+.view-switcher button:focus-visible { outline: 2px solid #b39b60; outline-offset: 2px; }
+body.in-tour .view-switcher { display: none; }
+.geographic-map {
+  height: auto !important;
+  aspect-ratio: var(--map-ratio);
+  max-width: 460px;
+  margin: 25px auto !important;
+}
+.geographic-map canvas { display: block; width: 100%; height: 100%; }
+.geographic-map .map-pin { width: 18px; height: 18px; font-size: 8px; }
+.map-credit { font-size: 10px; color: #73806e; margin-top: 22px; }
+.map-credit a { color: inherit; }
+@media (max-width: 760px) {
+  .view-switcher { top: 87px; padding: 4px; }
+  .view-switcher button { font-size: 10px; padding: 9px 10px; }
+}
 .bottom-bar {
   position: fixed;
   bottom: 0;

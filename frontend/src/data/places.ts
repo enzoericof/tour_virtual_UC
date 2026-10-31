@@ -1,3 +1,5 @@
+import { facultyToWorld } from "./campus-geometry";
+
 export type Place = {
   id: string;
   name: string;
@@ -10,7 +12,7 @@ export type Place = {
   scan?: string;
   status: "scan" | "reference" | "pending";
 };
-export const places: Place[] = [
+export const facultyPlaces: Place[] = [
   {
     id: "acceso",
     name: "Pasillos de acceso",
@@ -195,6 +197,10 @@ export const places: Place[] = [
     status: "reference",
   },
 ];
+export const places: Place[] = facultyPlaces.map((p) => ({
+  ...p,
+  position: facultyToWorld(p.position),
+}));
 export const photoUrl = (id: string) => `/assets/photos/${id}.webp`;
 export const statusLabel = {
   scan: "Escaneo real",

@@ -75,6 +75,16 @@ Separar la geometría 3D de los contenidos administrables. Usar identificadores 
 
 ## Pautas para Three.js
 
+### Base general y detalle de CyT
+
+- El escenario general y el plano interactivo comparten `frontend/src/data/campus-layout.json`. Consultar `docs/base-geografica.md` antes de mover bloques o cambiar coordenadas.
+- Mantener `X` hacia el este, `Z` hacia el sur y `Y` vertical. Los puntos de visita del modelo cercano pasan por `facultyToWorld`; conservar sus identificadores para los contenidos del backend.
+- La vista del campus completo utiliza las huellas cartográficas. «Mi facultad» y el modo a pie muestran el modelo cercano existente, pendiente de validación por sectores.
+- Afinar interiores, anexos y fachadas con referencias identificadas. Los árboles, vehículos y alturas del contexto son aproximaciones; no presentarlos como un relevamiento exacto.
+- Mantener la atribución de OpenStreetMap. Las capturas locales de Google Maps sirven para comparar la distribución; no son texturas del escenario.
+
+### Implementación del recorrido
+
 - Separar construcción del escenario, controles, colisiones, interacción, interfaz y acceso a datos.
 - Usar metros como unidad y el eje `Y` vertical. Documentar el origen y la orientación común antes de combinar modelos aportados por distintos integrantes.
 - Mantener un único ciclo de renderizado y adaptar cámara y renderizador al tamaño de la ventana.
