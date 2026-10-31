@@ -71,7 +71,7 @@ Detalle y justificación: [docs/base-geografica.md](docs/base-geografica.md); co
 - El escenario se limita a **CyT, las dos canchas vecinas y los estacionamientos cercanos**. `campus-geometry.ts` selecciona ese sector de `campus-layout.json`, que queda como referencia. No reincorporar otras facultades ni el seminario sin nueva indicación del equipo.
 - `faculty-blueprint.ts` es la única geometría de CyT para las cuatro vistas («Sector CyT», «Vista de planta», «Plano de CyT», «Mi facultad») y el modo a pie. No recuperar los bloques paralelos antiguos ni duplicar anexos con volúmenes OSM. El Bloque G es oblicuo respecto del Bloque 1.
 - Secuencia: **bloque de aulas → plaza techada → plaza abierta → cantina girada**, junto al Departamento de Electrónica e Informática. La plaza abierta queda a cielo abierto y unida al pavimento de la techada. `plaza` es la techada; `plaza-abierta` es independiente. La aclaración del equipo y las capturas del 31/10/2026 prevalecen sobre el rótulo «Cantina» de la imagen anotada antigua.
-- `X` este, `Z` sur, `Y` vertical, metros. Los puntos de visita pasan por `facultyToWorld`.
+- `X` este, `Z` sur, `Y` vertical, metros. Los puntos de visita pasan por `facultyToWorld`, que solo gira y traslada el plano métrico: no escalarlo ni volver a registrarlo sobre píxeles de imágenes. Las medidas del equipo están en base-geografica.md y las comprueba `npm test`.
 - Red peatonal conectada y circulaciones despejadas. Sin bosques: 4 árboles de referencia en CyT y pocos en el contexto.
 - Afinar interiores, anexos y fachadas solo con referencias identificadas. Árboles, vehículos y alturas del contexto son aproximaciones, no un relevamiento.
 - Mantener la atribución de OpenStreetMap. Las capturas de Google Maps sirven para comparar, no son texturas.
@@ -104,7 +104,7 @@ Detalle y justificación: [docs/base-geografica.md](docs/base-geografica.md); co
 - Ramas `feat/…`, `fix/…`, `docs/…`; commits descriptivos; pull requests para el desarrollo posterior. Excepción registrada: el recorte a CyT se integró directamente en `main` por solicitud del equipo.
 - Registrar en la documentación los cambios de arquitectura o alcance y su efecto en las tareas pendientes. Cada hecho vive en un solo documento (tabla anterior).
 - No subir `node_modules`, resultados de compilación, `.env`, claves, bases locales ni archivos personales.
-- Recursos: las fotos WebP y los GLB usados están en Git, pero `.gitignore` excluye `photos/`, `scans/*.glb` y `manifest.json`; añadir uno nuevo requiere `git add -f`. Las fuentes de Drive son de solo lectura; no subir originales (HEIC, escaneos sin optimizar) ni recursos no usados. `scripts/prepare-assets.py` solo escribe derivados locales; `frontend/public/assets/sources.json` registra la procedencia.
+- Recursos: las fotos WebP y los GLB usados están en Git, pero `.gitignore` excluye `photos/`, `scans/*.glb` y `manifest.json`; añadir uno nuevo requiere `git add -f`. Las fuentes de Drive son de solo lectura; no subir originales (HEIC, escaneos sin optimizar) ni recursos no usados. `scripts/prepare-assets.py` y `scripts/extract-scan-textures.py` solo escriben derivados locales (las texturas de `textures/` no están excluidas); `frontend/public/assets/sources.json` registra la procedencia.
 
 ## Verificación y definición de terminado
 
