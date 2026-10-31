@@ -22,6 +22,8 @@ export class TourEngine {
   private frame = 0;
   private current = "campus";
   private spawn = new T.Vector3(...places.find((p) => p.id === "acceso")!.position);
+  /** Punto al que mira el visitante al aparecer en `spawn`. */
+  private gaze = this.lookTarget("acceso", this.spawn);
   private canvas: HTMLCanvasElement;
   onProgress = (_text: string, _percent: number) => {};
   onMode = (_mode: string) => {};
@@ -134,11 +136,15 @@ export class TourEngine {
     }
     return best;
   }
+  private lookTarget(placeId: string, spawn: T.Vector3) {
+    const target = facultyVisitTargets[placeId];
+    return target ? new T.Vector3(...facultyToWorld(target)) : spawn.clone().add(new T.Vector3(-8, 1.5, -3));
+  }
   startWalking() {
     if (this.current === "campus") this.campus.setDetail(true);
     if (!this.walker.enabled) {
       this.walker.teleport(this.spawn);
-      this.camera.lookAt(this.spawn.clone().add(new T.Vector3(-10, 1.5, -2)));
+      this.camera.lookAt(this.gaze);
     }
     this.orbit.enabled = false;
     this.walker.walk();
@@ -151,13 +157,15 @@ export class TourEngine {
       this.campus.setDetail(mode === "faculty" || mode === "faculty-plan");
       this.orbit.maxDistance = 650;
       if (mode === "faculty-plan") {
-        const focus = new T.Vector3(...facultyToWorld([22, 0, 9]));
+        // Centro del conjunto: Bloque 1, Bloque G, plazas, cantina y estacionamiento.
+        const focus = new T.Vector3(...facultyToWorld([30, 0, 24]));
         this.orbit.target.copy(focus);
-        this.camera.position.copy(focus).add(new T.Vector3(0, 190, 0.01));
+        this.camera.position.copy(focus).add(new T.Vector3(0, 175, 0.01));
       } else if (mode === "faculty") {
-        const focus = new T.Vector3(...facultyToWorld([0, 1, 10]));
+        // Desde el sudoeste: galerías, escalera, torre de baños y Bloque G.
+        const focus = new T.Vector3(...facultyToWorld([8, 4, 14]));
         this.orbit.target.copy(focus);
-        this.camera.position.copy(focus).add(new T.Vector3(-100, 66, 0));
+        this.camera.position.copy(focus).add(new T.Vector3(-62, 48, 72));
       } else {
         this.orbit.target.set(campusCenter[0], 0, campusCenter[1]);
         const span = Math.max(campusBounds.maxZ - campusBounds.minZ, (campusBounds.maxX - campusBounds.minX) / this.camera.aspect);
@@ -204,11 +212,11 @@ export class TourEngine {
       this.spawn = place
         ? new T.Vector3(...place.position).add(new T.Vector3(0, 0.15, 0))
         : new T.Vector3(...places.find((p) => p.id === "acceso")!.position);
+      this.gaze = this.lookTarget(place?.id ?? "acceso", this.spawn);
       if (place) {
         this.walker.teleport(this.spawn);
         this.walker.enabled = true;
-        const target = facultyVisitTargets[place.id];
-        this.camera.lookAt(target ? new T.Vector3(...facultyToWorld(target)) : this.spawn.clone().add(new T.Vector3(-8, 1.5, -3)));
+        this.camera.lookAt(this.gaze);
         this.onMode("paused");
       } else this.overview();
       return;
@@ -256,17 +264,8 @@ export class TourEngine {
       this.walker.setWorld(this.scan);
       this.spawn = this.walker.findSpawn(this.scan);
       this.walker.teleport(this.spawn);
-      this.camera.lookAt(
-        this.spawn
-          .clone()
-          .add(
-            new T.Vector3(
-              place.scan === "pasillo-p3" ? -10 : 0,
-              1.5,
-              place.scan === "pasillo-p3" ? 0 : 8,
-            ),
-          ),
-      );
+      this.gaze = this.spawn.clone().add(new T.Vector3(place.scan === "pasillo-p3" ? -10 : 0, 1.5, place.scan === "pasillo-p3" ? 0 : 8));
+      this.camera.lookAt(this.gaze);
       this.walker.enabled = true;
       this.onProgress("", 1);
       this.onMode("paused");
