@@ -1,40 +1,27 @@
-# Verificación de la versión 0.1
+# Verificación (versión 0.1.0)
 
-- Frontend: TypeScript estricto y compilación Vite correctos; cuatro pruebas de disponibilidad de fotos y estructura de los tres GLB aprobadas.
-- Backend: cinco pruebas de integración aprobadas durante el desarrollo. Se amplió después la prueba de edición de trabajos; esa ampliación queda pendiente de repetir al publicar este corte.
-- Chat: prueba con dos sesiones autenticadas y recepción del mensaje en ambas aprobada durante el desarrollo.
-- Inspección visual: vista general, laboratorio, aula y pasillo del tercer piso. Se comprobaron carga de modelos, controles alternativos y paneles informativos.
+Distingue lo ejecutado de lo pendiente. Comandos: [README](../README.md#verificación). Revisión visual más reciente: [design-qa.md](../design-qa.md).
 
-Pendientes: recorrido completo por todas las escaleras, dispositivos móviles físicos, validación conjunta con seis usuarios y ejecución completa de Docker/PostgreSQL. El backend se probó localmente con H2 en modo PostgreSQL. La inspección visual no garantiza ausencia de huecos ni colisiones imperfectas en los escaneos.
+## Estado vigente
 
-## Base geográfica del campus — 31/10/2026
+| Área | Estado | Detalle |
+| --- | --- | --- |
+| Frontend: `npm test` | 12/12 aprobadas (31/10/2026) | assets 4 (fotos referenciadas + 3 GLB), `campus-layout` 4 (sector, recorte de calles, registro de CyT, proyección del plano), `faculty-blueprint` 4 (ángulo de G y alturas, anexos y estacionamiento, red peatonal, orden plaza techada → abierta → cantina) |
+| Frontend: `npm run build` | Correcto (31/10/2026) | `tsc --noEmit` + `vite build` |
+| Backend: `./mvnw verify` | 5/5 aprobadas (31/10/2026, JDK 25.0.5, H2 en modo PostgreSQL) | Incluye propiedad, edición y eliminación de trabajos, enlaces inseguros, permisos de paneles, sesión y contraseñas |
+| Chat | Aprobada durante el desarrollo | `frontend/tests/chat.integration.mjs`: dos sesiones autenticadas reciben el mensaje. No re-ejecutada; requiere backend local |
+| Visual (navegador interno, 920 × 764) | Aprobada | Cuatro vistas, mapa, selección de espacios (incluida `plaza-abierta`), acceso a la cantina, movimiento y pausa, carga de los tres escaneos, paneles y controles alternativos. Sin Pointer Lock del navegador interno se mira arrastrando; la consola solo registra ese rechazo |
+| Docker + PostgreSQL | **No ejecutado** | El motor Docker no respondió en el equipo de preparación |
+| Móviles físicos, 6 usuarios simultáneos | **No ejecutado** | — |
+| Todas las escaleras y recintos | **No ejecutado** | La revisión visual no garantiza ausencia de huecos ni colisiones imperfectas en los escaneos |
+| Pruebas visuales de cuentas y biblioteca | **Pendiente** | Solo hay cobertura automática en backend |
 
-- Siete pruebas del frontend aprobadas: las cuatro de recursos existentes y tres de integridad cartográfica, registro de coordenadas de CyT y proyección del plano.
-- Comprobación de TypeScript y compilación Vite correctas.
-- Revisión en el navegador interno a 920 × 764: campus completo, vista de planta con norte arriba, regreso a «Mi facultad», mapa interactivo, selección del laboratorio, carga de su escaneo y retorno al campus.
-- Entrada al recorrido de CyT, movimiento con teclado y pausa comprobados tras trasladar el modelo. En el navegador interno se verificó el modo alternativo de arrastrar para mirar cuando la captura del cursor no está disponible. La consola registra el rechazo de Pointer Lock del navegador; no se detectaron otros errores nuevos en esta revisión.
-- Comparación conjunta de la referencia satelital y la vista de planta registrada en `design-qa.md`. Las capturas se guardan localmente en `.local/references/`, fuera de Git.
+Las capturas de comparación están en `.local/references/` (fuera de Git).
 
-No se repitieron las pruebas del backend en esta iteración: su código no cambió. La ejecución con PostgreSQL/Docker y la validación de detalles de cada sector conservan los pendientes indicados arriba.
+## Historial (31/10/2026)
 
-## Corrección de la distribución de CyT — 31/10/2026
+1. **Base geográfica**: huellas OSM y registro de coordenadas; 7 pruebas frontend.
+2. **Distribución de CyT**: modelo cercano antiguo sustituido por una reconstrucción registrada sobre la vista aérea anotada; 10 pruebas.
+3. **Sector y plazas**: recorte a CyT, dos canchas y dos estacionamientos; secuencia plaza techada → plaza abierta → cantina girada; 12 pruebas. Integrado directamente en `main` por solicitud del equipo (excepción a la regla de pull requests de AGENTS.md).
 
-- Se sustituyó el modelo cercano antiguo por una reconstrucción registrada sobre la vista aérea anotada del Drive del equipo. Bloque G, anexos, patio y estacionamiento comparten una única geometría en las vistas y el recorrido.
-- Diez pruebas del frontend aprobadas. Las tres nuevas protegen el ángulo de G, registro de alturas, posición relativa de sectores y conectividad completa de la red peatonal.
-- TypeScript y compilación Vite correctos.
-- Revisión visual en el navegador interno a 920 × 764: las cuatro vistas, mapa compartido, selección de espacios, acceso desde «Comenzar recorrido», movimiento y pausa en el acceso, llegada y caminata en la galería del primer piso.
-- El control alternativo de arrastrar funciona ante la restricción de Pointer Lock del navegador interno.
-- Comparación de referencia y plano en `.local/references/faculty-distribution-comparison.jpg`; diagnóstico y límites actualizados en `design-qa.md`. La evaluación anterior no bastaba para validar CyT y queda sustituida.
-
-Pendientes: mediciones reales, validación por el equipo de las proporciones y detalles, caminata completa por todas las escaleras y recintos, y los pendientes de integración anteriores. No hubo cambios de backend en esta corrección.
-
-## Sector CyT y secuencia de plazas — 31/10/2026
-
-- Cambio solicitado directamente sobre `main`: se conserva CyT con las dos canchas vecinas y dos estacionamientos cercanos; se excluye el resto del campus. El archivo cartográfico original se conserva como referencia.
-- Doce pruebas frontend aprobadas, incluyendo selección del sector, recorte de calles, red peatonal y orden espacial de plaza techada, plaza abierta y cantina girada.
-- TypeScript y compilación Vite correctos.
-- Navegador interno a 920 × 764: cuatro vistas, mapa del sector, selección de plaza abierta desde el mapa, acceso a la cantina, movimiento desde su explanada hacia la entrada y pausa comprobados.
-- Consola: únicamente rechazos de Pointer Lock del navegador interno; el control alternativo de arrastrar permite recorrer el escenario.
-- Comparación general y ampliación de plazas/cantina guardadas localmente, fuera de Git, y documentadas en `design-qa.md`.
-
-No se modificó el backend ni se repitieron sus pruebas. La fachada, las dimensiones y los interiores de la cantina requieren las próximas referencias del equipo. Las comprobaciones anteriores no equivalen a un recorrido exhaustivo por todos los recintos.
+Incoherencias documentales halladas y corregidas: [correcciones.md](correcciones.md).

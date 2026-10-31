@@ -1,68 +1,79 @@
-# Sector de Ciencias y Tecnología
+# Sector CyT: geografía y reconstrucción
 
-## Recorte y corrección del 31/10/2026
+Fuente única de la distribución espacial. Reglas de trabajo: [AGENTS.md](../AGENTS.md).
 
-Por indicación del equipo, el escenario se limita a **CyT, las dos canchas vecinas y los estacionamientos cercanos**. Se retiró la representación de otras facultades, biblioteca, seminario y la cancha del extremo sur. El JSON cartográfico original se conserva como referencia; no se muestra entero.
+## Alcance del escenario
 
-`campus-geometry.ts` selecciona las dos huellas de referencia de CyT, las canchas OSM `793370300` y `793370301`, y los estacionamientos `274489888` y `327428697`. Las calles de acceso seleccionadas se recortan al sector (X de -140 a 115 m, Z de -205 a 95 m). Este borde es un recorte de presentación, no un límite de propiedad. El plano y la cámara general usan los mismos límites.
+Decisión del equipo (31/10/2026): solo **CyT, las dos canchas vecinas y los estacionamientos cercanos**. Quedan fuera otras facultades, biblioteca, seminario y la cancha sur (`793370302`).
 
-Las capturas satelitales de mayor resolución adjuntadas por el usuario y su explicación corrigen la identificación anterior de la cantina: la secuencia es **bloque de aulas → plaza techada → plaza abierta → cantina girada**, junto a Electrónica e Informática. Esta aclaración tiene prioridad sobre el pequeño rótulo «Cantina» de la imagen anotada antigua.
+- `frontend/src/data/campus-geometry.ts` selecciona de `campus-layout.json` las huellas OSM `274489894` (Bloque 1, constante `FACULTY_MAIN`) y `327428698` («segundo bloque»), las canchas `793370300` y `793370301`, los estacionamientos `274489888` y `327428697` y siete calles recortadas.
+- `campus-layout.json` completo (60 huellas, 32 trazados viales, 4 estacionamientos, 3 canchas) es referencia, no escenario.
+- Recorte de presentación: X −140…115 m, Z −205…95 m (no es un límite de propiedad). El mapa y la cámara general usan ese recorte más 12 m de margen.
+- Las huellas OSM no se dibujan como volúmenes: la de Bloque 1 fija el marco de registro (`facultyPose`) y ambas evitan árboles de contexto. La constante `FACULTY_LABS` (`327428698`) tiene un nombre engañoso: no designa laboratorios. Su centroide queda a ~12 m del de Bloque G, y no se ha confirmado que sea el mismo edificio.
+- Fuera de `inFacultyZone` (zona reconstruida) se dibujan como contexto los estacionamientos y calles OSM.
 
-Se conservaron los dos bloques centrales. La plaza techada ahora tiene cubierta completa; la plaza abierta comparte su borde de pavimento y queda sin techo. La fachada larga de la cantina gira hacia la plaza, con su eje aproximadamente transversal al del bloque de aulas. El ala vecina de Electrónica e Informática se incluye como volumen de orientación, con interior pendiente de relevamiento.
+## Coordenadas y pisos
 
-Referencia local: `.local/references/cyt-cantina-source.png`, copia de la tercera captura del usuario, de 1333 × 827 píxeles. Las esquinas aproximadas del Bloque 1 (85,310), (620,352) y (606,454) registran esa imagen sobre el marco local existente. Los nuevos polígonos se expresan en el mismo sistema de píxeles de trabajo anterior, evitando mover los bloques centrales. La captura sigue fuera de Git y no se utiliza como textura.
+Origen WGS84: latitud **−25,3251**, longitud **−57,6387**. `X` este, `Z` sur, `Y` vertical; metros.
 
-El identificador `plaza` conserva la plaza techada; `plaza-abierta` identifica el nuevo punto de visita. El acceso de la cantina y su dirección de mirada se trasladaron con el edificio. Sus dimensiones, detalles e interiores siguen siendo aproximados hasta recibir más fotos y medidas.
+| Nivel | Altura Y |
+| --- | --- |
+| Planta baja | 0 |
+| Primer piso (`piso-1`) | 3,5 |
+| Segundo piso (`piso-2`) | 7 |
+| Tercer piso (`pasillo-p3`, `aula-p3`) | 10,5 |
+
+## Registro sobre la imagen aérea
+
+1. `photoPoint(x, z, altura)` convierte píxeles del **marco de trabajo** al marco local del Bloque 1 (64 × 13 m, aproximado) mediante tres esquinas de su techo en la imagen anotada (560 × 508 px).
+2. El marco de trabajo se extendió al este (x hasta ~760) para cantina, plaza abierta y Electrónica, tomados de la captura de 1333 × 827 px (esquinas del Bloque 1 en esa captura: (85,310), (620,352), (606,454)).
+3. `facultyToWorld` gira, escala y traslada el marco local a la huella OSM. Edificios, colisiones y puntos de visita usan la misma transformación; las alturas no cambian. Los escaneos siguen siendo escenas independientes.
+
+## Distribución (`faculty-blueprint.ts`)
+
+Una sola geometría para «Sector CyT», «Vista de planta», «Plano de CyT», «Mi facultad» y el modo a pie, construida por `scene/faculty-reconstruction.ts` (galerías, columnas, barandas, vanos, ventanas, escaleras, techos con cerchas, bancos, rasgos de cantina y Manfred; el mural recorta en ejecución la foto `IMG_5727`).
+
+| Elemento | Clave | Ids en `places.ts` | Posición y forma |
+| --- | --- | --- | --- |
+| Bloque 1 («bloque de aulas») | `main` | `laboratorio`, `piso-1`, `piso-2`, `pasillo-p3`, `aula-p3`, `banos` | Norte; planta baja y 3 pisos |
+| Bloque G («Bloque 2» de las carpetas) | `block2` | `bloque-g` | Sur y oblicuo respecto de Bloque 1 (la prueba exige −0,6…−0,2 rad); planta baja y 2 pisos |
+| Patio triangular (área común 2) | `courtyard` | `patio` | Entre ambos bloques |
+| Área común 1 | `common1` | `jardin` (punto junto a su borde) | Al sur de la plaza |
+| Sala Manfred | `manfred` | `sala-manfred` | Norte del extremo oriental de Bloque 1 |
+| Bedelía | `bedelia` | `bedelia` | Noreste del mismo extremo |
+| Plaza techada | `coveredPlaza` | `plaza` | Cubierta completa; continúa el bloque de aulas |
+| Plaza abierta | `openPlaza` | `plaza-abierta` | Este de la techada, sin techo, pavimento compartido |
+| Cantina | `cantina` | `cantina-cyt` | Girada: eje largo transversal al del bloque de aulas, fachada hacia la plaza abierta |
+| Electrónica e Informática | `electronics` | — | Junto a la cantina; solo volumen de orientación, interior sin relevar |
+| Estacionamiento | `parking` | `estacionamiento` | Sur de G, sobre césped; paso peatonal cubierto lateral |
+| Accesos | `paths` | `acceso` | 7 caminos en una red conectada desde el acceso |
+
+- Secuencia obligatoria: **bloque de aulas → plaza techada → plaza abierta → cantina girada**. Tiene prioridad sobre el pequeño rótulo «Cantina» de la imagen anotada antigua.
+- Vegetación: 4 árboles de referencia en CyT y hasta 4 en el contexto. No rellenar con más.
+- Cada id de `places.ts` (16) tiene punto de visita en `facultyVisitPoints`; `cantina-cyt` y `plaza-abierta` tienen además `facultyVisitTargets` (dirección de mirada).
 
 ## Fuentes y prioridad
 
-La primera base separaba un contexto cartográfico del modelo cercano antiguo. Esa solución conservó una distribución incorrecta de CyT. Se reemplazó por una única reconstrucción compartida entre las vistas y el recorrido.
+Orden de prioridad: aclaraciones del equipo y capturas recientes › vista aérea anotada › polígonos OSM dentro de CyT.
 
-1. [Vista aérea marcada por el equipo](https://drive.google.com/file/d/1nqROQLGTXraAKXHkl4VRuzc5UGMFQnyW/view), carpeta «Vista Aerea» del [Drive del TP](https://drive.google.com/drive/folders/1WIVm8i_-avD0KK45kboU60isgf9_5Z2K). Imagen de 560 × 508 píxeles, recibida el 31/10/2026. Se utiliza para los bloques y patios; la corrección de cantina y plazas se describe arriba.
-2. Fotografías de Bloque 1, Bloque 2/G, áreas comunes, Cantina, Manfred y plaza techada del mismo Drive. Los derivados utilizados y su procedencia figuran en `frontend/public/assets/sources.json`. Las fotos IMG_5668, IMG_5720, IMG_5685 y IMG_5727 orientan respectivamente Bloque G, Cantina, Manfred y el pilar pintado.
-3. [Google Maps: Campus Santa Librada](https://www.google.com/maps/place/Universidad+Cat%C3%B3lica+de+Asunci%C3%B3n+-+Campus+Santa+Librada/@-25.3262439,-57.6387973,16.83z/). Contexto general aportado por el equipo.
-4. [Área universitaria OSM](https://www.openstreetmap.org/way/130888813), [Bloque 1](https://www.openstreetmap.org/way/274489894) y [segundo bloque](https://www.openstreetmap.org/way/327428698). Huellas y trazados de contexto, con [atribución ODbL](https://www.openstreetmap.org/copyright).
+1. Capturas satelitales del usuario (31/10/2026). La tercera, de 1333 × 827 px, se guarda en `.local/references/cyt-cantina-source.png`. Fuera de Git; no es textura.
+2. [Vista aérea marcada](https://drive.google.com/file/d/1nqROQLGTXraAKXHkl4VRuzc5UGMFQnyW/view) (560 × 508 px, 31/10/2026), carpeta «Vista Aerea» del [Drive del TP](https://drive.google.com/drive/folders/1WIVm8i_-avD0KK45kboU60isgf9_5Z2K). Bloques y patios.
+3. Fotos del mismo Drive (procedencia en `frontend/public/assets/sources.json`). Orientan: `IMG_5668` Bloque G, `IMG_5720` cantina, `IMG_5685` Manfred, `IMG_5727` pilar pintado.
+4. [Google Maps: Campus Santa Librada](https://www.google.com/maps/place/Universidad+Cat%C3%B3lica+de+Asunci%C3%B3n+-+Campus+Santa+Librada/@-25.3262439,-57.6387973,16.83z/): solo comparación.
+5. OSM: [área universitaria](https://www.openstreetmap.org/way/130888813), [Bloque 1](https://www.openstreetmap.org/way/274489894), [segundo bloque](https://www.openstreetmap.org/way/327428698); [atribución ODbL](https://www.openstreetmap.org/copyright).
 
-Las aclaraciones del equipo y las capturas más recientes tienen prioridad sobre la vista marcada antigua y sobre los polígonos OSM dentro de CyT. Las imágenes aéreas se conservan como evidencia local de comparación; no se incorporan como texturas ni se redistribuyen desde el repositorio. Los originales de Drive permanecen sin cambios.
-
-## Una distribución para todas las vistas
-
-`frontend/src/data/faculty-blueprint.ts` registra los vértices de los sectores y caminos sobre la imagen marcada:
-
-- Bloque 1 al norte, con planta baja y tres pisos superiores.
-- Bloque G/«Bloque 2» al sur, oblicuo respecto al Bloque 1, con planta baja y dos pisos superiores según las fotos.
-- Área común 2 en el patio triangular entre ambos.
-- Manfred y Bedelía al norte/noreste del extremo oriental del Bloque 1.
-- Plaza abierta al este de la techada y cantina girada al otro lado de la plaza, junto a Electrónica e Informática; área común 1 hacia el sur.
-- Estacionamiento sobre césped al sur de G, con paso peatonal cubierto lateral.
-- Caminos que enlazan galerías, plaza, anexos y estacionamiento en una sola red.
-
-`frontend/src/scene/faculty-reconstruction.ts` construye esa geometría en todos los modos. Incluye galerías abiertas, columnas, barandas horizontales, vanos de puertas, ventanas, escaleras, techos con cerchas, bancos y los rasgos visibles de Cantina y Manfred. El mural usa un recorte en ejecución de una foto ya versionada del pilar real.
-
-Se retiraron los antiguos bloques paralelos y sus anexos. El contexto OSM excluye los volúmenes de la zona reconstruida para evitar duplicados. El plano interactivo usa los mismos polígonos y caminos.
-
-Se eliminó el bosque generado: quedan cuatro árboles de referencia dentro de CyT y pocos ejemplares pequeños en el contexto. No se deben rellenar zonas vacías con vegetación.
-
-## Coordenadas
-
-El archivo de referencia `campus-layout.json` contiene 60 huellas, 32 trazados viales, cuatro áreas de estacionamiento y tres canchas; el escenario usa únicamente la selección descrita arriba. Origen WGS84: latitud **-25.3251**, longitud **-57.6387**. `X` crece hacia el este, `Z` hacia el sur y `Y` es vertical, en metros.
-
-`photoPoint` registra tres esquinas del Bloque 1 de la imagen anotada sobre el marco local de trabajo de 64 × 13 metros. Esas dimensiones son aproximadas. `facultyToWorld` gira, escala y traslada ese marco hasta la huella cartográfica. Los edificios, sus colisiones y los puntos de visita reciben la misma transformación. Las alturas se conservan; los escaneos siguen siendo escenas independientes.
+Las imágenes aéreas son evidencia local de comparación: ni texturas ni redistribuidas. Los originales de Drive no se modifican.
 
 ## Límites de fidelidad
 
-La relación entre sectores proviene de la referencia identificada. No hay relevamiento topográfico ni mediciones verificadas de longitudes, alturas, inclinaciones o anchos de circulación. La imagen aérea es pequeña y tiene perspectiva; su registro aproxima las proporciones.
-
-Las fachadas incorporan rasgos observados, pero la cantidad de módulos, interiores sin escaneo, mobiliario y materiales siguen siendo una reconstrucción. No se asignan números reales de aulas por suposición. Segundo piso y baños mantienen su estado por validar. Bedelía permanece incluida por indicación previa del equipo.
-
-El resto del campus queda fuera del escenario. No se afirma fidelidad fotográfica ni se da por concluida la validación de todas las escaleras.
+No hay relevamiento topográfico ni medidas verificadas de longitudes, alturas, inclinaciones o anchos. La imagen aérea es pequeña y con perspectiva, así que el registro solo aproxima proporciones. Número de módulos, interiores sin escaneo, mobiliario y materiales son reconstrucción; no se asignan números de aula. `piso-2` y `banos` siguen `pending` en `places.ts`. Bedelía permanece por indicación del equipo. De la cantina faltan fachada, dimensiones, forma de cubierta e interiores. No se afirma fidelidad fotográfica.
 
 ## Actualizar el contexto cartográfico
 
-Guardar fuera del repositorio una exportación XML de OSM con el área universitaria y edificios completos. Desde la raíz:
+Guardar fuera del repositorio una exportación XML de OSM con el área universitaria y edificios completos y, desde la raíz:
 
 ```shell
 python scripts/import-campus-map.py ruta/al/campus.osm
 ```
 
-El importador usa la biblioteca estándar de Python y descarta metadatos personales de colaboradores OSM. No sobrescribe el plano de CyT. Antes de modificar este último, contrastar la vista aérea marcada y las fotos del sector; preservar identificadores de espacios y conectividad peatonal.
+Usa solo la biblioteca estándar de Python, descarta metadatos personales de colaboradores y **sobrescribe `frontend/src/data/campus-layout.json`**; no toca `faculty-blueprint.ts`. Después ejecutar `npm test` en `frontend/`: comprueba que siguen existiendo los ids seleccionados (2 huellas, 2 estacionamientos, 2 canchas). Antes de cambiar el plano, contrastar la vista aérea y las fotos; preservar ids y conectividad peatonal.
