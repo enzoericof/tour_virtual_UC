@@ -23,3 +23,9 @@ Incoherencias halladas al contrastar los documentos con el código y las pruebas
 **Abiertas** (no corregibles solo con documentación): `.gitignore` contradice el versionado de los recursos; hay originales sin seguimiento en la raíz (`IMG_5659.HEIC`, `Pasillo - Piso 3.glb`) que AGENTS.md prohíbe subir; el nombre `FACULTY_LABS`. Seguimiento en [pendientes.md](pendientes.md).
 
 **Reorganización**: cada hecho pasó a un único documento (tabla de AGENTS.md); se eliminaron las secciones históricas repetidas y las dos descripciones del mismo recorte.
+
+## 31/10/2026 — medidas y texturas (rama `feat/cyt-medidas-texturas`)
+
+| Documento | Incorrecto | Correcto | Fuente de verdad |
+| --- | --- | --- | --- |
+| `base-geografica.md` | El Bloque 1 se describía como «marco local de 64 × 13 m» | `facultyToWorld` escalaba ×1,17 y ×1,03: en escena medía 75 × 13,4 m. El plano está ahora en metros (75 × 12, medida del equipo) y no se escala | `faculty-blueprint.ts`, `campus-geometry.ts`, `npm test` |

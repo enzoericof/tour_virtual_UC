@@ -1,44 +1,35 @@
-# Revisión visual — sector CyT y cantina
+# Revisión visual — medidas de CyT, escalera, torre, texturas y menú superior
 
-Fecha: 31/10/2026. Alcance de esta revisión: recortar el escenario a CyT, las dos canchas vecinas y los estacionamientos cercanos; conservar los bloques centrales; corregir plaza techada, plaza abierta y orientación de cantina. No se evalúa como réplica fotográfica terminada.
+Fecha: 31/10/2026, rama `feat/cyt-medidas-texturas`. Alcance: aplicar las medidas del equipo, corregir la escalera del Bloque 1, agregar ascensor, torre de baños y media sombra, texturas del escaneo del pasillo y recoger la portada y los paneles en la barra superior. No se evalúa como réplica fotográfica terminada.
 
 ## Hallazgos y comparación
 
-- [P1 corregido] El modelo mostraba todo Santa Librada. Se seleccionaron solamente las huellas de referencia de CyT, dos canchas y dos estacionamientos; se recortaron las calles y se actualizaron límites, cámara, mapa y nombres de las vistas.
-- [P1 corregido] La cantina estaba adosada a la plaza cubierta y mal orientada. La nueva captura del usuario y su explicación sustituyen la identificación de la imagen pequeña anterior. Ahora hay cubierta continua tras el bloque de aulas, una plaza descubierta y la cantina girada al otro lado, junto al ala de Electrónica e Informática.
-- [P2 corregido] La primera vista de planta del sector dejaba el rótulo de canchas bajo el pie de la interfaz. Se ajustaron encuadre y posición del rótulo; la captura final muestra las dos canchas y sus etiquetas dentro del área visible.
-- [P2 corregido] La primera revisión de la plaza abierta mostraba una franja de césped entre su pavimento y el de la techada. Se hizo coincidir el borde compartido y se repitió la vista.
-- [P3 / siguiente etapa] Medidas, forma exacta de la cubierta de cantina, detalles de fachadas, mobiliario e interiores requieren las próximas fotos y mediciones. No se declaran resueltos por esta corrección de distribución.
-
-La revisión previa dejó una cantina incorrecta y no basta como evidencia de su fidelidad. La comprobación actual tiene el alcance acotado indicado arriba.
+- [P1 corregido] El plano se estiraba distinto en cada eje (×1,17 a lo largo, ×1,03 a lo ancho) y el Bloque 1 medía unos 75 × 13,5 m con módulos deformados. Ahora el plano está en metros y solo se gira y traslada: Bloque 1 de 75 × 12 m, Bloque G de 65 × 12 m a 11 y 47 m del Bloque 1.
+- [P1 corregido] La escalera del Bloque 1 estaba en la cabecera este, como caja de ida y vuelta. Ahora sube por fuera de la galería desde 20 m de la esquina SE hacia la torre, un tramo por piso, como en la foto `IMG_5659`. El ascensor de 2 × 2 m queda a 4 m de la esquina.
+- [P1 corregido] Faltaba la torre de baños. Se agregó como cilindro de 10 m partido por una junta blanca, con acceso desde la galería en cada nivel (forma confirmada por el equipo).
+- [P1 corregido] La plaza techada seguía la orientación del bloque. Ahora mide 15 × 10 m, está pegada a la cabecera y sigue la orientación de Bedelía y la cantina, que cierran el cuadrado descubierto.
+- [P2 corregido] Ladrillo, pisos y hormigón eran texturas dibujadas. Ahora salen del escaneo: ladrillo con su traba real, granito con franjas cada cuarto de módulo, dintel de hormigón, lamas de la media sombra y chapa de la cubierta.
+- [P2 corregido, hallado en esta revisión] «Comenzar recorrido» dejaba al visitante frente a la pared de ladrillo de la cabecera, y la cantina, Bedelía y los baños aparecían de costado o demasiado cerca. Cada punto tiene ahora dirección de mirada: la galería de planta baja, las fachadas y la junta de la torre.
+- [P3 / siguiente etapa] Medidas de Bedelía, cantina, Manfred y Electrónica; interior de la torre y de la cantina; cubierta de la plaza techada (hoy plana con cerchas). Ver [pendientes](docs/pendientes.md).
 
 ## Evidencia
 
-- Verdad visual: tercera captura adjunta del usuario, copiada sin cambios a `.local/references/cyt-cantina-source.png`, **1333 × 827 píxeles**. La explicación del usuario identifica la cantina junto a Electrónica e Informática.
-- Implementación: `.local/references/cyt-cantina-plan.jpg`, **920 × 764 píxeles**, viewport **920 × 764 CSS px**, captura a escala de un píxel por píxel CSS.
-- Recorte completo: `.local/references/cyt-sector-plan.jpg`, mismo viewport.
-- Fachada desde la plaza: `.local/references/cyt-cantina-front.jpg`.
-- Comparación general conjunta: `.local/references/cyt-cantina-comparison.jpg`.
-- Comparación ampliada de los extremos de aulas, plazas y cantina: `.local/references/cyt-cantina-focused-comparison.jpg`.
+Capturas en `.local/references/medidas-texturas/` (fuera de Git), tomadas con Edge sin ventana y WebGL por GPU: vistas «Plano de CyT» y «Mi facultad» (`01`, `02`), patio, escalera, torre y plaza techada (`03`–`06`), galerías de planta baja y tercer piso (`07`, `08`, `16`), Bloque G (`09`), puntos de visita (`visits_sheet`), menú (`ui-2-recogido`, `ui-3-menu`, `ui-celular`), llegada a «Pasillos de acceso» (`ui-6-acceso`), mapa (`30-mapa`) y texturas en mosaico (`texturas-1`, `texturas-2`).
 
-Las capturas quedan fuera de Git. En la comparación general se reduce la fuente proporcionalmente a 920 px de ancho; la implementación mantiene su tamaño. La ampliación compara regiones con proporciones conservadas. No se superponen píxeles ni se exige igualdad de escala: la fuente tiene perspectiva satelital y la aplicación usa una cámara elevada con norte arriba. Se comparan orden, adyacencias y dirección de los edificios.
-
-La comparación focal muestra la plaza techada a la izquierda, el pavimento descubierto en el centro y la cantina con eje largo transversal a la derecha. El ala vecina se usa como orientación. Los dos bloques centrales conservan sus posiciones.
+Comparación: la foto `IMG_5659` (área común 2 hacia el Bloque 1) frente a `03-courtyard` y `04-stair` para torre, tramos, bóvedas y lamas; el escaneo del pasillo frente a `08-gallery-p3` para ladrillo, pilastras, piso, baranda, lamas y cubierta. Se comparan disposición, sentido de subida y materiales, no píxeles: la foto tiene otra lente y el escaneo, huecos.
 
 ## Superficies de fidelidad
 
-- **Tipografía:** se mantienen DM Sans, Manrope y las jerarquías existentes; el nuevo título de CyT y las cuatro vistas se leen sin desbordar.
-- **Distribución y espaciado:** el sector completo entra entre cabecera y pie; mapa, geometría, colisiones y destinos usan las mismas transformaciones. La plaza abierta comparte pavimento con la techada y queda fuera de ambas cubiertas.
-- **Colores:** se conserva la paleta del proyecto; techos claros en aulas/ala vecina y azul en G/cantina. La plaza utiliza pavimento, sin césped en su unión principal.
-- **Imágenes:** fotografías y escaneos existentes conservados. La captura aérea sirve como referencia y no se convierte en textura ni se sustituye por una imagen generada.
-- **Contenido:** «Sector CyT» reemplaza «Campus completo»; el mapa explica el alcance. Se añade «Plaza abierta» como punto visitable, conservando «Plaza techada» y todos los identificadores anteriores.
+- **Tipografía:** se mantienen DM Sans, Manrope y las jerarquías existentes; el botón «Menú» usa el estilo de la navegación con su tecla `M`.
+- **Distribución y espaciado:** medidas del equipo en el plano; mapa, geometría, colisiones y destinos comparten la transformación. El menú desplegable aloja ubicación, vistas, herramientas y pie sin desbordar en 1280 × 800 ni en 390 × 844.
+- **Colores:** los del escaneo para ladrillo, granito, hormigón y cubierta; lamas en el gris azulado de las fotos; techo gris en el Bloque 1 y azul en G y la cantina.
+- **Imágenes:** fotos y escaneos conservados; las texturas son derivados documentados en `sources.json`, no imágenes generadas.
+- **Contenido:** ids y nombres de `places.ts` sin cambios; la ayuda y el README documentan la tecla `M`.
 
 ## Interacción y resultado
 
-Verificadas las cuatro vistas, el mapa recortado, la selección de plaza abierta desde su leyenda, llegada a la explanada de cantina, movimiento hacia su entrada y pausa. El nuevo espacio carga sin paneles, de forma explícita, mientras no haya contenido publicado.
+Verificados: las cuatro vistas; el mapa; los puntos de visita; recoger la portada con una tecla (Tab, Enter y modificadores no la recogen), abrir el menú, elegir una vista desde él, cerrarlo al hacer clic afuera y devolver los paneles con `M`. Recorrido a pie con la cápsula del proyecto: escalera del Bloque 1 hasta el tercer piso, torre de baños, galerías, plazas, terraza de la cantina y escalera del Bloque G ([verificación](docs/verificacion.md)).
 
-Consola: solamente rechazos de Pointer Lock propios del navegador interno. La alternativa de arrastrar funciona. No se prueban móviles físicos, todas las escaleras ni la totalidad de interiores.
-
-Las doce pruebas frontend y el build pasaron. No hay hallazgos P0/P1/P2 pendientes dentro de este recorte y corrección espacial. Las medidas y detalles indicados como siguiente etapa permanecen pendientes de validación del equipo.
+Consola: sin errores. No se probaron móviles físicos ni los interiores sin escaneo. Las 16 pruebas frontend y el build pasaron.
 
 final result: passed
