@@ -215,6 +215,7 @@ export function createFaculty() {
   frame(plan.main, 64, 13, () => academicBlock(64, 13, 4, 1));
   frame(plan.block2, 58, 11, () => academicBlock(58, 11, 3, -1, true));
   pave(plan.courtyard, soil, 0.015);
+  pave(plan.openPlaza, paving, 0.06);
   pave(plan.common1, m.grass, 0.018);
   pave(plan.parking, m.grass, 0.02);
   plan.paths.forEach((p) => path(p));
@@ -258,13 +259,22 @@ export function createFaculty() {
       beam(new T.Vector3(0,4.4,z),new T.Vector3(4.2,3.7,z),0.06);
       beam(new T.Vector3(-4.2,3.7,z),new T.Vector3(4.2,3.7,z),0.05);
     }
+    roof(9, 17, 3.75, m.roof);
   });
+  // The uncovered plaza separates the covered circulation from the canteen.
+  // Planting beds occupy its sides; keep the central walking route open.
+  for (const [px, pz] of [[533,157],[565,210]]) {
+    const p = photoPoint(px,pz);
+    box(3.5,0.25,1.8,p[0],0.14,p[2],m.concrete);
+    box(3.3,0.08,1.6,p[0],0.3,p[2],m.grass);
+    bench(p[0],p[2]+1.3,0.06);
+  }
   frame(plan.cantina, 15, 12, () => {
     box(15, 0.25, 12, 0, 0.32, 0, m.stone, true);
     box(15, 4.1, 0.2, 0, 2.4, -6, m.brick, true);
     box(0.24, 5.6, 12, 7.5, 3.15, 0, m.brick, true);
     box(0.24, 4.1, 12, -7.5, 2.4, 0, m.brick, true);
-    box(15.5, 0.2, 12.5, 0, 4.7, 0, m.roof);
+    roof(15, 12, 4.7, blueRoof);
     box(15.7, 1.05, 0.12, 0, 4.22, 6.2, fascia);
     box(14, 0.16, 9, 0, 0.36, 10.5, paving, true);
     stair(new T.Vector3(0,0,16),new T.Vector3(0,0.44,14.5),12);
@@ -279,6 +289,18 @@ export function createFaculty() {
     }
     for (let z = -5; z <= 5; z += 0.55) box(0.09, 4.2, 0.12, 7.7, 2.5, z, m.metal);
     sign("CANTINA · CyT", 0, 4.2, 6.3, 3.8);
+  });
+  // Adjacent department shown only as the reference wing from the satellite view.
+  frame(plan.electronics, 24, 8, () => {
+    box(24,0.2,8,0,0,0,m.concrete,true);
+    box(24,3.2,0.22,0,1.6,-4,m.brick,true);
+    for (const x of [-12,12]) box(0.22,3.2,8,x,1.6,0,m.brick,true);
+    for (let x=-11;x<=11;x+=2.75) {
+      pole(0.14,3.4,x,1.7,3.8,m.concrete);
+      box(2.6,2.3,0.1,x,1.8,1.7,m.glass);
+    }
+    roof(24,8,3.5,m.roof);
+    sign("ELECTRÓNICA E INFORMÁTICA",0,2.9,3.95,7.5);
   });
 
   function picnic(px: number, pz: number) {

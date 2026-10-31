@@ -1,14 +1,54 @@
-import layout from "./campus-layout.json" with { type: "json" };
+import sourceLayout from "./campus-layout.json" with { type: "json" };
 
-export { layout };
+export { sourceLayout };
 export type Point = readonly [number, number] | readonly number[];
 export const FACULTY_MAIN = "274489894";
 export const FACULTY_LABS = "327428698";
+// Selected study area: CyT, the two neighbouring pitches and nearby parking.
+// This is a presentation crop, not a surveyed property boundary.
+export const sectorBounds = { minX: -140, maxX: 115, minZ: -205, maxZ: 95 };
+
+export function clipSegment(a: Point, b: Point, bounds = sectorBounds): number[][] | null {
+  const dx = b[0] - a[0], dz = b[1] - a[1];
+  let start = 0, end = 1;
+  const limits = [[-dx, a[0] - bounds.minX], [dx, bounds.maxX - a[0]],
+    [-dz, a[1] - bounds.minZ], [dz, bounds.maxZ - a[1]]];
+  for (const [p, q] of limits) {
+    if (p === 0) { if (q < 0) return null; continue; }
+    const t = q / p;
+    if (p < 0) start = Math.max(start, t); else end = Math.min(end, t);
+    if (start > end) return null;
+  }
+  return [[a[0] + dx * start, a[1] + dz * start], [a[0] + dx * end, a[1] + dz * end]];
+}
+
+function clipRoad(points: number[][]) {
+  const parts: number[][][] = [];
+  let current: number[][] = [];
+  for (let i = 1; i < points.length; i++) {
+    const segment = clipSegment(points[i - 1], points[i]);
+    if (!segment) { current = []; continue; }
+    if (current.length && Math.hypot(current.at(-1)![0] - segment[0][0], current.at(-1)![1] - segment[0][1]) < 0.001) current.push(segment[1]);
+    else { current = segment; parts.push(current); }
+  }
+  return parts;
+}
+
+export const layout = {
+  ...sourceLayout,
+  boundary: [[sectorBounds.minX, sectorBounds.minZ], [sectorBounds.maxX, sectorBounds.minZ],
+    [sectorBounds.maxX, sectorBounds.maxZ], [sectorBounds.minX, sectorBounds.maxZ], [sectorBounds.minX, sectorBounds.minZ]],
+  buildings: sourceLayout.buildings.filter((b) => [FACULTY_MAIN, FACULTY_LABS].includes(b.id)),
+  parking: sourceLayout.parking.filter((p) => ["274489888", "327428697"].includes(p.id)),
+  pitches: sourceLayout.pitches.filter((p) => ["793370300", "793370301"].includes(p.id)),
+  roads: sourceLayout.roads.filter((r) => ["29428768", "274489910", "594756081", "678429681", "678429682", "678429683", "1383036919"].includes(r.id))
+    .flatMap((r) => clipRoad(r.points).map((points, i) => ({ ...r, id: `${r.id}-${i}`, points }))),
+};
 export const campusBounds = {
-  minX: Math.min(...layout.boundary.map((p) => p[0])) - 25,
-  maxX: Math.max(...layout.boundary.map((p) => p[0])) + 25,
-  minZ: Math.min(...layout.boundary.map((p) => p[1])) - 25,
-  maxZ: Math.max(...layout.boundary.map((p) => p[1])) + 25,
+  minX: sectorBounds.minX - 12,
+  maxX: sectorBounds.maxX + 12,
+  minZ: sectorBounds.minZ - 12,
+  maxZ: sectorBounds.maxZ + 12,
 };
 export const campusCenter = [
   (campusBounds.minX + campusBounds.maxX) / 2,

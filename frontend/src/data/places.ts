@@ -131,10 +131,22 @@ const originalPlaces: Place[] = [
     category: "Espacios compartidos",
     floor: "Planta baja",
     description:
-      "Galerías y plaza cubierta que conectan los espacios del campus. La estructura se representa con módulos reutilizables.",
+      "Continuación cubierta del bloque de aulas. Desde aquí se pasa a la plaza abierta y después a la cantina.",
     position: [27, 0, 7],
     photo: "IMG_5688",
     photos: ["IMG_5688", "IMG_5693", "IMG_5706"],
+    status: "reference",
+  },
+  {
+    id: "plaza-abierta",
+    name: "Plaza abierta",
+    category: "Espacios compartidos",
+    floor: "Planta baja · a cielo abierto",
+    description:
+      "Plaza sin techo entre la plaza techada y la cantina. La fachada de la cantina está girada hacia este espacio, junto al Departamento de Electrónica e Informática.",
+    position: [0,0,0],
+    photo: "IMG_5720",
+    photos: ["IMG_5720", "IMG_5719"],
     status: "reference",
   },
   {

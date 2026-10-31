@@ -18,8 +18,12 @@ export const facultyBlueprint = {
   block2: [[235, 311], [459, 248], [484, 307], [261, 371]],
   manfred: [[396, 124], [421, 115], [433, 145], [405, 143]],
   bedelia: [[437, 110], [524, 84], [532, 108], [463, 144]],
-  cantina: [[493, 158], [534, 143], [558, 190], [512, 208]],
-  coveredPlaza: [[463, 157], [488, 151], [510, 218], [473, 224]],
+  // Revised from the user's larger satellite capture (1333 × 827 px).
+  // Long facade faces the open plaza, almost across the classroom block's axis.
+  cantina: [[599, 114], [634, 190], [602, 205], [568, 128]],
+  coveredPlaza: [[460, 158], [482, 149], [512, 211], [487, 226]],
+  openPlaza: [[482, 149], [568, 128], [602, 205], [512, 211]],
+  electronics: [[633, 190], [726, 148], [742, 183], [650, 229]],
   courtyard: [[242, 204], [414, 227], [256, 278]],
   common1: [[486, 233], [516, 407], [491, 415], [466, 320]],
   parking: [[278, 392], [479, 321], [516, 410], [332, 465]],
@@ -28,7 +32,7 @@ export const facultyBlueprint = {
     [[235, 207], [248, 297], [456, 234], [479, 205]],
     [[242, 309], [462, 245], [480, 230], [479, 205]],
     [[479, 205], [491, 260], [501, 313], [512, 407]],
-    [[479, 205], [520, 218], [536, 206]],
+    [[479, 205], [520, 208], [548, 185], [575, 172]],
     [[479, 205], [467, 160], [466, 145], [482, 126]],
     [[480, 230], [493, 307], [480, 375], [432, 420], [332, 465]],
   ],
@@ -39,12 +43,13 @@ export const facultyVisitPoints: Record<string, [number, number, number]> = {
   laboratorio: photoPoint(315, 188, 0.1),
   "pasillo-p3": photoPoint(345, 193, 10.5),
   "aula-p3": photoPoint(330, 170, 10.5),
-  "cantina-cyt": photoPoint(535, 214, 0.1),
+  "cantina-cyt": photoPoint(560, 178, 0.1),
   bedelia: photoPoint(492, 140, 0.2),
   "sala-manfred": photoPoint(417, 148, 0.2),
   patio: photoPoint(330, 245, 0.1),
   jardin: photoPoint(499, 281, 0.1),
   plaza: photoPoint(481, 193, 0.2),
+  "plaza-abierta": photoPoint(544, 182, 0.15),
   "piso-1": photoPoint(380, 203, 3.5),
   "piso-2": photoPoint(380, 203, 7),
   banos: photoPoint(237, 185, 0.1),
@@ -59,7 +64,12 @@ export function photoPolygon(points: readonly (readonly number[])[]) {
   });
 }
 
-export const facultyZone = photoPolygon([[190, 110], [565, 60], [590, 210], [548, 475], [242, 493], [190, 270]]);
+export const facultyVisitTargets: Record<string, [number, number, number]> = {
+  "cantina-cyt": photoPoint(601, 160, 1.8),
+  "plaza-abierta": photoPoint(592, 166, 1.8),
+};
+
+export const facultyZone = photoPolygon([[190, 110], [750, 60], [760, 240], [548, 475], [242, 493], [190, 270]]);
 export function inFacultyZone(points: readonly (readonly number[])[]) {
   const center = [points.reduce((s, p) => s + p[0], 0) / points.length,
     points.reduce((s, p) => s + p[1], 0) / points.length];

@@ -1,9 +1,9 @@
-import { layout, campusBounds, FACULTY_MAIN, FACULTY_LABS, type Point } from "../data/campus-geometry";
+import { layout, campusBounds, type Point } from "../data/campus-geometry";
 import { facultyBlueprint, photoPolygon, inFacultyZone } from "../data/faculty-blueprint";
 
 /** The map and the 3D overview use the same source footprints and orientation. */
 export function drawCampusMap(canvas: HTMLCanvasElement) {
-  const width = 820, height = 1010;
+  const width = 820, height = Math.round(width * (campusBounds.maxZ - campusBounds.minZ) / (campusBounds.maxX - campusBounds.minX));
   canvas.width = width * 2; canvas.height = height * 2;
   const ctx = canvas.getContext("2d")!; ctx.scale(2, 2);
   const project = (p: Point) => [
@@ -20,12 +20,8 @@ export function drawCampusMap(canvas: HTMLCanvasElement) {
   ctx.strokeStyle = "#f3f1e5"; ctx.lineJoin = "round"; ctx.lineCap = "round";
   layout.roads.filter((r) => !inFacultyZone(r.points)).forEach((r) => { path(r.points); ctx.lineWidth = r.width * width / (campusBounds.maxX - campusBounds.minX); ctx.stroke(); });
   layout.pitches.forEach((p) => { path(p.points); ctx.fillStyle = "#819d65"; ctx.fill(); ctx.strokeStyle = "#edf3e0"; ctx.lineWidth = 1.5; ctx.stroke(); });
-  layout.buildings.forEach((b) => {
-    if (inFacultyZone(b.points)) return;
-    path(b.points); ctx.fillStyle = [FACULTY_MAIN, FACULTY_LABS].includes(b.id) ? "#295740" : "#b18d70";
-    ctx.fill(); ctx.strokeStyle = "#f6f2e6"; ctx.lineWidth = 1.7; ctx.stroke();
-  });
-  for (const key of ["main", "block2", "manfred", "bedelia", "cantina", "coveredPlaza"] as const) {
+  path(photoPolygon(facultyBlueprint.openPlaza)); ctx.fillStyle = "#d8d3c1"; ctx.fill();
+  for (const key of ["main", "block2", "manfred", "bedelia", "cantina", "coveredPlaza", "electronics"] as const) {
     path(photoPolygon(facultyBlueprint[key])); ctx.fillStyle = "#295740"; ctx.fill();
     ctx.strokeStyle = "#f6f2e6"; ctx.lineWidth = 1.5; ctx.stroke();
   }
@@ -36,7 +32,7 @@ export function drawCampusMap(canvas: HTMLCanvasElement) {
   ctx.font = "bold 18px Arial";
   text("CIENCIAS Y TECNOLOGÍA", -40, -159);
   ctx.font = "15px Arial";
-  text("Otras facultades", 209, -229); text("Estacionamiento", 235, 45);
-  text("Canchas", -72, 94); text("Seminario · contexto", 68, 374);
+  text("Estacionamiento", 8, -30);
+  text("Canchas", -75, 82);
   ctx.font = "bold 24px Arial"; ctx.fillText("N ↑", 45, 40);
 }

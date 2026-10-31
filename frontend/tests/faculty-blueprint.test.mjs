@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { facultyBlueprint as plan, photoPoint, facultyVisitPoints, photoPolygon, inFacultyZone } from "../src/data/faculty-blueprint.ts";
+import { insidePolygon } from "../src/data/campus-geometry.ts";
 
 test("Aerial registration keeps floor heights and the oblique relationship between the two blocks", () => {
   const a = photoPoint(...plan.main[0], 10.5), b = photoPoint(...plan.main[1]);
@@ -40,4 +41,15 @@ test("The pedestrian paths form a single connected network from the entrance", (
     visited.add(point); queue.push(...graph.get(point));
   }
   assert.equal(visited.size, graph.size, "A path is disconnected from the entrance");
+});
+
+test("The rotated canteen lies beyond the uncovered plaza, after the covered circulation", () => {
+  const center = (quad) => quad.map(([x,z]) => photoPoint(x,z)).reduce((sum,p) => [sum[0]+p[0]/quad.length,sum[1]+p[2]/quad.length],[0,0]);
+  const covered = center(plan.coveredPlaza), open = center(plan.openPlaza), canteen = center(plan.cantina);
+  assert.ok(covered[0] < open[0] && open[0] < canteen[0]);
+  const a = photoPoint(...plan.cantina[0]), b = photoPoint(...plan.cantina[1]);
+  assert.ok(Math.atan2(b[2]-a[2],b[0]-a[0]) > 1, "Canteen long axis must be rotated across the classroom block");
+  const worldOpen = photoPolygon(plan.openPlaza).reduce((s,p) => [s[0]+p[0]/4,s[1]+p[1]/4],[0,0]);
+  assert.ok(!insidePolygon(worldOpen,photoPolygon(plan.cantina)));
+  assert.ok(!insidePolygon(worldOpen,photoPolygon(plan.coveredPlaza)), "Open plaza must remain outside both roofs");
 });

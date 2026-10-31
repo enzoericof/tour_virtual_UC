@@ -27,3 +27,14 @@ No se repitieron las pruebas del backend en esta iteración: su código no cambi
 - Comparación de referencia y plano en `.local/references/faculty-distribution-comparison.jpg`; diagnóstico y límites actualizados en `design-qa.md`. La evaluación anterior no bastaba para validar CyT y queda sustituida.
 
 Pendientes: mediciones reales, validación por el equipo de las proporciones y detalles, caminata completa por todas las escaleras y recintos, y los pendientes de integración anteriores. No hubo cambios de backend en esta corrección.
+
+## Sector CyT y secuencia de plazas — 31/10/2026
+
+- Cambio solicitado directamente sobre `main`: se conserva CyT con las dos canchas vecinas y dos estacionamientos cercanos; se excluye el resto del campus. El archivo cartográfico original se conserva como referencia.
+- Doce pruebas frontend aprobadas, incluyendo selección del sector, recorte de calles, red peatonal y orden espacial de plaza techada, plaza abierta y cantina girada.
+- TypeScript y compilación Vite correctos.
+- Navegador interno a 920 × 764: cuatro vistas, mapa del sector, selección de plaza abierta desde el mapa, acceso a la cantina, movimiento desde su explanada hacia la entrada y pausa comprobados.
+- Consola: únicamente rechazos de Pointer Lock del navegador interno; el control alternativo de arrastrar permite recorrer el escenario.
+- Comparación general y ampliación de plazas/cantina guardadas localmente, fuera de Git, y documentadas en `design-qa.md`.
+
+No se modificó el backend ni se repitieron sus pruebas. La fachada, las dimensiones y los interiores de la cantina requieren las próximas referencias del equipo. Las comprobaciones anteriores no equivalen a un recorrido exhaustivo por todos los recintos.

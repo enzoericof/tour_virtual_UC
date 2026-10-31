@@ -18,7 +18,6 @@ export function createCampus() {
   colliders.add(context.colliders, faculty.colliders);
   function setDetail(detail: boolean) {
     faculty.group.visible = true;
-    context.facultyVolumes.forEach((mesh) => { mesh.visible = false; });
     context.group.children.forEach((mesh) => {
       if (mesh.userData.contextLabel) mesh.visible = !detail;
     });

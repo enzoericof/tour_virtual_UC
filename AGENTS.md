@@ -77,9 +77,11 @@ Separar la geometría 3D de los contenidos administrables. Usar identificadores 
 
 ### Base general y detalle de CyT
 
-- El contexto general usa `frontend/src/data/campus-layout.json`. CyT usa `frontend/src/data/faculty-blueprint.ts`, registrado desde la vista aérea marcada del equipo en Drive. El escenario y el plano consumen ambas fuentes. Consultar `docs/base-geografica.md` antes de mover bloques o cambiar coordenadas.
+- El escenario se limita a **CyT, las dos canchas vecinas y los estacionamientos cercanos**. `frontend/src/data/campus-geometry.ts` selecciona ese sector de `campus-layout.json` y recorta las calles en su borde. El JSON completo queda como referencia, no como escenario a mostrar. No reincorporar otras facultades o el seminario sin una nueva indicación del equipo.
+- CyT usa `frontend/src/data/faculty-blueprint.ts`. Mantener los dos bloques centrales y tomar la aclaración del usuario y las capturas de mayor resolución del 31/10/2026 como prioridad para la cantina. Consultar `docs/base-geografica.md` antes de mover bloques o cambiar coordenadas.
 - Mantener `X` hacia el este, `Z` hacia el sur y `Y` vertical. Los puntos de visita del modelo cercano pasan por `facultyToWorld`; conservar sus identificadores para los contenidos del backend.
-- CyT tiene una única geometría en campus completo, «Mi facultad», «Plano de CyT» y modo a pie. No recuperar la disposición anterior de bloques paralelos ni duplicar los anexos con volúmenes OSM. El Bloque G es oblicuo respecto al Bloque 1; Cantina, Manfred y Bedelía se ubican según la referencia anotada.
+- CyT tiene una única geometría en «Sector CyT», «Mi facultad», «Plano de CyT» y modo a pie. No recuperar la disposición anterior de bloques paralelos ni duplicar los anexos con volúmenes OSM. El Bloque G es oblicuo respecto al Bloque 1.
+- Conservar la secuencia **bloque de aulas → plaza techada → plaza abierta → cantina girada**, junto al Departamento de Electrónica e Informática. La plaza abierta debe quedar a cielo abierto y unida al pavimento de la techada. `plaza` identifica la techada; `plaza-abierta` es el nuevo punto independiente. No confundir la ubicación de la cantina con el pequeño rótulo de la antigua imagen anotada.
 - Mantener conectada la red peatonal y despejadas las circulaciones. No generar bosques ni agregar árboles para rellenar el terreno; se conservan cuatro árboles de referencia en CyT y pocos en el contexto.
 - Afinar interiores, anexos y fachadas con referencias identificadas. Los árboles, vehículos y alturas del contexto son aproximaciones; no presentarlos como un relevamiento exacto.
 - Mantener la atribución de OpenStreetMap. Las capturas locales de Google Maps sirven para comparar la distribución; no son texturas del escenario.

@@ -5,6 +5,7 @@ import { createCampus } from "./campus";
 import { Walker } from "../navigation/walker";
 import { places, type Place } from "../data/places";
 import { campusBounds, campusCenter, facultyToWorld } from "../data/campus-geometry";
+import { facultyVisitTargets } from "../data/faculty-blueprint";
 export type CampusView = "campus" | "plan" | "faculty" | "faculty-plan";
 export class TourEngine {
   readonly scene = new T.Scene();
@@ -61,7 +62,7 @@ export class TourEngine {
     this.orbit.enableDamping = true;
     this.orbit.maxPolarAngle = Math.PI * 0.48;
     this.orbit.minDistance = 4;
-    this.orbit.maxDistance = 2000;
+    this.orbit.maxDistance = 650;
     this.orbit.target.set(campusCenter[0], 0, campusCenter[1]);
     this.camera.position.set(campusCenter[0] + 480, 640, campusCenter[1] + 760);
     this.orbit.update();
@@ -148,11 +149,11 @@ export class TourEngine {
     this.orbit.enabled = true;
     if (this.current === "campus") {
       this.campus.setDetail(mode === "faculty" || mode === "faculty-plan");
-      this.orbit.maxDistance = 2000;
+      this.orbit.maxDistance = 650;
       if (mode === "faculty-plan") {
-        const focus = new T.Vector3(...facultyToWorld([10, 0, 11]));
+        const focus = new T.Vector3(...facultyToWorld([22, 0, 9]));
         this.orbit.target.copy(focus);
-        this.camera.position.copy(focus).add(new T.Vector3(0, 165, 0.01));
+        this.camera.position.copy(focus).add(new T.Vector3(0, 190, 0.01));
       } else if (mode === "faculty") {
         const focus = new T.Vector3(...facultyToWorld([0, 1, 10]));
         this.orbit.target.copy(focus);
@@ -160,10 +161,10 @@ export class TourEngine {
       } else {
         this.orbit.target.set(campusCenter[0], 0, campusCenter[1]);
         const span = Math.max(campusBounds.maxZ - campusBounds.minZ, (campusBounds.maxX - campusBounds.minX) / this.camera.aspect);
-        const fit = span / (2 * Math.tan(T.MathUtils.degToRad(this.camera.fov / 2))) * 1.4;
+        const fit = span / (2 * Math.tan(T.MathUtils.degToRad(this.camera.fov / 2))) * 1.5;
         if (mode === "plan") {
           // Leave room above the campus for the persistent view controls.
-          const focusZ = campusCenter[1] - span * 0.12;
+          const focusZ = campusCenter[1] - span * 0.08;
           this.orbit.target.z = focusZ;
           this.camera.position.set(campusCenter[0], fit, focusZ + 0.01);
         } else this.camera.position.copy(this.orbit.target).add(new T.Vector3(fit * 0.40, fit * 0.54, fit * 0.63));
@@ -206,7 +207,8 @@ export class TourEngine {
       if (place) {
         this.walker.teleport(this.spawn);
         this.walker.enabled = true;
-        this.camera.lookAt(this.spawn.clone().add(new T.Vector3(-8, 1.5, -3)));
+        const target = facultyVisitTargets[place.id];
+        this.camera.lookAt(target ? new T.Vector3(...facultyToWorld(target)) : this.spawn.clone().add(new T.Vector3(-8, 1.5, -3)));
         this.onMode("paused");
       } else this.overview();
       return;

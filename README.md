@@ -1,10 +1,10 @@
-# Tour virtual UC · Campus Santa Librada
+# Tour virtual UC · Ciencias y Tecnología
 
 Primera versión funcional del Trabajo Práctico de **Informática III 2026**, desarrollada para un equipo de seis integrantes. Representa la Facultad de Ciencias y Tecnología de la Universidad Católica con Three.js y una base de usuarios, contenidos y chat en Spring Boot.
 
 ## Qué incluye esta versión
 
-- Campus general reconstruido a partir de fotografías y una vista aérea marcada: bloques, galerías, patios, cantina, Bedelía, Sala Manfred, plaza cubierta y estacionamiento.
+- Sector de Ciencias y Tecnología: bloques, galerías, patios, cantina, Bedelía, Sala Manfred, plazas techada y abierta, dos canchas vecinas y estacionamientos cercanos. Se excluyen las demás facultades y el seminario.
 - Tres espacios de **escaneo real**: laboratorio de planta baja, aula del tercer piso y pasillo del tercer piso. Se cargan individualmente para limitar memoria y descarga.
 - Primera persona, teclado y mouse, colisiones, gravedad y escaleras en el bloque principal. Si el navegador no permite capturar el cursor, se puede mirar arrastrando.
 - Vista general con cámara orbital, búsqueda de espacios, filtros, mapa y fotografías ampliables.
@@ -71,7 +71,7 @@ La configuración de Compose está limitada a la máquina local. Para un desplie
 
 ## Controles
 
-La vista general incluye el conjunto del campus como contexto cartográfico. CyT se reconstruye desde la vista aérea marcada del equipo: Bloque G inclinado, patio triangular, anexos al noreste, estacionamiento al sur y caminos conectados. Los controles **Campus completo**, **Vista de planta**, **Plano de CyT** y **Mi facultad** permiten revisar esa distribución. El plano y el recorrido comparten la misma geometría; se eliminó la arboleda generada. Ver [fuentes, coordenadas y límites de fidelidad](docs/base-geografica.md).
+La vista general se limita a **CyT, canchas y estacionamientos cercanos**. Se mantienen el Bloque G inclinado y el patio triangular. Después del bloque de aulas aparecen la **plaza techada**, una **plaza abierta** y la **cantina girada hacia esa plaza**, junto a Electrónica e Informática, según la aclaración del equipo y las nuevas capturas. Los controles **Sector CyT**, **Vista de planta**, **Plano de CyT** y **Mi facultad** permiten revisar el modelo. El mapa y el recorrido comparten la distribución. Ver [fuentes, coordenadas y límites de fidelidad](docs/base-geografica.md).
 
 | Acción | Control |
 | --- | --- |

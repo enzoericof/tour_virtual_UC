@@ -1,43 +1,44 @@
-# Revisión visual de la distribución de CyT
+# Revisión visual — sector CyT y cantina
 
-Fecha: 31/10/2026.
+Fecha: 31/10/2026. Alcance de esta revisión: recortar el escenario a CyT, las dos canchas vecinas y los estacionamientos cercanos; conservar los bloques centrales; corregir plaza techada, plaza abierta y orientación de cantina. No se evalúa como réplica fotográfica terminada.
 
-## Corrección del diagnóstico anterior
+## Hallazgos y comparación
 
-La revisión inicial de la base general fue insuficiente: comprobó el contexto OSM, pero dejó los bloques y anexos del recorrido cercano en posiciones incorrectas. El usuario rechazó esa distribución y la sobrecarga de árboles. El resultado anterior «passed» queda sustituido por esta revisión; no demuestra fidelidad de la facultad.
+- [P1 corregido] El modelo mostraba todo Santa Librada. Se seleccionaron solamente las huellas de referencia de CyT, dos canchas y dos estacionamientos; se recortaron las calles y se actualizaron límites, cámara, mapa y nombres de las vistas.
+- [P1 corregido] La cantina estaba adosada a la plaza cubierta y mal orientada. La nueva captura del usuario y su explicación sustituyen la identificación de la imagen pequeña anterior. Ahora hay cubierta continua tras el bloque de aulas, una plaza descubierta y la cantina girada al otro lado, junto al ala de Electrónica e Informática.
+- [P2 corregido] La primera vista de planta del sector dejaba el rótulo de canchas bajo el pie de la interfaz. Se ajustaron encuadre y posición del rótulo; la captura final muestra las dos canchas y sus etiquetas dentro del área visible.
+- [P2 corregido] La primera revisión de la plaza abierta mostraba una franja de césped entre su pavimento y el de la techada. Se hizo coincidir el borde compartido y se repitió la vista.
+- [P3 / siguiente etapa] Medidas, forma exacta de la cubierta de cantina, detalles de fachadas, mobiliario e interiores requieren las próximas fotos y mediciones. No se declaran resueltos por esta corrección de distribución.
 
-## Referencia y evidencia
+La revisión previa dejó una cantina incorrecta y no basta como evidencia de su fidelidad. La comprobación actual tiene el alcance acotado indicado arriba.
 
-Referencia principal: [vista aérea anotada del equipo](https://drive.google.com/file/d/1nqROQLGTXraAKXHkl4VRuzc5UGMFQnyW/view), junto con las fotos sectoriales del Drive documentadas en `docs/base-geografica.md`.
+## Evidencia
 
-Evidencia local excluida de Git:
+- Verdad visual: tercera captura adjunta del usuario, copiada sin cambios a `.local/references/cyt-cantina-source.png`, **1333 × 827 píxeles**. La explicación del usuario identifica la cantina junto a Electrónica e Informática.
+- Implementación: `.local/references/cyt-cantina-plan.jpg`, **920 × 764 píxeles**, viewport **920 × 764 CSS px**, captura a escala de un píxel por píxel CSS.
+- Recorte completo: `.local/references/cyt-sector-plan.jpg`, mismo viewport.
+- Fachada desde la plaza: `.local/references/cyt-cantina-front.jpg`.
+- Comparación general conjunta: `.local/references/cyt-cantina-comparison.jpg`.
+- Comparación ampliada de los extremos de aulas, plazas y cantina: `.local/references/cyt-cantina-focused-comparison.jpg`.
 
-- `.local/references/drive-aerial-0.jpg`: referencia anotada, 560 × 508.
-- `.local/references/faculty-rebuilt-plan.jpg`: vista de planta de la aplicación, 920 × 764.
-- `.local/references/faculty-rebuilt-overview.jpg`: galerías y patio desde la cámara orbital.
-- `.local/references/faculty-rebuilt-gallery.jpg`: galería a pie.
-- `.local/references/faculty-distribution-comparison.jpg`: referencia y plano juntos para comparar relaciones espaciales.
+Las capturas quedan fuera de Git. En la comparación general se reduce la fuente proporcionalmente a 920 px de ancho; la implementación mantiene su tamaño. La ampliación compara regiones con proporciones conservadas. No se superponen píxeles ni se exige igualdad de escala: la fuente tiene perspectiva satelital y la aplicación usa una cámara elevada con norte arriba. Se comparan orden, adyacencias y dirección de los edificios.
 
-La referencia es una imagen con perspectiva; el plano de la aplicación tiene norte arriba. La comparación evalúa orientación relativa, adyacencias y continuidad, no equivalencia fotográfica ni distancias de un relevamiento.
+La comparación focal muestra la plaza techada a la izquierda, el pavimento descubierto en el centro y la cantina con eje largo transversal a la derecha. El ala vecina se usa como orientación. Los dos bloques centrales conservan sus posiciones.
 
-## Hallazgos corregidos
+## Superficies de fidelidad
 
-- Los bloques ya no son paralelos. G tiene techo azul y tres niveles; Bloque 1, techo claro y cuatro niveles. El patio entre ambos forma una cuña triangular.
-- Manfred, Bedelía, plaza y Cantina se trasladaron al extremo oriental/noreste indicado en la referencia.
-- El estacionamiento de CyT se representa como área verde al sur de G.
-- Galerías, patio, plaza, anexos y estacionamiento comparten una red peatonal continua.
-- La misma geometría aparece en el plano, la vista lejana y el recorrido cercano. Se eliminó el modelo antiguo y los volúmenes OSM duplicados de esa zona.
-- Se retiró la generación masiva de árboles. Cuatro ejemplares pequeños conservan referencias de los patios.
-- Se incorporaron columnas, barandas, pisos rojos con bandas, puertas con sobreluz, cerchas, escaleras exteriores, fachada acristalada de Cantina y panelería de Manfred.
-- Los controles de vista ya pueden seleccionarse con la lista de espacios abierta. Se corrigió el punto de entrada junto a la unión de los bloques y la llegada a la galería del primer piso.
-- Se redujo el velo de la interfaz y se ajustó la precisión de profundidad de la cámara lejana para evitar manchas entre suelo y pavimento.
+- **Tipografía:** se mantienen DM Sans, Manrope y las jerarquías existentes; el nuevo título de CyT y las cuatro vistas se leen sin desbordar.
+- **Distribución y espaciado:** el sector completo entra entre cabecera y pie; mapa, geometría, colisiones y destinos usan las mismas transformaciones. La plaza abierta comparte pavimento con la techada y queda fuera de ambas cubiertas.
+- **Colores:** se conserva la paleta del proyecto; techos claros en aulas/ala vecina y azul en G/cantina. La plaza utiliza pavimento, sin césped en su unión principal.
+- **Imágenes:** fotografías y escaneos existentes conservados. La captura aérea sirve como referencia y no se convierte en textura ni se sustituye por una imagen generada.
+- **Contenido:** «Sector CyT» reemplaza «Campus completo»; el mapa explica el alcance. Se añade «Plaza abierta» como punto visitable, conservando «Plaza techada» y todos los identificadores anteriores.
 
-La tipografía y navegación existentes se conservan. Las imágenes aéreas son referencias; el mural es un recorte de la fotografía del pilar, y los demás materiales continúan siendo procedurales.
+## Interacción y resultado
 
-## Comprobaciones y límites
+Verificadas las cuatro vistas, el mapa recortado, la selección de plaza abierta desde su leyenda, llegada a la explanada de cantina, movimiento hacia su entrada y pausa. El nuevo espacio carga sin paneles, de forma explícita, mientras no haya contenido publicado.
 
-Se revisaron las cuatro vistas, la entrada desde «Comenzar recorrido», el movimiento y pausa en el acceso, la llegada al primer piso y el movimiento sobre su galería. Las pruebas de datos comprueban el ángulo entre bloques, registro de alturas, pertenencia de anexos y conectividad de todos los caminos.
+Consola: solamente rechazos de Pointer Lock propios del navegador interno. La alternativa de arrastrar funciona. No se prueban móviles físicos, todas las escaleras ni la totalidad de interiores.
 
-El navegador interno restringe Pointer Lock; funciona la alternativa de arrastrar. No se declara una caminata completa por todas las escaleras ni la validación de medidas reales. No se probaron dispositivos móviles físicos.
+Las doce pruebas frontend y el build pasaron. No hay hallazgos P0/P1/P2 pendientes dentro de este recorte y corrección espacial. Las medidas y detalles indicados como siguiente etapa permanecen pendientes de validación del equipo.
 
-Resultado: corregida la distribución relativa según la imagen anotada. **Fidelidad dimensional y validación completa por sectores pendientes.** Esta revisión no sustituye la aprobación del equipo ni da por terminada la réplica.
+final result: passed

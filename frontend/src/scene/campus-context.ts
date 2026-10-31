@@ -1,16 +1,13 @@
 import * as T from "three";
-import { layout, campusBounds, insidePolygon, distanceToSegment, FACULTY_MAIN, FACULTY_LABS, type Point } from "../data/campus-geometry";
+import { layout, campusBounds, insidePolygon, distanceToSegment, type Point } from "../data/campus-geometry";
 import { inFacultyZone } from "../data/faculty-blueprint";
 
 export function createCampusContext() {
   const group = new T.Group(), colliders = new T.Group();
-  group.name = "Campus completo · base cartográfica";
-  const facultyVolumes: T.Object3D[] = [];
+  group.name = "CyT · canchas y estacionamientos";
   const material = (color: string) => new T.MeshStandardMaterial({ color, roughness: 0.95 });
   const ground = material("#768961"), outside = material("#d7dacb");
   const road = material("#b4b1a5"), parking = material("#b6b2a2");
-  const wall = material("#b38c72"), roof = material("#b96543"), roofLight = material("#c68053");
-  const whiteRoof = material("#b8bdb6"), blueRoof = material("#526174");
   const pitchMat = material("#6a8e4a");
   const baseGeo = new T.BoxGeometry(1, 1, 1);
   function polygon(points: Point[], mat: T.Material, y: number, depth = 0) {
@@ -35,7 +32,7 @@ export function createCampusContext() {
     geo.setIndex(indices); geo.computeVertexNormals();
     const mesh = new T.Mesh(geo, mat); mesh.receiveShadow = true; group.add(mesh);
   }
-  const w = campusBounds.maxX - campusBounds.minX + 100, d = campusBounds.maxZ - campusBounds.minZ + 100;
+  const w = campusBounds.maxX - campusBounds.minX + 10, d = campusBounds.maxZ - campusBounds.minZ + 10;
   const base = new T.Mesh(baseGeo, outside);
   base.scale.set(w, 0.4, d);
   base.position.set((campusBounds.minX + campusBounds.maxX) / 2, -0.25, (campusBounds.minZ + campusBounds.maxZ) / 2);
@@ -67,34 +64,6 @@ export function createCampusContext() {
     }
   });
 
-  for (const [i, building] of layout.buildings.entries()) {
-    if (inFacultyZone(building.points)) continue;
-    const detailed = [FACULTY_MAIN, FACULTY_LABS].includes(building.id);
-    const height = building.id === FACULTY_MAIN ? 14 : building.id === FACULTY_LABS ? 10.5 : building.levels * 3.4 + 0.5;
-    const body = polygon(building.points, wall, 0.03, height);
-    const roofMat = building.id === FACULTY_MAIN ? whiteRoof : building.id === FACULTY_LABS ? blueRoof : i % 4 === 0 ? roofLight : roof;
-    const points = building.points.slice(0, -1);
-    const top = new T.Group(); group.add(top);
-    if (points.length === 4) {
-      let [a, b, c, e] = points;
-      if (Math.hypot(b[0] - a[0], b[1] - a[1]) < Math.hypot(c[0] - b[0], c[1] - b[1])) [a, b, c, e] = [b, c, e, a];
-      const ridgeHeight = Math.min(2.6, Math.hypot(e[0] - a[0], e[1] - a[1]) * 0.19);
-      const av = new T.Vector3(a[0], height, a[1]), bv = new T.Vector3(b[0], height, b[1]);
-      const cv = new T.Vector3(c[0], height, c[1]), ev = new T.Vector3(e[0], height, e[1]);
-      const r0 = av.clone().lerp(ev, 0.5).add(new T.Vector3(0, ridgeHeight, 0));
-      const r1 = bv.clone().lerp(cv, 0.5).add(new T.Vector3(0, ridgeHeight, 0));
-      const vertices = [av, r0, bv, bv, r0, r1, ev, cv, r0, cv, r1, r0, av, ev, r0, bv, r1, cv];
-      const geo = new T.BufferGeometry().setFromPoints(vertices); geo.computeVertexNormals();
-      const mesh = new T.Mesh(geo, roofMat); mesh.castShadow = mesh.receiveShadow = true; top.add(mesh);
-    } else {
-      const cap = polygon(building.points, roofMat, height + 0.06); top.attach(cap);
-    }
-    if (detailed) facultyVolumes.push(body, top);
-    else {
-      const collider = new T.Mesh(body.geometry); collider.position.copy(body.position); colliders.add(collider);
-    }
-  }
-
   let seed = 73161;
   const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
   function free(x: number, z: number) {
@@ -107,9 +76,7 @@ export function createCampusContext() {
   }
   // Sparse reference trees only: keep the campus layout and paths unobstructed.
   const treeCandidates: [number, number][] = [
-    [-140, -70], [-110, 85], [-80, 160], [-50, 235], [-15, 305],
-    [80, 365], [140, 310], [160, 215], [210, 88], [300, -15],
-    [320, -180], [115, -225],
+    [-125, -70], [-110, 85], [105, -35], [100, 60],
   ];
   const trees = treeCandidates.filter(([x, z]) => free(x, z));
   const trunks = new T.InstancedMesh(new T.CylinderGeometry(0.25, 0.4, 1, 5), material("#655744"), trees.length);
@@ -145,12 +112,9 @@ export function createCampusContext() {
 
   const labels = [
     ["CIENCIAS Y TECNOLOGÍA", -58, -160, true],
-    ["OTRAS FACULTADES", 185, -225, false],
-    ["BIBLIOTECA PABLO VI", 280, -85, false],
-    ["ESTACIONAMIENTO", 235, 45, false],
-    ["CANCHAS", -77, 90, false],
-    ["SEMINARIO · CONTEXTO", 67, 365, false],
-    ["N", -155, -225, false],
+    ["ESTACIONAMIENTO", 0, -35, false],
+    ["CANCHAS", -83, 5, false],
+    ["N", -125, -190, false],
   ] as const;
   for (const [name, x, z, faculty] of labels) {
     const isNorth = name === "N";
@@ -167,5 +131,5 @@ export function createCampusContext() {
     sprite.position.set(x, 25, z); sprite.scale.set(width, width * canvas.height / canvas.width, 1); sprite.renderOrder = 4;
     sprite.userData.contextLabel = true; group.add(sprite);
   }
-  return { group, colliders, facultyVolumes };
+  return { group, colliders };
 }
