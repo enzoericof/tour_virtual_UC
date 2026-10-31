@@ -1,0 +1,50 @@
+{
+  "ladrillo": {
+    "label": "Pared de ladrillo visto de las aulas",
+    "tile": [
+      1.08,
+      1.184
+    ],
+    "mean": "#98724a"
+  },
+  "granito-franja": {
+    "label": "Piso de granito de la galería, con su franja oscura",
+    "tile": [
+      1.286,
+      1.286
+    ],
+    "mean": "#796059"
+  },
+  "granito": {
+    "label": "Piso de granito de la galería, sin franja",
+    "tile": [
+      0.9,
+      0.9
+    ],
+    "mean": "#846762"
+  },
+  "hormigon": {
+    "label": "Hormigón a la vista (dintel sobre el ladrillo)",
+    "tile": [
+      2.0,
+      0.983
+    ],
+    "mean": "#a8ab99"
+  },
+  "lamas": {
+    "label": "Lamas de la media sombra sobre la baranda",
+    "tile": [
+      2.0,
+      0.96
+    ],
+    "mean": "#7c898f"
+  },
+  "chapa-cubierta": {
+    "label": "Cara inferior de la cubierta de chapa del tercer piso",
+    "tile": [
+      0.6,
+      0.42
+    ],
+    "mean": "#857c78"
+  }
+}

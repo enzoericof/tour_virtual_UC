@@ -280,6 +280,54 @@
       "asset": "photos/IMG_5727.webp",
       "bytes": 304402,
       "sha256": "cbf439cf86f4cbb6f21624e64fc01639bd6b5df17814e104d03f9df59717acc9"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\Pasillo - Piso 3.glb",
+      "sourceSha256": "84647bb3a8089527cabef1a66f6f6a458bfbb8fd1e0947dcfa3e7647c8b798e8",
+      "asset": "textures/ladrillo.webp",
+      "derivation": "Ortofoto del escaneo con iluminación compensada y bordes repetibles (scripts/extract-scan-textures.py)",
+      "bytes": 18576,
+      "sha256": "f23a8937a966f1d3ea98e923ac5ba1269e71b2e60964d33292fe5135be91c78f"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\Pasillo - Piso 3.glb",
+      "sourceSha256": "84647bb3a8089527cabef1a66f6f6a458bfbb8fd1e0947dcfa3e7647c8b798e8",
+      "asset": "textures/granito-franja.webp",
+      "derivation": "Ortofoto del escaneo con iluminación compensada y bordes repetibles (scripts/extract-scan-textures.py)",
+      "bytes": 10208,
+      "sha256": "b233c0cfd01e8845623672046625fe07ded26e176872ef02db9c81673e09b98b"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\Pasillo - Piso 3.glb",
+      "sourceSha256": "84647bb3a8089527cabef1a66f6f6a458bfbb8fd1e0947dcfa3e7647c8b798e8",
+      "asset": "textures/granito.webp",
+      "derivation": "Ortofoto del escaneo con iluminación compensada y bordes repetibles (scripts/extract-scan-textures.py)",
+      "bytes": 6670,
+      "sha256": "4d23e4d2b4f78feff1fa6d1006116e844117ab258ef66433fa0c4fc899d48a6d"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\Pasillo - Piso 3.glb",
+      "sourceSha256": "84647bb3a8089527cabef1a66f6f6a458bfbb8fd1e0947dcfa3e7647c8b798e8",
+      "asset": "textures/hormigon.webp",
+      "derivation": "Ortofoto del escaneo con iluminación compensada y bordes repetibles (scripts/extract-scan-textures.py)",
+      "bytes": 1758,
+      "sha256": "1d93318de93626874d579cbfb215ab46bbc862d5c3c1f2d2c4f1110aa32514c2"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\Pasillo - Piso 3.glb",
+      "sourceSha256": "84647bb3a8089527cabef1a66f6f6a458bfbb8fd1e0947dcfa3e7647c8b798e8",
+      "asset": "textures/lamas.webp",
+      "derivation": "Ortofoto del escaneo con iluminación compensada y bordes repetibles (scripts/extract-scan-textures.py)",
+      "bytes": 7190,
+      "sha256": "c7303386ee5ecb0f87f1d4fe900f6abf74fb0bb9bdf417e3eacdff2d6a95e383"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\Pasillo - Piso 3.glb",
+      "sourceSha256": "84647bb3a8089527cabef1a66f6f6a458bfbb8fd1e0947dcfa3e7647c8b798e8",
+      "asset": "textures/chapa-cubierta.webp",
+      "derivation": "Ortofoto del escaneo con iluminación compensada y bordes repetibles (scripts/extract-scan-textures.py)",
+      "bytes": 3520,
+      "sha256": "26b72b2c617c5125226cc0a1bb35ce05bbc268a1730c026daf2c30209a962076"
     }
   ]
 }
