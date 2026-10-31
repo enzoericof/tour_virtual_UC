@@ -22,7 +22,7 @@ El **Bloque G corresponde al “Bloque 2” de las carpetas y de la vista aérea
 Requisitos: **Node.js 24 LTS** y npm. Los modelos y las fotografías utilizados están incluidos en esta rama; no hace falta conectar Drive para ejecutar la aplicación.
 
 ```sh
-git clone --branch desarrollo-horacio https://github.com/enzoericof/tour_virtual_UC.git
+git clone https://github.com/enzoericof/tour_virtual_UC.git
 cd tour_virtual_UC/frontend
 npm ci
 npm run dev
@@ -70,6 +70,8 @@ Abrir `http://localhost:8080`. El frontend compilado y la API se sirven desde el
 La configuración de Compose está limitada a la máquina local. Para un despliegue real, configurar HTTPS, `COOKIE_SECURE=true`, `APP_ORIGIN` con el origen exacto, respaldo de datos y protección frente a abuso. **El arranque completo en Docker/PostgreSQL no se pudo verificar en el equipo de preparación porque el motor Docker no respondió.** Sí se compiló el backend con Java 25 y se verificó el perfil local.
 
 ## Controles
+
+La vista general incluye el conjunto del campus como contexto cartográfico. CyT se reconstruye desde la vista aérea marcada del equipo: Bloque G inclinado, patio triangular, anexos al noreste, estacionamiento al sur y caminos conectados. Los controles **Campus completo**, **Vista de planta**, **Plano de CyT** y **Mi facultad** permiten revisar esa distribución. El plano y el recorrido comparten la misma geometría; se eliminó la arboleda generada. Ver [fuentes, coordenadas y límites de fidelidad](docs/base-geografica.md).
 
 | Acción | Control |
 | --- | --- |
@@ -146,4 +148,4 @@ El Drive compartido se consultó **solo para lectura**. Se seleccionaron 37 foto
 
 Ver [preparación y procedencia](docs/referencias.md), [arquitectura y API](docs/arquitectura.md) y [siguientes tareas](docs/pendientes.md). La nómina, roles individuales y fechas de entrega siguen pendientes de registrar; no se asignaron responsabilidades en nombre del grupo.
 
-Trabajar mediante ramas y pull requests. Esta primera versión se prepara en `desarrollo-horacio`; no se modifica `main`.
+Trabajar mediante ramas y pull requests. La versión inicial se integró en `main`; las mejoras posteriores se preparan en ramas para su revisión.

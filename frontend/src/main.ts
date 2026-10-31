@@ -1,5 +1,5 @@
 import "./style.css";
-import { TourEngine } from "./scene/engine";
+import { TourEngine, type CampusView } from "./scene/engine";
 import { places, photoUrl, statusLabel, type Place } from "./data/places";
 import { icon } from "./ui/icons";
 import {
@@ -12,6 +12,8 @@ import {
   type Panel,
 } from "./services/api";
 import { CampusChat } from "./services/chat";
+import { mapPercent, campusBounds } from "./data/campus-geometry";
+import { drawCampusMap } from "./ui/campus-map";
 const $ = <T extends HTMLElement = HTMLElement>(s: string) =>
   document.querySelector<T>(s)!;
 const escape = (s: string) =>
@@ -28,6 +30,7 @@ $("#app").innerHTML = `
  <section class="intro" id="intro"><div class="eyebrow"><span class="dot"></span> TU FACULTAD, DESDE OTRA PERSPECTIVA</div><h1>Un campus.<br>Muchas <em>historias.</em></h1><p>Recorré sus pasillos, descubrí sus espacios<br>y encontrate con la comunidad.</p><button class="primary" id="begin">Comenzar recorrido ${icon("arrow")}</button><div class="intro-note">${icon("walk")} Primera persona <span>·</span> Exploración libre</div></section>
  <aside class="explorer" id="explorer"><div class="section-top"><div><span class="eyebrow">DESCUBRÍ EL CAMPUS</span><h2>Elegí tu próximo lugar</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="scan">Escaneos 3D <span>3</span></button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div><div class="explorer-foot">${icon("layers")} Primera versión · referencias reales</div></aside>
  <div class="location-chip" id="location-chip">${icon("pin")}<div><strong id="location-name">Campus Santa Librada</strong><span id="location-floor">Vista general · distribución aproximada</span></div></div>
+ <div class="view-switcher" role="group" aria-label="Vistas del campus"><button data-view="campus" aria-pressed="true">Campus completo</button><button data-view="plan" aria-pressed="false">Vista de planta</button><button data-view="faculty-plan" aria-pressed="false">Plano de CyT</button><button data-view="faculty" aria-pressed="false">Mi facultad</button></div>
  <div class="tools"><button id="overview" class="icon-btn" title="Vista general" aria-label="Vista general">${icon("cube")}</button><button id="map-btn" class="icon-btn" title="Mapa del campus" aria-label="Mapa del campus">${icon("map")}</button><button id="quality" class="icon-btn" title="Cambiar calidad gráfica" aria-label="Cambiar calidad gráfica">${icon("sun")}</button><button id="fullscreen" class="icon-btn" title="Pantalla completa" aria-label="Pantalla completa">${icon("expand")}</button><button id="help" class="icon-btn" title="Ayuda" aria-label="Ayuda">${icon("help")}</button></div>
  <div class="bottom-bar"><span class="edition">UC <i>/</i> TOUR VIRTUAL <span>2026</span></span><div class="control-hint" id="control-hint">Arrastrá para girar <span>·</span> Rueda para acercarte</div><span class="performance"><i></i><span id="fps">—</span> FPS</span></div>
  <div class="walk-prompt hidden" id="walk-prompt"><span id="walk-prompt-text">Listo para explorar</span><button class="primary" id="resume">${icon("walk")} Entrar al recorrido</button><small>W A S D para moverte · Mouse para mirar · Esc para salir</small><button class="text-btn" id="inspect">Ver modelo completo</button></div>
@@ -172,6 +175,7 @@ async function visit(p?: Place) {
     ? `${p.floor} · ${statusLabel[p.status]}`
     : "Vista general · distribución aproximada";
   await engine.go(p);
+  if (!p) document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === "campus")));
   renderPlaces();
 }
 function onMode(mode: string) {
@@ -221,11 +225,30 @@ $("#resume").onclick = () => {
   closeDialog();
   engine.startWalking();
 };
-$("#inspect").onclick = () => engine.overview();
-$("#overview").onclick = () => {
-  engine.overview();
-  $("#intro").classList.add("hidden");
+$("#inspect").onclick = () => {
+  if (engine.location === "campus") void setCampusView("faculty");
+  else {
+    engine.overview();
+    document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => b.setAttribute("aria-pressed", "false"));
+  }
 };
+$("#overview").onclick = () => {
+  void setCampusView("campus");
+};
+async function setCampusView(mode: CampusView) {
+  if (engine.location !== "campus") await engine.go();
+  engine.overview(mode);
+  selected = null;
+  renderPlaces();
+  $("#intro").classList.add("hidden");
+  $("#explorer").classList.add("collapsed");
+  $("#location-name").textContent = mode.startsWith("faculty") ? "Ciencias y Tecnología" : "Campus Santa Librada";
+  $("#location-floor").textContent = mode === "faculty" ? "Bloques y conexiones · referencia del equipo" : mode === "faculty-plan" ? "Plano de CyT · norte hacia arriba" : mode === "plan" ? "Vista de planta · norte hacia arriba" : "Campus completo · base cartográfica";
+  document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === mode)));
+}
+document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => {
+  b.onclick = () => { void setCampusView(b.dataset.view as CampusView); };
+});
 $("#home").onclick = () => {
   void visit();
   $("#intro").classList.remove("hidden");
@@ -271,7 +294,7 @@ $("#help").onclick = () =>
   );
 $("#map-btn").onclick = () => {
   openDialog(
-    `<span class="eyebrow">ORIENTATE EN EL CAMPUS</span><h2>Un lugar para cada encuentro</h2><p class="subtle">Esquema de ubicación aproximada. Seleccioná un punto para conocerlo.</p><div class="campus-map"><div class="map-block b1">BLOQUE 1 · PB + 3 PISOS</div><div class="map-block b2">BLOQUE G</div><div class="map-garden">PATIO ARBOLADO</div><div class="map-parking">ESTACIONAMIENTO</div>${places
+    `<span class="eyebrow">ORIENTATE EN EL CAMPUS</span><h2>El campus y tu facultad</h2><p class="subtle">Distribución general de Santa Librada. Los puntos numerados corresponden al recorrido de Ciencias y Tecnología.</p><div class="campus-map geographic-map" style="--map-ratio:${(campusBounds.maxX - campusBounds.minX) / (campusBounds.maxZ - campusBounds.minZ)}"><canvas id="geographic-map" aria-label="Plano del campus con Ciencias y Tecnología destacada"></canvas>${places
       .filter(
         (p) =>
           !["piso-1", "piso-2", "aula-p3", "banos", "pasillo-p3"].includes(
@@ -280,7 +303,7 @@ $("#map-btn").onclick = () => {
       )
       .map(
         (p, i) =>
-          `<button class="map-pin" data-map="${p.id}" style="left:${((p.position[0] + 37) / 90) * 100}%;top:${((p.position[2] + 23) / 85) * 100}%" title="${escape(p.name)}">${i + 1}</button>`,
+          `<button class="map-pin" data-map="${p.id}" style="left:${mapPercent(p.position).left}%;top:${mapPercent(p.position).top}%" title="${escape(p.name)}">${i + 1}</button>`,
       )
       .join("")}</div><div class="map-legend">${places
       .filter(
@@ -293,8 +316,9 @@ $("#map-btn").onclick = () => {
         (p, i) =>
           `<button data-map="${p.id}"><span>${i + 1}</span>${escape(p.name)}</button>`,
       )
-      .join("")}</div>`,
+      .join("")}</div><p class="map-credit">Base: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · Ubicaciones internas por validar.</p>`,
   );
+  drawCampusMap($<HTMLCanvasElement>("#geographic-map"));
   document
     .querySelectorAll<HTMLButtonElement>("[data-map]")
     .forEach(
