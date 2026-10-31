@@ -1,0 +1,285 @@
+{
+  "provenance": "Referencias aportadas por el equipo mediante Drive, leídas el 30/10/2026. Originales sin modificar. Uso en este trabajo práctico; no se declara una licencia de reutilización general.",
+  "assets": [
+    {
+      "source": "Bedelía\\IMG_5686.HEIC",
+      "sourceSha256": "447b54b966f856c530a9ff67ca27b9328efad0de50c4b76f1d01de04c7e89870",
+      "asset": "photos/IMG_5686.webp",
+      "bytes": 171752,
+      "sha256": "d90cd1053e2ac29df946c686e51fcea0bad104f238796553056d605fb922bb00"
+    },
+    {
+      "source": "Bedelía\\IMG_5691.HEIC",
+      "sourceSha256": "7c87b33d35b40b44faca36809759aaeb3fe758d5e983aa698befe243e09abd0e",
+      "asset": "photos/IMG_5691.webp",
+      "bytes": 151026,
+      "sha256": "3a0abb92d63606994863afb95a483e12619dcb2d0f7e14860a050d0a177783e8"
+    },
+    {
+      "source": "Bedelía\\IMG_5692.HEIC",
+      "sourceSha256": "ce6ace17940b764e5a316f47ca89e3701e07912f245bb32b4fc7b80098ba7151",
+      "asset": "photos/IMG_5692.webp",
+      "bytes": 130526,
+      "sha256": "a13d8874c09823c9c3d18c26b912823fdacf99fbb6a943d98a1bf9c5ec53d720"
+    },
+    {
+      "source": "Bloque 2\\IMG_5667.HEIC",
+      "sourceSha256": "d0f079c1ca0555bd6368eaf6cb2a414882e614e9ac1b3568e44a6f0503082693",
+      "asset": "photos/IMG_5667.webp",
+      "bytes": 344412,
+      "sha256": "4b3d92742a531d6ee07b8ba660e217e685d171c86aee070a54faf25bd1068a4d"
+    },
+    {
+      "source": "Bloque 2\\IMG_5668.HEIC",
+      "sourceSha256": "3117e5e1cb460533dbfda16b57a6ce17c39dc36a69bbd4281bb2ab4920c291d6",
+      "asset": "photos/IMG_5668.webp",
+      "bytes": 389452,
+      "sha256": "002a79abfbbde213f90c5463fe01f4a98a443fd68a0feef338187a434a73a921"
+    },
+    {
+      "source": "Cantina\\IMG_5719.HEIC",
+      "sourceSha256": "4810f67580b9fea9e8a3d67fc32d83793f2bcbc2cbb77e6b745cef51f2b59663",
+      "asset": "photos/IMG_5719.webp",
+      "bytes": 349838,
+      "sha256": "8d098466e4d0750ab13b537968502d3da899c6a5c745907d2d7581fd066ec42e"
+    },
+    {
+      "source": "Cantina\\IMG_5720.HEIC",
+      "sourceSha256": "ccf11faadb4119adbe877a9d9aad937dd3dc63d57b2c6fdccbb91e8a83a8c891",
+      "asset": "photos/IMG_5720.webp",
+      "bytes": 317920,
+      "sha256": "dd4f93ad6431ddf73b70bd0245c300787e44e8487073e9524f534ba990852119"
+    },
+    {
+      "source": "Cantina\\IMG_5721.HEIC",
+      "sourceSha256": "6e20380455d4135c8c87ce4a0847190d2aec43c3e2b50533f042ac97de0ee22a",
+      "asset": "photos/IMG_5721.webp",
+      "bytes": 264022,
+      "sha256": "503e7d6f996fa6c879624d0ae0077cd159478e3681fb9bb5995d360fadd8ae88"
+    },
+    {
+      "source": "Estacionamiento\\IMG_5730.HEIC",
+      "sourceSha256": "f4b4b84a1d338f521a88324bfbd2265f1a16145b510014b990e8a78ced0b2cdb",
+      "asset": "photos/IMG_5730.webp",
+      "bytes": 349324,
+      "sha256": "3ffb649ada5548c9bc5dd0345f4ab57c43d78ac7009dca2e7443b064d78f52e4"
+    },
+    {
+      "source": "Estacionamiento\\IMG_5738.HEIC",
+      "sourceSha256": "4ee27a0b08b3eec04fd319270f8083eabc3a4979811fa7d930f8dd3f06b8d242",
+      "asset": "photos/IMG_5738.webp",
+      "bytes": 429286,
+      "sha256": "d4dfa5b167216252c9230b8ea3736edd47fad61b28e2580d3901330c7cab7ff8"
+    },
+    {
+      "source": "Estacionamiento\\IMG_5739.HEIC",
+      "sourceSha256": "97b8b25271634981b56a4e4ccb3e95643d7f0624ebd98de6da792630ba9940c6",
+      "asset": "photos/IMG_5739.webp",
+      "bytes": 438492,
+      "sha256": "27b7c5a8213769bfb8f8567003599eee0ff5dba5b3fcb276d6a5395837434bbf"
+    },
+    {
+      "source": "Piso 1 - Bloque 1\\IMG_5656.HEIC",
+      "sourceSha256": "63870413dd95e1d923760a4151d428391fa9082c7a11f065fe234ff6fd95019a",
+      "asset": "photos/IMG_5656.webp",
+      "bytes": 98090,
+      "sha256": "357ba5c04e6fcff4f0459444ff766ecdbc899726aef06b5cd247bc107a34e9b9"
+    },
+    {
+      "source": "Piso 1 - Bloque 1\\IMG_5657.HEIC",
+      "sourceSha256": "5c3fcbf63add70bf6611ece902942c33b65f3f7c66c6b931c501556210494a82",
+      "asset": "photos/IMG_5657.webp",
+      "bytes": 93162,
+      "sha256": "02a2c9ed222ddd7f1a9f7d89cc1e1aec63ab09dff692a3119836ad77fd678703"
+    },
+    {
+      "source": "Piso 1 - Bloque 1\\IMG_5705.HEIC",
+      "sourceSha256": "02cdf20df5b38a6263fdc992a22bb44a0c735b5b0ece8647afa5d11237343014",
+      "asset": "photos/IMG_5705.webp",
+      "bytes": 219810,
+      "sha256": "8106ff9bf8887093f2cf92abe2a1f25d366e36855a647ea1a8204888b06c7435"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\Clase - Piso 3.glb",
+      "sourceSha256": "42e78ceff62306b0a126144d7fede5be852388245bf8f6e9e48b09cca267ef57",
+      "asset": "scans/aula-p3.glb",
+      "bytes": 9111756,
+      "sha256": "00fea3262056da9a514175da9a1574faf8cf6b60915684bb5a027ac49e94d8cb"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\IMG_5621.HEIC",
+      "sourceSha256": "800032db47323e484b7b24d413169aa64b24d460763265fcd534f47a81dbfa03",
+      "asset": "photos/IMG_5621.webp",
+      "bytes": 157856,
+      "sha256": "3a921fc0fafaf78665199f6db912203069075bafde8966cd157d56c91697ecbd"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\IMG_5625.HEIC",
+      "sourceSha256": "68f4856733fdf0eea623a577502a944d7bc9cba78436acf9caaa1c6664a9600f",
+      "asset": "photos/IMG_5625.webp",
+      "bytes": 156002,
+      "sha256": "cef241d823eee995e5e7ab1173dd5d1d2f5ed9e1231b97eb9c63f0f9fd98b916"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\IMG_5626.HEIC",
+      "sourceSha256": "cf16f2bef1d805e9bf5e08b2c56fd6cc504a388d96dcebc36686f73e4712c81c",
+      "asset": "photos/IMG_5626.webp",
+      "bytes": 195296,
+      "sha256": "86c5ae7f21444610e295840d02d1abbdac56f718f1fd3e3f15f43b618d56c4b3"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\IMG_5634.HEIC",
+      "sourceSha256": "c9f3645d278fd648cf1d1f028bc41f46307e266a06a4910fb66eef05ab5bda57",
+      "asset": "photos/IMG_5634.webp",
+      "bytes": 222716,
+      "sha256": "643d5d58afa0ad492e7bf8b6fd8770605cbb53e0f53bbabb2cee8d7375d14797"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\IMG_5635.HEIC",
+      "sourceSha256": "320a648e183bae724b1a196222870b8d26a9ab2498a15c6409caa0a4cd9b1945",
+      "asset": "photos/IMG_5635.webp",
+      "bytes": 134016,
+      "sha256": "e3dd1c473f957ede61487be8f6f79e4f7189c6a1907466b4b9a5e0d6045c52ce"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\IMG_5636.HEIC",
+      "sourceSha256": "acd478fdd7c3a68923a44e0812d788b734c7d3654d846912acd4d644784b4eaf",
+      "asset": "photos/IMG_5636.webp",
+      "bytes": 51894,
+      "sha256": "3ff455055b28f326e105db5e2f7308f28f441ed54a429a625aafac9ca877e095"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\IMG_5638.HEIC",
+      "sourceSha256": "8bf5db9b4dea717a89492053283ddde12241e77951c33fc3c55f53516f9ee9ad",
+      "asset": "photos/IMG_5638.webp",
+      "bytes": 221264,
+      "sha256": "4aa16c8dbe3b46132c54e94932ea54f654d099cc1333eda76c9ef3833d1dd2fd"
+    },
+    {
+      "source": "Piso 3 - Bloque 1\\Pasillo - Piso 3.glb",
+      "sourceSha256": "84647bb3a8089527cabef1a66f6f6a458bfbb8fd1e0947dcfa3e7647c8b798e8",
+      "asset": "scans/pasillo-p3.glb",
+      "bytes": 10348692,
+      "sha256": "4295f789d6a1f724b6d82265100a2a577e9d7493ef678d8b93c4dfadc894a639"
+    },
+    {
+      "source": "Planta Baja - Bloque 1\\IMG_5649.HEIC",
+      "sourceSha256": "6d4cc4ba31dcea729c1cd8420d2e410378afa62df88ea218314ed5344ae7f010",
+      "asset": "photos/IMG_5649.webp",
+      "bytes": 108008,
+      "sha256": "ed9d337bb1082e31d279625df3d904b9b811abf55908edd5b9fd27b227fa005f"
+    },
+    {
+      "source": "Planta Baja - Bloque 1\\IMG_5653.HEIC",
+      "sourceSha256": "8aafe290dde24f3255768c52d87e486fd20097e1b2fb3a01c6b06469c8f36705",
+      "asset": "photos/IMG_5653.webp",
+      "bytes": 143744,
+      "sha256": "7b6bcdd53e6614a3ed6315516a969fa746639d1d8776470f9c37bed3c9881b64"
+    },
+    {
+      "source": "Planta Baja - Bloque 1\\IMG_5655.HEIC",
+      "sourceSha256": "c796fa499c0c8d3d8b98eddc4e1c2b0bb0ac3517d67f83f266743c0275448a3e",
+      "asset": "photos/IMG_5655.webp",
+      "bytes": 84300,
+      "sha256": "114fd7c13c95e291fde20565e7de3166f7ca8c4d3adc12d567212fd1815f6131"
+    },
+    {
+      "source": "Planta Baja - Bloque 1\\IMG_5663.HEIC",
+      "sourceSha256": "45d679a4f881c0560015634585003cae656ee218b129c7c6a6fb2a652cea84de",
+      "asset": "photos/IMG_5663.webp",
+      "bytes": 190440,
+      "sha256": "b8ea2b938b68482c4b0356b4482eca2de2015c591680e506dbb26ad45b5d71f0"
+    },
+    {
+      "source": "Planta Baja - Bloque 1\\IMG_5680.HEIC",
+      "sourceSha256": "c39ef8080c411d512d02861fe0acf84312a915f928271de43afaf71bcfb11e70",
+      "asset": "photos/IMG_5680.webp",
+      "bytes": 287012,
+      "sha256": "99834b598418ce2455bf6b279bfcbf27e270ff8ff503dc7f06460450272eee0c"
+    },
+    {
+      "source": "Planta Baja - Bloque 1\\Laboratorio - Planta Baja.glb",
+      "sourceSha256": "13d1b3a8c727ed08b2eaf82b76b46894d231e63c8df84218b1036c05e580b97d",
+      "asset": "scans/laboratorio.glb",
+      "bytes": 9298596,
+      "sha256": "02cb9e76aa299639fdabf38db9a598ba506438c4cc20af1d59aa15fbe31e8901"
+    },
+    {
+      "source": "Plaza Techada\\IMG_5688.HEIC",
+      "sourceSha256": "3a58cb502b2265cbe800ad6bc59348edb1d59b0d817d6fe73a9ee502e0aaf3de",
+      "asset": "photos/IMG_5688.webp",
+      "bytes": 159372,
+      "sha256": "6305ca2a00e9c83d3033fc2b88894d5230da47b3fae50ee2dd5d852fe0db77d7"
+    },
+    {
+      "source": "Plaza Techada\\IMG_5693.HEIC",
+      "sourceSha256": "4ad4ba214b503780210fae2539f19ee4a098d488e0c87bfee65cab36b93baf5d",
+      "asset": "photos/IMG_5693.webp",
+      "bytes": 176092,
+      "sha256": "38a62bf8df92894ad3984ba431b1d52826570edefce29e137a07366133d156a7"
+    },
+    {
+      "source": "Plaza Techada\\IMG_5706.HEIC",
+      "sourceSha256": "03c27b4e452e4776752bca9b0d5c520ddf4d7756d040fbde67e06199dbd05073",
+      "asset": "photos/IMG_5706.webp",
+      "bytes": 201614,
+      "sha256": "0b163be13479e8a270aed7efa1c434c5cafcce5060d706aaf091702a744c9c97"
+    },
+    {
+      "source": "Sala Manfred\\IMG_5685.HEIC",
+      "sourceSha256": "61afd338e658178a95fe798cdfa67e560a88d2973d2df7bd62a2fda3938fcec1",
+      "asset": "photos/IMG_5685.webp",
+      "bytes": 126286,
+      "sha256": "e3cdab2a144fb8fa5432d8387e6df7ec6ddc49facd31aa287470cc500c04c17e"
+    },
+    {
+      "source": "Área Común 1\\IMG_5718.HEIC",
+      "sourceSha256": "ec3a3fd2bba63e3a2287c96256014a525e291d028aac2099175b6cfe81597fcd",
+      "asset": "photos/IMG_5718.webp",
+      "bytes": 384864,
+      "sha256": "b6396c7c473089cd03cf87d5a4d12ff2576d592740ee0f2e5820b28a643148ad"
+    },
+    {
+      "source": "Área Común 1\\IMG_5731.HEIC",
+      "sourceSha256": "f4a4a3cb0b01c79702461deee5c6b1d428185a90c8951557cd5dd12554e616fa",
+      "asset": "photos/IMG_5731.webp",
+      "bytes": 420200,
+      "sha256": "aeb2e7b3aa15869d3a717cbbea4e286293b0a2b499c6b76f377affdcb884b7a2"
+    },
+    {
+      "source": "Área Común 1\\IMG_5740.HEIC",
+      "sourceSha256": "31b0663d0628569909073af2cb0110f954abb732cc3371fa842a4b801f8d5ee5",
+      "asset": "photos/IMG_5740.webp",
+      "bytes": 435344,
+      "sha256": "8c1dbdf0effbb4b5afb965590eb6e1c23f539d62aec08c5198fa27aa645b1a26"
+    },
+    {
+      "source": "Área Común 2\\IMG_5646.HEIC",
+      "sourceSha256": "c3602f11c13be5743ce48869da4f81940c0402dd13f29efa9289448fc57f4454",
+      "asset": "photos/IMG_5646.webp",
+      "bytes": 340092,
+      "sha256": "3f8d59aea47c61b2df1ad02d346a8d9f7f2e71a914900e050f8b78d37f92deee"
+    },
+    {
+      "source": "Área Común 2\\IMG_5666.HEIC",
+      "sourceSha256": "d01e1bc934304e864a5c049bc257eb7ff31acfbcc80b863e07776c1e03d414ab",
+      "asset": "photos/IMG_5666.webp",
+      "bytes": 259276,
+      "sha256": "65452d05eb9818830749af261e40618b1450b0bcfa6863964515d33127f4b35f"
+    },
+    {
+      "source": "Área Común 2\\IMG_5703.HEIC",
+      "sourceSha256": "86ef568eb6a550add81e32788a8e8343ccc062f5db5489db65b90a5a62d47dfc",
+      "asset": "photos/IMG_5703.webp",
+      "bytes": 288244,
+      "sha256": "707c4082a84926634b864de550899561fed4b09de39f40448e30f1857a4b8db9"
+    },
+    {
+      "source": "Área Común 2\\IMG_5727.HEIC",
+      "sourceSha256": "d46b342413dd06ee737a74e7f3cd147335bdf042118282cd17a93a3e16d4d204",
+      "asset": "photos/IMG_5727.webp",
+      "bytes": 304402,
+      "sha256": "cbf439cf86f4cbb6f21624e64fc01639bd6b5df17814e104d03f9df59717acc9"
+    }
+  ]
+}

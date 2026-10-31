@@ -1,0 +1,10 @@
+.git
+.references
+.tools
+.local
+**/node_modules
+**/target
+**/dist
+**/.local
+.env
+*.zip

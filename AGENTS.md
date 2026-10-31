@@ -24,8 +24,14 @@ El recorrido incluye:
 4. Planta baja del bloque de laboratorios.
 5. Primer piso de aulas.
 6. Escaleras, patios y pasillos comunes.
+7. Bedelía.
+8. Segundo piso.
+9. Tercer piso.
+10. Baños.
+11. Bloque G.
+12. Estacionamiento.
 
-La Cantina de CyT es el recinto definido para este repositorio; conservar ese nombre y ese alcance en documentación, interfaz, identificadores y tareas. El README registra el ajuste respecto a la consigna recibida y su validación docente pendiente.
+El alcance ampliado incluye tanto Cantina de CyT como Bedelía. Conservar ambos nombres e identificadores. Horacio confirmó que el “Bloque 2” de las carpetas de referencia y de la vista aérea es el Bloque G. Las medidas de la reconstrucción y los recintos sin captura específica siguen pendientes de validación.
 
 Se requieren primera persona, movimiento libre, acceso a los recintos, paneles informativos, biblioteca de trabajos, registro e inicio de sesión, publicación de trabajos propios y administración de paneles.
 
@@ -56,7 +62,7 @@ El equipo está formado por **seis integrantes**; la nómina está pendiente de 
 
 ## Organización y límites entre componentes
 
-La estructura objetivo se describe en el README. Crear las carpetas a medida que se incorporen componentes reales:
+La estructura actual se describe en el README. Mantener separados los componentes:
 
 - `frontend/`: escenario, navegación, interacción, interfaz y clientes de API/chat.
 - `backend/`: usuarios, autenticación, trabajos, paneles y chat.
@@ -116,4 +122,6 @@ Una tarea termina cuando cumple sus criterios de aceptación, se ha verificado d
 
 ## Estado al crear este archivo
 
-El repositorio parte únicamente de `README.md` y `AGENTS.md`. Aún no existen aplicación, manifiestos, scripts, pruebas, contenedores ni despliegue. Actualizar este apartado y las instrucciones de inicio cuando se añada la base ejecutable.
+La versión 0.1.0 incluye frontend ejecutable, tres escaneos navegables, reconstrucción aproximada del campus, backend de usuarios/contenidos/chat, pruebas, Maven Wrapper y configuración de Docker Compose. Consultar `docs/verificacion.md` para distinguir pruebas ejecutadas de validaciones pendientes. PostgreSQL 18 sigue siendo la base de entrega; el perfil local H2 es una alternativa de desarrollo, no una sustitución de arquitectura. No existe todavía despliegue público ni avatares sincronizados.
+
+Los recursos utilizados están versionados. Las fuentes de Drive se mantienen de solo lectura; no subir originales ni recursos no utilizados. `scripts/prepare-assets.py` solo escribe derivados locales y `frontend/public/assets/sources.json` registra su procedencia.

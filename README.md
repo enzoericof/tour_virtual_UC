@@ -1,153 +1,149 @@
-# Tour virtual UC — Facultad de Ciencias y Tecnología
+# Tour virtual UC · Campus Santa Librada
 
-Visita virtual en primera persona a la Facultad de Ciencias y Tecnología de la Universidad Católica, Campus Santa Librada, Paraguay. Trabajo Práctico de **Informática III · 2026**, orientado a integrar computación gráfica, desarrollo web y gestión de contenidos.
+Primera versión funcional del Trabajo Práctico de **Informática III 2026**, desarrollada para un equipo de seis integrantes. Representa la Facultad de Ciencias y Tecnología de la Universidad Católica con Three.js y una base de usuarios, contenidos y chat en Spring Boot.
 
-**Estado:** planificación y documentación inicial. El repositorio todavía no contiene una aplicación ejecutable. Las funcionalidades, carpetas y servicios descritos a continuación constituyen la base acordada para su implementación.
+## Qué incluye esta versión
 
-## Equipo y colaboración
+- Campus general reconstruido a partir de fotografías y una vista aérea marcada: bloques, galerías, patios, cantina, Bedelía, Sala Manfred, plaza cubierta y estacionamiento.
+- Tres espacios de **escaneo real**: laboratorio de planta baja, aula del tercer piso y pasillo del tercer piso. Se cargan individualmente para limitar memoria y descarga.
+- Primera persona, teclado y mouse, colisiones, gravedad y escaleras en el bloque principal. Si el navegador no permite capturar el cursor, se puede mirar arrastrando.
+- Vista general con cámara orbital, búsqueda de espacios, filtros, mapa y fotografías ampliables.
+- Registro, inicio/cierre de sesión, biblioteca de trabajos por enlace y edición/eliminación de trabajos propios.
+- Paneles informativos obtenidos del servidor; creación, edición y eliminación para administradores.
+- Chat STOMP entre usuarios autenticados, con identidad asignada por el servidor. No se guarda historial.
+- Migración Flyway, pruebas de permisos y un contenedor de aplicación con PostgreSQL.
 
-El desarrollo y la documentación se construyen entre los **seis integrantes** del grupo. La nómina y la asignación individual de tareas están pendientes de registrar.
+**Es un prototipo inicial, no una réplica terminada.** Las proporciones generales, la vegetación y los recintos sin escaneo son aproximados. Segundo piso y baños están señalados como pendientes de validación. Las capturas originales tienen huecos y deformaciones que siguen visibles; no se generaron detalles que no existían en las fuentes. Los escaneos se visitan como escenas independientes, todavía sin alineación continua con el campus reconstruido.
 
-## Objetivo
+El **Bloque G corresponde al “Bloque 2” de las carpetas y de la vista aérea**, confirmado por Horacio. Cantina y Bedelía están ambas en el alcance ampliado. No se incluyen todavía avatares sincronizados, una persona animada, subida de archivos, agente IA ni un despliegue público. El escaneo de persona fue inspeccionado y preparado localmente; requiere recorte, retopología y rigging antes de servir como avatar.
 
-Construir un sitio web que permita recorrer libremente una representación 3D reconocible de la facultad, consultar información e interactuar con trabajos publicados por usuarios registrados. El parecido con las instalaciones reales y la posibilidad de recorrer sus interiores tienen prioridad sobre el detalle visual fino.
+## Inicio rápido: recorrido 3D
 
-## Alcance funcional
+Requisitos: **Node.js 24 LTS** y npm. Los modelos y las fotografías utilizados están incluidos en esta rama; no hace falta conectar Drive para ejecutar la aplicación.
 
-### Espacios del recorrido
+```sh
+git clone --branch desarrollo-horacio https://github.com/enzoericof/tour_virtual_UC.git
+cd tour_virtual_UC/frontend
+npm ci
+npm run dev
+```
 
-1. Pasillo de acceso.
-2. **Cantina de CyT.**
-3. Sala Manfred.
-4. Planta baja del bloque de laboratorios.
-5. Primer piso de aulas.
-6. Áreas comunes: escaleras, patios y pasillos.
+Abrir la dirección mostrada por Vite, normalmente `http://127.0.0.1:5173/`. Sin backend se pueden recorrer los espacios y ver las fotografías; biblioteca, cuentas y chat indican que el servicio no está disponible.
 
-La Cantina de CyT sustituye a Bedelía en el alcance definido para este repositorio. La conformidad de este ajuste con la consigna original queda pendiente de validación docente.
+## Inicio con servicios locales
 
-### Funcionalidades previstas
+Requisitos adicionales: **JDK 25**, con `JAVA_HOME` apuntando a esa instalación. Maven Wrapper está incluido.
 
-| Área | Resultado esperado |
+En una segunda terminal:
+
+```sh
+cd backend
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+En PowerShell:
+
+```powershell
+cd backend
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"
+```
+
+El backend escucha en `127.0.0.1:8080`. Vite redirige `/api` y `/ws` al backend; abrir el frontend usando **127.0.0.1**, coherente con el origen permitido en el perfil local.
+
+El perfil `local` usa H2 en modo PostgreSQL y conserva sus datos en `backend/.local/`. Es una alternativa para desarrollar sin Docker; **la base prevista para la entrega sigue siendo PostgreSQL 18**. H2 no reemplaza la validación final con PostgreSQL.
+
+Para crear un administrador inicial, establecer `ADMIN_EMAIL` y `ADMIN_PASSWORD` antes de iniciar el backend (mínimo 12 caracteres, máximo 72 bytes). No hay contraseñas predeterminadas ni un administrador incorporado. El alta se realiza únicamente si ese correo no existe; no cambia permisos de cuentas existentes. Con ese usuario, ingresar a **Mi cuenta → Administrar paneles**.
+
+## Ejecución integrada con PostgreSQL
+
+Requisitos: Docker Engine y Compose v2 funcionando.
+
+1. Copiar `.env.example` a `.env` y reemplazar `DATABASE_PASSWORD` por una contraseña local. Completar las variables de administrador solo si se necesita esa cuenta.
+2. Desde la raíz:
+
+```sh
+docker compose up --build
+```
+
+Abrir `http://localhost:8080`. El frontend compilado y la API se sirven desde el mismo proceso y origen. Los datos de PostgreSQL quedan en el volumen `campus-data`; el servicio no publica el puerto de la base de datos.
+
+La configuración de Compose está limitada a la máquina local. Para un despliegue real, configurar HTTPS, `COOKIE_SECURE=true`, `APP_ORIGIN` con el origen exacto, respaldo de datos y protección frente a abuso. **El arranque completo en Docker/PostgreSQL no se pudo verificar en el equipo de preparación porque el motor Docker no respondió.** Sí se compiló el backend con Java 25 y se verificó el perfil local.
+
+## Controles
+
+| Acción | Control |
 | --- | --- |
-| Escenario 3D | Instalaciones reconocibles, conectadas y con interiores accesibles. |
-| Navegación | Primera persona, movimiento libre por las áreas incluidas y acceso entre plantas. |
-| Interacción | Selección de elementos del entorno y apertura de información contextual. |
-| Paneles informativos | Contenidos consultables desde el recorrido y administrables desde el sitio. |
-| Biblioteca de trabajos | Espacios dentro del recorrido para consultar documentación, presentaciones, videos y enlaces de usuarios. |
-| Usuarios | Registro, inicio de sesión y gestión de los trabajos propios. |
-| Administración | Gestión de los paneles informativos con permisos de administrador. |
-| Chat | Mensajería en tiempo real entre visitantes conectados. |
-| Entrega | Sitio publicado y/o máquina virtual operativa, con instrucciones de configuración y puesta en marcha. |
+| Caminar | W A S D o flechas |
+| Mirar | Mouse; arrastrar si la captura del cursor no está disponible |
+| Caminar más rápido | Shift |
+| Saltar pequeños desniveles | Espacio |
+| Información del espacio cercano | E |
+| Pausar y liberar cursor | Esc |
+| Inspeccionar el conjunto | Botón de vista general; arrastrar y rueda |
 
-Según la consigna, la interacción entre usuarios es obligatoria cuando participan **más de cuatro alumnos**. Para este equipo de **seis integrantes**, el chat es obligatorio y se incluye en el alcance inicial. El agente IA y el recorrido guiado con IA son obligatorios únicamente cuando participan **más de seis alumnos** (siete o más), por lo que quedan fuera de esta base; si cambia la cantidad de integrantes, se revisará el alcance.
+En dispositivos táctiles se pueden inspeccionar modelos, mapas y fotos. El recorrido a pie está pensado para teclado y mouse.
 
-### Criterios de implementación del recorrido
+## Stack
 
-- Usar cámara en primera persona y controles de teclado y mouse; informar cómo comenzar, moverse e interactuar.
-- Implementar colisiones y circulación por escaleras para que el visitante pueda recorrer los espacios sin atravesar paredes o caer fuera del escenario.
-- Asegurar la navegación y el parecido general antes de añadir mobiliario o efectos visuales detallados.
-- Utilizar fotografías, croquis y medidas de referencia del campus; identificar las aproximaciones pendientes de verificar.
-- Mantener el contenido de los paneles y los trabajos separado de la geometría 3D para poder actualizarlo desde el backend.
+| Componente | Versión / decisión |
+| --- | --- |
+| Gráficos | Three.js 0.187.0 directo |
+| Frontend | TypeScript 5.9.3 estricto, Vite 8.3.5, HTML/CSS |
+| Herramientas | Node.js 24 LTS, npm y package-lock.json |
+| Backend | Java 25 LTS, Spring Boot 4.1.2, Maven Wrapper 3.9.11 |
+| Persistencia de entrega | PostgreSQL 18, JPA/Hibernate, Flyway |
+| Sesiones | Spring Security, cookies HttpOnly y CSRF |
+| Chat | WebSocket + STOMP, cliente @stomp/stompjs 7.5.0 |
+| Integración | Docker y Compose v2 |
 
-## Stack tecnológico
-
-Base definida el **29 de octubre de 2026**:
-
-| Capa | Tecnología / versión base | Uso |
-| --- | --- | --- |
-| Gráficos 3D | **Three.js** | Escena, cámara, iluminación, navegación e interacción con objetos. |
-| Frontend | **TypeScript en modo estricto + Vite + HTML/CSS** | Código del navegador, formularios, biblioteca y administración. |
-| Herramientas frontend | **Node.js 24 LTS + npm** | Instalación de dependencias y construcción del frontend. |
-| Backend | **Java 25 LTS + Spring Boot 4.1.2** | API REST y lógica de negocio. |
-| Construcción backend | **Maven, mediante Maven Wrapper** | Compilación y ejecución reproducibles. |
-| Persistencia | **PostgreSQL 18 + Spring Data JPA/Hibernate** | Usuarios, trabajos, paneles y relaciones. |
-| Migraciones | **Flyway** | Evolución versionada del esquema de base de datos. |
-| Seguridad | **Spring Security** | Autenticación y autorización de usuarios y administradores. |
-| Tiempo real | **WebSocket + STOMP sobre Spring** | Chat entre visitantes conectados. |
-| Ejecución integrada | **Docker + Docker Compose v2** | Servicios, configuración y volúmenes persistentes. |
-| Colaboración | **Git + GitHub** | Versionado, tareas, revisión de cambios y seguimiento. |
-
-Las versiones exactas de Three.js, TypeScript, Vite y las herramientas auxiliares se fijarán al crear la aplicación y se registrarán en sus manifiestos y archivos de bloqueo. Spring Boot gestionará las versiones compatibles de sus dependencias. Se conservarán `package-lock.json`, Maven Wrapper y las versiones elegidas de las imágenes de contenedores; se evitarán etiquetas `latest`.
-
-Three.js se utilizará directamente, con módulos separados para escena, movimiento e interacción. El frontend inicial usará HTML/CSS y TypeScript. Cualquier incorporación de un framework de interfaz se evaluará como cambio del stack.
-
-Node.js se utiliza para las herramientas del frontend; el backend del producto se desarrolla en Java.
-
-Referencias oficiales: [instalación de Three.js](https://threejs.org/manual/pages/installation.html), [Java LTS](https://www.oracle.com/java/technologies/java-se-support-roadmap.html), [requisitos de Spring Boot](https://docs.spring.io/spring-boot/system-requirements.html), [Spring Boot 4.1.2](https://spring.io/blog/2026/10/23/spring-boot-4-1-2-available-now/), [versiones de Node.js](https://nodejs.org/en/about/previous-releases), [política de versiones de PostgreSQL](https://www.postgresql.org/support/versioning/).
-
-## Arquitectura y organización prevista
-
-Un único repositorio con frontend y backend separados, y un backend monolítico organizado por funcionalidades. El navegador consume la API REST para usuarios y contenidos, y WebSocket para el chat. Solo el backend accede a PostgreSQL.
+## Organización
 
 ```text
-tour_virtual_UC/
-├── README.md                  # Presentación y acuerdos del proyecto
-├── AGENTS.md                  # Instrucciones para colaboradores y agentes
-├── frontend/                  # Previsto: Three.js, TypeScript, Vite y UI
-│   ├── src/
-│   │   ├── scene/             # Escenario, espacios, cámara y luces
-│   │   ├── navigation/        # Movimiento, colisiones y escaleras
-│   │   ├── interaction/       # Detección y activación de elementos
-│   │   ├── ui/                # Formularios, paneles y chat
-│   │   └── services/          # API REST y conexión WebSocket
-│   └── public/assets/         # Modelos, texturas y recursos estáticos
-├── backend/                   # Previsto: Spring Boot y Maven Wrapper
-│   └── src/                   # Usuarios, contenidos, seguridad y chat
-├── docs/                      # Previsto: arquitectura, tareas y entrega
-└── compose.yaml               # Previsto: ejecución integrada
+frontend/src/
+  data/           espacios, estado de relevamiento y referencias
+  scene/          campus, materiales, carga y liberación de escaneos
+  navigation/     controles, cápsula de colisión y gravedad
+  services/       REST y STOMP
+  ui/             iconos de interfaz
+  main.ts         interacción de la interfaz
+frontend/public/assets/  recursos optimizados y procedencia
+backend/src/main/java/py/edu/uc/tour/
+  users/          registro y autenticación
+  security/       sesiones, permisos y alta inicial de administrador
+  content/        trabajos y paneles
+  chat/           WebSocket y mensajería
+backend/src/main/resources/db/migration/  esquema y paneles iniciales
+docs/             arquitectura, contratos, referencias y verificación
+scripts/          preparación de recursos desde copias locales
 ```
 
-Actualmente existen únicamente `README.md` y `AGENTS.md`; el árbol muestra la estructura objetivo.
+## Verificación
 
-Convenciones iniciales:
-
-- API REST bajo `/api/v1` y conexión WebSocket bajo `/ws`.
-- Roles de aplicación `USER` y `ADMIN`; los visitantes podrán consultar el recorrido y los contenidos públicos.
-- Autenticación mediante sesión de servidor y cookies `HttpOnly`; en producción, frontend y API se servirán bajo un mismo origen con HTTPS.
-- Los archivos de trabajos se almacenarán fuera de la base de datos, en un volumen persistente, y sus metadatos en PostgreSQL. También se admitirán enlaces externos.
-- Los identificadores de espacios y elementos interactivos deben ser estables para relacionar el escenario con los contenidos del backend.
-- La escena usará metros como unidad, eje `Y` vertical y un origen común que se documentará antes de integrar modelos.
-
-## Incorporación al proyecto
-
-Se puede obtener la documentación con:
-
-```shell
-git clone https://github.com/enzoericof/tour_virtual_UC.git
-cd tour_virtual_UC
+```sh
+cd frontend
+npm ci
+npm test
+npm run build
 ```
 
-Leer este archivo y [AGENTS.md](AGENTS.md) antes de comenzar una tarea. Para la implementación se utilizarán Git, JDK 25, Node.js 24 con npm y Docker con Compose v2. Maven Wrapper se incorporará con el backend.
+```sh
+cd backend
+./mvnw verify
+```
 
-**Todavía no hay comandos para ejecutar la aplicación:** faltan los proyectos frontend/backend, los scripts y la configuración de contenedores. Las instrucciones reales de instalación, variables de entorno, ejecución y verificación se añadirán junto con esos componentes.
+En Windows usar `mvnw.cmd`. La prueba de chat se ejecuta con el backend local encendido:
 
-## Forma de trabajo
+```sh
+cd frontend
+node tests/chat.integration.mjs
+```
 
-1. Registrar cada tarea con objetivo, responsable, dependencias y criterios de aceptación verificables.
-2. Trabajar en una rama breve: `feat/descripcion`, `fix/descripcion` o `docs/descripcion`.
-3. Mantener cambios pequeños y abrir un pull request que explique el resultado y cómo se verificó.
-4. Coordinar con el equipo los cambios de alcance, stack y contratos entre frontend y backend.
-5. Integrar con frecuencia y conservar `main` utilizable; actualizar la documentación cuando cambien las instrucciones o los acuerdos.
+Esa prueba crea dos cuentas sintéticas `@example.test` en la base apuntada. Usarla únicamente sobre una instancia de desarrollo desechable, nunca producción. Ver [resultados y límites](docs/verificacion.md).
 
-No subir contraseñas, claves, archivos `.env`, dependencias descargadas ni resultados de compilación. Los recursos visuales deberán indicar su procedencia y permiso de uso cuando corresponda.
+## Referencias y trabajo del equipo
 
-## Hitos de implementación
+El Drive compartido se consultó **solo para lectura**. Se seleccionaron 37 fotografías y tres modelos para la aplicación (aproximadamente 38 MB en total). Los originales, el escaneo de persona no utilizado, datos de pruebas, herramientas locales y credenciales no se incorporan a Git.
 
-| Hito | Criterio de aceptación |
-| --- | --- |
-| 1. Base del proyecto | Frontend, backend y PostgreSQL levantan con instrucciones reproducibles. |
-| 2. Primer recorrido integrado | Se ingresa a un recinto en primera persona y se consulta un panel cuyo contenido llega del backend. |
-| 3. Recorrido completo | Los seis sectores previstos son reconocibles, accesibles y están conectados, incluidos ambos niveles. |
-| 4. Usuarios y contenidos | Un usuario se registra y publica un trabajo; un administrador actualiza un panel; los cambios persisten. |
-| 5. Chat e integración | Dos sesiones de navegador conectadas intercambian mensajes y se comprueban los permisos y la desconexión. |
-| 6. Entrega | El sistema funciona en el entorno de entrega y otra persona puede configurarlo siguiendo la documentación. |
+Ver [preparación y procedencia](docs/referencias.md), [arquitectura y API](docs/arquitectura.md) y [siguientes tareas](docs/pendientes.md). La nómina, roles individuales y fechas de entrega siguen pendientes de registrar; no se asignaron responsabilidades en nombre del grupo.
 
-## Pendientes de coordinación
-
-- Registrar la nómina definitiva y asignar responsables de 3D, interfaz, backend, integración y documentación.
-- Confirmar fecha de entrega e hitos intermedios.
-- Reunir referencias de los espacios y validar el ajuste del recinto incluido en el recorrido.
-- Definir el entorno de publicación o la máquina virtual y las condiciones de acceso.
-- Acordar los formatos y límites de archivos y el comportamiento del chat para visitantes sin cuenta.
-
-Las características descritas se considerarán implementadas únicamente cuando exista el código correspondiente y se haya verificado su funcionamiento.
+Trabajar mediante ramas y pull requests. Esta primera versión se prepara en `desarrollo-horacio`; no se modifica `main`.
