@@ -1,0 +1,13 @@
+node_modules/
+dist/
+target/
+.env
+.references/
+.tools/
+.local/
+*.log
+.DS_Store
+frontend/public/assets/scans/*.glb
+frontend/public/assets/photos/
+frontend/public/assets/manifest.json
+output/
