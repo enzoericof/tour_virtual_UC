@@ -24,15 +24,17 @@ const escape = (s: string) =>
         c
       ]!,
   );
+const overviewHint = `Arrastrá para girar <span>·</span> Rueda para acercarte <span>·</span> <kbd>M</kbd> Paneles`;
 $("#app").innerHTML = `
  <main id="viewport"></main><div class="vignette"></div>
- <header class="topbar"><button class="brand" id="home" aria-label="Volver al campus"><span class="brand-mark">UC<span>✦</span></span><span><strong>Ciencias y Tecnología</strong><small>FACULTAD DE CIENCIAS Y TECNOLOGÍA</small></span></button><nav aria-label="Principal"><button id="spaces-btn" class="active">${icon("map")}<span>Explorar</span></button><button id="library-btn">${icon("book")}<span>Biblioteca</span></button><button id="chat-btn">${icon("chat")}<span>Comunidad</span></button></nav><button id="account-btn" class="account">${icon("user")}<span>Ingresar</span></button></header>
+ <header class="topbar"><button class="brand" id="home" aria-label="Volver al campus"><span class="brand-mark">UC<span>✦</span></span><span><strong>Ciencias y Tecnología</strong><small>FACULTAD DE CIENCIAS Y TECNOLOGÍA</small></span></button><nav aria-label="Principal"><button id="spaces-btn" class="active">${icon("map")}<span>Explorar</span></button><button id="library-btn">${icon("book")}<span>Biblioteca</span></button><button id="chat-btn">${icon("chat")}<span>Comunidad</span></button><button id="menu-btn" class="menu-btn" aria-expanded="false" aria-controls="menu-panel">${icon("menu")}<span>Menú</span><kbd>M</kbd></button></nav><button id="account-btn" class="account">${icon("user")}<span>Ingresar</span></button></header>
+ <div class="menu-panel hidden" id="menu-panel" role="region" aria-label="Vistas y herramientas"><button class="secondary restore" id="restore-panels">Mostrar paneles <kbd>M</kbd></button></div>
  <section class="intro" id="intro"><div class="eyebrow"><span class="dot"></span> TU FACULTAD, DESDE OTRA PERSPECTIVA</div><h1>Tu facultad.<br>Más <em>cerca.</em></h1><p>Recorré sus pasillos, descubrí sus espacios<br>y encontrate con la comunidad.</p><button class="primary" id="begin">Comenzar recorrido ${icon("arrow")}</button><div class="intro-note">${icon("walk")} Primera persona <span>·</span> Exploración libre</div></section>
  <aside class="explorer" id="explorer"><div class="section-top"><div><span class="eyebrow">DESCUBRÍ CyT</span><h2>Elegí tu próximo lugar</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="scan">Escaneos 3D <span>3</span></button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div><div class="explorer-foot">${icon("layers")} Primera versión · referencias reales</div></aside>
  <div class="location-chip" id="location-chip">${icon("pin")}<div><strong id="location-name">Ciencias y Tecnología</strong><span id="location-floor">Vista general · distribución aproximada</span></div></div>
  <div class="view-switcher" role="group" aria-label="Vistas del campus"><button data-view="campus" aria-pressed="true">Sector CyT</button><button data-view="plan" aria-pressed="false">Vista de planta</button><button data-view="faculty-plan" aria-pressed="false">Plano de CyT</button><button data-view="faculty" aria-pressed="false">Mi facultad</button></div>
  <div class="tools"><button id="overview" class="icon-btn" title="Vista general" aria-label="Vista general">${icon("cube")}</button><button id="map-btn" class="icon-btn" title="Mapa del campus" aria-label="Mapa del campus">${icon("map")}</button><button id="quality" class="icon-btn" title="Cambiar calidad gráfica" aria-label="Cambiar calidad gráfica">${icon("sun")}</button><button id="fullscreen" class="icon-btn" title="Pantalla completa" aria-label="Pantalla completa">${icon("expand")}</button><button id="help" class="icon-btn" title="Ayuda" aria-label="Ayuda">${icon("help")}</button></div>
- <div class="bottom-bar"><span class="edition">UC <i>/</i> TOUR VIRTUAL <span>2026</span></span><div class="control-hint" id="control-hint">Arrastrá para girar <span>·</span> Rueda para acercarte</div><span class="performance"><i></i><span id="fps">—</span> FPS</span></div>
+ <div class="bottom-bar"><span class="edition">UC <i>/</i> TOUR VIRTUAL <span>2026</span></span><div class="control-hint" id="control-hint">${overviewHint}</div><span class="performance"><i></i><span id="fps">—</span> FPS</span></div>
  <div class="walk-prompt hidden" id="walk-prompt"><span id="walk-prompt-text">Listo para explorar</span><button class="primary" id="resume">${icon("walk")} Entrar al recorrido</button><small>W A S D para moverte · Mouse para mirar · Esc para salir</small><button class="text-btn" id="inspect">Ver modelo completo</button></div>
  <div id="crosshair" class="hidden">+</div><button id="interaction" class="interaction hidden"></button>
  <div class="loading hidden" id="loading"><div class="loading-card"><span class="eyebrow">PREPARANDO TU VISITA</span><h2 id="loading-text">Cargando espacio…</h2><div class="progress"><div id="progress"></div></div><p>Las texturas y los detalles reales están en camino.</p></div></div>
@@ -47,6 +49,32 @@ let online = false;
 let highQuality = true;
 let toastTimer = 0;
 const chat = new CampusChat();
+// Paneles recogidos: con una tecla, la portada y los controles flotantes pasan al menú de
+// la barra superior; «M» (o «Mostrar paneles») los devuelve a su lugar.
+const floating = [".location-chip", ".view-switcher", ".tools", ".bottom-bar"].map((selector) => {
+  const element = $(selector), mark = document.createComment(selector);
+  element.before(mark);
+  return { element, mark };
+});
+function setMenu(open: boolean) {
+  $("#menu-panel").classList.toggle("hidden", !open);
+  $("#menu-btn").setAttribute("aria-expanded", String(open));
+}
+function setCompact(compact: boolean) {
+  document.body.classList.toggle("ui-compact", compact);
+  if (compact) {
+    $("#intro").classList.add("hidden");
+    $("#explorer").classList.add("collapsed");
+    for (const { element } of floating) $("#menu-panel").insertBefore(element, $("#restore-panels"));
+  } else {
+    for (const { element, mark } of floating) mark.after(element);
+    setMenu(false);
+  }
+}
+const compact = () => document.body.classList.contains("ui-compact");
+// Teclas que no recogen la portada: navegación con teclado y modificadores.
+const passiveKeys = new Set(["Tab", "Enter", "Escape", "CapsLock", "ShiftLeft", "ShiftRight", "ControlLeft",
+  "ControlRight", "AltLeft", "AltRight", "MetaLeft", "MetaRight", "ContextMenu"]);
 function toast(message: string) {
   $("#toast").textContent = message;
   $("#toast").classList.remove("hidden");
@@ -58,6 +86,7 @@ function toast(message: string) {
 }
 function openDialog(html: string) {
   engine?.pause();
+  setMenu(false);
   $("#dialog-content").innerHTML = html;
   const d = $<HTMLDialogElement>("#dialog");
   if (!d.open) d.showModal();
@@ -188,8 +217,9 @@ function onMode(mode: string) {
     ? `<kbd>W A S D</kbd> Moverte <span>·</span> ${engine.walker.fallback ? "Arrastrá para mirar" : "Mouse para mirar"} <span>·</span> <kbd>Esc</kbd> Menú`
     : mode === "paused"
       ? "Recorrido en pausa · retomá cuando quieras"
-      : "Arrastrá para girar <span>·</span> Rueda para acercarte";
+      : overviewHint;
   if (!walking) $("#interaction").classList.add("hidden");
+  else setMenu(false);
 }
 try {
   engine = new TourEngine($("#viewport"));
@@ -249,7 +279,22 @@ async function setCampusView(mode: CampusView) {
 document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => {
   b.onclick = () => { void setCampusView(b.dataset.view as CampusView); };
 });
+$("#menu-btn").onclick = () => setMenu($("#menu-panel").classList.contains("hidden"));
+$("#restore-panels").onclick = () => setCompact(false);
+window.addEventListener("keydown", (e) => {
+  if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+  const target = e.target instanceof Element ? e.target : null;
+  if (target?.closest("input, textarea, select, [contenteditable]") || $<HTMLDialogElement>("#dialog").open) return;
+  if (e.code === "Escape") return setMenu(false);
+  if (e.code === "KeyM") return setCompact(!compact());
+  if (passiveKeys.has(e.code) || (e.code === "Space" && target?.closest("button, a"))) return;
+  if (!compact() && !$("#intro").classList.contains("hidden")) setCompact(true);
+});
+document.addEventListener("pointerdown", (e) => {
+  if (!(e.target instanceof Element && e.target.closest("#menu-panel, #menu-btn"))) setMenu(false);
+});
 $("#home").onclick = () => {
+  setCompact(false);
   void visit();
   $("#intro").classList.remove("hidden");
   $("#explorer").classList.remove("collapsed");
@@ -290,7 +335,7 @@ $("#fullscreen").onclick = () => {
 };
 $("#help").onclick = () =>
   openDialog(
-    `<span class="eyebrow">TU VISITA, A TU RITMO</span><h2>Cómo recorrer el campus</h2><div class="help-grid"><kbd>W A S D</kbd><p>Caminar. También podés usar las flechas.</p><kbd>Mouse</kbd><p>Mirar alrededor. En vista general, arrastrar y acercar con la rueda.</p><kbd>Shift</kbd><p>Caminar más rápido.</p><kbd>Espacio</kbd><p>Saltar para superar pequeños desniveles.</p><kbd>E</kbd><p>Abrir información del espacio cercano.</p><kbd>Esc</kbd><p>Soltar el cursor y volver al menú.</p></div><p class="subtle">El sector de CyT es una reconstrucción aproximada. Los tres espacios con la etiqueta “Escaneo real” usan tus capturas de Scaniverse. Se recomienda teclado y mouse para caminar; en pantallas táctiles podés inspeccionar modelos y fotografías.</p>`,
+    `<span class="eyebrow">TU VISITA, A TU RITMO</span><h2>Cómo recorrer el campus</h2><div class="help-grid"><kbd>W A S D</kbd><p>Caminar. También podés usar las flechas.</p><kbd>Mouse</kbd><p>Mirar alrededor. En vista general, arrastrar y acercar con la rueda.</p><kbd>Shift</kbd><p>Caminar más rápido.</p><kbd>Espacio</kbd><p>Saltar para superar pequeños desniveles.</p><kbd>E</kbd><p>Abrir información del espacio cercano.</p><kbd>Esc</kbd><p>Soltar el cursor y volver al menú.</p><kbd>M</kbd><p>Recoger la portada y los paneles en el menú de la barra superior, o devolverlos a su lugar. Cualquier tecla también recoge la portada.</p></div><p class="subtle">El sector de CyT es una reconstrucción aproximada. Los tres espacios con la etiqueta “Escaneo real” usan tus capturas de Scaniverse. Se recomienda teclado y mouse para caminar; en pantallas táctiles podés inspeccionar modelos y fotografías.</p>`,
   );
 $("#map-btn").onclick = () => {
   openDialog(

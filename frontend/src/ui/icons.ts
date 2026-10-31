@@ -14,6 +14,7 @@ const paths: Record<string, string> = {
   help: "M12 17h.01M9 8a3 3 0 0 1 6 0c0 2-3 2-3 5M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z",
   expand: "M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5",
   layers: "m12 3 10 5-10 5L2 8l10-5ZM2 12l10 5 10-5M2 16l10 5 10-5",
+  menu: "M4 7h16M4 12h16M4 17h16",
   volume: "m3 9 5 0 5-5v16l-5-5H3V9Zm14-2a8 8 0 0 1 0 10",
 };
 export const icon = (name: string) =>
