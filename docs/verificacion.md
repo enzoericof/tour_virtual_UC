@@ -1,5 +1,16 @@
 # Verificación (versión 0.1.0)
 
+## Integración de todas las ramas — 01/11/2026
+
+- Incorporados `feat/arboles-patio` y `feature/campus-backend`. Las ramas de medidas/texturas, plataforma/ascensor/torre, cabecera este/rampa y `desarrollo-horacio` ya estaban contenidas en `main`.
+- Único conflicto: `.gitignore`, resuelto conservando las exclusiones de ambos aportes.
+- Frontend: 20 pruebas aprobadas y tipos/build correctos.
+- Servidor activo `backend/`: cinco pruebas de integración aprobadas con `mvnw verify` y Java 25.
+- Aporte `campus-backend/`: compilado con `backend/mvnw.cmd -f campus-backend/pom.xml -DskipTests package`, Java 25 y el objetivo Java 21 de su POM. No se ejecutó su prueba de contexto ni su arranque, que requieren PostgreSQL `TP_INFO3`; permanece separado del servidor activo.
+- Revisión visual de «Mi facultad» con los árboles integrados, sin errores de página detectados. Captura local: `.local/references/merge-branches.png` (1262 × 624), fuera de Git. No equivale a recorrer todas las escaleras ni a validar PostgreSQL.
+
+## Registro anterior
+
 Distingue lo ejecutado de lo pendiente. Comandos: [README](../README.md#verificación). Revisión visual más reciente: [design-qa.md](../design-qa.md).
 
 ## Estado vigente

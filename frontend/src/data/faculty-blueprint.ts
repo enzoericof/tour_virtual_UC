@@ -233,8 +233,12 @@ export const facultyBlueprint = {
     [[41, 11], [47, 11.5], add(squareSteps, [Z, STEPS_RUN]), squareSteps, add(plazaNorth, [X, -2], [Z, 0.5]),
       corridorTop, corridorFoot],
   ] as Vec2[][],
+  /** Árbol 1: mango frondoso en el patio este (foto árbol_1.HEIC, posición 1 en cómo_debe_ser.png). */
+  tree1: [21.5, 15] as Vec2,
+  /** Árbol 2: árbol autóctono alto en el patio oeste (foto árbol_2.HEIC, posición 2 en cómo_debe_ser.png). */
+  tree2: [-20, 22] as Vec2,
   trees: [[2, 19], [53 + plazaShift, -5.5], [50, 22], [20, 62]] as Vec2[],
-  picnic: [[-14, 15], [-8, 13.5], [-2, 13], [52.5, 13], [54, 26]] as Vec2[],
+  picnic: [[-14, 15], [-8, 13.5], [-2, 13], [24, 13.5], [52.5, 13], [54, 26]] as Vec2[],
   /** Canteros con banco del cuadrado. */
   planters: [[46.1 + plazaShift, -7.35], [54.4 + plazaShift, -10.9]] as Vec2[],
 } as const;

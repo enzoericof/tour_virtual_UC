@@ -78,7 +78,10 @@ Una sola geometría para «Sector CyT», «Vista de planta», «Plano de CyT», 
 | Accesos | `paths` | — | 7 caminos en una red conectada desde la plaza techada |
 
 - Secuencia obligatoria: **bloque de aulas → plaza techada → plaza abierta → cantina girada**.
-- Vegetación: 4 árboles de referencia en CyT y hasta 4 en el contexto. No rellenar con más.
+- Vegetación: 2 árboles principales identificados en el patio central según fotos in situ (`arbol_ia/árbol_1.HEIC` y `arbol_ia/árbol_2.HEIC`, ubicaciones 1 y 2 en `cómo_debe_ser.png`):
+  - **Árbol 1** (`tree1` en `[21.5, 15]`): mango frondoso del patio este, ~9 m de altura, copa densa en cúpula, tronco con raíces tablares y bancos de descanso debajo.
+  - **Árbol 2** (`tree2` en `[-20, 22]`): árbol autóctono alto del patio oeste, ~15,5 m de altura (supera la cubierta del Bloque 1), fuste alto despejado (~5,2 m), grandes ramas maestras y canteros de ladrillo en su base.
+  - Árboles de referencia adicionales en CyT (4 puntos) y hasta 4 en el contexto. No rellenar con bosques inventados.
 - Cada id de `places.ts` (16) tiene punto de visita en `facultyVisitPoints`; la mayoría tiene además `facultyVisitTargets` (hacia dónde mira el visitante al llegar).
 
 ## Fuentes y prioridad

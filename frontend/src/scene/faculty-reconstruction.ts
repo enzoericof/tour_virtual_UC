@@ -728,7 +728,80 @@ export function createFaculty() {
       for (const dx of [-0.9, 0.9]) pole(0.035, 0.75, x + dx, 0.38, z + dz * 0.5);
     }
   }
-  // Cuatro árboles de referencia; sin bosque generado. Los de la plataforma nacen en su piso.
+  // Árbol 1: mango frondoso del patio este (foto árbol_1.HEIC, posición 1 en cómo_debe_ser.png).
+  {
+    const [x, z] = plan.tree1;
+    // Raíces tablares superficiales visibles en el suelo.
+    for (const [dx, dz] of [[0.9, 0.4], [-0.8, 0.6], [0.5, -0.8], [-0.7, -0.6]]) {
+      beam(new T.Vector3(x, 0.18, z), new T.Vector3(x + dx, 0.08, z + dz), 0.2, m.bark);
+    }
+    // Tronco grueso y robusto con colisión.
+    pole(0.55, 2.7, x, 1.35, z, m.bark, true);
+    // Ramas principales que se abren a baja altura (~2.4-2.8 m).
+    const branches = [
+      new T.Vector3(x + 1.2, 3.8, z + 0.8),
+      new T.Vector3(x - 1.3, 3.7, z + 0.9),
+      new T.Vector3(x + 1.0, 4.0, z - 1.1),
+      new T.Vector3(x - 1.1, 3.8, z - 1.0),
+    ];
+    for (const b of branches) beam(new T.Vector3(x, 2.4, z), b, 0.25, m.bark);
+    // Copa en cúpula densa y ancha, follaje verde oscuro de mango, altura total ~9 m.
+    const crownTop = new T.Mesh(new T.IcosahedronGeometry(1, 2), m.leaves[3]);
+    crownTop.scale.set(4.6, 2.8, 4.4); crownTop.position.set(x, 6.6, z); crownTop.castShadow = true; visual.add(crownTop);
+    const mangoLobes: [number, number, number, number, number, number][] = [
+      [2.2, 4.9, 1.2, 3.2, 2.2, 3.0],
+      [-2.3, 4.7, 1.4, 3.1, 2.1, 3.1],
+      [1.6, 5.0, -2.1, 3.0, 2.2, 2.8],
+      [-1.9, 4.8, -1.8, 2.9, 2.1, 2.9],
+      [0.0, 5.0, 2.4, 3.2, 2.0, 3.0],
+      [0.0, 5.1, -2.2, 3.1, 2.0, 3.0],
+    ];
+    for (const [ox, oy, oz, sx, sy, sz] of mangoLobes) {
+      const lobe = new T.Mesh(new T.IcosahedronGeometry(1, 2), m.leaves[3]);
+      lobe.scale.set(sx, sy, sz); lobe.position.set(x + ox, oy, z + oz); lobe.castShadow = true; visual.add(lobe);
+    }
+  }
+
+  // Árbol 2: árbol autóctono alto y esbelto del patio oeste (foto árbol_2.HEIC, posición 2 en cómo_debe_ser.png).
+  {
+    const [x, z] = plan.tree2;
+    // Tronco alto y despejado hasta ~5.2 m de altura con colisión.
+    pole(0.42, 5.4, x, 2.7, z, m.bark, true);
+    // Grandes ramas maestras que ascienden hacia la parte alta.
+    const boughs: [T.Vector3, T.Vector3, number][] = [
+      [new T.Vector3(x, 5.2, z), new T.Vector3(x - 2.5, 9.2, z + 1.8), 0.22],
+      [new T.Vector3(x, 5.2, z), new T.Vector3(x + 2.4, 9.8, z + 2.0), 0.22],
+      [new T.Vector3(x, 5.2, z), new T.Vector3(x - 1.8, 9.5, z - 2.4), 0.22],
+      [new T.Vector3(x, 5.2, z), new T.Vector3(x + 2.0, 10.2, z - 1.8), 0.22],
+      [new T.Vector3(x - 2.5, 9.2, z + 1.8), new T.Vector3(x - 3.8, 12.2, z + 2.4), 0.14],
+      [new T.Vector3(x + 2.4, 9.8, z + 2.0), new T.Vector3(x + 3.6, 12.6, z + 2.6), 0.14],
+      [new T.Vector3(x - 1.8, 9.5, z - 2.4), new T.Vector3(x - 2.6, 12.5, z - 3.2), 0.14],
+      [new T.Vector3(x + 2.0, 10.2, z - 1.8), new T.Vector3(x + 3.0, 13.0, z - 2.4), 0.14],
+    ];
+    for (const [from, to, r] of boughs) beam(from, to, r, m.bark);
+    // Copa majestuosa estratificada que supera los 15 m de altura (sobre el techo del Bloque 1).
+    const tallCrown: [number, number, number, number, number, number, T.Material][] = [
+      [0.0, 14.4, 0.0, 4.4, 2.3, 4.4, m.leaves[1]],
+      [0.0, 15.5, 0.0, 3.2, 1.8, 3.2, m.leaves[0]],
+      [-3.8, 12.6, 2.5, 3.8, 2.0, 3.6, m.leaves[1]],
+      [3.6, 13.0, 2.7, 3.7, 2.1, 3.6, m.leaves[0]],
+      [-2.8, 12.8, -3.2, 3.6, 2.0, 3.5, m.leaves[1]],
+      [3.2, 13.3, -2.5, 3.8, 2.1, 3.7, m.leaves[0]],
+      [-2.2, 9.6, 1.5, 3.4, 1.8, 3.2, m.leaves[0]],
+      [2.1, 10.0, 1.6, 3.3, 1.8, 3.2, m.leaves[1]],
+      [-1.5, 9.8, -2.0, 3.2, 1.7, 3.1, m.leaves[0]],
+      [1.7, 10.3, -1.5, 3.4, 1.8, 3.3, m.leaves[1]],
+    ];
+    for (const [ox, oy, oz, sx, sy, sz, mat] of tallCrown) {
+      const crownMesh = new T.Mesh(new T.IcosahedronGeometry(1, 2), mat);
+      crownMesh.scale.set(sx, sy, sz); crownMesh.position.set(x + ox, oy, z + oz); crownMesh.castShadow = true; visual.add(crownMesh);
+    }
+    // Muretes / canteros de ladrillo visto en el patio junto al árbol (foto árbol_2.HEIC).
+    box(2.8, 0.45, 0.6, x + 3.0, 0.225, z - 2.5, m.brick, true);
+    box(2.4, 0.45, 0.6, x + 3.0, 0.225, z - 5.0, m.brick, true);
+  }
+
+  // Árboles de referencia adicionales; los de la plataforma nacen en su piso.
   for (const [x, z] of plan.trees) {
     const y = plan.platform.some((p) => insidePolygon([x, z], p)) ? PLAZA_LEVEL : 0;
     pole(0.3, 5.5, x, y + 2.75, z, m.bark, true);
