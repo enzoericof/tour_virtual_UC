@@ -11,4 +11,8 @@ frontend/public/assets/scans/*.glb
 frontend/public/assets/photos/
 frontend/public/assets/manifest.json
 output/
-arbol_ia
+para_la_ia
+replica_3d/
+frontend/replica.html
+frontend/src/replica.ts
+frontend/src/replica.css

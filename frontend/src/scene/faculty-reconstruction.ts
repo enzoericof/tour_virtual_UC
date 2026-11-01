@@ -682,6 +682,32 @@ export function createFaculty() {
       }
     });
   }, PLAZA_LEVEL);
+  // Marquesina sobre la entrada de Sala Manfred: cubierta de ~3 m de vuelo hacia la plaza techada,
+  // apoyada en cuatro columnas de acero (blancas, r=0,08 m) y con una losa delgada. La foto
+  // zona_techada_y_manfred.HEIC muestra la cubierta del corredor principal extendiéndose sobre el
+  // frente curvo. Coordenadas en el plano métrico de CyT (Manfred.angle = 0 → sin rotación).
+  {
+    const mf = plan.manfred;
+    const [mw] = mf.size, mb = mf.bulge;
+    const mx = mf.center[0]; // x central de Manfred en coords de facultad
+    const mRadius = (mw * mw / 4 + mb * mb) / (2 * mb);
+    // z del borde del arco en coords globales de facultad:
+    // center[1] + (d/2 - mb)  =  manfredFront - md/2 + (md/2 - mb)  =  manfredFront - mb
+    const zArcGlobal = mf.center[1] + (mf.size[1] / 2 - mb); // ≈ -12 (frente del arco)
+    const canopyDepth = 3.0; // vuelo desde el arco hacia la plaza (z positivo = norte)
+    const canopyH = PLAZA_LEVEL + 4.0; // techo a ~4 m sobre la plataforma
+    const colH = canopyH - PLAZA_LEVEL;
+    const canopyW = mw - 1.0; // ancho de la marquesina (algo menor que el edificio)
+    // Cuatro columnas circulares en el borde exterior (z = zArcGlobal + canopyDepth).
+    const zColGlobal = zArcGlobal + canopyDepth;
+    for (const cx of [-canopyW / 2 + 0.5, -canopyW / 6, canopyW / 6, canopyW / 2 - 0.5]) {
+      pole(0.08, colH, mx + cx, PLAZA_LEVEL + colH / 2, zColGlobal, m.white, true);
+    }
+    // Losa plana de la marquesina.
+    box(canopyW, 0.15, canopyDepth, mx, canopyH, zArcGlobal + canopyDepth / 2, m.concrete, false);
+    // Viga frontal.
+    box(canopyW, 0.22, 0.1, mx, canopyH - 0.11, zColGlobal, m.concrete, false);
+  }
   // Losa del pasillo cubierto entre la Sala Manfred y Bedelía.
   prism(plan.corridor, PLAZA_LEVEL + 3.6, 0.2, m.concrete, false);
   frame(plan.cantina, () => {

@@ -127,15 +127,16 @@ const cantina = rectFromCorner(add(cantinaFront, [Z, 3], [X, 12]), [18, 12], gri
 const bedeliaCorner = add(plazaNorth, [X, -1], [Z, -10]);
 const bedelia = rectFromCorner(bedeliaCorner, [20, 10], gridAngle);
 const bedeliaWest = (z: number) => pointAtZ(bedeliaCorner, add(bedeliaCorner, [Z, 10]), z);
-// Sala Manfred (12 × 9 m), alineada con el Bloque 1: escenario y pizarrón al norte y el frente curvo
-// al sur, enfrentado a la rampa, con su vértice 2,5 m al norte del arranque. Su lado este queda a 2 m
-// de la esquina noroeste de Bedelía; el pasillo entre ambas se abre en cuña hacia el sur.
+// Sala Manfred (12 × 9 m): escenario y pizarrón al norte y el frente curvo al sur hacia la rampa.
+// Por foto in situ (zona_techada_y_manfred.HEIC) y coordenadas medidas en el campus, la sala se desplaza
+// hacia la izquierda (oeste) para abrir el pasillo en (42.45, -12.92), dar lugar a la puerta de entrada
+// al edificio en (44.64, -11.13) y orientar su entrada y marquesina hacia la plaza techada en (46.58, -5.52).
 const manfredSize: Vec2 = [12, 9], manfredBulge = 1.5;
-const manfredEast = bedeliaCorner[0] - 2, manfredFront = ramp.top - 2.5;
+const manfredEast = bedeliaCorner[0] - 3.4, manfredFront = ramp.top - 2.5;
 const manfredWest = manfredEast - manfredSize[0], manfredBack = manfredFront - manfredSize[1];
 const corridor: Vec2[] = [[manfredEast, bedeliaCorner[1]], bedeliaCorner, bedeliaWest(manfredFront - manfredBulge),
   [manfredEast, manfredFront - manfredBulge]];
-const corridorTop: Vec2 = [manfredEast + 1, bedeliaCorner[1]];
+const corridorTop: Vec2 = [(manfredEast + bedeliaCorner[0]) / 2, bedeliaCorner[1]];
 const corridorFoot = add(corridorTop, [[0, -1], STEPS_RUN]);
 const squareSteps = add(plazaNorth, [X, 5], [Z, square.size[1]]);
 const galleryStepsTop = half.x + STEPS_RUN;
@@ -148,11 +149,13 @@ export const facultyBlueprint = {
   bedelia,
   cantina,
   electronics: { center: [88 + plazaShift, -1], size: [26, 10], angle: gridAngle } as Rect,
-  /** Sala Manfred: auditorio de 12 × 9 m alineado con el Bloque 1, con el escenario y el pizarrón al
-   * norte (-z local) y el frente (+z local) en arco de 1,5 m de flecha hacia la rampa; la fachada
-   * vidriada (+x) da al pasillo que la separa de Bedelía. */
+  /** Sala Manfred: auditorio de 12 × 9 m con frente hacia la rampa y entrada/marquesina orientada a la plaza techada. */
   manfred: { center: [manfredEast - manfredSize[0] / 2, manfredFront - manfredSize[1] / 2] as Vec2, size: manfredSize, angle: 0, bulge: manfredBulge },
-  /** Pasillo cubierto entre Manfred y Bedelía: 2 m en su extremo norte, más ancho hacia el sur. */
+  /** Entrada y marquesina de Sala Manfred orientada hacia la plaza techada (foto zona_techada_y_manfred.HEIC). */
+  manfredCanopy: [46.58, 2.88, -5.52] as const,
+  /** Puerta de entrada al edificio en la galería oeste de Bedelía (foto zona_techada_y_manfred.HEIC). */
+  buildingDoor: [44.64, 1.63, -11.13] as const,
+  /** Pasillo cubierto entre Manfred y Bedelía hacia el norte. */
   corridor,
   /** Plataforma a PLAZA_LEVEL. El primer contorno reúne la Sala Manfred, su pasillo, la explanada
    * hasta la cara norte del Bloque 1 (cortada por la rampa), el rellano al pie de la escalera dentro

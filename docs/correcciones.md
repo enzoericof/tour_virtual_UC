@@ -54,3 +54,10 @@ Incoherencias halladas al contrastar los documentos con el código y las pruebas
 | `base-geografica.md` | Ascensor de 2 × 2 m a 4 m de la esquina SE | 2,5 × 2,5 m, 1,5 m más al este (centro a 3,5 m de la esquina) | Aclaración del equipo, `npm test` |
 | `base-geografica.md` | Escalera Pompidou de 1,8 m que arranca a 20 m de la esquina SE | 2,4 m, arranca a 18 m | Aclaración del equipo (opción elegida), `npm test` |
 | `faculty-reconstruction.ts` | Columnas de 0,34 m, una por módulo de 5 m y por piso; una o dos puertas por módulo | Columnas de 0,5 m cada 2,5 m, enteras hasta la cubierta; seis aulas por piso, desiguales, con una puerta cada una | Aclaración del equipo, `npm test` |
+
+## 01/11/2026 — Sala Manfred: distancia a Bedelía y marquesina (rama `feat/arboles-patio`)
+
+| Documento | Incorrecto | Correcto | Fuente de verdad |
+| --- | --- | --- | --- |
+| `base-geografica.md`, `faculty-blueprint.ts`, prueba | Distancia entre Sala Manfred y Bedelía: 2 m (`manfredEast = bedeliaCorner[0] − 2`) | 3,4 m (`manfredEast = bedeliaCorner[0] − 3,4`); corredor más amplio y centrado | Foto `zona_techada_y_manfred.HEIC` y coordenadas del inspector de réplica (01/11/2026) |
+| `base-geografica.md`, código | Marquesina sobre la entrada de Sala Manfred no modelada | Marquesina de ~3 m de vuelo hacia la plaza techada a PLAZA_LEVEL + 4,0 m, con cuatro columnas blancas (r = 0,08 m) | Foto `zona_techada_y_manfred.HEIC`, `faculty-reconstruction.ts` |
