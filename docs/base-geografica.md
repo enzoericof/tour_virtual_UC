@@ -19,6 +19,7 @@ Origen WGS84: latitud **−25,3251**, longitud **−57,6387**. `X` este, `Z` sur
 | Nivel | Altura Y |
 | --- | --- |
 | Planta baja | 0 |
+| Plataforma de la plaza techada, el cuadrado, Bedelía, la cantina y la Sala Manfred (`PLAZA_LEVEL`) | 1,75 |
 | Primer piso (`piso-1`) | 3,5 |
 | Segundo piso (`piso-2`) | 7 |
 | Tercer piso (`pasillo-p3`, `aula-p3`) | 10,5 |
@@ -29,7 +30,7 @@ Origen WGS84: latitud **−25,3251**, longitud **−57,6387**. `X` este, `Z` sur
 
 Hasta el 31/10/2026 el plano se registraba sobre la imagen aérea anotada con `photoPoint` y una escala distinta por eje (×1,17 a lo largo y ×1,03 a lo ancho), lo que deformaba las proporciones; ese registro se eliminó.
 
-### Medidas del equipo (31/10/2026)
+### Medidas y aclaraciones del equipo (31/10/2026; las marcadas «01/11» son del 01/11/2026)
 
 | Elemento | Medida | Cómo se aplica |
 | --- | --- | --- |
@@ -37,10 +38,13 @@ Hasta el 31/10/2026 el plano se registraba sobre la imagen aérea anotada con `p
 | Bloque G (techo azul, «Bloque 2») | 65 × 12 m | Planta baja y dos pisos; galería hacia el Bloque 1 |
 | Separación entre bloques | 11 m en el punto más cercano y 47 m en el más lejano | 11 m: esquina NE de G a la cara sur del Bloque 1. 47 m: esquina SO del Bloque 1 a la esquina NO de G. Con el giro de 29,15° ambas se cumplen (la esquina NE de G queda también a 11,1 m de la esquina SE del Bloque 1) |
 | Plaza techada | 15 × 10 m | Pegada a toda la cabecera este del Bloque 1 (sus lados oeste pasan por las dos esquinas este), alineada con Bedelía y la cantina, no con el bloque |
+| Plataforma (01/11) | Plaza techada, Bedelía y cantina elevadas a media altura entre la planta baja y el primer piso | 1,75 m. El equipo eligió sumar el cuadrado, la Sala Manfred y su pasillo, y bajar por escalinatas de diez escalones junto al ascensor (como en `IMG_5706`) y al sur del cuadrado; una tercera sale al norte del pasillo de Manfred |
+| Escalera del primer piso a la plaza (01/11) | Por el borde noreste; la cubre el techo del Bloque 1 | Por fuera de la cabecera este (ubicación elegida por el equipo): descanso a la salida de la galería del primer piso y un tramo de 1,4 m que baja hacia el norte hasta la plataforma. El alero del Bloque 1 se prolonga sobre ella y la cubierta de la plaza arranca después |
 | Cuadrado descubierto | — | Entre la plaza techada (oeste), Bedelía (norte) y la cantina (este); 17 × 15 m adoptados |
-| Escalera del Bloque 1 | Arranca a 20 m de la esquina SE | Tipo Pompidou, por fuera de la galería: un tramo por piso hacia la torre, cada uno con descanso unido a la galería y bóveda de chapa; llega al tercer piso. Sentido confirmado por el equipo |
-| Ascensor del Bloque 1 | 2 × 2 m, a 4 m de la misma esquina | Entre la esquina y la escalera, del lado de la galería; recorre todos los niveles. Es un volumen: no se puede usar |
-| Torre de baños | Dos semicírculos, 10 m de punta a punta | Cilindro de 10 m en el extremo oeste, partido en mitades norte y sur por una junta blanca (forma confirmada por el equipo); acceso desde la galería en cada nivel |
+| Escalera del Bloque 1 | Arranca a 20 m de la esquina SE; la bóveda sigue a la escalera y se aplana en los descansos (01/11) | Tipo Pompidou, por fuera de la galería: un tramo por piso hacia la torre, cada uno con descanso unido a la galería; llega al tercer piso. Sentido confirmado por el equipo. Una sola bóveda de chapa, a 2,3 m de la pisada, sube con cada tramo y se aplana en cada descanso |
+| Ascensor del Bloque 1 | 2 × 2 m, a 4 m de la misma esquina; su recubrimiento son tres murales distintos que llegan a la mitad superior entre el primer y el segundo piso (01/11) | Entre la esquina y la escalera, del lado de la galería; recorre todos los niveles. Caja de hormigón con murales en las caras este, sur y oeste hasta 6,5 m; por ahora los tres repiten el único fotografiado (`IMG_5727`). Puertas con marco azul hacia la galería (`IMG_5706`). Es un volumen: no se puede usar |
+| Sala Manfred (01/11) | Aula tipo auditorio a 2 m de Bedelía, con la que forma un pasillo; planta cuadrada con un lado curvo que apunta a la plaza techada | 8 × 6 m (tamaño de las capturas), frente en arco de 1,5 m de flecha y fondo alineado con el de Bedelía. Escenario contra el fondo, tres gradas y fachada vidriada (`IMG_5685`) hacia el pasillo cubierto |
+| Torre de baños | Dos semicírculos, 10 m de punta a punta. Salen de un rectángulo central; en planta baja, un cuadrado sobresale 2 m al sur; vistos desde el edificio, a la derecha hombres y a la izquierda mujeres en todos los pisos (01/11) | Extremo oeste. Núcleo de 2 m que sale de la galería hacia el sur y semicírculos de 4 m de radio al este y al oeste (10 m de punta a punta; disposición y reparto elegidos por el equipo). Entrando desde la galería, hombres al oeste y mujeres al este. Anexo de 8 × 8 m con portón (`IMG_5646`) |
 | Media sombra | Sobre las barandas azules | Lamas en las galerías del Bloque 1, de 2,1 a 3,1 m sobre cada piso |
 
 ### Medidas tomadas del escaneo del pasillo del tercer piso
@@ -54,14 +58,15 @@ Una sola geometría para «Sector CyT», «Vista de planta», «Plano de CyT», 
 | Elemento | Clave | Ids en `places.ts` | Posición y forma |
 | --- | --- | --- | --- |
 | Bloque 1 («bloque de aulas») | `main` | `laboratorio`, `piso-1`, `piso-2`, `pasillo-p3`, `aula-p3` | 75 × 12 m, planta baja y 3 pisos |
-| Torre de baños | `tower` | `banos` | Extremo oeste del Bloque 1, sobre la galería |
-| Escalera y ascensor | `stair`, `elevator` | — | Fachada sur del Bloque 1 (medidas arriba) |
+| Torre de baños | `tower` | `banos` | Extremo oeste del Bloque 1, al sur de la galería (medidas arriba) |
+| Escaleras y ascensor | `stair`, `elevator`, `eastStair` | — | Fachada sur y cabecera este del Bloque 1 (medidas arriba) |
 | Bloque G («Bloque 2» de las carpetas) | `block2` | `bloque-g` | 65 × 12 m, sur del Bloque 1 y girado −29,15°; escalera de ida y vuelta sobre su galería |
 | Patio (área común 2) | `courtyard` | `patio` | Entre ambos bloques |
 | Área común 1 | `common1` | `jardin` | Al sur de la plaza techada |
-| Sala Manfred | `manfred` | `sala-manfred` | 8 × 6 m, norte del extremo oriental del Bloque 1 |
+| Sala Manfred | `manfred`, `corridor` | `sala-manfred` | Frente curvo hacia la plaza techada, a 2 m de Bedelía (medidas arriba) |
 | Bedelía | `bedelia` | `bedelia` | 20 × 10 m, fachada vidriada hacia el cuadrado |
 | Plaza techada | `coveredPlaza` | `plaza`, `acceso` | 15 × 10 m (medidas arriba) |
+| Plataforma | `platform`, `platformSteps` | — | Plaza techada, cuadrado, Bedelía, cantina y Manfred a 1,75 m; tres escalinatas |
 | Plaza abierta | `openPlaza` | `plaza-abierta` | El cuadrado descubierto, con pavimento propio |
 | Cantina | `cantina` | `cantina-cyt` | 18 × 12 m, eje largo transversal al Bloque 1, fachada y terraza hacia el cuadrado |
 | Electrónica e Informática | `electronics` | — | 26 × 10 m, junto a la cantina; solo volumen de orientación |
@@ -76,10 +81,10 @@ Una sola geometría para «Sector CyT», «Vista de planta», «Plano de CyT», 
 
 Orden de prioridad: medidas y aclaraciones del equipo › escaneos › capturas y vista aérea anotada › polígonos OSM.
 
-1. Medidas, capturas y fotos aportadas el 31/10/2026: vistas aéreas con los nombres de las áreas y con las dimensiones, y la foto `IMG_5659` (iPhone, 30/10/2026) desde el área común 2 hacia el Bloque 1, con la torre, la escalera y la media sombra. El HEIC original queda fuera de Git.
+1. Medidas, capturas y fotos aportadas el 31/10/2026: vistas aéreas con los nombres de las áreas y con las dimensiones, y la foto `IMG_5659` (iPhone, 30/10/2026) del arranque de la escalera del Bloque 1 desde la galería de planta baja. El HEIC original está versionado en la raíz del repositorio (ver [pendientes](pendientes.md)). Aclaraciones del 01/11/2026 sobre ascensor, plataforma, escalera a la plaza, Sala Manfred, bóveda y torre, con las ubicaciones elegidas entre opciones por el equipo.
 2. Escaneo del pasillo del tercer piso (`Pasillo - Piso 3.glb`, Scaniverse, hash en `frontend/public/assets/sources.json`): medidas de la galería y texturas.
 3. Capturas satelitales anteriores (31/10/2026), fuera de Git en `.local/references/`, y la [vista aérea marcada](https://drive.google.com/file/d/1nqROQLGTXraAKXHkl4VRuzc5UGMFQnyW/view) del [Drive del TP](https://drive.google.com/drive/folders/1WIVm8i_-avD0KK45kboU60isgf9_5Z2K): posición de Manfred, Electrónica, áreas comunes, caminos y estacionamiento.
-4. Fotos del mismo Drive (procedencia en `frontend/public/assets/sources.json`). Orientan: `IMG_5668` Bloque G, `IMG_5646` torre de baños, `IMG_5720` cantina, `IMG_5685` Manfred, `IMG_5693` plaza techada, `IMG_5727` pilar pintado.
+4. Fotos del mismo Drive (procedencia en `frontend/public/assets/sources.json`). Orientan: `IMG_5668` Bloque G, `IMG_5646` torre de baños, `IMG_5720` cantina, `IMG_5685` e `IMG_5686` pasillo de Manfred, `IMG_5693` plaza techada, `IMG_5706` ascensor y escalones desde la plaza techada, `IMG_5727` mural del ascensor.
 5. [Google Maps: Campus Santa Librada](https://www.google.com/maps/place/Universidad+Cat%C3%B3lica+de+Asunci%C3%B3n+-+Campus+Santa+Librada/@-25.3262439,-57.6387973,16.83z/): solo comparación.
 6. OSM: [área universitaria](https://www.openstreetmap.org/way/130888813), [Bloque 1](https://www.openstreetmap.org/way/274489894), [segundo bloque](https://www.openstreetmap.org/way/327428698); [atribución ODbL](https://www.openstreetmap.org/copyright).
 
@@ -87,7 +92,7 @@ Las imágenes aéreas son evidencia local de comparación: ni texturas ni redist
 
 ## Límites de fidelidad
 
-Las medidas de la tabla del equipo son las únicas medidas de edificios; se tomaron sobre capturas y no son un relevamiento topográfico. Interpretación propia, a confirmar: los puntos entre los que se midieron los 11 y 47 m, el ancho de la galería (2,5 m), la altura de piso (3,5 m) y del último nivel (4,1 m bajo la cubierta), el ancho de la escalera (1,8 m), la ubicación de la escalera del Bloque G y la distribución interior de la torre. Sin medida del equipo: Bedelía, cantina, Sala Manfred, Electrónica, cuadrado descubierto, áreas comunes, caminos y estacionamiento; sus tamaños y posiciones salen de las capturas y son aproximados. Número de módulos, interiores sin escaneo, mobiliario y materiales son reconstrucción; no se asignan números de aula. `piso-2` y `banos` siguen `pending` en `places.ts`. De la cantina faltan fachada, forma de cubierta e interiores. No se afirma fidelidad fotográfica.
+Las medidas de la tabla del equipo son las únicas medidas de edificios; se tomaron sobre capturas y no son un relevamiento topográfico. Interpretación propia, a confirmar: los puntos entre los que se midieron los 11 y 47 m, el ancho de la galería (2,5 m), la altura de piso (3,5 m) y del último nivel (4,1 m bajo la cubierta), el ancho de la escalera (1,8 m), la ubicación de la escalera del Bloque G, el reparto de los 10 m de la torre (núcleo de 2 m y radios de 4 m), el acceso de 2 m del núcleo, el anexo de 8 × 8 m y la distribución interior de la torre, la altura de los murales (6,5 m), la ubicación de las escalinatas de la plataforma, la flecha del frente de Manfred y su interior, y la prolongación del alero sobre la escalera de la cabecera. Sin medida del equipo: Bedelía, cantina, Sala Manfred, Electrónica, cuadrado descubierto, áreas comunes, caminos y estacionamiento; sus tamaños y posiciones salen de las capturas y son aproximados. Número de módulos, interiores sin escaneo, mobiliario y materiales son reconstrucción; no se asignan números de aula. `piso-2` y `banos` siguen `pending` en `places.ts`. De la cantina faltan fachada, forma de cubierta e interiores. No se afirma fidelidad fotográfica.
 
 ## Actualizar el contexto cartográfico
 

@@ -1,35 +1,36 @@
-# Revisión visual — medidas de CyT, escalera, torre, texturas y menú superior
+# Revisión visual — plataforma, ascensor, escalera, torre de baños y Sala Manfred
 
-Fecha: 31/10/2026, rama `feat/cyt-medidas-texturas`. Alcance: aplicar las medidas del equipo, corregir la escalera del Bloque 1, agregar ascensor, torre de baños y media sombra, texturas del escaneo del pasillo y recoger la portada y los paneles en la barra superior. No se evalúa como réplica fotográfica terminada.
+Fecha: 01/11/2026, rama `feat/cyt-plataforma-ascensor-torre`. Alcance: aplicar las aclaraciones del equipo del 01/11/2026 sobre el ascensor, la plataforma de la plaza techada, la escalera del primer piso a la plaza, la bóveda de la escalera del Bloque 1, la torre de baños y la Sala Manfred. No se evalúa como réplica fotográfica terminada. La revisión anterior (31/10/2026, medidas y texturas) está en el historial de Git.
 
 ## Hallazgos y comparación
 
-- [P1 corregido] El plano se estiraba distinto en cada eje (×1,17 a lo largo, ×1,03 a lo ancho) y el Bloque 1 medía unos 75 × 13,5 m con módulos deformados. Ahora el plano está en metros y solo se gira y traslada: Bloque 1 de 75 × 12 m, Bloque G de 65 × 12 m a 11 y 47 m del Bloque 1.
-- [P1 corregido] La escalera del Bloque 1 estaba en la cabecera este, como caja de ida y vuelta. Ahora sube por fuera de la galería desde 20 m de la esquina SE hacia la torre, un tramo por piso, como en la foto `IMG_5659`. El ascensor de 2 × 2 m queda a 4 m de la esquina.
-- [P1 corregido] Faltaba la torre de baños. Se agregó como cilindro de 10 m partido por una junta blanca, con acceso desde la galería en cada nivel (forma confirmada por el equipo).
-- [P1 corregido] La plaza techada seguía la orientación del bloque. Ahora mide 15 × 10 m, está pegada a la cabecera y sigue la orientación de Bedelía y la cantina, que cierran el cuadrado descubierto.
-- [P2 corregido] Ladrillo, pisos y hormigón eran texturas dibujadas. Ahora salen del escaneo: ladrillo con su traba real, granito con franjas cada cuarto de módulo, dintel de hormigón, lamas de la media sombra y chapa de la cubierta.
-- [P2 corregido, hallado en esta revisión] «Comenzar recorrido» dejaba al visitante frente a la pared de ladrillo de la cabecera, y la cantina, Bedelía y los baños aparecían de costado o demasiado cerca. Cada punto tiene ahora dirección de mirada: la galería de planta baja, las fachadas y la junta de la torre.
-- [P3 / siguiente etapa] Medidas de Bedelía, cantina, Manfred y Electrónica; interior de la torre y de la cantina; cubierta de la plaza techada (hoy plana con cerchas). Ver [pendientes](docs/pendientes.md).
+- [P1 corregido] El mural de `IMG_5727` era un pilar exento entre la escalera y el ascensor, y el ascensor tenía cerramiento de lamas. Ahora el ascensor es una caja de hormigón con murales en sus caras este, sur y oeste hasta 6,5 m. Coincide con `IMG_5727` (cara este desde el patio) y con `IMG_5706` (puerta con marco azul hacia la galería).
+- [P1 corregido] La plaza techada, Bedelía y la cantina estaban en planta baja. Ahora están sobre una plataforma a 1,75 m con el cuadrado, la Sala Manfred y su pasillo. Se baja por escalinatas junto al ascensor, al sur del cuadrado y al norte del pasillo de Manfred. Una escalera por fuera de la cabecera este une el primer piso con la plaza; la cubre el alero del Bloque 1.
+- [P1 corregido] La bóveda de cada tramo de la escalera Pompidou era horizontal, a la altura del piso de llegada (hasta 6 m sobre los primeros escalones). Ahora es una sola bóveda a 2,3 m de la pisada que sube con los tramos y se aplana en los descansos.
+- [P1 corregido] La torre de baños era un cilindro partido en mitades norte y sur. Ahora tiene un núcleo de 2 m que sale de la galería y semicírculos al oeste (hombres, a la derecha al entrar) y al este (mujeres), con un anexo de 8 × 8 m en planta baja. Desde el patio se parece a `IMG_5646`: semicírculo con ventanas en la punta, pilastra de hormigón en el encuentro con el núcleo y anexo bajo con portón.
+- [P1 corregido] La Sala Manfred era un rectángulo vidriado lejos de Bedelía. Ahora es un auditorio con el frente curvo hacia la plaza techada, a 2 m de Bedelía. Entre ambas queda un pasillo cubierto, y la fachada vidriada da a ese pasillo como en `IMG_5685`.
+- [P2 corregido, hallado en esta revisión] Dentro de los baños, la mesada y un cubículo dejaban 0,5 m de paso junto a la puerta y la cápsula no entraba. Mesada y cubículos pasaron a la mitad sur.
+- [P2 corregido, hallado en esta revisión] La viga transversal de la galería tapaba el cartel «BAÑOS». Se quitó esa viga junto con la columna que reemplaza el núcleo de la torre.
+- [P3 / siguiente etapa] Fotos de los murales sur y oeste del ascensor. Confirmar el reparto de los 10 m de la torre, la altura de los murales, las escalinatas y el tamaño de Manfred. Ver [pendientes](docs/pendientes.md).
 
 ## Evidencia
 
-Capturas en `.local/references/medidas-texturas/` (fuera de Git), tomadas con Edge sin ventana y WebGL por GPU: vistas «Plano de CyT» y «Mi facultad» (`01`, `02`), patio, escalera, torre y plaza techada (`03`–`06`), galerías de planta baja y tercer piso (`07`, `08`, `16`), Bloque G (`09`), puntos de visita (`visits_sheet`), menú (`ui-2-recogido`, `ui-3-menu`, `ui-celular`), llegada a «Pasillos de acceso» (`ui-6-acceso`), mapa (`30-mapa`) y texturas en mosaico (`texturas-1`, `texturas-2`).
+Capturas en `.local/references/plataforma-ascensor-torre/` (fuera de Git), tomadas con Edge sin ventana y WebGL por GPU sobre la escena del proyecto: ascensor desde el patio y desde la plaza (`01`, `02`), bóveda por fuera y por dentro (`03`, `04`, `16`), plataforma con escalinatas (`05`), escalera de la cabecera este (`06`), Sala Manfred por fuera, desde el pasillo y por dentro (`07`–`10`), torre desde el patio, desde la galería, desde arriba y dentro del baño de hombres (`11`–`14`), vista de planta (`15`) y mapa (`17`). En la app: «Comenzar recorrido» (`app-comenzar`) y seis puntos de visita (`app-*`).
 
-Comparación: la foto `IMG_5659` (área común 2 hacia el Bloque 1) frente a `03-courtyard` y `04-stair` para torre, tramos, bóvedas y lamas; el escaneo del pasillo frente a `08-gallery-p3` para ladrillo, pilastras, piso, baranda, lamas y cubierta. Se comparan disposición, sentido de subida y materiales, no píxeles: la foto tiene otra lente y el escaneo, huecos.
+Comparación: `IMG_5727` frente a `01` (mural, altura y ubicación junto a la galería), `IMG_5706` frente a `02` (ascensor visto desde la plaza elevada y escalones de bajada), `IMG_5646` frente a `11` (semicírculo, núcleo y anexo) e `IMG_5685`/`IMG_5686` frente a `08` (fachada vidriada hacia el pasillo). Se comparan disposición y niveles, no píxeles.
 
 ## Superficies de fidelidad
 
-- **Tipografía:** se mantienen DM Sans, Manrope y las jerarquías existentes; el botón «Menú» usa el estilo de la navegación con su tecla `M`.
-- **Distribución y espaciado:** medidas del equipo en el plano; mapa, geometría, colisiones y destinos comparten la transformación. El menú desplegable aloja ubicación, vistas, herramientas y pie sin desbordar en 1280 × 800 ni en 390 × 844.
-- **Colores:** los del escaneo para ladrillo, granito, hormigón y cubierta; lamas en el gris azulado de las fotos; techo gris en el Bloque 1 y azul en G y la cantina.
-- **Imágenes:** fotos y escaneos conservados; las texturas son derivados documentados en `sources.json`, no imágenes generadas.
-- **Contenido:** ids y nombres de `places.ts` sin cambios; la ayuda y el README documentan la tecla `M`.
+- **Tipografía:** sin cambios en la interfaz. Los carteles nuevos («HOMBRES», «MUJERES», «SALA MANFRED STARK») usan el mismo estilo que los existentes.
+- **Distribución y espaciado:** plataforma, escaleras, torre y Manfred salen de `faculty-blueprint.ts`. Mapa, geometría, colisiones y puntos de visita usan la misma fuente; el mapa dibuja la plataforma, el frente curvo de Manfred y la torre con su anexo.
+- **Colores:** hormigón y ladrillo del escaneo; el mural es un recorte de la foto `IMG_5727`; butacas y escenario en la madera rojiza de los bancos.
+- **Imágenes:** no se agregaron recursos; las tres caras del ascensor repiten el único mural fotografiado.
+- **Contenido:** ids y nombres de `places.ts` sin cambios; los rótulos de piso de los espacios de la plataforma y las descripciones de Manfred y de los baños reflejan las aclaraciones.
 
 ## Interacción y resultado
 
-Verificados: las cuatro vistas; el mapa; los puntos de visita; recoger la portada con una tecla (Tab, Enter y modificadores no la recogen), abrir el menú, elegir una vista desde él, cerrarlo al hacer clic afuera y devolver los paneles con `M`. Recorrido a pie con la cápsula del proyecto: escalera del Bloque 1 hasta el tercer piso, torre de baños, galerías, plazas, terraza de la cantina y escalera del Bloque G ([verificación](docs/verificacion.md)).
+Verificados con la cápsula del proyecto sobre las colisiones del campus: los 16 puntos de visita sin solaparse; las tres escalinatas; de la galería de planta baja a la plaza junto al ascensor; la escalera de la cabecera este en ambos sentidos; la entrada a la Sala Manfred; el baño de hombres en planta baja y el de mujeres en el primer y tercer piso; la escalera Pompidou hasta el tercer piso; y plaza techada → cuadrado → terraza de la cantina ([verificación](docs/verificacion.md)).
 
-Consola: sin errores. No se probaron móviles físicos ni los interiores sin escaneo. Las 16 pruebas frontend y el build pasaron.
+Consola de la app: sin errores de JavaScript; solo las respuestas 502 de la API, porque el backend no estaba en marcha. No se probaron móviles físicos. Las 18 pruebas frontend y el build pasaron.
 
 final result: passed

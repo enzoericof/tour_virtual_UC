@@ -20,7 +20,7 @@ Incoherencias halladas al contrastar los documentos con el código y las pruebas
 | `verificacion.md` | Backend: edición de trabajos «pendiente de repetir» | Repetida: 5/5 aprobadas | `./mvnw verify` |
 | `AGENTS.md`, `base-geografica.md`, código | «Bloque de laboratorios» frente a «bloque de aulas»; constante `FACULTY_LABS` | Es el Bloque 1 (el laboratorio está en su planta baja). `FACULTY_LABS` es la huella OSM `327428698`, no designa laboratorios | `places.ts`, `campus-geometry.ts` |
 
-**Abiertas** (no corregibles solo con documentación): `.gitignore` contradice el versionado de los recursos; hay originales sin seguimiento en la raíz (`IMG_5659.HEIC`, `Pasillo - Piso 3.glb`) que AGENTS.md prohíbe subir; el nombre `FACULTY_LABS`. Seguimiento en [pendientes.md](pendientes.md).
+**Abiertas** (no corregibles solo con documentación): `.gitignore` contradice el versionado de los recursos; hay originales versionados en la raíz (`IMG_5659.HEIC`, `Pasillo - Piso 3.glb`; ver la tabla del 01/11/2026) que AGENTS.md prohíbe subir; el nombre `FACULTY_LABS`. Seguimiento en [pendientes.md](pendientes.md).
 
 **Reorganización**: cada hecho pasó a un único documento (tabla de AGENTS.md); se eliminaron las secciones históricas repetidas y las dos descripciones del mismo recorte.
 
@@ -29,3 +29,16 @@ Incoherencias halladas al contrastar los documentos con el código y las pruebas
 | Documento | Incorrecto | Correcto | Fuente de verdad |
 | --- | --- | --- | --- |
 | `base-geografica.md` | El Bloque 1 se describía como «marco local de 64 × 13 m» | `facultyToWorld` escalaba ×1,17 y ×1,03: en escena medía 75 × 13,4 m. El plano está ahora en metros (75 × 12, medida del equipo) y no se escala | `faculty-blueprint.ts`, `campus-geometry.ts`, `npm test` |
+
+## 01/11/2026 — plataforma, ascensor, torre y Sala Manfred (rama `feat/cyt-plataforma-ascensor-torre`)
+
+| Documento | Incorrecto | Correcto | Fuente de verdad |
+| --- | --- | --- | --- |
+| `base-geografica.md`, `design-qa.md` | Torre de baños «partida en mitades norte y sur por una junta blanca (forma confirmada por el equipo)» | Núcleo de 2 m que sale de la galería, con semicírculos al este (mujeres) y al oeste (hombres) y anexo cuadrado en planta baja | Aclaración del equipo, `faculty-blueprint.ts`, `npm test` |
+| `base-geografica.md`, código | `IMG_5727` como «pilar pintado» exento junto a la escalera; ascensor con cerramiento de lamas | El bloque pintado es el recubrimiento del ascensor: tres murales hasta la mitad superior entre el primer y el segundo piso | Aclaración del equipo, `faculty-reconstruction.ts` |
+| `base-geografica.md` | Sala Manfred: rectángulo de 8 × 6 m «norte del extremo oriental del Bloque 1» | Auditorio con el frente curvo hacia la plaza techada, a 2 m de Bedelía, con un pasillo entre ambas | Aclaración del equipo, `faculty-blueprint.ts` |
+| `places.ts`, `base-geografica.md` | Plaza techada, cuadrado, Bedelía, cantina y Manfred en planta baja | Sobre una plataforma a 1,75 m, con escalinatas y una escalera desde el primer piso | Aclaración del equipo, `npm test` |
+| `base-geografica.md`, `design-qa.md` | Bóveda de cada tramo de la escalera del Bloque 1, horizontal a la altura del piso de llegada | Una bóveda que sigue los tramos y se aplana en los descansos | Aclaración del equipo |
+| `places.ts` | Baños: «Ubicación provisional, pendiente de identificar con el equipo» | Torre del extremo oeste; hombres a la derecha y mujeres a la izquierda entrando desde la galería | Aclaración del equipo |
+| `base-geografica.md`, `design-qa.md` | `IMG_5659` «desde el área común 2 hacia el Bloque 1, con la torre» | El archivo `IMG_5659.HEIC` muestra la galería de planta baja del Bloque 1 con el arranque de la escalera; no se ve la torre | `IMG_5659.HEIC` |
+| `base-geografica.md`, `pendientes.md`, `correcciones.md` | `IMG_5659.HEIC` y `Pasillo - Piso 3.glb` «fuera de Git» o «sin seguimiento» en la raíz | Están versionados desde el commit `0017185` (integrado en `main` con el PR #3), contra la regla de AGENTS.md de no subir originales | `git ls-files` |
