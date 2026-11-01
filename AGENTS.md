@@ -61,6 +61,7 @@ Versiones exactas: tabla del README (única fuente). Decisiones: Three.js direct
 - `frontend/`: escenario, navegación, interacción, interfaz y clientes de API/chat. `backend/`: usuarios, autenticación, trabajos, paneles y chat. `docs/`: documentación. `compose.yaml`: ejecución conjunta.
 - El navegador consume REST bajo `/api/v1` y WebSocket bajo `/ws`; solo el backend accede a PostgreSQL. Actualizar [docs/arquitectura.md](docs/arquitectura.md) en el mismo cambio que modifique un contrato y coordinar con los componentes afectados.
 - Separar la geometría 3D de los contenidos administrables. Paneles y biblioteca salen del backend en la versión integrada.
+- `campus-backend/` conserva un aporte independiente integrado el 01/11; no lo consume el frontend ni Compose. No reemplazar `backend/` ni arrancar ambos en 8080. Sus diferencias y pendientes están en docs/arquitectura.md.
 
 ## Three.js
 
@@ -72,7 +73,7 @@ Detalle y justificación: [docs/base-geografica.md](docs/base-geografica.md); co
 - `faculty-blueprint.ts` es la única geometría de CyT para las cuatro vistas («Sector CyT», «Vista de planta», «Plano de CyT», «Mi facultad») y el modo a pie. No recuperar los bloques paralelos antiguos ni duplicar anexos con volúmenes OSM. El Bloque G es oblicuo respecto del Bloque 1.
 - Secuencia: **bloque de aulas → plaza techada → plaza abierta → cantina girada**, junto al Departamento de Electrónica e Informática. La plaza abierta queda a cielo abierto y unida al pavimento de la techada. `plaza` es la techada; `plaza-abierta` es independiente. Plaza techada, cuadrado, Bedelía, cantina y Sala Manfred están sobre una plataforma a 1,40 m, entre la planta baja y el primer piso; los bloques quedan en el nivel del suelo. La aclaración del equipo y las capturas del 31/10/2026 prevalecen sobre el rótulo «Cantina» de la imagen anotada antigua.
 - `X` este, `Z` sur, `Y` vertical, metros. Los puntos de visita pasan por `facultyToWorld`, que solo gira y traslada el plano métrico: no escalarlo ni volver a registrarlo sobre píxeles de imágenes. Las medidas del equipo están en base-geografica.md y las comprueba `npm test`.
-- Red peatonal conectada y circulaciones despejadas. Sin bosques: 4 árboles de referencia en CyT y pocos en el contexto.
+- Red peatonal conectada y circulaciones despejadas. Sin bosques: dos árboles principales del patio, cuatro referencias adicionales en CyT y pocos en el contexto, según base-geografica.md.
 - Afinar interiores, anexos y fachadas solo con referencias identificadas. Árboles, vehículos y alturas del contexto son aproximaciones, no un relevamiento.
 - Mantener la atribución de OpenStreetMap. Las capturas de Google Maps sirven para comparar, no son texturas.
 

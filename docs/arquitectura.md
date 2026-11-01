@@ -11,6 +11,14 @@ Monolito: el backend Spring Boot sirve la API, el WebSocket y, en Docker, el fro
 | Datos | JPA + Flyway (`V1__initial_schema.sql`: `campus_user`, `work`, `panel`; `ddl-auto=validate`). PostgreSQL 18 en entrega; H2 en modo PostgreSQL solo con el perfil `local`. |
 | Despliegue | `Dockerfile` en 3 etapas (build del frontend → copia a `static/` del JAR → JRE). `compose.yaml`: `app` (8080, solo en 127.0.0.1) y `database` (sin puerto publicado, volumen `campus-data`). |
 
+## Aporte campus-backend
+
+Integrado desde `feature/campus-backend` el 01/11/2026 para conservar el trabajo del equipo. Es un proyecto separado con usuarios, autenticación y modelos de trabajos/archivos; no está conectado al frontend ni al Dockerfile. El servidor activo continúa en `backend/`.
+
+El aporte usa Java 21 en su POM y rutas `/api/auth/registro`, `/api/auth/login` y `/api/auth/logout`, distintas de `/api/v1`. Apunta a PostgreSQL local `TP_INFO3`, con variables `DB_USER` y `DB_PASSWORD`; su prueba de contexto requiere esa base. La configuración actual desactiva CSRF y necesita adecuarse a la política del proyecto antes de usarla como sustituto del servidor. Ambos proyectos configuran el puerto 8080 y no deben arrancarse juntos con esa configuración.
+
+Su incorporación conserva código e historial; no unifica los contratos, las migraciones ni las funciones de seguridad. La compilación se verificó con Java 25 usando el Maven Wrapper de `backend/` y `-DskipTests`; no se declara verificado el arranque del aporte con PostgreSQL.
+
 ## API REST `/api/v1`
 
 Convenciones: JSON; errores `{"message": "..."}`; cookie de sesión `JSESSIONID` (HttpOnly, SameSite=Lax, `Secure` si `COOKIE_SECURE=true`, 60 min). **Toda petición POST/PUT/DELETE exige CSRF, incluidos registro, login y logout**: pedir `GET /auth/csrf` y enviar `token` en el encabezado `headerName`. El token se invalida al iniciar sesión; pedir otro.

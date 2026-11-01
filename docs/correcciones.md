@@ -1,5 +1,10 @@
 # Correcciones documentales
 
+## Integración del 01/11/2026
+
+- La documentación solo describía `backend/`; al incorporar `feature/campus-backend` se añade el estado del proyecto separado en [arquitectura.md](arquitectura.md#aporte-campus-backend). Su compilación no implica que sustituya al servidor activo ni que se hayan unificado contratos o seguridad.
+- AGENTS.md aún fijaba cuatro árboles en CyT. Se sincronizó con el aporte de dos árboles principales del patio y las cuatro referencias adicionales descritas en base-geografica.md.
+
 Incoherencias halladas al contrastar los documentos con el código y las pruebas. Una fila por error: qué decía, qué es correcto y dónde está la verdad. Añadir al final, bajo un encabezado con la fecha.
 
 ## 31/10/2026

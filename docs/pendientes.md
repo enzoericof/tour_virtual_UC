@@ -4,6 +4,7 @@ Responsables y fechas: **sin asignar** (no se registran por suposición). Estado
 
 | Tarea | Criterio de terminado |
 | --- | --- |
+| Unificar el aporte `campus-backend/` con `backend/`: Java, rutas, sesiones/CSRF, modelos y migraciones | Un único servidor acordado, consumido por el frontend y Compose, con pruebas de PostgreSQL y permisos; hoy el aporte permanece separado |
 | Confirmar las interpretaciones de las medidas del equipo: puntos de los 11 y 47 m, ancho de galería, alturas de piso y de cubierta; y de las aclaraciones del 01/11: reparto de los 10 m de la torre, acceso del núcleo y anexo, altura de los murales, escalinatas de la plataforma, flecha y pasillo en cuña de la Sala Manfred, corrimiento de la plaza (6,5 m) y del grupo que la acompaña, retiro de planta baja y primer piso, ancho, arranque y pendiente de la rampa, bodega, diámetro de las columnas y tramo de la escalera Pompidou ([base-geografica.md](base-geografica.md#límites-de-fidelidad)) | Confirmación del equipo registrada en base-geografica.md |
 | Aulas: hoy son seis por piso con anchos y puertas de una variación fija, no relevados | Planos o fotos de cada piso incorporados a `rooms` en `faculty-blueprint.ts` |
 | Murales del ascensor: hoy las tres caras repiten el mural de `IMG_5727` | Fotos de las caras sur y oeste incorporadas como texturas propias, con su procedencia en `sources.json` |

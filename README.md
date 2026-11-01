@@ -2,6 +2,8 @@
 
 Primera versión funcional del Trabajo Práctico de **Informática III 2026**, desarrollada para un equipo de seis integrantes. Representa la Facultad de Ciencias y Tecnología de la Universidad Católica con Three.js y una base de usuarios, contenidos y chat en Spring Boot.
 
+La integración de ramas del 01/11 conserva también el aporte `campus-backend/`. El servidor utilizado por el frontend y Docker sigue siendo `backend/`; el aporte separado requiere unificación antes de sustituirlo. Ver [estado de ambos proyectos](docs/arquitectura.md#aporte-campus-backend).
+
 ## Qué incluye esta versión
 
 - Sector de Ciencias y Tecnología con las medidas del equipo: Bloque 1 (75 × 12 m, planta baja y tres pisos) con su escalera tipo Pompidou, ascensor con murales, cabecera este con escalera y rampa hacia la plaza techada, media sombra y torre de baños; Bloque G (65 × 12 m); patios; plazas techada y abierta, Bedelía, cantina y Sala Manfred sobre una plataforma a 1,40 m; dos canchas vecinas y estacionamientos cercanos. Se excluyen las demás facultades y el seminario.
