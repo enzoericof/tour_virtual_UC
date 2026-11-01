@@ -74,19 +74,13 @@ function tiled(map: T.Texture, tile: readonly number[], options: T.MeshStandardM
 }
 
 export function makeMaterials() {
-  const louver = scanMaterial("lamas", { roughness: 0.65, metalness: 0.15, side: T.DoubleSide });
-  // El cerramiento del ascensor comparte la textura de las lamas, más claro y de una sola cara.
-  const elevatorLouver = louver.clone();
-  elevatorLouver.color.setScalar(1.55);
-  elevatorLouver.side = T.FrontSide;
   return {
     brick: scanMaterial("ladrillo", { roughness: 0.95 }),
     concrete: scanMaterial("hormigon", { roughness: 0.92 }),
     // Franjas cada cuarto de módulo (5 m / 4), como en el escaneo (5,14 m / 4).
     galleryFloor: scanMaterial("granito-franja", { roughness: 0.55 }, [1.25, 1.25]),
     granite: scanMaterial("granito", { roughness: 0.6 }),
-    louver,
-    elevatorLouver,
+    louver: scanMaterial("lamas", { roughness: 0.65, metalness: 0.15, side: T.DoubleSide }),
     roofUnder: scanMaterial("chapa-cubierta", { roughness: 0.85 }),
     tile: tiled(texture("tile"), [1.6, 1.6], { roughness: 0.7 }),
     stone: tiled(texture("concrete"), [4, 4], { roughness: 0.95 }),

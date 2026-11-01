@@ -18,7 +18,7 @@ const originalPlaces: Place[] = [
     id: "acceso",
     name: "Pasillos de acceso",
     category: "Bienvenida",
-    floor: "Planta baja",
+    floor: "Plataforma de la plaza (+1,75 m)",
     description:
       "El punto de encuentro con el campus: galerías cubiertas, estructura clara y ladrillo visto. Distribución reconstruida a partir de fotografías y la referencia aérea.",
     position: [34, 0, 1],
@@ -69,7 +69,7 @@ const originalPlaces: Place[] = [
     id: "cantina-cyt",
     name: "Cantina de CyT",
     category: "Vida universitaria",
-    floor: "Planta baja",
+    floor: "Plataforma de la plaza (+1,75 m)",
     description:
       "Un espacio para hacer una pausa y compartir. La reconstrucción del exterior se basa en las fotografías; la distribución interior es provisional.",
     position: [40, 0, 15],
@@ -81,7 +81,7 @@ const originalPlaces: Place[] = [
     id: "bedelia",
     name: "Bedelía",
     category: "Servicios",
-    floor: "Planta baja",
+    floor: "Plataforma de la plaza (+1,75 m)",
     description:
       "Área administrativa junto al acceso. Referencia fotográfica disponible; dimensiones e interior pendientes de validación.",
     position: [40, 0, -12],
@@ -93,9 +93,9 @@ const originalPlaces: Place[] = [
     id: "sala-manfred",
     name: "Sala Manfred",
     category: "Encuentros",
-    floor: "Planta baja",
+    floor: "Plataforma de la plaza (+1,75 m)",
     description:
-      "Recinto junto al acceso, identificado por su cerramiento de vidrio y perfilería azul. Interior aproximado en esta primera versión.",
+      "Sala tipo auditorio con el frente curvo hacia la plaza techada y el cerramiento de vidrio y perfilería azul hacia el pasillo que la separa de Bedelía. Interior aproximado.",
     position: [27, 0, -15],
     photo: "IMG_5685",
     photos: ["IMG_5685"],
@@ -129,9 +129,9 @@ const originalPlaces: Place[] = [
     id: "plaza",
     name: "Plaza techada",
     category: "Espacios compartidos",
-    floor: "Planta baja",
+    floor: "Plataforma de la plaza (+1,75 m)",
     description:
-      "Continuación cubierta del bloque de aulas. Desde aquí se pasa a la plaza abierta y después a la cantina.",
+      "Continuación cubierta del bloque de aulas, a media altura entre la planta baja y el primer piso. Desde aquí se pasa a la plaza abierta y después a la cantina.",
     position: [27, 0, 7],
     photo: "IMG_5688",
     photos: ["IMG_5688", "IMG_5693", "IMG_5706"],
@@ -141,7 +141,7 @@ const originalPlaces: Place[] = [
     id: "plaza-abierta",
     name: "Plaza abierta",
     category: "Espacios compartidos",
-    floor: "Planta baja · a cielo abierto",
+    floor: "Plataforma de la plaza · a cielo abierto",
     description:
       "Plaza sin techo entre la plaza techada y la cantina. La fachada de la cantina está girada hacia este espacio, junto al Departamento de Electrónica e Informática.",
     position: [0,0,0],
@@ -177,9 +177,9 @@ const originalPlaces: Place[] = [
     id: "banos",
     name: "Baños",
     category: "Servicios",
-    floor: "Planta baja · Bloque 1",
+    floor: "Todos los pisos · Bloque 1",
     description:
-      "Ubicación provisional, pendiente de identificar con el equipo. Se incluye un recinto accesible sin afirmar que reproduce el interior real.",
+      "Torre del extremo oeste del Bloque 1: un núcleo que sale de la galería y dos semicírculos. Entrando desde la galería, hombres a la derecha y mujeres a la izquierda, en todos los pisos. Distribución interior aproximada.",
     position: [-26, 0, -4],
     photo: "IMG_5666",
     photos: [],

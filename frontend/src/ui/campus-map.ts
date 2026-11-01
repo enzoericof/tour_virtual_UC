@@ -1,5 +1,7 @@
 import { layout, campusBounds, type Point } from "../data/campus-geometry";
-import { facultyBlueprint, worldPolygon, inFacultyZone } from "../data/faculty-blueprint";
+import {
+  facultyBlueprint, worldPolygon, inFacultyZone, manfredOutline, towerAnnex, towerOutline,
+} from "../data/faculty-blueprint";
 
 /** The map and the 3D overview use the same source footprints and orientation. */
 export function drawCampusMap(canvas: HTMLCanvasElement) {
@@ -20,16 +22,15 @@ export function drawCampusMap(canvas: HTMLCanvasElement) {
   ctx.strokeStyle = "#f3f1e5"; ctx.lineJoin = "round"; ctx.lineCap = "round";
   layout.roads.filter((r) => !inFacultyZone(r.points)).forEach((r) => { path(r.points); ctx.lineWidth = r.width * width / (campusBounds.maxX - campusBounds.minX); ctx.stroke(); });
   layout.pitches.forEach((p) => { path(p.points); ctx.fillStyle = "#819d65"; ctx.fill(); ctx.strokeStyle = "#edf3e0"; ctx.lineWidth = 1.5; ctx.stroke(); });
-  path(worldPolygon(facultyBlueprint.openPlaza)); ctx.fillStyle = "#d8d3c1"; ctx.fill();
-  for (const key of ["main", "block2", "manfred", "bedelia", "cantina", "coveredPlaza", "electronics"] as const) {
-    path(worldPolygon(facultyBlueprint[key])); ctx.fillStyle = "#295740"; ctx.fill();
+  // Plataforma de la plaza techada, el cuadrado y los anexos.
+  for (const outline of facultyBlueprint.platform) { path(worldPolygon(outline)); ctx.fillStyle = "#d8d3c1"; ctx.fill(); }
+  // Edificios, Sala Manfred con su frente curvo y torre de baños (núcleo, semicírculos y anexo).
+  const shapes = [...(["main", "block2", "bedelia", "cantina", "coveredPlaza", "electronics"] as const)
+    .map((key) => facultyBlueprint[key]), manfredOutline(), towerAnnex(), towerOutline()];
+  for (const shape of shapes) {
+    path(worldPolygon(shape)); ctx.fillStyle = "#295740"; ctx.fill();
     ctx.strokeStyle = "#f6f2e6"; ctx.lineWidth = 1.5; ctx.stroke();
   }
-  // Torre de baños: dos semicírculos con su junta.
-  const { center, radius } = facultyBlueprint.tower;
-  path(worldPolygon(Array.from({ length: 32 }, (_, i) => [center[0] + radius * Math.cos(i * Math.PI / 16),
-    center[1] + radius * Math.sin(i * Math.PI / 16)] as const)));
-  ctx.fillStyle = "#295740"; ctx.fill(); ctx.strokeStyle = "#f6f2e6"; ctx.stroke();
   ctx.strokeStyle = "#f4efe0";
   facultyBlueprint.paths.forEach((p) => { path(worldPolygon(p)); ctx.lineWidth = 3.5; ctx.stroke(); });
   ctx.textAlign = "center"; ctx.fillStyle = "#244c3c";

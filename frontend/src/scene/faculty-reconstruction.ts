@@ -2,8 +2,10 @@ import * as T from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { makeMaterials } from "./materials";
 import {
-  facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, rectCorners, type Rect, type Vec2,
+  facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, STEPS_RUN, rectCorners,
+  bulgedOutline, pointAtX, type Rect, type Vec2,
 } from "../data/faculty-blueprint";
+import { insidePolygon } from "../data/campus-geometry";
 import { facultyPlaces } from "../data/places";
 
 type BoxOptions = { tile?: readonly number[]; offset?: readonly number[]; rotation?: number };
@@ -16,6 +18,10 @@ type BlockSpec = {
   label: (level: number) => string;
   /** Tramos (x) de la galería sin baranda ni lamas: descansos, ascensor, accesos. */
   openings: (level: number) => Range[];
+  /** Tramos (x) del borde de la galería sin columna (los apoya otro elemento, como la torre). */
+  noColumns?: Range[];
+  /** Alero adicional de la cubierta en el extremo +x. */
+  eaveEast?: number;
   doors: (bay: number) => number[];
 };
 
@@ -75,12 +81,27 @@ export function createFaculty() {
     const mesh = new T.Mesh(new T.PlaneGeometry(width, width / 5.12), new T.MeshBasicMaterial({ map: texture, side: T.DoubleSide }));
     mesh.position.set(x, y, z); mesh.rotation.y = rotation; visual.add(mesh);
   }
-  /** Construye dentro del marco de un rectángulo del plano (giro y traslación, sin escala). */
-  function frame(rect: Rect, build: () => void) {
+  /** Construye dentro del marco de un rectángulo del plano (giro y traslación, sin escala), con el
+   * piso a la altura y. */
+  function frame(rect: Rect, build: () => void, y = 0) {
     const vg = new T.Group(), cg = new T.Group();
-    for (const g of [vg, cg]) { g.position.set(rect.center[0], 0, rect.center[1]); g.rotation.y = -rect.angle; }
+    for (const g of [vg, cg]) { g.position.set(rect.center[0], y, rect.center[1]); g.rotation.y = -rect.angle; }
     const pv = visual, ps = solid; visual.add(vg); solid.add(cg); visual = vg; solid = cg;
     build(); visual = pv; solid = ps;
+  }
+  /** Prisma de planta `points` entre y e y + h, con la textura en metros sobre sus caras laterales. */
+  function prism(points: readonly Vec2[], y: number, h: number, mat: T.Material, collide = true) {
+    const geo = new T.ExtrudeGeometry(new T.Shape(points.map(([x, z]) => new T.Vector2(x, -z))), { depth: h, bevelEnabled: false });
+    geo.rotateX(-Math.PI / 2); geo.translate(0, y, 0);
+    const tile = (mat.userData.tile as number[] | undefined) ?? [1, 1];
+    const p = geo.attributes.position, n = geo.attributes.normal, uv = geo.attributes.uv;
+    for (let i = 0; i < p.count; i++) {
+      const cap = Math.abs(n.getY(i)) > 0.5;
+      uv.setXY(i, (cap ? p.getX(i) : p.getZ(i) * n.getX(i) - p.getX(i) * n.getZ(i)) / tile[0], (cap ? p.getZ(i) : p.getY(i)) / tile[1]);
+    }
+    const mesh = new T.Mesh(geo, mat); mesh.castShadow = mesh.receiveShadow = true; visual.add(mesh);
+    if (collide) solid.add(new T.Mesh(geo));
+    return mesh;
   }
   function pave(points: readonly Vec2[], mat: T.Material, y: number) {
     const geo = new T.ShapeGeometry(new T.Shape(points.map(([x, z]) => new T.Vector2(x, -z))));
@@ -160,17 +181,40 @@ export function createFaculty() {
       geo.computeVertexNormals(); solid.add(new T.Mesh(geo));
     }
   }
-  /** Bóveda de chapa curva sobre un tramo (la «media sombra» de las escaleras). */
-  function canopy(x0: number, x1: number, y: number, zc: number, r: number) {
-    const mesh = new T.Mesh(new T.CylinderGeometry(r, r, x1 - x0, 18, 1, true, 0, Math.PI), m.canopy);
-    mesh.rotation.z = Math.PI / 2; mesh.position.set((x0 + x1) / 2, y, zc); mesh.castShadow = true; visual.add(mesh);
-    for (const x of [x0 + 0.1, (x0 + x1) / 2, x1 - 0.1]) {
-      const arch = new T.Mesh(new T.TorusGeometry(r, 0.035, 5, 18, Math.PI), m.steel);
-      arch.rotation.y = Math.PI / 2; arch.position.set(x, y, zc); visual.add(arch);
+  /** Escalinata maciza a lo largo de x, del pie (xs, 0) al borde de arriba (xe, rise), sin barandas. */
+  function steps(xs: number, xe: number, rise: number, width: number) {
+    const run = Math.abs(xe - xs), n = Math.round(rise / 0.175), dir = Math.sign(xe - xs);
+    for (let i = 0; i < n; i++) {
+      const top = ((i + 0.5) * rise) / n;
+      box(run / n + 0.02, top, width, xs + dir * ((i + 0.5) * run) / n, top / 2, 0, m.stone);
     }
+    ramp(v3(xs, 0, 0), v3(xe, rise, 0), width);
   }
-  /** Cubierta a cuatro aguas con cara inferior de chapa (textura del escaneo). */
-  function hipRoof(w: number, d: number, y: number, rise: number, top: T.Material) {
+  /** Bóveda de chapa curva (la «media sombra» de las escaleras) que sigue la pisada `tread(x)`:
+   * sube con cada tramo y se aplana en los descansos, con `clear` metros libres hasta el arranque
+   * del arco. Devuelve la altura del arranque en cada x. */
+  function vault(x0: number, x1: number, tread: (x: number) => number, zc: number, r: number, clear: number) {
+    // Promedio de ±0,6 m: la chapa se curva en los cambios de pendiente en vez de quebrarse.
+    const spring = (x: number) => { let s = 0; for (let k = -3; k <= 3; k++) s += tread(x + k * 0.2); return s / 7 + clear; };
+    const n = Math.ceil(Math.abs(x1 - x0) / 0.25), arcs = 16, position: number[] = [], index: number[] = [];
+    for (let i = 0; i <= n; i++) {
+      const x = x0 + ((x1 - x0) * i) / n, y = spring(x);
+      for (let j = 0; j <= arcs; j++) position.push(x, y + r * Math.sin((Math.PI * j) / arcs), zc + r * Math.cos((Math.PI * j) / arcs));
+      if (i) for (let j = 0; j < arcs; j++) { const a = (i - 1) * (arcs + 1) + j, b = a + arcs + 1; index.push(a, b, a + 1, a + 1, b, b + 1); }
+    }
+    const geo = new T.BufferGeometry(); geo.setAttribute("position", new T.Float32BufferAttribute(position, 3));
+    geo.setIndex(index); geo.computeVertexNormals();
+    const mesh = new T.Mesh(geo, m.canopy); mesh.castShadow = true; visual.add(mesh);
+    // Arcos de acero cada 2,5 m.
+    for (let k = 0, ribs = Math.ceil(Math.abs(x1 - x0) / 2.5); k <= ribs; k++) {
+      const x = x0 + ((x1 - x0) * k) / ribs, arch = new T.Mesh(new T.TorusGeometry(r, 0.035, 5, 18, Math.PI), m.steel);
+      arch.rotation.y = Math.PI / 2; arch.position.set(x, spring(x), zc); visual.add(arch);
+    }
+    return spring;
+  }
+  /** Cubierta a cuatro aguas con cara inferior de chapa (textura del escaneo), centrada en x = cx. */
+  function hipRoof(w: number, d: number, y: number, rise: number, top: T.Material, cx = 0) {
+    const roof = new T.Group(), previous = visual; roof.position.x = cx; visual.add(roof); visual = roof;
     const a = w / 2 + 0.6, b = d / 2 + 0.6, ridge = Math.max(0, a - b), yr = y + rise;
     const faces = [[-a, y, b, a, y, b, ridge, yr, 0, -a, y, b, ridge, yr, 0, -ridge, yr, 0],
       [a, y, -b, -a, y, -b, -ridge, yr, 0, a, y, -b, -ridge, yr, 0, ridge, yr, 0],
@@ -192,6 +236,20 @@ export function createFaculty() {
     for (const s of [-1, 1]) {
       box(2 * a, 0.22, 0.06, 0, y - 0.05, s * b, m.white);
       box(0.06, 0.22, 2 * b, s * a, y - 0.05, 0, m.white);
+    }
+    visual = previous;
+  }
+  /** Fachada vidriada con perfilería azul a lo largo de x, en z, con una hoja abierta en el paño `door`. */
+  function glazing(w: number, z: number, door: number) {
+    const bays = Math.ceil(w / 1.2), bay = w / bays;
+    for (let i = 0; i < bays; i++) {
+      const x = -w / 2 + bay * (i + 0.5), entrance = i === door;
+      if (entrance) {
+        box(bay - 0.06, 2.12, 0.055, x + bay * 0.32, 1.16, z - bay * 0.35, m.glass, false, { rotation: Math.PI / 2.5 });
+        box(bay - 0.06, 0.5, 0.055, x, 2.72, z, m.glass);
+      } else box(bay - 0.06, 2.75, 0.055, x, 1.47, z, m.glass, true);
+      box(0.055, 3, 0.08, x - bay / 2, 1.55, z, m.blue);
+      for (const y of entrance ? [2.3, 3.0] : [0.15, 1.05, 2.15, 3.0]) box(bay, 0.055, 0.08, x, y, z, m.blue);
     }
   }
 
@@ -235,8 +293,9 @@ export function createFaculty() {
         for (let k = 1; k < 4; k++) box(0.05, 1.7, 0.09, x0 + 0.6 + (k * (bay - 1.2)) / 4, y + 1.85, zBack, m.metal);
         box(bay - 1.2, 0.05, 0.09, xc, y + 2.1, zBack, m.metal);
         // Borde de la galería: columna redonda, viga transversal, baranda y lamas.
-        pole(0.17, hw, x0 + (i ? 0 : 0.2), y + hw / 2, zEdge - front * 0.2, m.concrete, true);
-        if (!top) box(0.28, 0.42, G, x0 + (i ? 0 : 0.2), y + H - 0.45, zGallery, m.concrete);
+        const column = !s.noColumns?.some(([a, b]) => x0 > a && x0 < b);
+        if (column) pole(0.17, hw, x0 + (i ? 0 : 0.2), y + hw / 2, zEdge - front * 0.2, m.concrete, true);
+        if (column && !top) box(0.28, 0.42, G, x0 + (i ? 0 : 0.2), y + H - 0.45, zGallery, m.concrete);
         if (level) for (const [a, b] of spans(x0 + 0.17, x1 - 0.17, open)) rail(a, b, y, zEdge - front * 0.08);
         if (level && s.louvers) for (const [a, b] of spans(x0 + 0.18, x1 - 0.18, open))
           box(b - a, 0.96, 0.04, (a + b) / 2, y + 2.6, zEdge - front * 0.03, m.louver);
@@ -249,8 +308,8 @@ export function createFaculty() {
       }
       sign(s.label(level), -L / 2 + 2.5 * bay, y + 3.02, zWall + front * 0.13, 1.6, front < 0 ? Math.PI : 0);
     }
-    const roofY = (levels - 1) * H + s.topWall;
-    hipRoof(L, D, roofY, 1.2, s.roof);
+    const roofY = (levels - 1) * H + s.topWall, eave = s.eaveEast ?? 0;
+    hipRoof(L + eave, D, roofY, 1.2, s.roof, eave / 2);
     // Cerchas bajo la cubierta en cada línea de módulo (visibles desde el último piso).
     const rise = 1.2, half = D / 2 + 0.6;
     for (let i = 1; i < bays; i++) {
@@ -269,16 +328,25 @@ export function createFaculty() {
   const st = plan.stair, step = st.run + st.landing;
   /** Descanso del nivel l (1..3): tramo de x donde la escalera se une a la galería. */
   const landingAt = (level: number): Range => [st.start - level * step, st.start - level * step + st.landing];
-  const [ex, ez] = plan.elevator.center, [ew, ed] = plan.elevator.size, tw = plan.tower;
+  const [ex, ez] = plan.elevator.center, [ew, ed] = plan.elevator.size, tw = plan.tower, es = plan.eastStair;
+  const towerDoor: Range = [tw.center[0] - tw.core / 2, tw.center[0] + tw.core / 2];
+  /** Borde exterior de la escalera de la cabecera este y de su descanso en el primer piso. */
+  const eastEdge = es.x + es.width / 2 + 0.2;
   frame(plan.main, () => {
     academicBlock({
       ...block1, front: 1, topWall: 4.1, roof: m.roof, louvers: true,
       label: (level) => level ? "AULAS" : "LABORATORIOS",
       openings: (level) => [
         ...(level ? [landingAt(level)] : []),
+        // Salida del primer piso a la escalera de la plaza techada.
+        ...(level === 1 ? [[block1.length / 2 - 0.05, eastEdge] as Range] : []),
         [ex - 0.6, ex + 0.6],
-        [tw.center[0] - 1.25, tw.center[0] + 1.25],
+        towerDoor,
       ],
+      // El núcleo de la torre de baños apoya el borde de la galería en su acceso.
+      noColumns: [towerDoor],
+      // El alero se prolonga sobre la escalera de la cabecera este.
+      eaveEast: eastEdge + 0.3 - (block1.length / 2 + 0.6),
       doors: (i) => i % 2 ? [1.3] : i % 4 === 0 ? [1.3, 3.7] : [3.7],
     });
     // Mesas del laboratorio en planta baja.
@@ -287,95 +355,143 @@ export function createFaculty() {
       box(2.6, 0.06, 0.8, x, 0.78, z, m.white);
       for (const dx of [-1.1, 1.1]) box(0.06, 0.75, 0.7, x + dx, 0.39, z, m.metal);
     }
-    // Escalera tipo Pompidou: tramo, descanso unido a la galería y bóveda curva por piso.
+    // Escalera tipo Pompidou: tramo y descanso unido a la galería por piso, bajo una bóveda que
+    // sigue la pisada (sube con los tramos y se aplana en los descansos).
     const z0 = st.z - st.width / 2, z1 = st.z + st.width / 2;
+    const tread = (x: number) => {
+      for (let f = 0; f < st.flights; f++) {
+        const xs = st.start - f * step, xe = xs - st.run;
+        if (x >= xe) return f * H + Math.max(0, Math.min(H, (H * (xs - x)) / st.run));
+        if (x >= xe - st.landing) return (f + 1) * H;
+      }
+      return st.flights * H;
+    };
+    const spring = vault(st.start + 0.5, st.start - st.flights * step + 0.1, tread, st.z, st.width / 2 + 0.06, 2.3);
     for (let f = 0; f < st.flights; f++) {
       const xs = st.start - f * step, xe = xs - st.run, y0 = f * H, y1 = y0 + H, xl = xe - st.landing;
       flight(xs, y0, xe, y1, st.z, st.width);
       box(st.landing, 0.22, z1 - block1.depth / 2 + 0.05, (xe + xl) / 2, y1 - 0.11, (block1.depth / 2 - 0.05 + z1) / 2, m.stone, true);
       rail(xl, xe, y1, z1 + 0.03);
       if (f === st.flights - 1) railZ(z0 - 0.05, z1, y1, xl + 0.05);
-      canopy(xl, xs, y1 + 2.55, st.z, st.width / 2 + 0.06);
-      for (const x of [xl + 0.15, xe, xs - 0.15]) for (const z of [z0 - 0.02, z1 + 0.02]) {
-        const base = x <= xe ? y1 : y0 + (H * (xs - x)) / st.run;
-        beam(v3(x, base, z), v3(x, y1 + 2.55, z), 0.04, m.steel);
-      }
+      for (const x of [xl + 0.15, xe, xs - 0.15]) for (const z of [z0 - 0.02, z1 + 0.02])
+        beam(v3(x, tread(x), z), v3(x, spring(x), z), 0.04, m.steel);
     }
-    // Ascensor de 2 × 2 m con cerramiento de lamas y marco azul; puertas hacia la galería.
-    const shaftTop = (block1.levels - 1) * H + 4.1 + 0.9;
-    box(ew, shaftTop, ed, ex, shaftTop / 2, ez, m.elevatorLouver, true);
-    for (const dx of [-1, 1]) for (const dz of [-1, 1]) box(0.12, shaftTop, 0.12, ex + (dx * ew) / 2, shaftTop / 2, ez + (dz * ed) / 2, m.blue);
-    for (let level = 0; level < block1.levels; level++) {
-      const y = level * H;
-      box(ew + 0.1, 0.16, ed + 0.1, ex, y - 0.06, ez, m.blue);
-      box(1, 2.1, 0.06, ex, y + 1.05, ez - ed / 2 - 0.02, m.steel);
-    }
-    box(ew + 0.3, 1.1, ed + 0.3, ex, shaftTop + 0.55, ez, m.white);
-    // Pilar pintado junto a la escalera (recorte de la foto IMG_5727).
+    // Ascensor de 2 × 2 m: caja de hormigón con murales en sus caras este, sur y oeste hasta la
+    // mitad superior entre el primer y el segundo piso; puertas con marco azul hacia la galería
+    // (IMG_5706). Por ahora las tres caras repiten el único mural fotografiado (IMG_5727).
+    const shaftTop = (block1.levels - 1) * H + 4.1 + 0.9, muralHeight = plan.elevator.mural - 0.1;
+    box(ew, shaftTop, ed, ex, shaftTop / 2, ez, m.concrete, true);
     const mural = new T.TextureLoader().load("/assets/photos/IMG_5727.webp");
     mural.colorSpace = T.SRGBColorSpace; mural.offset.set(0.748, 0.279); mural.repeat.set(0.102, 0.497);
-    box(1.2, 6.6, 0.5, st.start + 2.2, 3.3, block1.depth / 2 + 0.45, m.concrete, true);
-    const panel = new T.Mesh(new T.PlaneGeometry(1.15, 6.45), new T.MeshStandardMaterial({ map: mural, roughness: 0.9 }));
-    panel.position.set(st.start + 2.2, 3.3, block1.depth / 2 + 0.71); visual.add(panel);
+    const muralMat = new T.MeshStandardMaterial({ map: mural, roughness: 0.9 });
+    for (const [dx, dz, width] of [[1, 0, ed], [0, 1, ew], [-1, 0, ed]] as const) {
+      const panel = new T.Mesh(new T.PlaneGeometry(width - 0.06, muralHeight), muralMat);
+      panel.position.set(ex + dx * (ew / 2 + 0.01), 0.1 + muralHeight / 2, ez + dz * (ed / 2 + 0.01));
+      panel.rotation.y = Math.atan2(dx, dz); visual.add(panel);
+    }
+    for (let level = 0; level < block1.levels; level++) {
+      const y = level * H, zd = ez - ed / 2;
+      box(1, 2.1, 0.06, ex, y + 1.05, zd - 0.03, m.steel);
+      box(1.3, 0.12, 0.08, ex, y + 2.16, zd - 0.04, m.blue);
+      for (const s of [-1, 1]) box(0.12, 2.1, 0.08, ex + s * 0.59, y + 1.05, zd - 0.04, m.blue);
+    }
+    box(ew + 0.3, 1.1, ed + 0.3, ex, shaftTop + 0.55, ez, m.white);
+    // Escalera del primer piso a la plaza techada: descanso a la salida de la galería y un tramo
+    // pegado a la cabecera que baja hacia el norte hasta la plataforma.
+    const landingDepth = block1.depth / 2 - es.top;
+    box(eastEdge - block1.length / 2, 0.24, landingDepth, (block1.length / 2 + eastEdge) / 2, H - 0.12, es.top + landingDepth / 2, m.concrete, true);
+    box(eastEdge - block1.length / 2, 0.03, landingDepth, (block1.length / 2 + eastEdge) / 2, H + 0.015, es.top + landingDepth / 2, m.granite);
+    rail(block1.length / 2 - 0.05, eastEdge, H, block1.depth / 2 - 0.05);
+    railZ(es.top, block1.depth / 2 - 0.05, H, eastEdge - 0.05);
+    frame({ center: [es.x, es.top - es.run / 2], size: [es.run, es.width], angle: -Math.PI / 2 },
+      () => flight(es.run / 2, PLAZA_LEVEL, -es.run / 2, H, 0, es.width, [1]));
   });
 
-  // ---- Torre de baños: cilindro de 10 m partido en dos mitades por una junta blanca ----
+  // ---- Torre de baños: núcleo desde la galería y dos semicírculos a sus costados ----
   {
-    const [cx, cz] = tw.center, r = tw.radius, top = (block1.levels - 1) * H + 4.1, gate = Math.asin(1.25 / r);
-    const brickTile = m.brick.userData.tile as number[];
-    const arc = (zc: number, y0: number, y1: number, a0: number, a1: number, mat: T.Material, radius = r) => {
+    const [cx, cz] = tw.center, r = tw.radius, c = tw.core / 2, top = (block1.levels - 1) * H + 4.1;
+    const north = block1.depth / 2, south = cz + r, door = cz - r + 1;   // z del centro de las puertas de los baños
+    const brickTile = m.brick.userData.tile as number[], gt = m.granite.userData.tile as number[];
+    const arc = (xc: number, y0: number, y1: number, a0: number, a1: number, mat: T.Material, radius: number = r) => {
       if (a1 - a0 < 0.01) return;
       const geo = new T.CylinderGeometry(radius, radius, y1 - y0, Math.max(3, Math.ceil((a1 - a0) * 9)), 1, true, a0, a1 - a0);
       const uv = geo.attributes.uv, length = radius * (a1 - a0), tile = (mat.userData.tile as number[]) ?? brickTile;
       for (let i = 0; i < uv.count; i++) uv.setXY(i, (uv.getX(i) * length) / tile[0], (y0 + uv.getY(i) * (y1 - y0)) / tile[1]);
-      const mesh = new T.Mesh(geo, mat); mesh.position.set(cx, (y0 + y1) / 2, zc);
+      const mesh = new T.Mesh(geo, mat); mesh.position.set(xc, (y0 + y1) / 2, cz);
       mesh.castShadow = mesh.receiveShadow = true; visual.add(mesh); solid.add(new T.Mesh(geo, mat).copy(mesh, false));
     };
-    const north = cz - tw.joint / 2, south = cz + tw.joint / 2;
     const wallMat = m.brick.clone(); wallMat.side = T.DoubleSide; wallMat.userData.tile = brickTile;
+    // Semicírculos a cada lado del núcleo. En CylinderGeometry θ = 0 apunta al sur y θ = π/2 al
+    // este: cada mitad va de θ0 a θ0 + π, con la punta (`apex`) hacia afuera.
+    const halves = [-1, 1].map((side) => ({
+      side, xc: cx + side * c, a0: side > 0 ? 0 : Math.PI, apex: side > 0 ? Math.PI / 2 : 1.5 * Math.PI,
+      name: side === tw.menSide ? "HOMBRES" : "MUJERES",
+    }));
     for (let level = 0; level < block1.levels; level++) {
-      const y = level * H, y1 = level === block1.levels - 1 ? top : y + H;
-      // Mitad norte: acceso desde la galería por su punta (θ = π apunta al norte).
-      arc(north, y, y1, Math.PI / 2, Math.PI - gate, wallMat);
-      arc(north, y, y1, Math.PI + gate, 1.5 * Math.PI, wallMat);
-      arc(north, y + 2.6, y1, Math.PI - gate, Math.PI + gate, wallMat);
-      arc(south, y, y1, -Math.PI / 2, Math.PI / 2, wallMat);
-      // Losa de cada nivel, puente hasta la galería y franja blanca en el canto.
-      const gt = m.granite.userData.tile as number[];
-      for (const [zc, a0, f0] of [[north, Math.PI / 2, 0], [south, -Math.PI / 2, Math.PI]] as const) {
+      const y = level * H, y1 = level === block1.levels - 1 ? top : y + H, hw = y1 - y;
+      for (const { side, xc, a0, apex, name } of halves) {
+        // Muro curvo con una ventana en banda en la punta (IMG_5646).
+        arc(xc, y, y1, a0, apex - 0.26, wallMat);
+        arc(xc, y, y1, apex + 0.26, a0 + Math.PI, wallMat);
+        arc(xc, y, y + 1.2, apex - 0.26, apex + 0.26, wallMat);
+        arc(xc, y + 2.1, y1, apex - 0.26, apex + 0.26, wallMat);
+        arc(xc, y + 1.2, y + 2.1, apex - 0.26, apex + 0.26, m.glass, r - 0.03);
+        // Losa, piso de granito y franja blanca en el canto.
         const slab = new T.Mesh(new T.CylinderGeometry(r, r, 0.24, 24, 1, false, a0, Math.PI), m.concrete);
-        slab.position.set(cx, y - 0.12, zc); visual.add(slab); solid.add(slab.clone());
-        const floor = new T.Mesh(new T.CircleGeometry(r - 0.05, 24, f0, Math.PI), m.granite);
+        slab.position.set(xc, y - 0.12, cz); visual.add(slab); solid.add(slab.clone());
+        const floor = new T.Mesh(new T.CircleGeometry(r - 0.05, 24, side > 0 ? -Math.PI / 2 : Math.PI / 2, Math.PI), m.granite);
         const fuv = floor.geometry.attributes.uv, fp = floor.geometry.attributes.position;
         for (let i = 0; i < fuv.count; i++) fuv.setXY(i, fp.getX(i) / gt[0], fp.getY(i) / gt[1]);
-        floor.rotation.x = -Math.PI / 2; floor.position.set(cx, y + 0.02, zc); floor.receiveShadow = true; visual.add(floor);
+        floor.rotation.x = -Math.PI / 2; floor.position.set(xc, y + 0.02, cz); floor.receiveShadow = true; visual.add(floor);
+        if (level) {
+          const band = new T.Mesh(new T.CylinderGeometry(r + 0.04, r + 0.04, 0.3, 24, 1, true, a0, Math.PI), m.white);
+          band.position.set(xc, y - 0.1, cz); visual.add(band);
+        }
+        // Tabique hacia el núcleo con la puerta del baño y su cartel.
+        const wx = cx + side * (c - 0.06);
+        box(0.12, hw, door - 0.5 - (cz - r), wx, y + hw / 2, (cz - r + door - 0.5) / 2, m.plaster, true);
+        box(0.12, hw, south - door - 0.5, wx, y + hw / 2, (door + 0.5 + south) / 2, m.plaster, true);
+        box(0.12, hw - 2.1, 1, wx, y + 2.1 + (hw - 2.1) / 2, door, m.plaster, true);
+        sign(name, wx - side * 0.07, y + 2.4, door, 0.9, -side * Math.PI / 2);
+        // Mesada con lavatorios junto al tabique y cubículos contra el muro curvo, en la mitad sur;
+        // la entrada y la mitad norte quedan libres para circular.
+        box(0.55, 0.06, 2.4, xc + side * 0.4, y + 0.85, cz + 0.6, m.white, true);
+        for (let k = 1; k < 6; k++) {
+          const a = a0 + (Math.PI * k) / 6;
+          if (Math.cos(a) > 0.2)
+            box(0.05, 1.9, 1.5, xc + Math.sin(a) * (r - 0.85), y + 1.1, cz + Math.cos(a) * (r - 0.85), m.plaster, true, { rotation: a });
+        }
       }
-      box(2 * r, 0.24, tw.joint, cx, y - 0.12, cz, m.concrete, true);
-      box(2.6, 0.24, 0.7, cx, y - 0.12, north - r + 0.2, m.concrete, true);
-      if (level) for (const zc of [north, south]) {
-        const band = new T.Mesh(new T.CylinderGeometry(r + 0.04, r + 0.04, 0.3, 40, 1, true, zc < cz ? Math.PI / 2 : -Math.PI / 2, Math.PI), m.white);
-        band.position.set(cx, y - 0.1, zc); visual.add(band);
+      // Núcleo: losa y piso, muros del acceso, frente sur y dintel con el cartel hacia la galería.
+      box(2 * c, 0.24, south - north, cx, y - 0.12, (north + south) / 2, m.concrete, true);
+      box(2 * c, 0.03, south - north, cx, y + 0.015, (north + south) / 2, m.granite);
+      for (const side of [-1, 1]) {
+        box(0.2, hw, cz - r - north, cx + side * (c - 0.1), y + hw / 2, (north + cz - r) / 2, m.brick, true);
+        if (level) box(0.04, 0.3, cz - r - north, cx + side * (c + 0.02), y - 0.1, (north + cz - r) / 2, m.white);
       }
-      // Ventanas en banda sobre la mitad sur, hacia el área común 2.
-      for (const a of [-0.55, 0.55]) {
-        const wx = cx + Math.sin(a) * (r + 0.04), wz = south + Math.cos(a) * (r + 0.04);
-        box(1.9, 1, 0.05, wx, y + 1.75, wz, m.white, false, { rotation: a });
-        box(1.7, 0.8, 0.06, wx + Math.sin(a) * 0.01, y + 1.75, wz + Math.cos(a) * 0.01, m.glass, false, { rotation: a });
-      }
-      // Junta: tabique blanco entre mitades con dos pasos, visible como franja en las puntas.
-      for (const [a, b] of [[-r - 0.06, -1.9], [-0.7, 0.7], [1.9, r + 0.06]] as const)
-        box(b - a, y1 - y, tw.joint, cx + (a + b) / 2, (y + y1) / 2, cz, m.white, true);
-      for (const x of [cx - 1.3, cx + 1.3]) box(1.2, y1 - y - 2.2, tw.joint, x, y + 2.2 + (y1 - y - 2.2) / 2, cz, m.white);
-      // Cubículos en la mitad sur.
-      for (const dx of [-2.4, -0.8, 0.8, 2.4]) box(0.05, 1.9, 1.6, cx + dx, y + 0.95 + 0.15, south + 2.6, m.plaster, true);
-      sign("BAÑOS", cx, y + 2.85, north - r - 0.04, 1.2, Math.PI);
+      box(2 * c, hw, 0.2, cx, y + hw / 2, south - 0.1, m.brick, true);
+      box(2 * c, hw - 2.6, 0.2, cx, y + 2.6 + (hw - 2.6) / 2, north + 0.1, m.concrete, true);
+      sign("BAÑOS", cx, y + 2.85, north - 0.04, 1.2, Math.PI);
     }
-    const lid = new T.Mesh(new T.CylinderGeometry(r + 0.1, r + 0.1, 0.3, 40), m.white);
-    lid.position.set(cx, top + 0.15, cz); visual.add(lid);
-    arc(north, top, top + 0.7, Math.PI / 2, 1.5 * Math.PI, wallMat);
-    arc(south, top, top + 0.7, -Math.PI / 2, Math.PI / 2, wallMat);
-    box(4.2, 2.6, 3.2, cx, top + 1.6, cz, m.white);
-    box(4.4, 0.15, 3.4, cx, top + 2.95, cz, m.concrete);
+    // Pilastras de hormigón en los encuentros de los semicírculos con el núcleo (IMG_5646).
+    for (const side of [-1, 1]) for (const z of [cz - r, south])
+      box(0.3, top + 0.7, 0.3, cx + side * (c + 0.1), (top + 0.7) / 2, z, m.concrete);
+    for (const { xc, a0 } of halves) {
+      const lid = new T.Mesh(new T.CylinderGeometry(r + 0.1, r + 0.1, 0.3, 24, 1, false, a0, Math.PI), m.white);
+      lid.position.set(xc, top + 0.15, cz); visual.add(lid);
+      arc(xc, top, top + 0.7, a0, a0 + Math.PI, wallMat);
+    }
+    box(2 * c, 0.3, south - north, cx, top + 0.15, (north + south) / 2, m.white);
+    box(2.6, 2.6, 4.4, cx, top + 1.6, cz, m.white);
+    box(2.8, 0.15, 4.6, cx, top + 2.95, cz, m.concrete);
+    // Anexo cuadrado de planta baja que sobresale al sur, con portón enrollable al este. Sus muros
+    // laterales arrancan donde cortan a los semicírculos.
+    const a = tw.annex.size / 2, zs = south + tw.annex.beyond, zn = cz + Math.sqrt(r * r - (a - c) ** 2);
+    box(2 * a, H, 0.24, cx, H / 2, zs - 0.12, m.brick, true);
+    for (const side of [-1, 1]) box(0.24, H, zs - zn, cx + side * (a - 0.12), H / 2, (zn + zs) / 2, m.brick, true);
+    box(2 * a, 0.2, zs - zn + 0.3, cx, H - 0.1, (zn + zs - 0.3) / 2, m.concrete);
+    box(2 * a + 0.1, 0.3, 0.06, cx, H - 0.1, zs + 0.03, m.white);
+    box(0.05, 2.6, 2.2, cx + a + 0.03, 1.3, (zn + zs) / 2 + 0.3, m.steel);
   }
 
   // ---- Bloque G ----
@@ -403,34 +519,38 @@ export function createFaculty() {
     }
   });
 
-  // ---- Plaza techada: recortada contra la cabecera este del Bloque 1 ----
+  // ---- Plataforma a media altura: plaza techada, cuadrado, Bedelía, cantina y Sala Manfred ----
+  for (const outline of plan.platform) {
+    prism(outline, 0, PLAZA_LEVEL, m.concrete);
+    pave(outline, m.stone, PLAZA_LEVEL + 0.005);
+  }
+  for (const s of plan.platformSteps)
+    frame({ center: s.top, size: [STEPS_RUN, s.width], angle: s.angle }, () => steps(STEPS_RUN, 0, PLAZA_LEVEL, s.width));
+
+  // ---- Plaza techada: la cubierta arranca después de la escalera de la cabecera este ----
   {
-    const [w, n, e, s] = rectCorners(plan.coveredPlaza), edge = block1.length / 2;
-    const cut = (a: Vec2, b: Vec2): Vec2 => { const t = (edge - a[0]) / (b[0] - a[0]); return [edge, a[1] + (b[1] - a[1]) * t]; };
-    const outline: Vec2[] = [cut(w, n), n, e, s, cut(w, s)];
-    pave(outline, m.stone, 0.06);
-    const floorBody = new T.Mesh(new T.ExtrudeGeometry(new T.Shape(outline.map(([x, z]) => new T.Vector2(x, -z))), { depth: 0.1, bevelEnabled: false }));
-    floorBody.geometry.rotateX(-Math.PI / 2); floorBody.position.y = -0.04; solid.add(floorBody);
-    const roofY = 4.6;
+    const [w, n, e, s] = rectCorners(plan.coveredPlaza), edge = eastEdge + 0.1;
+    const outline: Vec2[] = [pointAtX(w, n, edge), n, e, s, pointAtX(w, s, edge)];
+    const height = 4.6, roofY = PLAZA_LEVEL + height;
     flipFaces(pave(outline, m.roofUnder, roofY - 0.02).geometry);
     pave(outline, m.roof, roofY + 0.12);
     for (let i = 0; i < outline.length; i++) {
       const a = outline[i], b = outline[(i + 1) % outline.length];
-      if (a[0] === edge && b[0] === edge) continue;
       const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
       box(length, 0.35, 0.08, (a[0] + b[0]) / 2, roofY - 0.05, (a[1] + b[1]) / 2, m.white, false,
         { rotation: -Math.atan2(b[1] - a[1], b[0] - a[0]) });
     }
-    // Columnas en los bordes libres y cerchas paralelas al lado corto.
+    // Columnas en los bordes y cerchas paralelas al lado corto, apoyadas al oeste en una viga.
     const inset = (p: Vec2, c: Vec2, k = 0.35): Vec2 => [p[0] + (c[0] - p[0]) * k / Math.hypot(c[0] - p[0], c[1] - p[1]), p[1] + (c[1] - p[1]) * k / Math.hypot(c[0] - p[0], c[1] - p[1])];
-    const centre: Vec2 = [(n[0] + s[0]) / 2, (n[1] + s[1]) / 2];
-    for (const [a, b, ts] of [[n, e, [0, 1 / 3, 2 / 3, 1]], [e, s, [0.5, 1]]] as const) for (const t of ts) {
+    const centre: Vec2 = [(n[0] + s[0]) / 2, (n[1] + s[1]) / 2], [wn, , , , ws] = outline;
+    for (const [a, b, ts] of [[n, e, [0, 1 / 3, 2 / 3, 1]], [e, s, [0.5, 1]], [ws, wn, [0.06, 0.94]]] as const) for (const t of ts) {
       const p = inset([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], centre);
-      pole(0.16, roofY, p[0], roofY / 2, p[1], m.steel, true);
+      pole(0.16, height, p[0], PLAZA_LEVEL + height / 2, p[1], m.steel, true);
     }
+    beam(v3(ws[0] + 0.1, roofY - 0.45, ws[1]), v3(wn[0] + 0.1, roofY - 0.45, wn[1]), 0.07, m.steel);
     const X: Vec2 = [(n[0] - w[0]) / 10, (n[1] - w[1]) / 10], Z: Vec2 = [(s[0] - w[0]) / 15, (s[1] - w[1]) / 15];
     for (const k of [3, 6, 9, 12]) {
-      const start = [w[0] + Z[0] * k, w[1] + Z[1] * k], t0 = (edge + 0.2 - start[0]) / X[0];
+      const start = [w[0] + Z[0] * k, w[1] + Z[1] * k], t0 = (edge + 0.1 - start[0]) / X[0];
       const a = v3(start[0] + X[0] * Math.max(0, t0), roofY - 0.45, start[1] + X[1] * Math.max(0, t0));
       const b = v3(start[0] + X[0] * 10, roofY - 0.45, start[1] + X[1] * 10);
       beam(a, b, 0.05, m.steel); beam(a.clone().setY(roofY - 0.05), b.clone().setY(roofY - 0.05), 0.045, m.steel);
@@ -442,30 +562,19 @@ export function createFaculty() {
   }
 
   // ---- Cuadrado descubierto, Bedelía, Sala Manfred, cantina y Electrónica ----
-  pave(plan.openPlaza, m.stone, 0.06);
   for (const [px, pz] of [[46.1, -7.35], [54.4, -10.9]]) frame({ center: [px, pz], size: [3.4, 1.6], angle: gridAngle }, () => {
     box(3.4, 0.4, 1.6, 0, 0.2, 0, m.brick, true);
     box(3.2, 0.08, 1.4, 0, 0.41, 0, m.grass);
     bench(0, 1.5, 0.06, -1);
-  });
+  }, PLAZA_LEVEL);
   function glazedRoom(w: number, d: number, name: string) {
     box(w, 0.16, d, 0, 0.02, 0, m.stone, true);
     box(w, 3.2, 0.2, 0, 1.68, -d / 2, m.brick, true);
     for (const x of [-w / 2, w / 2]) box(0.2, 3.2, d, x, 1.68, 0, m.brick, true);
     box(w + 0.8, 0.2, d + 0.8, 0, 3.4, 0, m.concrete);
-    const bays = Math.ceil(w / 1.2), bay = w / bays;
-    for (let i = 0; i < bays; i++) {
-      const x = -w / 2 + bay * (i + 0.5), entrance = i === Math.floor(bays / 2);
-      if (entrance) {
-        box(bay - 0.06, 2.12, 0.055, x + bay * 0.32, 1.16, d / 2 - bay * 0.35, m.glass, false, { rotation: Math.PI / 2.5 });
-        box(bay - 0.06, 0.5, 0.055, x, 2.72, d / 2, m.glass);
-      } else box(bay - 0.06, 2.75, 0.055, x, 1.47, d / 2, m.glass, true);
-      box(0.055, 3, 0.08, x - bay / 2, 1.55, d / 2, m.blue);
-      for (const y of entrance ? [2.3, 3.0] : [0.15, 1.05, 2.15, 3.0]) box(bay, 0.055, 0.08, x, y, d / 2, m.blue);
-    }
+    glazing(w, d / 2, Math.floor(Math.ceil(w / 1.2) / 2));
     sign(name, 0, 2.65, d / 2 + 0.08, Math.min(w - 1, 4.5));
   }
-  frame(plan.manfred, () => glazedRoom(...(plan.manfred.size as [number, number]), "SALA MANFRED STARK"));
   frame(plan.bedelia, () => {
     const [w, d] = plan.bedelia.size;
     glazedRoom(w, d, "BEDELÍA");
@@ -474,7 +583,45 @@ export function createFaculty() {
       box(0.7, 0.07, 0.55, x, 0.8, d / 2 - 1.5, m.metal);
       pole(0.09, 0.3, x, 1, d / 2 - 1.5, gold); pole(0.22, 0.25, x, 1.27, d / 2 - 1.5, gold);
     }
-  });
+  }, PLAZA_LEVEL);
+  // Sala Manfred: auditorio con el frente curvo hacia la plaza techada, fachada vidriada hacia el
+  // pasillo (IMG_5685), escenario contra el fondo y tres gradas hacia el arco.
+  frame(plan.manfred, () => {
+    const [w, d] = plan.manfred.size, bulge = plan.manfred.bulge, zf = d / 2 - bulge, hw = 3.3;
+    const radius = (w * w / 4 + bulge * bulge) / (2 * bulge), zc = d / 2 - radius, outline = bulgedOutline(w, d, bulge);
+    pave(outline, m.tile, 0.03);
+    prism(outline, hw, 0.22, m.concrete, false);
+    box(w, hw, 0.2, 0, hw / 2, -d / 2 + 0.1, m.brick, true);
+    box(0.2, hw, zf + d / 2, -w / 2 + 0.1, hw / 2, (zf - d / 2) / 2, m.brick, true);
+    const a = Math.asin(w / 2 / radius), front = new T.CylinderGeometry(radius, radius, hw, 20, 1, true, -a, 2 * a);
+    const fuv = front.attributes.uv, tile = m.brick.userData.tile as number[], wallMat = m.brick.clone();
+    for (let i = 0; i < fuv.count; i++) fuv.setXY(i, (fuv.getX(i) * radius * 2 * a) / tile[0], (fuv.getY(i) * hw) / tile[1]);
+    wallMat.side = T.DoubleSide; wallMat.userData.tile = tile;
+    const curved = new T.Mesh(front, wallMat); curved.position.set(0, hw / 2, zc); curved.castShadow = curved.receiveShadow = true;
+    visual.add(curved); solid.add(new T.Mesh(front).copy(curved, false));
+    // Fachada vidriada (+x) con la puerta entre el escenario y las gradas, y dintel hasta la losa.
+    frame({ center: [w / 2 - 0.05, (zf - d / 2) / 2], size: [zf + d / 2, 0.2], angle: -Math.PI / 2 }, () => {
+      glazing(zf + d / 2, 0, 2);
+      sign("SALA MANFRED STARK", 0, 2.65, 0.08, 3);
+    });
+    box(0.2, hw - 3.05, zf + d / 2, w / 2 - 0.05, 3.05 + (hw - 3.05) / 2, (zf - d / 2) / 2, m.concrete);
+    box(w - 0.4, 0.4, 0.8, 0, 0.2, -d / 2 + 0.6, m.wood, true);
+    box(3.2, 1.8, 0.04, 0, 2, -d / 2 + 0.22, m.white);
+    const ri = radius - 0.05, wi = w / 2 - 0.2, ai = Math.asin(wi / ri);
+    const curve = Array.from({ length: 13 }, (_, i): Vec2 => { const t = ai - (2 * ai * i) / 12; return [ri * Math.sin(t), zc + ri * Math.cos(t)]; });
+    [-0.6, 0.3, 1.2].forEach((z, k) => {
+      const h = 0.25 * (k + 1);
+      prism([[-wi, z], [wi, z], ...curve], 0, h, m.concrete);
+      // Butacas de 0,5 m en fila sobre cada grada.
+      for (let x = -wi + 0.55; x <= wi - 0.5; x += 0.56) {
+        box(0.5, 0.07, 0.42, x, h + 0.42, z + 0.3, m.wood);
+        box(0.5, 0.35, 0.05, x, h + 0.62, z + 0.53, m.wood);
+        box(0.05, 0.42, 0.4, x - 0.27, h + 0.21, z + 0.3, m.metal);
+      }
+    });
+  }, PLAZA_LEVEL);
+  // Losa del pasillo cubierto entre la Sala Manfred y Bedelía.
+  frame(plan.corridor, () => box(2.4, 0.2, plan.corridor.size[1], 0, 3.4, 0, m.concrete), PLAZA_LEVEL);
   frame(plan.cantina, () => {
     const [w, d] = plan.cantina.size;
     box(w, 0.25, d, 0, 0.32, 0, m.stone, true);
@@ -493,7 +640,7 @@ export function createFaculty() {
     // Dos escalones de la terraza hacia el cuadrado.
     for (const k of [0, 1]) box(w - 1 + k * 0.6, 0.3 - k * 0.12, 0.5, 0, 0.15 - k * 0.06, d / 2 + 3.75 + k * 0.5, m.stone, true);
     sign("CANTINA · CyT", 0, 4.2, d / 2 + 0.28, 3.8);
-  });
+  }, PLAZA_LEVEL);
   frame(plan.electronics, () => {
     const [w, d] = plan.electronics.size;
     box(w, 0.2, d, 0, 0, 0, m.concrete, true);
@@ -519,11 +666,12 @@ export function createFaculty() {
       for (const dx of [-0.9, 0.9]) pole(0.035, 0.75, x + dx, 0.38, z + dz * 0.5);
     }
   }
-  // Cuatro árboles de referencia; sin bosque generado.
+  // Cuatro árboles de referencia; sin bosque generado. Los de la plataforma nacen en su piso.
   for (const [x, z] of plan.trees) {
-    pole(0.3, 5.5, x, 2.75, z, m.bark, true);
+    const y = plan.platform.some((p) => insidePolygon([x, z], p)) ? PLAZA_LEVEL : 0;
+    pole(0.3, 5.5, x, y + 2.75, z, m.bark, true);
     const crown = new T.Mesh(new T.IcosahedronGeometry(1, 2), m.leaves[0]);
-    crown.scale.set(3.4, 2.1, 3.1); crown.position.set(x, 6, z); crown.castShadow = true; visual.add(crown);
+    crown.scale.set(3.4, 2.1, 3.1); crown.position.set(x, y + 6, z); crown.castShadow = true; visual.add(crown);
   }
   {
     const [[ax, az], [bx, bz]] = plan.coveredWalk, length = Math.hypot(bx - ax, bz - az);
@@ -533,10 +681,11 @@ export function createFaculty() {
     for (const x of [-1.1, 1.1]) for (let z = -length / 2; z <= length / 2; z += 4) pole(0.05, 2.7, x, 1.35, z);
     visual = previous;
   }
+  // Marcadores de los puntos de visita en el suelo y sobre la plataforma (no en los pisos altos).
   for (const place of facultyPlaces) {
-    if (place.position[1] > 0.5) continue;
+    if (place.position[1] > PLAZA_LEVEL + 0.5) continue;
     const marker = new T.Mesh(new T.CylinderGeometry(0.24, 0.24, 0.04, 16), new T.MeshBasicMaterial({ color: 0xbca36d }));
-    marker.position.set(place.position[0], 0.13, place.position[2]); marker.userData.placeId = place.id;
+    marker.position.set(place.position[0], (place.position[1] > 1 ? PLAZA_LEVEL : 0) + 0.13, place.position[2]); marker.userData.placeId = place.id;
     marker.userData.keep = true; group.add(marker); markers.push(marker);
   }
   mergeByMaterial(group);
