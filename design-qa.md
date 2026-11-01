@@ -1,36 +1,36 @@
-# Revisión visual — plataforma, ascensor, escalera, torre de baños y Sala Manfred
+# Revisión visual — cabecera este, rampa, plaza techada, Sala Manfred y aulas
 
-Fecha: 01/11/2026, rama `feat/cyt-plataforma-ascensor-torre`. Alcance: aplicar las aclaraciones del equipo del 01/11/2026 sobre el ascensor, la plataforma de la plaza techada, la escalera del primer piso a la plaza, la bóveda de la escalera del Bloque 1, la torre de baños y la Sala Manfred. No se evalúa como réplica fotográfica terminada. La revisión anterior (31/10/2026, medidas y texturas) está en el historial de Git.
+Fecha: 01/11/2026, rama `feat/cyt-cabecera-este-rampa`. Alcance: aplicar la segunda tanda de aclaraciones del equipo del 01/11/2026, con la foto `IMG_5694` y una captura desde el cruce de los toldos. Cubre la plataforma, la plaza techada, la cabecera este del Bloque 1 (escalera, rampa, bodega y escalones de la galería), el ascensor, la Sala Manfred, las columnas, las aulas y la escalera Pompidou. No se evalúa como réplica fotográfica terminada. La revisión anterior (plataforma, ascensor, torre y Manfred) está en el historial de Git.
 
 ## Hallazgos y comparación
 
-- [P1 corregido] El mural de `IMG_5727` era un pilar exento entre la escalera y el ascensor, y el ascensor tenía cerramiento de lamas. Ahora el ascensor es una caja de hormigón con murales en sus caras este, sur y oeste hasta 6,5 m. Coincide con `IMG_5727` (cara este desde el patio) y con `IMG_5706` (puerta con marco azul hacia la galería).
-- [P1 corregido] La plaza techada, Bedelía y la cantina estaban en planta baja. Ahora están sobre una plataforma a 1,75 m con el cuadrado, la Sala Manfred y su pasillo. Se baja por escalinatas junto al ascensor, al sur del cuadrado y al norte del pasillo de Manfred. Una escalera por fuera de la cabecera este une el primer piso con la plaza; la cubre el alero del Bloque 1.
-- [P1 corregido] La bóveda de cada tramo de la escalera Pompidou era horizontal, a la altura del piso de llegada (hasta 6 m sobre los primeros escalones). Ahora es una sola bóveda a 2,3 m de la pisada que sube con los tramos y se aplana en los descansos.
-- [P1 corregido] La torre de baños era un cilindro partido en mitades norte y sur. Ahora tiene un núcleo de 2 m que sale de la galería y semicírculos al oeste (hombres, a la derecha al entrar) y al este (mujeres), con un anexo de 8 × 8 m en planta baja. Desde el patio se parece a `IMG_5646`: semicírculo con ventanas en la punta, pilastra de hormigón en el encuentro con el núcleo y anexo bajo con portón.
-- [P1 corregido] La Sala Manfred era un rectángulo vidriado lejos de Bedelía. Ahora es un auditorio con el frente curvo hacia la plaza techada, a 2 m de Bedelía. Entre ambas queda un pasillo cubierto, y la fachada vidriada da a ese pasillo como en `IMG_5685`.
-- [P2 corregido, hallado en esta revisión] Dentro de los baños, la mesada y un cubículo dejaban 0,5 m de paso junto a la puerta y la cápsula no entraba. Mesada y cubículos pasaron a la mitad sur.
-- [P2 corregido, hallado en esta revisión] La viga transversal de la galería tapaba el cartel «BAÑOS». Se quitó esa viga junto con la columna que reemplaza el núcleo de la torre.
-- [P3 / siguiente etapa] Fotos de los murales sur y oeste del ascensor. Confirmar el reparto de los 10 m de la torre, la altura de los murales, las escalinatas y el tamaño de Manfred. Ver [pendientes](docs/pendientes.md).
+- [P1 corregido] La plaza techada estaba pegada a la cabecera este y la escalera al primer piso iba por fuera, bajo un alero prolongado. Ahora planta baja y primer piso están retraídos bajo los pisos 2 y 3. Dentro del retiro, la escalera de 2,8 m sube hacia el sur hasta la galería del primer piso, frente al ascensor, con la bodega debajo. La plaza quedó separada 6,5 m más al este. Desde el pie de la escalera se ve como en `IMG_5694`: puerta azul del ascensor arriba a la derecha, columna a la izquierda, voladizo encima y, a la derecha, la pared del primer piso con el paso de la rampa por debajo.
+- [P1 corregido] Faltaban la rampa y la bajada de la plaza a la galería de planta baja. La rampa baja hacia el sur desde la explanada frente a Manfred hasta la galería, junto al ascensor, con pasamanos sobre la pared de las aulas. Ocho escalones prolongan la galería hasta la plataforma. Desde la plaza se ve como en `IMG_5706`: ascensor con mural y puerta azul en los dos niveles, balcón del primer piso delante, lateral de ladrillo de la bodega y piso de la galería más abajo.
+- [P1 corregido] La Sala Manfred (8 × 6 m) estaba girada como Bedelía. Ahora mide 12 × 9 m, está alineada con el Bloque 1, con el escenario y el pizarrón al norte, y su frente curvo queda enfrentado a la rampa. El pasillo con Bedelía se abre en cuña: 2 m en su punto más angosto.
+- [P1 corregido] Columnas finas (0,34 m) una por módulo y por piso, y una o dos puertas por módulo. Ahora hay columnas de 0,5 m cada 2,5 m, enteras hasta la cubierta, y seis aulas desiguales por piso en ambos bloques, con una puerta cada una que no se alinea con la del piso de abajo.
+- [P2 corregido] Plataforma a 1,4 m (antes 1,75 m). Ascensor de 2,5 m, 1,5 m más al este. Escalera Pompidou de 2,4 m a 18 m de la esquina, con tramo y descanso que suman cuatro intervalos de columna, de modo que cada descanso llega a la galería entre dos columnas.
+- [P2 corregido, hallado en esta revisión] La pared oeste de la bodega cerraba todo el lado de la escalera y tapaba el paso de la rampa que muestra `IMG_5694`. Ahora los dos laterales siguen los peldaños.
+- [P2 corregido, hallado en esta revisión] La puerta de Manfred caía en el tramo de fachada que queda al norte del pasillo, fuera de la plataforma. Pasó al tramo frente al pasillo, con un pasillo lateral de 1,2 m junto al vidrio hasta el frente del escenario.
+- [P3 / siguiente etapa] Medidas reales del retiro, la rampa, la bodega, la separación de la plaza y el reparto de las aulas. Ver [pendientes](docs/pendientes.md).
 
 ## Evidencia
 
-Capturas en `.local/references/plataforma-ascensor-torre/` (fuera de Git), tomadas con Edge sin ventana y WebGL por GPU sobre la escena del proyecto: ascensor desde el patio y desde la plaza (`01`, `02`), bóveda por fuera y por dentro (`03`, `04`, `16`), plataforma con escalinatas (`05`), escalera de la cabecera este (`06`), Sala Manfred por fuera, desde el pasillo y por dentro (`07`–`10`), torre desde el patio, desde la galería, desde arriba y dentro del baño de hombres (`11`–`14`), vista de planta (`15`) y mapa (`17`). En la app: «Comenzar recorrido» (`app-comenzar`) y seis puntos de visita (`app-*`).
+Capturas en `.local/references/cabecera-este-rampa/` (fuera de Git), tomadas con Edge sin ventana y WebGL por GPU sobre la escena del proyecto. Cabecera este: desde el patio (`01`), desde la plaza (`03`) y como en `IMG_5706` (`15`). Escalera desde su pie (`02`). Rampa desde arriba (`04`) y desde la galería (`16`). Bodega (`17`). Galerías de planta baja (`08`) y primer piso (`09`). Escalera Pompidou (`11`) y plaza techada (`12`). Sala Manfred desde la explanada (`05`), el pasillo (`14`), el pasillo lateral (`06`) y el escenario (`06b`). Plantas de la cabecera (`07`) y del Bloque 1 (`13`), y vista aérea (`10`). En la app: «Comenzar recorrido», el mapa y seis puntos de visita (`app-*`).
 
-Comparación: `IMG_5727` frente a `01` (mural, altura y ubicación junto a la galería), `IMG_5706` frente a `02` (ascensor visto desde la plaza elevada y escalones de bajada), `IMG_5646` frente a `11` (semicírculo, núcleo y anexo) e `IMG_5685`/`IMG_5686` frente a `08` (fachada vidriada hacia el pasillo). Se comparan disposición y niveles, no píxeles.
+Comparación: `IMG_5694` frente a `02`; `IMG_5706` frente a `15`; la captura del cruce de los toldos frente a `01`. Se comparan disposición y niveles, no píxeles.
 
 ## Superficies de fidelidad
 
-- **Tipografía:** sin cambios en la interfaz. Los carteles nuevos («HOMBRES», «MUJERES», «SALA MANFRED STARK») usan el mismo estilo que los existentes.
-- **Distribución y espaciado:** plataforma, escaleras, torre y Manfred salen de `faculty-blueprint.ts`. Mapa, geometría, colisiones y puntos de visita usan la misma fuente; el mapa dibuja la plataforma, el frente curvo de Manfred y la torre con su anexo.
-- **Colores:** hormigón y ladrillo del escaneo; el mural es un recorte de la foto `IMG_5727`; butacas y escenario en la madera rojiza de los bancos.
-- **Imágenes:** no se agregaron recursos; las tres caras del ascensor repiten el único mural fotografiado.
-- **Contenido:** ids y nombres de `places.ts` sin cambios; los rótulos de piso de los espacios de la plataforma y las descripciones de Manfred y de los baños reflejan las aclaraciones.
+- **Tipografía:** sin cambios en la interfaz; los rótulos de piso de los espacios de la plataforma dicen +1,40 m.
+- **Distribución y espaciado:** retiro, rampa, escaleras, columnas, aulas, plaza y Manfred salen de `faculty-blueprint.ts`. Mapa, geometría, colisiones y puntos de visita usan la misma fuente.
+- **Colores:** la rampa usa el granito rosado de la galería, como el piso de `IMG_5706`; bodega y laterales en el ladrillo del escaneo.
+- **Imágenes:** no se agregaron recursos. `IMG_5694.HEIC` quedó sin seguimiento en la raíz.
+- **Contenido:** ids y nombres de `places.ts` sin cambios; se actualizaron las descripciones de acceso, plaza techada y Sala Manfred.
 
 ## Interacción y resultado
 
-Verificados con la cápsula del proyecto sobre las colisiones del campus: los 16 puntos de visita sin solaparse; las tres escalinatas; de la galería de planta baja a la plaza junto al ascensor; la escalera de la cabecera este en ambos sentidos; la entrada a la Sala Manfred; el baño de hombres en planta baja y el de mujeres en el primer y tercer piso; la escalera Pompidou hasta el tercer piso; y plaza techada → cuadrado → terraza de la cantina ([verificación](docs/verificacion.md)).
+Verificado con la cápsula del proyecto sobre las colisiones del campus. Los 16 puntos de visita aparecen sin solaparse y pasan 13 recorridos: de la galería de planta baja a la del primer piso por los escalones, el rellano y la escalera, y el camino inverso; la rampa en ambos sentidos; la entrada a Manfred hasta el escenario; la escalera Pompidou piso por piso; plaza → cuadrado → cantina; dos bajadas al suelo; y la entrada a un aula ([verificación](docs/verificacion.md)).
 
-Consola de la app: sin errores de JavaScript; solo las respuestas 502 de la API, porque el backend no estaba en marcha. No se probaron móviles físicos. Las 18 pruebas frontend y el build pasaron.
+Consola de la app: sin errores de JavaScript; solo las respuestas 502 de la API, porque el backend no estaba en marcha. Solo se revisó en 1280 × 800; no se repitió en 390 × 844 ni en móviles físicos. Las 20 pruebas frontend y el build pasaron.
 
 final result: passed

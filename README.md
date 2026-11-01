@@ -4,7 +4,7 @@ Primera versión funcional del Trabajo Práctico de **Informática III 2026**, d
 
 ## Qué incluye esta versión
 
-- Sector de Ciencias y Tecnología con las medidas del equipo: Bloque 1 (75 × 12 m, planta baja y tres pisos) con su escalera tipo Pompidou, ascensor con murales, escalera a la plaza techada, media sombra y torre de baños; Bloque G (65 × 12 m); patios; plazas techada y abierta, Bedelía, cantina y Sala Manfred sobre una plataforma a media altura; dos canchas vecinas y estacionamientos cercanos. Se excluyen las demás facultades y el seminario.
+- Sector de Ciencias y Tecnología con las medidas del equipo: Bloque 1 (75 × 12 m, planta baja y tres pisos) con su escalera tipo Pompidou, ascensor con murales, cabecera este con escalera y rampa hacia la plaza techada, media sombra y torre de baños; Bloque G (65 × 12 m); patios; plazas techada y abierta, Bedelía, cantina y Sala Manfred sobre una plataforma a 1,40 m; dos canchas vecinas y estacionamientos cercanos. Se excluyen las demás facultades y el seminario.
 - Paredes de ladrillo, piso de granito, hormigón, cubierta y lamas con texturas sacadas del escaneo del pasillo del tercer piso.
 - Tres espacios de **escaneo real**: laboratorio de planta baja, aula del tercer piso y pasillo del tercer piso. Se cargan individualmente para limitar memoria y descarga.
 - Primera persona, teclado y mouse, colisiones, gravedad y escaleras en el bloque principal. Si el navegador no permite capturar el cursor, se puede mirar arrastrando.

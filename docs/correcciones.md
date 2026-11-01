@@ -42,3 +42,15 @@ Incoherencias halladas al contrastar los documentos con el código y las pruebas
 | `places.ts` | Baños: «Ubicación provisional, pendiente de identificar con el equipo» | Torre del extremo oeste; hombres a la derecha y mujeres a la izquierda entrando desde la galería | Aclaración del equipo |
 | `base-geografica.md`, `design-qa.md` | `IMG_5659` «desde el área común 2 hacia el Bloque 1, con la torre» | El archivo `IMG_5659.HEIC` muestra la galería de planta baja del Bloque 1 con el arranque de la escalera; no se ve la torre | `IMG_5659.HEIC` |
 | `base-geografica.md`, `pendientes.md`, `correcciones.md` | `IMG_5659.HEIC` y `Pasillo - Piso 3.glb` «fuera de Git» o «sin seguimiento» en la raíz | Están versionados desde el commit `0017185` (integrado en `main` con el PR #3), contra la regla de AGENTS.md de no subir originales | `git ls-files` |
+
+## 01/11/2026 — cabecera este, rampa y aulas (rama `feat/cyt-cabecera-este-rampa`)
+
+| Documento | Incorrecto | Correcto | Fuente de verdad |
+| --- | --- | --- | --- |
+| `AGENTS.md`, `README.md`, `base-geografica.md`, `places.ts` | Plataforma «a media altura» (1,75 m) | 1,4 m: el equipo la bajó un 20 % | Aclaración del equipo, `npm test` |
+| `base-geografica.md`, `faculty-blueprint.ts` | Plaza techada «pegada a toda la cabecera este», con sus lados oeste por las esquinas del Bloque 1 | Separada de la cabecera: corrida 6,5 m al este con Bedelía, el cuadrado, la cantina y Electrónica | Aclaración del equipo, `npm test` |
+| `base-geografica.md`, `design-qa.md` | Escalera del primer piso a la plaza «por fuera de la cabecera este», de 1,4 m, bajo el alero prolongado del Bloque 1 | De 2,8 m, dentro de la cabecera este bajo los pisos 2 y 3, frente a la puerta del ascensor, con una bodega debajo; planta baja y primer piso están retraídos | Aclaración del equipo, `IMG_5694`, captura del cruce de los toldos |
+| `base-geografica.md` | Sala Manfred de 8 × 6 m con el fondo alineado con el de Bedelía y el frente curvo hacia la plaza techada | 12 × 9 m, alineada con el Bloque 1: pizarrón al norte y frente curvo hacia la rampa | Aclaración del equipo (tamaño y giro elegidos entre opciones), `npm test` |
+| `base-geografica.md` | Ascensor de 2 × 2 m a 4 m de la esquina SE | 2,5 × 2,5 m, 1,5 m más al este (centro a 3,5 m de la esquina) | Aclaración del equipo, `npm test` |
+| `base-geografica.md` | Escalera Pompidou de 1,8 m que arranca a 20 m de la esquina SE | 2,4 m, arranca a 18 m | Aclaración del equipo (opción elegida), `npm test` |
+| `faculty-reconstruction.ts` | Columnas de 0,34 m, una por módulo de 5 m y por piso; una o dos puertas por módulo | Columnas de 0,5 m cada 2,5 m, enteras hasta la cubierta; seis aulas por piso, desiguales, con una puerta cada una | Aclaración del equipo, `npm test` |
