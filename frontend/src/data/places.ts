@@ -18,9 +18,9 @@ const originalPlaces: Place[] = [
     id: "acceso",
     name: "Pasillos de acceso",
     category: "Bienvenida",
-    floor: "Plataforma de la plaza (+1,75 m)",
+    floor: "Plataforma de la plaza (+1,40 m)",
     description:
-      "El punto de encuentro con el campus: galerías cubiertas, estructura clara y ladrillo visto. Distribución reconstruida a partir de fotografías y la referencia aérea.",
+      "El punto de encuentro con el campus: desde el rellano junto a la cabecera del Bloque 1 suben la escalera al primer piso y bajan la rampa y los escalones a la galería, junto al ascensor de los murales. Distribución reconstruida a partir de fotografías.",
     position: [34, 0, 1],
     photo: "IMG_5686",
     photos: ["IMG_5686", "IMG_5688", "IMG_5685"],
@@ -69,7 +69,7 @@ const originalPlaces: Place[] = [
     id: "cantina-cyt",
     name: "Cantina de CyT",
     category: "Vida universitaria",
-    floor: "Plataforma de la plaza (+1,75 m)",
+    floor: "Plataforma de la plaza (+1,40 m)",
     description:
       "Un espacio para hacer una pausa y compartir. La reconstrucción del exterior se basa en las fotografías; la distribución interior es provisional.",
     position: [40, 0, 15],
@@ -81,7 +81,7 @@ const originalPlaces: Place[] = [
     id: "bedelia",
     name: "Bedelía",
     category: "Servicios",
-    floor: "Plataforma de la plaza (+1,75 m)",
+    floor: "Plataforma de la plaza (+1,40 m)",
     description:
       "Área administrativa junto al acceso. Referencia fotográfica disponible; dimensiones e interior pendientes de validación.",
     position: [40, 0, -12],
@@ -93,9 +93,9 @@ const originalPlaces: Place[] = [
     id: "sala-manfred",
     name: "Sala Manfred",
     category: "Encuentros",
-    floor: "Plataforma de la plaza (+1,75 m)",
+    floor: "Plataforma de la plaza (+1,40 m)",
     description:
-      "Sala tipo auditorio con el frente curvo hacia la plaza techada y el cerramiento de vidrio y perfilería azul hacia el pasillo que la separa de Bedelía. Interior aproximado.",
+      "Sala tipo auditorio con el escenario y el pizarrón al norte, el frente curvo hacia la rampa del Bloque 1 y el cerramiento de vidrio y perfilería azul hacia el pasillo que la separa de Bedelía. Interior aproximado.",
     position: [27, 0, -15],
     photo: "IMG_5685",
     photos: ["IMG_5685"],
@@ -129,9 +129,9 @@ const originalPlaces: Place[] = [
     id: "plaza",
     name: "Plaza techada",
     category: "Espacios compartidos",
-    floor: "Plataforma de la plaza (+1,75 m)",
+    floor: "Plataforma de la plaza (+1,40 m)",
     description:
-      "Continuación cubierta del bloque de aulas, a media altura entre la planta baja y el primer piso. Desde aquí se pasa a la plaza abierta y después a la cantina.",
+      "Plaza cubierta frente a la cabecera del bloque de aulas, 1,40 m sobre su planta baja. Desde aquí se pasa a la plaza abierta y después a la cantina.",
     position: [27, 0, 7],
     photo: "IMG_5688",
     photos: ["IMG_5688", "IMG_5693", "IMG_5706"],

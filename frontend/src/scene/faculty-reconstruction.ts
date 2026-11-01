@@ -3,7 +3,7 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { makeMaterials } from "./materials";
 import {
   facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, STEPS_RUN, rectCorners,
-  bulgedOutline, pointAtX, type Rect, type Vec2,
+  bulgedOutline, type Rect, type Rooms, type Vec2,
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
 import { facultyPlaces } from "../data/places";
@@ -16,13 +16,16 @@ type BlockSpec = {
   front: 1 | -1;
   topWall: number; roof: T.Material; louvers: boolean;
   label: (level: number) => string;
+  /** Aulas de cada nivel; donde terminan antes del extremo del bloque solo sigue la galería. */
+  rooms: (level: number) => Rooms;
   /** Tramos (x) de la galería sin baranda ni lamas: descansos, ascensor, accesos. */
   openings: (level: number) => Range[];
+  /** Tramos (x) sin baranda en el borde interior de la galería, más allá de las aulas (llegada de una escalera). */
+  innerOpenings?: (level: number) => Range[];
+  /** Columnas del borde de la galería, enteras desde la planta baja hasta la cubierta. */
+  columns: { spacing: number; radius: number };
   /** Tramos (x) del borde de la galería sin columna (los apoya otro elemento, como la torre). */
   noColumns?: Range[];
-  /** Alero adicional de la cubierta en el extremo +x. */
-  eaveEast?: number;
-  doors: (bay: number) => number[];
 };
 
 /** CyT en metros sobre el plano del equipo (faculty-blueprint.ts), con texturas del escaneo. */
@@ -253,63 +256,97 @@ export function createFaculty() {
     }
   }
 
+  /** Muro de ladrillo de 0,2 m a lo largo de z, de z0 a z1, cuyo borde de arriba sube de h0 a h1 (el
+   * lateral de la bodega bajo la escalera). */
+  function slopedWall(x: number, z0: number, z1: number, h0: number, h1: number) {
+    const shape = new T.Shape([new T.Vector2(z0, 0), new T.Vector2(z1, 0), new T.Vector2(z1, h1), new T.Vector2(z0, h0)]);
+    const geo = new T.ExtrudeGeometry(shape, { depth: 0.2, bevelEnabled: false });
+    geo.rotateY(-Math.PI / 2); geo.translate(x + 0.1, 0, 0);
+    const tile = m.brick.userData.tile as number[], p = geo.attributes.position, uv = geo.attributes.uv;
+    for (let i = 0; i < p.count; i++) uv.setXY(i, p.getZ(i) / tile[0], p.getY(i) / tile[1]);
+    const mesh = new T.Mesh(geo, m.brick); mesh.castShadow = mesh.receiveShadow = true; visual.add(mesh);
+    solid.add(new T.Mesh(geo));
+  }
+
   /** Bloque de aulas con galería abierta (Bloque 1 y Bloque G). */
   function academicBlock(s: BlockSpec) {
     const { length: L, depth: D, levels, bay, gallery: G, front } = s;
     const zWall = front * (D / 2 - G), zEdge = front * D / 2, zBack = -front * D / 2;
     const zGallery = front * (D / 2 - G / 2), zRooms = -front * G / 2, bays = Math.round(L / bay);
+    const roofY = (levels - 1) * H + s.topWall;
+    const modules = Array.from({ length: bays - 1 }, (_, i) => -L / 2 + (i + 1) * bay);
+    // Columnas del borde de la galería: cada una sube entera hasta la cubierta.
+    const { spacing, radius: r } = s.columns, end = Math.max(0.2, r);
+    const columns = [-L / 2 + end, ...Array.from({ length: Math.round(L / spacing) - 1 }, (_, k) => -L / 2 + (k + 1) * spacing),
+      L / 2 - end].filter((x) => !s.noColumns?.some(([a, b]) => x > a && x < b));
+    for (const x of columns) pole(r, roofY, x, roofY / 2, zEdge - front * (r + 0.03), m.concrete, true);
     for (let level = 0; level < levels; level++) {
       const y = level * H, top = level === levels - 1, hw = top ? s.topWall : H, open = s.openings(level);
-      box(L, 0.24, D, 0, y - 0.12, 0, m.concrete, true);
+      const { from: a, to: b, walls, doors } = s.rooms(level);
+      // Losa: entera bajo las aulas y, donde estas terminan antes, solo la franja de la galería.
+      box(level ? b - a : L, 0.24, D, level ? (a + b) / 2 : 0, y - 0.12, 0, m.concrete, true);
+      const beyond = level ? spans(-L / 2, L / 2, [[a, b]]) : [];
+      for (const [p, q] of beyond) box(q - p, 0.24, G, (p + q) / 2, y - 0.12, zGallery, m.concrete, true);
       // Galería: granito con franjas sobre las líneas de módulo; aulas: baldosa clara.
       box(L, 0.03, G, 0, y + 0.015, zGallery, m.galleryFloor, false, { offset: [0.5, 0] });
-      box(L, 0.03, D - G, 0, y + 0.015, zRooms, m.tile);
+      box(b - a, 0.03, D - G, (a + b) / 2, y + 0.015, zRooms, m.tile);
       if (level) {
         box(L + 0.1, 0.32, 0.08, 0, y - 0.1, zEdge + front * 0.04, m.white);
-        box(L + 0.1, 0.32, 0.08, 0, y - 0.1, zBack - front * 0.04, m.white);
+        box(b - a + 0.1, 0.32, 0.08, (a + b) / 2, y - 0.1, zBack - front * 0.04, m.white);
+        for (const [p, q] of beyond) {
+          box(q - p, 0.32, 0.08, (p + q) / 2, y - 0.1, zWall - front * 0.04, m.white);
+          for (const [c, d] of spans(p, q, s.innerOpenings?.(level) ?? [])) rail(c, d, y, zWall + front * 0.08);
+        }
       }
-      for (let i = 0; i < bays; i++) {
-        const x0 = -L / 2 + i * bay, x1 = x0 + bay, xc = (x0 + x1) / 2;
-        // Pared de la galería: pilastras de hormigón, ladrillo hasta 2,85 m y dintel de hormigón.
-        if (i) box(0.45, hw, 0.32, x0, y + hw / 2, zWall + front * 0.06, m.concrete, true);
-        const left = x0 + (i ? 0.225 : 0.12), right = x1 - (i < bays - 1 ? 0.225 : 0.12);
-        const doors = s.doors(i).map((d) => x0 + d), edges = [left, ...doors.flatMap((d) => [d - 0.5, d + 0.5]), right];
+      // Pared de la galería: pilastras de hormigón en las líneas de módulo, ladrillo hasta 2,85 m con la
+      // puerta de cada aula y dintel de hormigón.
+      const posts = [a, ...modules.filter((x) => x > a + 0.5 && x < b - 0.5), b];
+      for (let i = 0; i + 1 < posts.length; i++) {
+        const left = posts[i] + (i ? 0.225 : 0.12), right = posts[i + 1] - (i + 2 < posts.length ? 0.225 : 0.12);
+        if (i) box(0.45, hw, 0.32, posts[i], y + hw / 2, zWall + front * 0.06, m.concrete, true);
+        const edges = [left, ...doors.filter((d) => d > left && d < right).flatMap((d) => [d - 0.5, d + 0.5]), right];
         for (let k = 0; k < edges.length; k += 2) if (edges[k + 1] - edges[k] > 0.05)
           box(edges[k + 1] - edges[k], 2.85, 0.2, (edges[k] + edges[k + 1]) / 2, y + 1.425, zWall, m.brick, true);
         box(right - left, hw - 2.85, 0.2, (left + right) / 2, y + 2.85 + (hw - 2.85) / 2, zWall, m.concrete, true);
-        for (const d of doors) {
-          box(1, 0.6, 0.05, d, y + 2.45, zWall, m.glass);
-          box(1.04, 0.08, 0.22, d, y + 2.15, zWall, m.metal);
-          const hinge = d - 0.48, swing = 1.2;
-          box(0.95, 2.1, 0.05, hinge + Math.cos(swing) * 0.475, y + 1.05, zWall - front * Math.sin(swing) * 0.475, m.metal, false,
-            { rotation: front * swing });
-        }
-        // Tabique entre aulas y fachada posterior con ventanales.
-        if (i) box(0.12, hw, D - G - 0.2, x0, y + hw / 2, zRooms - front * 0.1, m.plaster, true);
-        box(bay, 1, 0.2, xc, y + 0.5, zBack, m.brick, true);
-        box(bay, hw - 2.7, 0.2, xc, y + 2.7 + (hw - 2.7) / 2, zBack, m.brick, true);
+      }
+      for (const d of doors) {
+        box(1, 0.6, 0.05, d, y + 2.45, zWall, m.glass);
+        box(1.04, 0.08, 0.22, d, y + 2.15, zWall, m.metal);
+        const hinge = d - 0.48, swing = 1.2;
+        box(0.95, 2.1, 0.05, hinge + Math.cos(swing) * 0.475, y + 1.05, zWall - front * Math.sin(swing) * 0.475, m.metal, false,
+          { rotation: front * swing });
+      }
+      // Tabiques entre aulas y fachada posterior con ventanales por módulo, recortada donde terminan las aulas.
+      for (const x of walls) box(0.12, hw, D - G - 0.2, x, y + hw / 2, zRooms - front * 0.1, m.plaster, true);
+      for (let i = 0; i < bays; i++) {
+        const x0 = Math.max(a, -L / 2 + i * bay), x1 = Math.min(b, -L / 2 + (i + 1) * bay), w = x1 - x0, xc = (x0 + x1) / 2;
+        if (w < 0.05) continue;
+        if (w < 1.6) { box(w, hw, 0.2, xc, y + hw / 2, zBack, m.brick, true); continue; }
+        box(w, 1, 0.2, xc, y + 0.5, zBack, m.brick, true);
+        box(w, hw - 2.7, 0.2, xc, y + 2.7 + (hw - 2.7) / 2, zBack, m.brick, true);
         for (const px of [x0 + 0.3, x1 - 0.3]) box(0.6, 1.7, 0.2, px, y + 1.85, zBack, m.brick, true);
-        box(bay - 1.2, 1.7, 0.05, xc, y + 1.85, zBack, m.glass, true);
-        for (let k = 1; k < 4; k++) box(0.05, 1.7, 0.09, x0 + 0.6 + (k * (bay - 1.2)) / 4, y + 1.85, zBack, m.metal);
-        box(bay - 1.2, 0.05, 0.09, xc, y + 2.1, zBack, m.metal);
-        // Borde de la galería: columna redonda, viga transversal, baranda y lamas.
-        const column = !s.noColumns?.some(([a, b]) => x0 > a && x0 < b);
-        if (column) pole(0.17, hw, x0 + (i ? 0 : 0.2), y + hw / 2, zEdge - front * 0.2, m.concrete, true);
-        if (column && !top) box(0.28, 0.42, G, x0 + (i ? 0 : 0.2), y + H - 0.45, zGallery, m.concrete);
-        if (level) for (const [a, b] of spans(x0 + 0.17, x1 - 0.17, open)) rail(a, b, y, zEdge - front * 0.08);
-        if (level && s.louvers) for (const [a, b] of spans(x0 + 0.18, x1 - 0.18, open))
-          box(b - a, 0.96, 0.04, (a + b) / 2, y + 2.6, zEdge - front * 0.03, m.louver);
-        if (i % 3 === 1) bench(xc + 0.6, zWall + front * 0.42, y, front);
+        box(w - 1.2, 1.7, 0.05, xc, y + 1.85, zBack, m.glass, true);
+        for (let k = 1; k < 4; k++) box(0.05, 1.7, 0.09, x0 + 0.6 + (k * (w - 1.2)) / 4, y + 1.85, zBack, m.metal);
+        box(w - 1.2, 0.05, 0.09, xc, y + 2.1, zBack, m.metal);
       }
-      pole(0.17, hw, L / 2 - 0.2, y + hw / 2, zEdge - front * 0.2, m.concrete, true);
-      for (const x of [-L / 2, L / 2]) {
-        box(0.24, hw, D - G, x, y + hw / 2, zRooms, m.brick, true);
-        if (level && !open.some(([a, b]) => a <= x + 0.5 && b >= x - 0.5)) railZ(Math.min(zWall, zEdge) + 0.1, Math.max(zWall, zEdge) - 0.1, y, x - Math.sign(x) * 0.08);
+      // Borde de la galería: viga transversal en cada línea de módulo con columna; baranda y lamas
+      // entre columnas.
+      if (!top) for (const x of modules) if (columns.some((c) => Math.abs(c - x) < 0.01))
+        box(0.28, 0.42, G, x, y + H - 0.45, zGallery, m.concrete);
+      if (level) for (let i = 0; i + 1 < columns.length; i++) for (const [p, q] of spans(columns[i] + r, columns[i + 1] - r, open)) {
+        rail(p, q, y, zEdge - front * 0.08);
+        if (s.louvers) box(q - p, 0.96, 0.04, (p + q) / 2, y + 2.6, zEdge - front * 0.03, m.louver);
       }
+      for (let i = 1; i < bays; i += 3) {
+        const x = -L / 2 + (i + 0.5) * bay + 0.6;
+        if (x > a + 1 && x < b - 1 && doors.every((d) => Math.abs(d - x) > 1.5)) bench(x, zWall + front * 0.42, y, front);
+      }
+      for (const x of [a, b]) box(0.24, hw, D - G, x, y + hw / 2, zRooms, m.brick, true);
+      for (const x of [-L / 2, L / 2])
+        if (level && !open.some(([p, q]) => p <= x + 0.5 && q >= x - 0.5)) railZ(Math.min(zWall, zEdge) + 0.1, Math.max(zWall, zEdge) - 0.1, y, x - Math.sign(x) * 0.08);
       sign(s.label(level), -L / 2 + 2.5 * bay, y + 3.02, zWall + front * 0.13, 1.6, front < 0 ? Math.PI : 0);
     }
-    const roofY = (levels - 1) * H + s.topWall, eave = s.eaveEast ?? 0;
-    hipRoof(L + eave, D, roofY, 1.2, s.roof, eave / 2);
+    hipRoof(L, D, roofY, 1.2, s.roof);
     // Cerchas bajo la cubierta en cada línea de módulo (visibles desde el último piso).
     const rise = 1.2, half = D / 2 + 0.6;
     for (let i = 1; i < bays; i++) {
@@ -330,30 +367,26 @@ export function createFaculty() {
   const landingAt = (level: number): Range => [st.start - level * step, st.start - level * step + st.landing];
   const [ex, ez] = plan.elevator.center, [ew, ed] = plan.elevator.size, tw = plan.tower, es = plan.eastStair;
   const towerDoor: Range = [tw.center[0] - tw.core / 2, tw.center[0] + tw.core / 2];
-  /** Borde exterior de la escalera de la cabecera este y de su descanso en el primer piso. */
-  const eastEdge = es.x + es.width / 2 + 0.2;
+  const stairWest = es.x - es.width / 2, stairEast = es.x + es.width / 2, stairFoot = es.top - es.run;
   frame(plan.main, () => {
     academicBlock({
       ...block1, front: 1, topWall: 4.1, roof: m.roof, louvers: true,
       label: (level) => level ? "AULAS" : "LABORATORIOS",
-      openings: (level) => [
-        ...(level ? [landingAt(level)] : []),
-        // Salida del primer piso a la escalera de la plaza techada.
-        ...(level === 1 ? [[block1.length / 2 - 0.05, eastEdge] as Range] : []),
-        [ex - 0.6, ex + 0.6],
-        towerDoor,
-      ],
+      rooms: (level) => plan.rooms.main[level],
+      openings: (level) => [...(level ? [landingAt(level)] : []), [ex - ew / 2, ex + ew / 2], towerDoor],
+      // Llegada de la escalera de la plaza a la galería del primer piso.
+      innerOpenings: (level) => level === 1 ? [[stairWest, stairEast]] : [],
+      columns: { spacing: block1.column, radius: 0.25 },
       // El núcleo de la torre de baños apoya el borde de la galería en su acceso.
       noColumns: [towerDoor],
-      // El alero se prolonga sobre la escalera de la cabecera este.
-      eaveEast: eastEdge + 0.3 - (block1.length / 2 + 0.6),
-      doors: (i) => i % 2 ? [1.3] : i % 4 === 0 ? [1.3, 3.7] : [3.7],
     });
-    // Mesas del laboratorio en planta baja.
-    for (let i = 4; i < 9; i++) for (const z of [-1, -3.4]) {
-      const x = -block1.length / 2 + (i + 0.5) * block1.bay;
-      box(2.6, 0.06, 0.8, x, 0.78, z, m.white);
-      for (const dx of [-1.1, 1.1]) box(0.06, 0.75, 0.7, x + dx, 0.39, z, m.metal);
+    // Mesas del laboratorio en planta baja, sin cruzar los tabiques.
+    for (let x = -15; x <= 5; x += 5) {
+      if (plan.rooms.main[0].walls.some((w) => Math.abs(w - x) < 1.5)) continue;
+      for (const z of [-1, -3.4]) {
+        box(2.6, 0.06, 0.8, x, 0.78, z, m.white);
+        for (const dx of [-1.1, 1.1]) box(0.06, 0.75, 0.7, x + dx, 0.39, z, m.metal);
+      }
     }
     // Escalera tipo Pompidou: tramo y descanso unido a la galería por piso, bajo una bóveda que
     // sigue la pisada (sube con los tramos y se aplana en los descansos).
@@ -376,9 +409,9 @@ export function createFaculty() {
       for (const x of [xl + 0.15, xe, xs - 0.15]) for (const z of [z0 - 0.02, z1 + 0.02])
         beam(v3(x, tread(x), z), v3(x, spring(x), z), 0.04, m.steel);
     }
-    // Ascensor de 2 × 2 m: caja de hormigón con murales en sus caras este, sur y oeste hasta la
+    // Ascensor de 2,5 × 2,5 m: caja de hormigón con murales en sus caras este, sur y oeste hasta la
     // mitad superior entre el primer y el segundo piso; puertas con marco azul hacia la galería
-    // (IMG_5706). Por ahora las tres caras repiten el único mural fotografiado (IMG_5727).
+    // (IMG_5706, IMG_5694). Por ahora las tres caras repiten el único mural fotografiado (IMG_5727).
     const shaftTop = (block1.levels - 1) * H + 4.1 + 0.9, muralHeight = plan.elevator.mural - 0.1;
     box(ew, shaftTop, ed, ex, shaftTop / 2, ez, m.concrete, true);
     const mural = new T.TextureLoader().load("/assets/photos/IMG_5727.webp");
@@ -392,19 +425,39 @@ export function createFaculty() {
     for (let level = 0; level < block1.levels; level++) {
       const y = level * H, zd = ez - ed / 2;
       box(1, 2.1, 0.06, ex, y + 1.05, zd - 0.03, m.steel);
-      box(1.3, 0.12, 0.08, ex, y + 2.16, zd - 0.04, m.blue);
-      for (const s of [-1, 1]) box(0.12, 2.1, 0.08, ex + s * 0.59, y + 1.05, zd - 0.04, m.blue);
+      box(1.5, 0.14, 0.08, ex, y + 2.17, zd - 0.04, m.blue);
+      for (const s of [-1, 1]) box(0.2, 2.1, 0.08, ex + s * 0.64, y + 1.05, zd - 0.04, m.blue);
     }
     box(ew + 0.3, 1.1, ed + 0.3, ex, shaftTop + 0.55, ez, m.white);
-    // Escalera del primer piso a la plaza techada: descanso a la salida de la galería y un tramo
-    // pegado a la cabecera que baja hacia el norte hasta la plataforma.
-    const landingDepth = block1.depth / 2 - es.top;
-    box(eastEdge - block1.length / 2, 0.24, landingDepth, (block1.length / 2 + eastEdge) / 2, H - 0.12, es.top + landingDepth / 2, m.concrete, true);
-    box(eastEdge - block1.length / 2, 0.03, landingDepth, (block1.length / 2 + eastEdge) / 2, H + 0.015, es.top + landingDepth / 2, m.granite);
-    rail(block1.length / 2 - 0.05, eastEdge, H, block1.depth / 2 - 0.05);
-    railZ(es.top, block1.depth / 2 - 0.05, H, eastEdge - 0.05);
+
+    // ---- Cabecera este: planta baja y primer piso retraídos bajo los pisos 2 y 3 ----
+    const ee = plan.eastEnd, rp = ee.ramp, [groundEnd] = ee.roomsEnd;
+    // Columnas que sostienen los pisos 2 y 3 donde planta baja y primer piso se retraen.
+    for (const [x, z] of ee.columns) pole(0.25, 2 * H, x, H, z, m.concrete, true);
+    // Rampa: losa inclinada de la explanada de Manfred a la galería de planta baja, con pasamanos sobre
+    // la pared de las aulas y baranda del lado del rellano. Donde estaba la pared de la cabecera quedan
+    // solo las columnas.
+    const rampWidth = rp.east - rp.west, rampX = (rp.west + rp.east) / 2, rampRun = es.top - rp.top;
+    const rampAt = (z: number) => (PLAZA_LEVEL * (es.top - z)) / rampRun;
+    box(rampWidth, 0.2, Math.hypot(rampRun, PLAZA_LEVEL), rampX, PLAZA_LEVEL / 2 - 0.1, (rp.top + es.top) / 2, m.granite)
+      .rotation.x = Math.atan2(PLAZA_LEVEL, rampRun);
+    ramp(v3(rampX, 0, es.top), v3(rampX, PLAZA_LEVEL, rp.top), rampWidth);
+    beam(v3(groundEnd + 0.2, rampAt(-block1.depth / 2) + 0.9, -block1.depth / 2), v3(groundEnd + 0.2, 0.9, es.top), 0.03);
+    railZ(rp.top, stairFoot, PLAZA_LEVEL, rp.east + 0.06);
+    railZ(rp.top, -block1.depth / 2, PLAZA_LEVEL, rp.west - 0.06);
+    // Bodega bajo la escalera: laterales de ladrillo que siguen los peldaños (el oeste deja ver el paso
+    // de la rampa, como en IMG_5694) y frente hacia la galería con una puerta de chapa.
+    const bodegaTop = H - 0.12, door = es.x - 0.3;
+    const eastTread = (z: number) => PLAZA_LEVEL + ((H - PLAZA_LEVEL) * (z - stairFoot)) / es.run;
+    for (const x of [stairWest + 0.1, stairEast - 0.1])
+      slopedWall(x, stairFoot, es.top - 0.2, PLAZA_LEVEL, eastTread(es.top - 0.2) - 0.1);
+    for (const [p, q] of [[stairWest, door - 0.5], [door + 0.5, stairEast]])
+      box(q - p, bodegaTop, 0.2, (p + q) / 2, bodegaTop / 2, es.top - 0.1, m.brick, true);
+    box(1, bodegaTop - 2.1, 0.2, door, 2.1 + (bodegaTop - 2.1) / 2, es.top - 0.1, m.brick, true);
+    box(0.95, 2.1, 0.05, door, 1.05, es.top + 0.02, m.steel, true);
+    // Escalera de la plataforma al primer piso (2,8 m): sube hacia el sur hasta la galería, frente al ascensor.
     frame({ center: [es.x, es.top - es.run / 2], size: [es.run, es.width], angle: -Math.PI / 2 },
-      () => flight(es.run / 2, PLAZA_LEVEL, -es.run / 2, H, 0, es.width, [1]));
+      () => flight(es.run / 2, PLAZA_LEVEL, -es.run / 2, H, 0, es.width));
   });
 
   // ---- Torre de baños: núcleo desde la galería y dos semicírculos a sus costados ----
@@ -500,8 +553,9 @@ export function createFaculty() {
     academicBlock({
       ...blockG, front: -1, topWall: 3.6, roof: m.blue, louvers: false,
       label: () => "BLOQUE G",
+      rooms: (level) => plan.rooms.block2[level],
       openings: (level) => level ? [[gStair - 1.3, gStair]] : [],
-      doors: (i) => i % 2 ? [1.6] : [3.4],
+      columns: { spacing: blockG.bay, radius: 0.17 },
     });
     // Escalera de ida y vuelta sobre la fachada hacia el Bloque 1 (fotos IMG_5666/5668).
     const zA = -blockG.depth / 2 - 0.1 - gWidth / 2, zB = zA - gWidth;
@@ -519,7 +573,7 @@ export function createFaculty() {
     }
   });
 
-  // ---- Plataforma a media altura: plaza techada, cuadrado, Bedelía, cantina y Sala Manfred ----
+  // ---- Plataforma a 1,40 m: plaza techada, cuadrado, Bedelía, cantina, Sala Manfred y cabecera este ----
   for (const outline of plan.platform) {
     prism(outline, 0, PLAZA_LEVEL, m.concrete);
     pave(outline, m.stone, PLAZA_LEVEL + 0.005);
@@ -527,10 +581,9 @@ export function createFaculty() {
   for (const s of plan.platformSteps)
     frame({ center: s.top, size: [STEPS_RUN, s.width], angle: s.angle }, () => steps(STEPS_RUN, 0, PLAZA_LEVEL, s.width));
 
-  // ---- Plaza techada: la cubierta arranca después de la escalera de la cabecera este ----
+  // ---- Plaza techada: cubierta exenta, separada de la cabecera este del Bloque 1 ----
   {
-    const [w, n, e, s] = rectCorners(plan.coveredPlaza), edge = eastEdge + 0.1;
-    const outline: Vec2[] = [pointAtX(w, n, edge), n, e, s, pointAtX(w, s, edge)];
+    const outline = rectCorners(plan.coveredPlaza), [w, n, e, s] = outline;
     const height = 4.6, roofY = PLAZA_LEVEL + height;
     flipFaces(pave(outline, m.roofUnder, roofY - 0.02).geometry);
     pave(outline, m.roof, roofY + 0.12);
@@ -540,18 +593,22 @@ export function createFaculty() {
       box(length, 0.35, 0.08, (a[0] + b[0]) / 2, roofY - 0.05, (a[1] + b[1]) / 2, m.white, false,
         { rotation: -Math.atan2(b[1] - a[1], b[0] - a[0]) });
     }
-    // Columnas en los bordes y cerchas paralelas al lado corto, apoyadas al oeste en una viga.
+    // Columnas en los dos lados largos, con una viga a lo largo de cada uno, y cerchas paralelas al
+    // lado corto apoyadas en ellas.
     const inset = (p: Vec2, c: Vec2, k = 0.35): Vec2 => [p[0] + (c[0] - p[0]) * k / Math.hypot(c[0] - p[0], c[1] - p[1]), p[1] + (c[1] - p[1]) * k / Math.hypot(c[0] - p[0], c[1] - p[1])];
-    const centre: Vec2 = [(n[0] + s[0]) / 2, (n[1] + s[1]) / 2], [wn, , , , ws] = outline;
-    for (const [a, b, ts] of [[n, e, [0, 1 / 3, 2 / 3, 1]], [e, s, [0.5, 1]], [ws, wn, [0.06, 0.94]]] as const) for (const t of ts) {
-      const p = inset([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], centre);
-      pole(0.16, height, p[0], PLAZA_LEVEL + height / 2, p[1], m.steel, true);
+    const centre: Vec2 = [(n[0] + s[0]) / 2, (n[1] + s[1]) / 2];
+    for (const [a, b] of [[n, e], [w, s]] as const) {
+      for (const t of [0, 1 / 3, 2 / 3, 1]) {
+        const p = inset([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], centre);
+        pole(0.16, height, p[0], PLAZA_LEVEL + height / 2, p[1], m.steel, true);
+      }
+      const [pa, pb] = [inset(a, centre), inset(b, centre)];
+      beam(v3(pa[0], roofY - 0.45, pa[1]), v3(pb[0], roofY - 0.45, pb[1]), 0.07, m.steel);
     }
-    beam(v3(ws[0] + 0.1, roofY - 0.45, ws[1]), v3(wn[0] + 0.1, roofY - 0.45, wn[1]), 0.07, m.steel);
     const X: Vec2 = [(n[0] - w[0]) / 10, (n[1] - w[1]) / 10], Z: Vec2 = [(s[0] - w[0]) / 15, (s[1] - w[1]) / 15];
     for (const k of [3, 6, 9, 12]) {
-      const start = [w[0] + Z[0] * k, w[1] + Z[1] * k], t0 = (edge + 0.1 - start[0]) / X[0];
-      const a = v3(start[0] + X[0] * Math.max(0, t0), roofY - 0.45, start[1] + X[1] * Math.max(0, t0));
+      const start = [w[0] + Z[0] * k, w[1] + Z[1] * k];
+      const a = v3(start[0], roofY - 0.45, start[1]);
       const b = v3(start[0] + X[0] * 10, roofY - 0.45, start[1] + X[1] * 10);
       beam(a, b, 0.05, m.steel); beam(a.clone().setY(roofY - 0.05), b.clone().setY(roofY - 0.05), 0.045, m.steel);
       for (let t = 0; t <= 1.001; t += 0.25) {
@@ -562,7 +619,7 @@ export function createFaculty() {
   }
 
   // ---- Cuadrado descubierto, Bedelía, Sala Manfred, cantina y Electrónica ----
-  for (const [px, pz] of [[46.1, -7.35], [54.4, -10.9]]) frame({ center: [px, pz], size: [3.4, 1.6], angle: gridAngle }, () => {
+  for (const center of plan.planters) frame({ center, size: [3.4, 1.6], angle: gridAngle }, () => {
     box(3.4, 0.4, 1.6, 0, 0.2, 0, m.brick, true);
     box(3.2, 0.08, 1.4, 0, 0.41, 0, m.grass);
     bench(0, 1.5, 0.06, -1);
@@ -584,10 +641,10 @@ export function createFaculty() {
       pole(0.09, 0.3, x, 1, d / 2 - 1.5, gold); pole(0.22, 0.25, x, 1.27, d / 2 - 1.5, gold);
     }
   }, PLAZA_LEVEL);
-  // Sala Manfred: auditorio con el frente curvo hacia la plaza techada, fachada vidriada hacia el
-  // pasillo (IMG_5685), escenario contra el fondo y tres gradas hacia el arco.
+  // Sala Manfred: auditorio con el escenario y el pizarrón al norte (fondo), el frente curvo hacia la
+  // rampa del Bloque 1, fachada vidriada hacia el pasillo (IMG_5685) y cinco gradas hacia el arco.
   frame(plan.manfred, () => {
-    const [w, d] = plan.manfred.size, bulge = plan.manfred.bulge, zf = d / 2 - bulge, hw = 3.3;
+    const [w, d] = plan.manfred.size, bulge = plan.manfred.bulge, zf = d / 2 - bulge, hw = 3.6;
     const radius = (w * w / 4 + bulge * bulge) / (2 * bulge), zc = d / 2 - radius, outline = bulgedOutline(w, d, bulge);
     pave(outline, m.tile, 0.03);
     prism(outline, hw, 0.22, m.concrete, false);
@@ -599,21 +656,26 @@ export function createFaculty() {
     wallMat.side = T.DoubleSide; wallMat.userData.tile = tile;
     const curved = new T.Mesh(front, wallMat); curved.position.set(0, hw / 2, zc); curved.castShadow = curved.receiveShadow = true;
     visual.add(curved); solid.add(new T.Mesh(front).copy(curved, false));
-    // Fachada vidriada (+x) con la puerta entre el escenario y las gradas, y dintel hasta la losa.
-    frame({ center: [w / 2 - 0.05, (zf - d / 2) / 2], size: [zf + d / 2, 0.2], angle: -Math.PI / 2 }, () => {
-      glazing(zf + d / 2, 0, 2);
+    // Escenario y pizarrón contra el fondo; gradas desde 1,9 m del escenario hasta el arco, con un
+    // pasillo lateral de 1,2 m junto a la fachada vidriada.
+    const stageFront = -d / 2 + 1.4, rows = [-1.2, -0.3, 0.6, 1.5, 2.4];
+    box(w - 0.4, 0.4, 1.2, 0, 0.2, stageFront - 0.6, m.wood, true);
+    box(4.5, 1.4, 0.04, 0, 2, -d / 2 + 0.22, m.white);
+    // Fachada vidriada (+x) con la puerta frente al pasillo cubierto, que llega hasta Bedelía solo en su
+    // mitad sur, y dintel hasta la losa. El paño i queda centrado en z = zf - paño · (i + 0,5).
+    const facade = zf + d / 2, pane = facade / Math.ceil(facade / 1.2);
+    frame({ center: [w / 2 - 0.05, (zf - d / 2) / 2], size: [facade, 0.2], angle: -Math.PI / 2 }, () => {
+      glazing(facade, 0, Math.round((zf - 1) / pane - 0.5));
       sign("SALA MANFRED STARK", 0, 2.65, 0.08, 3);
     });
-    box(0.2, hw - 3.05, zf + d / 2, w / 2 - 0.05, 3.05 + (hw - 3.05) / 2, (zf - d / 2) / 2, m.concrete);
-    box(w - 0.4, 0.4, 0.8, 0, 0.2, -d / 2 + 0.6, m.wood, true);
-    box(3.2, 1.8, 0.04, 0, 2, -d / 2 + 0.22, m.white);
-    const ri = radius - 0.05, wi = w / 2 - 0.2, ai = Math.asin(wi / ri);
-    const curve = Array.from({ length: 13 }, (_, i): Vec2 => { const t = ai - (2 * ai * i) / 12; return [ri * Math.sin(t), zc + ri * Math.cos(t)]; });
-    [-0.6, 0.3, 1.2].forEach((z, k) => {
+    box(0.2, hw - 3.05, facade, w / 2 - 0.05, 3.05 + (hw - 3.05) / 2, (zf - d / 2) / 2, m.concrete);
+    const ri = radius - 0.05, wi = w / 2 - 0.2, ai = Math.asin(wi / ri), aisle = w / 2 - 1.4, ta = Math.asin(aisle / ri);
+    const curve = Array.from({ length: 13 }, (_, i): Vec2 => { const t = ta - ((ta + ai) * i) / 12; return [ri * Math.sin(t), zc + ri * Math.cos(t)]; });
+    rows.forEach((z, k) => {
       const h = 0.25 * (k + 1);
-      prism([[-wi, z], [wi, z], ...curve], 0, h, m.concrete);
+      prism([[-wi, z], [aisle, z], ...curve], 0, h, m.concrete);
       // Butacas de 0,5 m en fila sobre cada grada.
-      for (let x = -wi + 0.55; x <= wi - 0.5; x += 0.56) {
+      for (let x = -wi + 0.55; x <= aisle - 0.5; x += 0.56) {
         box(0.5, 0.07, 0.42, x, h + 0.42, z + 0.3, m.wood);
         box(0.5, 0.35, 0.05, x, h + 0.62, z + 0.53, m.wood);
         box(0.05, 0.42, 0.4, x - 0.27, h + 0.21, z + 0.3, m.metal);
@@ -621,7 +683,7 @@ export function createFaculty() {
     });
   }, PLAZA_LEVEL);
   // Losa del pasillo cubierto entre la Sala Manfred y Bedelía.
-  frame(plan.corridor, () => box(2.4, 0.2, plan.corridor.size[1], 0, 3.4, 0, m.concrete), PLAZA_LEVEL);
+  prism(plan.corridor, PLAZA_LEVEL + 3.6, 0.2, m.concrete, false);
   frame(plan.cantina, () => {
     const [w, d] = plan.cantina.size;
     box(w, 0.25, d, 0, 0.32, 0, m.stone, true);
