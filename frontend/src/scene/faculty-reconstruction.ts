@@ -642,46 +642,138 @@ export function createFaculty() {
     }
   }, PLAZA_LEVEL);
   // Sala Manfred: auditorio con el escenario y el pizarrón al norte (fondo), el frente curvo hacia la
-  // rampa del Bloque 1, fachada vidriada hacia el pasillo (IMG_5685) y cinco gradas hacia el arco.
+  // rampa del Bloque 1, fachada vidriada con entrada 2 cortando la curva frontal (rectángulo verde).
+// ---- Sala Manfred (Reconstrucción Limpia - Anfiteatro Descendente) ----
+// ---- Sala Manfred (Anfiteatro Descendente con Paredes Extendidas) ----
   frame(plan.manfred, () => {
     const [w, d] = plan.manfred.size, bulge = plan.manfred.bulge, zf = d / 2 - bulge, hw = 3.6;
     const radius = (w * w / 4 + bulge * bulge) / (2 * bulge), zc = d / 2 - radius, outline = bulgedOutline(w, d, bulge);
-    pave(outline, m.tile, 0.03);
+    
+    const pitY = -1.25;
+    const wallYMin = -1.35; // Extensión hacia abajo para cerrar el hueco inferior
+
+    // 1. TECHO Y CIELORRASO
     prism(outline, hw, 0.22, m.concrete, false);
-    box(w, hw, 0.2, 0, hw / 2, -d / 2 + 0.1, m.brick, true);
-    box(0.2, hw, zf + d / 2, -w / 2 + 0.1, hw / 2, (zf - d / 2) / 2, m.brick, true);
-    const a = Math.asin(w / 2 / radius), front = new T.CylinderGeometry(radius, radius, hw, 20, 1, true, -a, 2 * a);
-    const fuv = front.attributes.uv, tile = m.brick.userData.tile as number[], wallMat = m.brick.clone();
-    for (let i = 0; i < fuv.count; i++) fuv.setXY(i, (fuv.getX(i) * radius * 2 * a) / tile[0], (fuv.getY(i) * hw) / tile[1]);
-    wallMat.side = T.DoubleSide; wallMat.userData.tile = tile;
-    const curved = new T.Mesh(front, wallMat); curved.position.set(0, hw / 2, zc); curved.castShadow = curved.receiveShadow = true;
-    visual.add(curved); solid.add(new T.Mesh(front).copy(curved, false));
-    // Escenario y pizarrón contra el fondo; gradas desde 1,9 m del escenario hasta el arco, con un
-    // pasillo lateral de 1,2 m junto a la fachada vidriada.
-    const stageFront = -d / 2 + 1.4, rows = [-1.2, -0.3, 0.6, 1.5, 2.4];
-    box(w - 0.4, 0.4, 1.2, 0, 0.2, stageFront - 0.6, m.wood, true);
-    box(4.5, 1.4, 0.04, 0, 2, -d / 2 + 0.22, m.white);
-    // Fachada vidriada (+x) con la puerta frente al pasillo cubierto, que llega hasta Bedelía solo en su
-    // mitad sur, y dintel hasta la losa. El paño i queda centrado en z = zf - paño · (i + 0,5).
-    const facade = zf + d / 2, pane = facade / Math.ceil(facade / 1.2);
-    frame({ center: [w / 2 - 0.05, (zf - d / 2) / 2], size: [facade, 0.2], angle: -Math.PI / 2 }, () => {
-      glazing(facade, 0, Math.round((zf - 1) / pane - 0.5));
-      sign("SALA MANFRED STARK", 0, 2.65, 0.08, 3);
+    pave(outline, m.roofUnder, hw - 0.01);
+
+    // 2. PAREDES DE LADRILLO VISTO (EXTENDIDAS HASTA wallYMin)
+    const wallMat = m.brick.clone();
+    wallMat.side = T.DoubleSide;
+    wallMat.userData.tile = m.brick.userData.tile as number[];
+
+    const wallH = hw - wallYMin;
+    const wallCenterY = (hw + wallYMin) / 2;
+
+    // Pared trasera
+    box(w, wallH, 0.2, 0, wallCenterY, -d / 2 + 0.1, m.brick, true);
+    // Paredes laterales rectas (-x y +x)
+    box(0.2, wallH, zf + d / 2, -w / 2 + 0.1, wallCenterY, (zf - d / 2) / 2, m.brick, true);
+    box(0.2, wallH, zf + d / 2, w / 2 - 0.1, wallCenterY, (zf - d / 2) / 2, m.brick, true);
+
+    // 3. MURO CURVO FRONTAL Y ENTRADA
+    const doorXStart = -0.8; 
+    const doorXEnd = 2.4;
+    const glassH = 2.8;
+
+    const a = Math.asin(w / 2 / radius);
+    const aStart = Math.asin(Math.max(-w / 2 + 0.05, doorXStart) / radius);
+    const aEnd = Math.asin(Math.min(w / 2 - 0.05, doorXEnd) / radius);
+
+    const buildArc = (a0: number, a1: number, y0: number, y1: number) => {
+      if (a1 <= a0) return;
+      const geo = new T.CylinderGeometry(radius, radius, y1 - y0, Math.max(4, Math.ceil((a1 - a0) * 12)), 1, true, a0, a1 - a0);
+      const fuv = geo.attributes.uv, tile = wallMat.userData.tile as number[];
+      for (let i = 0; i < fuv.count; i++) {
+        fuv.setXY(i, (fuv.getX(i) * radius * (a1 - a0)) / tile[0], (fuv.getY(i) * (y1 - y0)) / tile[1]);
+      }
+      const mesh = new T.Mesh(geo, wallMat);
+      mesh.position.set(0, (y0 + y1) / 2, zc);
+      mesh.castShadow = mesh.receiveShadow = true;
+      visual.add(mesh);
+      solid.add(new T.Mesh(geo).copy(mesh, false));
+    };
+
+    // Muros curvos extendidos verticalmente desde wallYMin hasta hw
+    buildArc(-a, aStart, wallYMin, hw);
+    buildArc(aEnd, a, wallYMin, hw);
+    buildArc(aStart, aEnd, glassH, hw);
+
+    const p1 = new T.Vector3(radius * Math.sin(aStart), 0, zc + radius * Math.cos(aStart));
+    const p2 = new T.Vector3(radius * Math.sin(aEnd), 0, zc + radius * Math.cos(aEnd));
+    const chordCenter = p1.clone().add(p2).multiplyScalar(0.5);
+    const chordLen = p1.distanceTo(p2);
+    const chordAngle = Math.atan2(p2.z - p1.z, p2.x - p1.x);
+
+    frame({ center: [chordCenter.x, chordCenter.z], size: [chordLen, 0.2], angle: -chordAngle }, () => {
+      glazing(chordLen, 0, 1);
+      sign("SALA MANFRED STARK", 0, 2.5, 0.08, Math.min(chordLen - 0.4, 3.2));
     });
-    box(0.2, hw - 3.05, facade, w / 2 - 0.05, 3.05 + (hw - 3.05) / 2, (zf - d / 2) / 2, m.concrete);
-    const ri = radius - 0.05, wi = w / 2 - 0.2, ai = Math.asin(wi / ri), aisle = w / 2 - 1.4, ta = Math.asin(aisle / ri);
-    const curve = Array.from({ length: 13 }, (_, i): Vec2 => { const t = ta - ((ta + ai) * i) / 12; return [ri * Math.sin(t), zc + ri * Math.cos(t)]; });
-    rows.forEach((z, k) => {
-      const h = 0.25 * (k + 1);
-      prism([[-wi, z], [aisle, z], ...curve], 0, h, m.concrete);
-      // Butacas de 0,5 m en fila sobre cada grada.
-      for (let x = -wi + 0.55; x <= aisle - 0.5; x += 0.56) {
-        box(0.5, 0.07, 0.42, x, h + 0.42, z + 0.3, m.wood);
-        box(0.5, 0.35, 0.05, x, h + 0.62, z + 0.53, m.wood);
-        box(0.05, 0.42, 0.4, x - 0.27, h + 0.21, z + 0.3, m.metal);
+
+    // 4. PISO DEL HALL Y BUTACAS DESCENDENTES
+    const rowsZ = [1.2, 0.4, -0.4, -1.2, -2.0];
+    const rowWidth = w - 0.6;
+    const rowDepth = 0.8;
+
+    // Piso del vestíbulo hasta la curva de entrada
+    const arcPoints = outline.slice(2) as Vec2[];
+    const vestibuleOutline: Vec2[] = [
+      [-w / 2 + 0.1, 1.6],
+      [w / 2 - 0.1, 1.6],
+      ...arcPoints
+    ];
+    prism(vestibuleOutline, -0.15, 0.15, m.tile, true);
+
+    // Gradas descendentes e individuales
+    rowsZ.forEach((z, k) => {
+      const stepY = -0.25 * k;
+      box(rowWidth, 0.2, rowDepth, 0, stepY - 0.1, z, m.tile, true);
+
+      const nextY = k < rowsZ.length - 1 ? -0.25 * (k + 1) : pitY;
+      const riserH = Math.abs(stepY - nextY);
+      box(rowWidth, riserH, 0.08, 0, stepY - riserH / 2, z - rowDepth / 2, m.concrete, true);
+
+      for (let x = -rowWidth / 2 + 0.4; x <= rowWidth / 2 - 0.4; x += 0.58) {
+        box(0.5, 0.07, 0.42, x, stepY + 0.42, z - 0.05, m.wood);
+        box(0.5, 0.35, 0.05, x, stepY + 0.62, z + 0.14, m.wood);
+        box(0.05, 0.42, 0.4, x - 0.27, stepY + 0.21, z - 0.05, m.metal);
       }
     });
+
+    // 5. FOSO DEL PIZARRÓN Y ESCENARIO AL FONDO
+    const stageZ = -d / 2 + 1.4;
+    box(rowWidth, 0.15, 1.2, 0, pitY + 0.075, stageZ + 0.5, m.tile, true);
+    box(rowWidth - 0.8, 0.25, 0.9, 0, pitY + 0.25, stageZ - 0.4, m.wood, true);
+    box(4.8, 1.4, 0.04, 0, pitY + 1.4, -d / 2 + 0.22, m.white);
   }, PLAZA_LEVEL);
+
+  // ---- TECHO 1 (MARQUESINA EXTIENDE LA COBERTURA SOBRE EL SECTOR SUPERIOR RED) ----
+// ---- TECHO 1 (COBERTURA EXTENDIDA HACIA LA DERECHA) ----
+  {
+    const mf = plan.manfred;
+    const [mw] = mf.size, mb = mf.bulge;
+    const mx = mf.center[0];
+    const zArcGlobal = mf.center[1] + (mf.size[1] / 2 - mb);
+
+    // PARÁMETROS DE CONTROL EXTENDIDOS:
+    const canopyW = 23.0;       // <-- Ancho incrementado (de 18.0 a 23.0) para llegar a la derecha
+    const canopyDepth = 10.5;   // <-- Profundidad para sellar la brecha
+    const mx_canopy = mx + 2.0; // <-- Desplazamiento a la derecha (+X hacia Bedelía)
+    const canopyH = PLAZA_LEVEL + 4.1; 
+    const colH = canopyH - PLAZA_LEVEL;
+
+    const posZ = zArcGlobal + canopyDepth / 2 - 3.0;
+    const zColGlobal = posZ + canopyDepth / 2 - 0.6;
+
+    // Losa superior del Techo 1
+    box(canopyW, 0.20, canopyDepth, mx_canopy, canopyH, posZ, m.concrete, false);
+    box(canopyW, 0.30, 0.12, mx_canopy, canopyH - 0.1, posZ + canopyDepth / 2, m.white, false);
+
+    // Columnas de soporte distribuidas a lo largo de la losa ensanchada
+    for (const cx of [-canopyW / 2 + 1.0, -canopyW / 4, 0, canopyW / 4, canopyW / 2 - 1.0]) {
+      pole(0.09, colH, mx_canopy + cx, PLAZA_LEVEL + colH / 2, zColGlobal, m.white, true);
+    }
+  }
+
   // Losa del pasillo cubierto entre la Sala Manfred y Bedelía.
   prism(plan.corridor, PLAZA_LEVEL + 3.6, 0.2, m.concrete, false);
   frame(plan.cantina, () => {

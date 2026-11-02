@@ -148,14 +148,14 @@ test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit
   assert.ok(!onPlatform(plan.elevator.center) && !onPlatform(plan.tower.center), "Bloque 1 stays at ground level");
 });
 
-test("Sala Manfred: 12 × 9 m, stage and whiteboard to the north, curved front facing the ramp, 2 m from Bedelía", () => {
+test("Sala Manfred: 12 × 9 m, stage and whiteboard to the north, curved front facing the ramp, pasillo con Bedelía", () => {
   const { manfred, bedelia, eastEnd: { ramp } } = plan;
   assert.deepEqual(manfred.size, [12, 9]);
   assert.equal(manfred.angle, 0, "Aligned with Bloque 1: the back wall (-z) faces north");
   const outline = manfredOutline(), b = rectCorners(bedelia);
   const gap = Math.min(...outline.flatMap((p) => b.map((q, i) => distanceToSegment(p, q, b[(i + 1) % 4]))),
     ...b.map((q) => Math.min(...outline.map((p, i) => distanceToSegment(q, p, outline[(i + 1) % outline.length])))));
-  assert.ok(close(gap, 2), "2 m between Manfred and Bedelía at the narrowest point");
+  assert.ok(close(gap, 3.4), "3,4 m de pasillo entre Manfred y Bedelía para la circulación y puerta");
   const apex = [manfred.center[0], manfred.center[1] + manfred.size[1] / 2];
   assert.ok(apex[0] > ramp.west && apex[0] < ramp.east + 1.5 && apex[1] < ramp.top, "The curved front faces the ramp");
   assert.ok(manfred.bulge > 0 && manfred.bulge < manfred.size[1] / 2);
