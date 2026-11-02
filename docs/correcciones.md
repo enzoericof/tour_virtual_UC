@@ -74,3 +74,17 @@ Incoherencias halladas al contrastar los documentos con el código y las pruebas
 | --- | --- | --- | --- |
 | `base-geografica.md`, `faculty-blueprint.ts`, prueba | Distancia entre Sala Manfred y Bedelía: 2 m (`manfredEast = bedeliaCorner[0] − 2`) | 3,4 m (`manfredEast = bedeliaCorner[0] − 3,4`); corredor más amplio y centrado | Foto `zona_techada_y_manfred.HEIC` y coordenadas del inspector de réplica (01/11/2026) |
 | `base-geografica.md`, código | Marquesina sobre la entrada de Sala Manfred no modelada | Marquesina de ~3 m de vuelo hacia la plaza techada a PLAZA_LEVEL + 4,0 m, con cuatro columnas blancas (r = 0,08 m) | Foto `zona_techada_y_manfred.HEIC`, `faculty-reconstruction.ts` |
+
+## 02/11/2026 — Bloque 1 de 65 m, estructura, puertas y cara este (rama `feat/bloque1-65m-fachada`)
+
+| Documento | Incorrecto | Correcto | Fuente de verdad |
+| --- | --- | --- | --- |
+| `README.md`, `base-geografica.md`, `faculty-blueprint.ts` | Bloque 1 de 75 × 12 m | 65 × 12 m; se conserva la cabecera este y el extremo oeste, con la torre, se corre 10 m al este | Medida del equipo, `npm test` |
+| `base-geografica.md`, `faculty-blueprint.ts` | Columnas de la galería cada 2,5 m y pilastras cada 5 m | Columnas y pilastras cada 4,5 m, con 1 m en voladizo en cada extremo; dos paños de lamas por módulo | Medida del equipo, `npm test` |
+| `base-geografica.md`, `faculty-blueprint.ts` | Bloque G ubicado también a 47 m de la esquina SO del Bloque 1 | Se ubica por su esquina NE (11 m de la cara sur y 11,1 m de la esquina SE); la distancia a la esquina SO pasa a 43,8 m | `npm test` |
+| `base-geografica.md`, `faculty-blueprint.ts` | Escalera de la plaza al primer piso de 2,8 m | 2,1 m; la rampa y la línea de columnas de la cabecera se corren 0,7 m al este | Medida del equipo, `npm test` |
+| `base-geografica.md`, `faculty-blueprint.ts` | Ascensor con el centro a 3,5 m de la esquina SE | Entre las dos últimas columnas de la galería: centro a 3,25 m | Aclaración del equipo, `npm test` |
+| `base-geografica.md`, `faculty-blueprint.ts` | Escalera Pompidou con tramo de 6,5 m y descanso de 3,5 m (cuatro intervalos de 2,5 m) | Tramo de 6 m y descanso de 3 m (dos módulos de 4,5 m), para que cada descanso siga entrando entre dos columnas | `npm test` |
+| `base-geografica.md` | «No se asignan números de aula»; una puerta de una hoja por aula | Puerta doble de 1,7 m con hoja fija y ventana, montante y prisma con el número (10x, 20x, 30x) | Aclaración del equipo, `IMG_5639` |
+| `base-geografica.md` | «Los módulos de 5 m del plano redondean los 5,14 m [del escaneo] para que entren 15 en los 75 m» | El escaneo (72 m) es un 11 % más largo que el bloque; corregido, su módulo da unos 4,6 m | Medida del equipo |
+| `faculty-blueprint.test.mjs` | El vértice del frente curvo de Manfred debía quedar entre los bordes de la rampa | Con la rampa 0,7 m más al este, el vértice queda 0,12 m al oeste de su borde; se comprueba que esté a menos de 1,5 m de su eje. Manfred sigue anclado a Bedelía | `npm test` |

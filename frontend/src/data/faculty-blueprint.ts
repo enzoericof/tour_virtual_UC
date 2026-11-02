@@ -1,7 +1,8 @@
 import { facultyToWorld, insidePolygon } from "./campus-geometry.ts";
 
 /** Plano métrico de CyT, única geometría de la facultad.
- * Marco local: origen en el centro del Bloque 1, x a lo largo del bloque (hacia la plaza
+ * Marco local: origen en el centro de la huella OSM del Bloque 1 (el bloque de 65 m queda corrido 5 m
+ * hacia su cabecera este), x a lo largo del bloque (hacia la plaza
  * techada), z hacia el área común 2 (sur), y vertical; metros. `facultyToWorld` lo apoya,
  * sin escalar, sobre la huella OSM del Bloque 1. Medidas del equipo (31/10/2026) y fuentes:
  * docs/base-geografica.md.
@@ -20,12 +21,17 @@ export const FLOOR_HEIGHT = 3.5;
 export const PLAZA_LEVEL = 1.4;
 /** Recorrido de cada escalinata de la plataforma: ocho escalones de 17,5 × 30 cm. */
 export const STEPS_RUN = 2.4;
-/** Bloque 1 (techo gris): 75 × 12 m, planta baja y tres pisos, galería al sur. Los módulos de
- * 5 m redondean los 5,14 m entre pilastras medidos en el escaneo del tercer piso. Columnas del
- * borde de la galería cada 2,5 m, enteras hasta la cubierta (aclaración del 01/11/2026). */
-export const block1 = { length: 75, depth: 12, levels: 4, bay: 5, gallery: 2.5, column: 2.5 } as const;
+/** Bloque 1 (techo gris): 65 × 12 m (medida del equipo del 02/11/2026; antes 75 m), planta baja y
+ * tres pisos, galería al sur. Estructura cada 4,5 m: columnas del borde de la galería, enteras hasta
+ * la cubierta, y pilastras de la pared de las aulas en las mismas líneas. Los 14 módulos dejan 1 m
+ * en voladizo en cada extremo (`margin`). */
+export const block1 = { length: 65, depth: 12, levels: 4, bay: 4.5, margin: 1, gallery: 2.5 } as const;
 /** Bloque G («Bloque 2»): 65 × 12 m, planta baja y dos pisos, galería hacia el Bloque 1. */
-export const blockG = { length: 65, depth: 12, levels: 3, bay: 5, gallery: 2.5 } as const;
+export const blockG = { length: 65, depth: 12, levels: 3, bay: 5, margin: 0, gallery: 2.5 } as const;
+/** Puerta doble de las aulas del Bloque 1 (IMG_5639; medida del equipo del 02/11/2026): dos hojas que
+ * suman 1,7 m; la izquierda, fija, con una ventana cuadrada de 45 cm a 1,30 m del suelo, y la derecha
+ * de abrir. Alto de hojas y montante de dos paños estimados en la foto. */
+export const classroomDoor = { width: 1.7, height: 2, frame: 0.06, window: 0.45, windowSill: 1.3, transom: 0.53 } as const;
 /** Aulas por piso en ambos bloques, de anchos desiguales (aclaración del equipo, 01/11/2026). */
 export const ROOMS_PER_FLOOR = 6;
 /** Giro común del Bloque G, la plaza techada, Bedelía y la cantina respecto del Bloque 1:
@@ -37,7 +43,24 @@ const across = (angle: number): Vec2 => [-Math.sin(angle), Math.cos(angle)];
 const add = (p: Vec2, ...terms: [Vec2, number][]): Vec2 =>
   terms.reduce<Vec2>((q, [v, k]) => [q[0] + v[0] * k, q[1] + v[1] * k], p);
 const X = axis(gridAngle), Z = across(gridAngle);
-const half = { x: block1.length / 2, z: block1.depth / 2 };
+// El origen sigue en el centro de la huella OSM (75 m). Al corregir el largo a 65 m se conservó la
+// cabecera este, de la que se midieron el ascensor, las escaleras, la rampa y todo lo que sigue hacia
+// la plaza (decisión del 02/11/2026): el bloque queda corrido 5 m al este y el extremo oeste, 10 m.
+const east = 37.5, west = east - block1.length, half = { x: block1.length / 2, z: block1.depth / 2 };
+/** Centro del Bloque 1 en el plano: sus elementos internos (aulas) van en x de su propio marco. */
+const b1x = (east + west) / 2;
+
+/** Líneas de la estructura de un bloque (columnas y pilastras), en x de su marco: cada `bay` metros,
+ * desde `margin` metros de un extremo. */
+export function structureLines(block: { length: number; bay: number; margin: number }): number[] {
+  const count = Math.round((block.length - 2 * block.margin) / block.bay);
+  return Array.from({ length: count + 1 }, (_, k) => -block.length / 2 + block.margin + k * block.bay);
+}
+/** Pilastras de la pared de las aulas: las líneas de la estructura que no caen en los extremos. */
+export const pilasters = (block: { length: number; bay: number; margin: number }) =>
+  structureLines(block).filter((x) => Math.abs(x) < block.length / 2 - 0.01);
+/** Líneas de la estructura del Bloque 1 en x del plano. */
+const lines1 = structureLines(block1).map((x) => x + b1x);
 
 /** Esquinas en orden: atrás-izquierda, atrás-derecha, frente-derecha, frente-izquierda. */
 export function rectCorners(r: Rect): Vec2[] {
@@ -66,47 +89,50 @@ export function bulgedOutline(w: number, d: number, bulge: number, segments = 12
   });
   return [[-w / 2, -d / 2], [w / 2, -d / 2], ...arc];
 }
-/** Aulas de un nivel entre `from` y `to`: anchos desiguales y una puerta por aula en un lugar distinto
- * en cada piso. Variación fija (no aleatoria) según `seed`; sin relevamiento, solo reproduce que las
- * aulas no son regulares. Las puertas esquivan las pilastras de los módulos de `bay` metros y quedan
- * al menos a 0,6 m de las del piso de abajo (`below`). */
-export function classrooms(length: number, bay: number, from: number, to: number, seed: number, below: number[] = []): Rooms {
+/** Aulas de un nivel entre `from` y `to` (x del marco del bloque): anchos desiguales y una puerta por
+ * aula en un lugar distinto en cada piso. Variación fija (no aleatoria) según `seed`; sin relevamiento,
+ * solo reproduce que las aulas no son regulares. Cada puerta, de `door` metros de vano, esquiva las
+ * pilastras (`pilasters`) y los tabiques y queda al menos a 0,6 m de las del piso de abajo (`below`). */
+export function classrooms(pilasters: readonly number[], from: number, to: number, seed: number, door: number,
+  below: number[] = []): Rooms {
   const weights = Array.from({ length: ROOMS_PER_FLOOR }, (_, i) => 1 + 0.3 * Math.sin(seed * 1.7 + i * 2.39));
   const total = weights.reduce((s, w) => s + w, 0);
   const bounds = weights.reduce((xs, w) => [...xs, xs[xs.length - 1] + ((to - from) * w) / total], [from]);
-  const pilasters = Array.from({ length: Math.round(length / bay) - 1 }, (_, k) => -length / 2 + (k + 1) * bay);
-  const free = (x: number) => pilasters.every((p) => Math.abs(x - p) > 0.8) && below.every((d) => Math.abs(x - d) > 0.6);
+  const wall = door / 2 + 0.5, reach = door / 2 + 0.3;
+  const free = (x: number) => pilasters.every((p) => Math.abs(x - p) > reach) && below.every((d) => Math.abs(x - d) > 0.6);
   const doors = bounds.slice(0, -1).map((x0, i) => {
-    const x1 = bounds[i + 1], preferred = x0 + 1 + (0.5 + 0.35 * Math.sin(seed * 2.3 + i * 1.37 + 1)) * (x1 - x0 - 2);
+    const x1 = bounds[i + 1], preferred = x0 + wall + (0.5 + 0.35 * Math.sin(seed * 2.3 + i * 1.37 + 1)) * (x1 - x0 - 2 * wall);
     // El primer lugar libre alrededor del preferido, a pasos de 0,2 m, sin acercarse a los tabiques.
     for (let k = 0; k < 40; k++) for (const x of [preferred + k * 0.2, preferred - k * 0.2])
-      if (x > x0 + 1 && x < x1 - 1 && free(x)) return x;
+      if (x > x0 + wall && x < x1 - wall && free(x)) return x;
     return preferred;
   });
   return { from, to, walls: bounds.slice(1, -1), doors };
 }
 
-// Bloque G: su esquina NO está a 47 m de la esquina SO del Bloque 1 y su esquina NE a 11 m
-// de la cara sur (las dos distancias medidas por el equipo).
-const gDrop = 11 + blockG.length * Math.sin(-gridAngle);
-const gNorthWest: Vec2 = [-half.x + Math.sqrt(47 ** 2 - gDrop ** 2), half.z + gDrop];
+// Bloque G: su esquina NE queda a 11 m de la cara sur del Bloque 1 y a 11,1 m de su esquina SE (medidas
+// del equipo). Hasta el 02/11/2026 se ubicaba también a 47 m de la esquina SO del Bloque 1 de 75 m; con
+// el largo corregido a 65 m conserva su lugar y esa distancia pasa a unos 44 m.
+const gNorthEast: Vec2 = [east + Math.sqrt(11.1 ** 2 - 11 ** 2), half.z + 11];
+const gNorthWest = add(gNorthEast, [X, -blockG.length]);
 const gRect = rectFromCorner(gNorthWest, [blockG.length, blockG.depth], gridAngle);
-const [, gNorthEast, gSouthEast, gSouthWest] = rectCorners(gRect);
+const [, , gSouthEast, gSouthWest] = rectCorners(gRect);
 
 // Cabecera este del Bloque 1 (fotos IMG_5694 e IMG_5706; aclaraciones del 01/11/2026). Planta baja y
 // primer piso terminan antes que los pisos 2 y 3, que la cubren. La escalera de la plaza al primer
-// piso (2,8 m) sube hacia el sur bajo ese voladizo, por delante de la puerta del ascensor y dejando
-// 0,65 m para las columnas de la cabecera; debajo queda la bodega. Al oeste, una línea de columnas
-// donde terminan las aulas del primer piso y, entre ella y las aulas de planta baja, la rampa: baja
-// hacia el sur, en sentido contrario a la escalera, desde la explanada frente a Manfred (2 m al norte
-// del bloque, para que la pendiente no pase del 12 %) hasta la galería de planta baja.
-const eastStair = { x: half.x - 0.65 - 1.4, width: 2.8, top: half.z - block1.gallery, run: 3.5 };
+// piso (2,1 m, medida del equipo del 02/11/2026; antes 2,8) sube hacia el sur bajo ese voladizo, por
+// delante de la puerta del ascensor y dejando 0,65 m para las columnas de la cabecera; debajo queda la
+// bodega. Al oeste, una línea de columnas donde terminan las aulas del primer piso y, entre ella y las
+// aulas de planta baja, la rampa: baja hacia el sur, en sentido contrario a la escalera, desde la
+// explanada frente a Manfred (2 m al norte del bloque, para que la pendiente no pase del 12 %) hasta
+// la galería de planta baja.
+const eastStair = { x: east - 0.65 - 1.05, width: 2.1, top: half.z - block1.gallery, run: 3.5 };
 const stairWest = eastStair.x - eastStair.width / 2, stairEast = eastStair.x + eastStair.width / 2;
 const stairFoot = eastStair.top - eastStair.run;
 const recessColumns = stairWest - 0.3;
 const ramp = { west: recessColumns - 0.25 - 1.6, east: recessColumns - 0.25, top: -half.z - 2 };
-/** Extremo este de las aulas en cada nivel: planta baja y primer piso retraídos. */
-const roomsEnd = [ramp.west - 0.15, recessColumns, half.x, half.x];
+/** Extremo este de las aulas en cada nivel (x del plano): planta baja y primer piso retraídos. */
+const roomsEnd = [ramp.west - 0.15, recessColumns, east, east];
 
 // Plaza techada (15 × 10 m): alineada con Bedelía y la cantina, no con el Bloque 1. Hasta el 01/11/2026
 // sus lados oeste pasaban por las esquinas este del Bloque 1; el equipo aclaró que está más alejada:
@@ -114,7 +140,7 @@ const roomsEnd = [ramp.west - 0.15, recessColumns, half.x, half.x];
 // 1,4 m fuera de la cabecera. Entre ambas, la escalera, la rampa y los escalones de la galería.
 const plazaShift = 6.5;
 const reach = block1.depth * -Math.sin(gridAngle);
-const plazaWest: Vec2 = [half.x - reach * X[0] + plazaShift, -half.z - reach * X[1]];
+const plazaWest: Vec2 = [east - reach * X[0] + plazaShift, -half.z - reach * X[1]];
 const plazaNorth = add(plazaWest, [X, 10]);
 const coveredPlaza = rectFromCorner(plazaWest, [10, 15], gridAngle);
 const [, , , plazaSouth] = rectCorners(coveredPlaza);
@@ -153,10 +179,10 @@ const corridor: Vec2[] = [[manfredEast, bedeliaCorner[1]], bedeliaCorner, bedeli
 const corridorTop: Vec2 = [(manfredEast + bedeliaCorner[0]) / 2, bedeliaCorner[1]];
 const corridorFoot = add(corridorTop, [[0, -1], STEPS_RUN]);
 const squareSteps = fromRect(cantina, [-11, 22]);
-const galleryStepsTop = half.x + STEPS_RUN;
+const galleryStepsTop = east + STEPS_RUN;
 
 export const facultyBlueprint = {
-  main: { center: [0, 0], size: [block1.length, block1.depth], angle: 0 } as Rect,
+  main: { center: [b1x, 0], size: [block1.length, block1.depth], angle: 0 } as Rect,
   block2: gRect,
   coveredPlaza,
   openPlaza,
@@ -205,33 +231,38 @@ export const facultyBlueprint = {
    * y primer piso se retraen. */
   eastEnd: {
     roomsEnd, ramp,
-    columns: [-half.z + 0.25, -1.25, eastStair.top - 0.25].flatMap((z) => [[recessColumns, z], [half.x - 0.25, z]] as Vec2[]),
+    columns: [-half.z + 0.25, -1.25, eastStair.top - 0.25].flatMap((z) => [[recessColumns, z], [east - 0.25, z]] as Vec2[]),
   },
-  /** Seis aulas por piso en cada bloque, cada piso con otra distribución y otras puertas. */
+  /** Seis aulas por piso en cada bloque, cada piso con otra distribución y otras puertas; en x del
+   * marco de cada bloque. Las del Bloque 1 tienen la puerta doble (`classroomDoor`) y las del Bloque G
+   * una hoja de 1 m. */
   rooms: {
     main: roomsEnd.reduce<Rooms[]>((floors, end, level) =>
-      [...floors, classrooms(block1.length, block1.bay, -half.x, end, level + 1, floors[level - 1]?.doors)], []),
+      [...floors, classrooms(pilasters(block1), -half.x, end - b1x, level + 1,
+        classroomDoor.width + 2 * classroomDoor.frame, floors[level - 1]?.doors)], []),
     block2: Array.from({ length: blockG.levels }).reduce<Rooms[]>((floors, _, level) =>
-      [...floors, classrooms(blockG.length, blockG.bay, -blockG.length / 2, blockG.length / 2, level + 7, floors[level - 1]?.doors)], []),
+      [...floors, classrooms(pilasters(blockG), -blockG.length / 2, blockG.length / 2, level + 7, 1, floors[level - 1]?.doors)], []),
   },
   /** Torre de baños en el extremo oeste: núcleo de 2 m de ancho que sale de la galería hacia el sur
    * y dos semicírculos de 4 m de radio a sus costados (10 m de punta a punta). `center`: eje del
    * núcleo y centro de los semicírculos, 2 m al sur del acceso. Entrando desde la galería, a la
    * derecha (oeste, `menSide`) hombres y a la izquierda mujeres, en todos los pisos. En planta baja
    * un anexo cuadrado sobresale 2 m al sur de la torre. */
-  tower: { center: [-half.x + 5, half.z + 2 + 4] as Vec2, radius: 4, core: 2, menSide: -1, annex: { size: 8, beyond: 2 } },
+  tower: { center: [west + 5, half.z + 2 + 4] as Vec2, radius: 4, core: 2, menSide: -1, annex: { size: 8, beyond: 2 } },
   /** Escalera tipo Pompidou fuera de la galería: arranca a 18 m de la esquina SE (el 01/11/2026 el
    * equipo la corrió 2 m al este y la ensanchó a 2,4 m) y sube un piso por tramo hacia la torre. Tramo
-   * y descanso suman 10 m, cuatro intervalos de columna: cada descanso se une a la galería entre dos
-   * columnas en los tres pisos. */
-  stair: { start: half.x - 18, z: half.z + 0.1 + 1.2, width: 2.4, run: 6.5, landing: 3.5, flights: 3 },
-  /** Ascensor de 2,5 × 2,5 m con el centro a 3,5 m de la misma esquina (el 01/11/2026 se corrió 1,5 m
-   * al este y se agrandó), del lado de la galería y separado 0,1 m de ella para dejar las columnas.
-   * Su puerta mira al norte, a la galería, en los cuatro niveles; en el primer piso, a la llegada de la
-   * escalera de la plaza (IMG_5694). Caja de hormigón con tres murales (este, sur y oeste) hasta `mural`
-   * metros, en la mitad superior entre el primer y el segundo piso. */
-  elevator: { center: [half.x - 3.5, half.z + 0.1 + 1.25] as Vec2, size: [2.5, 2.5] as Vec2, mural: 6.5 },
-  courtyard: [[-half.x, half.z + 0.2], [half.x, half.z + 0.2], add(gNorthEast, [Z, -0.4]),
+   * (6 m, veinte peldaños de 30 cm) y descanso (3 m) suman 9 m, dos módulos de 4,5 m: cada descanso se
+   * une a la galería entre dos columnas en los tres pisos. */
+  stair: { start: east - 18, z: half.z + 0.1 + 1.2, width: 2.4, run: 6, landing: 3, flights: 3 },
+  /** Ascensor de 2,5 × 2,5 m entre las dos últimas columnas de la galería, junto a la esquina SE (el
+   * 02/11/2026 el equipo confirmó que ocupa ese módulo; su centro queda a 3,25 m de la esquina), del
+   * lado de la galería y separado 0,1 m de ella para dejar las columnas. Su puerta mira al norte, a la
+   * galería, en los cuatro niveles; en el primer piso, a la llegada de la escalera de la plaza
+   * (IMG_5694). Caja revocada con tres murales (este, sur y oeste) hasta `mural` metros, en la mitad
+   * superior entre el primer y el segundo piso. */
+  elevator: { center: [(lines1[lines1.length - 2] + lines1[lines1.length - 1]) / 2, half.z + 0.1 + 1.25] as Vec2,
+    size: [2.5, 2.5] as Vec2, mural: 6.5 },
+  courtyard: [[west, half.z + 0.2], [east, half.z + 0.2], add(gNorthEast, [Z, -0.4]),
     add(gNorthWest, [Z, -0.4])] as Vec2[],
   // Al sur de la plaza techada, que ya no lo invade al correrse al este.
   common1: [[44, 12.2], [56.5, 6], [62, 30], [49, 33.5]] as Vec2[],
@@ -240,7 +271,7 @@ export const facultyBlueprint = {
   /** Paso peatonal cubierto del área común 1 hacia el estacionamiento. */
   coveredWalk: [[41, 11], [55, 37]] as Vec2[],
   paths: [
-    [[-26.5, 9.4], [5, 9.4], [36.5, 9.4], [41, 11]],
+    [[-16, 9.4], [5, 9.4], [36.5, 9.4], [41, 11]],
     [[5, 9.4], [11.3, 30.7]],
     [[11.3, 30.7], [37.6, 16], [41, 11]],
     [[41, 11], [55, 37]],
@@ -291,14 +322,21 @@ const towerX = facultyBlueprint.tower.center[0];
 const at = (p: Vec2, y: number): [number, number, number] => [p[0], y, p[1]];
 /** Altura de llegada de los puntos sobre la plataforma. */
 const onPlatform = PLAZA_LEVEL + 0.15;
+/** Centro, en x del plano, del aula `index` (desde el oeste) del nivel `level` del Bloque 1: los puntos
+ * interiores siguen al reparto de las aulas sin caer sobre un tabique. */
+function roomCenter(level: number, index: number) {
+  const { from, walls, to } = facultyBlueprint.rooms.main[level], bounds = [from, ...walls, to];
+  return b1x + (bounds[index] + bounds[index + 1]) / 2;
+}
+const lab = roomCenter(0, 2), classroom = roomCenter(3, 2);
 
 export const facultyVisitPoints: Record<string, [number, number, number]> = {
   // Rellano junto a la cabecera este: la bodega bajo la escalera, el ascensor y la galería de planta
   // baja, como en la foto IMG_5706.
-  acceso: [half.x + 2.7, onPlatform, 1.8],
-  laboratorio: [-7.5, 0.1, -2.2],
+  acceso: [east + 2.7, onPlatform, 1.8],
+  laboratorio: [lab + 2, 0.1, -2.2],
   "pasillo-p3": [3, 10.5, 4.75],
-  "aula-p3": [0, 10.5, -1.5],
+  "aula-p3": [classroom, 10.5, -1.5],
   "cantina-cyt": at(fromRect(cantina, [-2.5, 21]), onPlatform),
   bedelia: at(add(bedeliaFacade, [Z, 1]), onPlatform),
   // Boca del pasillo entre Manfred y Bedelía, como en las fotos IMG_5685 e IMG_5686.
@@ -317,9 +355,9 @@ export const facultyVisitPoints: Record<string, [number, number, number]> = {
 
 /** Hacia dónde mira el visitante al llegar (si falta, se usa una dirección por defecto). */
 export const facultyVisitTargets: Record<string, [number, number, number]> = {
-  acceso: [half.x - 3.5, 1.4, half.z + 0.5],
-  laboratorio: [-20, 1.2, -2.2],
-  "aula-p3": [0, 11.2, -6],
+  acceso: [facultyBlueprint.elevator.center[0], 1.4, half.z + 0.5],
+  laboratorio: [lab - 4, 1.2, -2.2],
+  "aula-p3": [classroom, 11.2, -6],
   "cantina-cyt": at(cantinaFacade, PLAZA_LEVEL + 1.8),
   "plaza-abierta": at(cantinaFacade, PLAZA_LEVEL + 1.8),
   bedelia: at(bedeliaFacade, PLAZA_LEVEL + 1.6),

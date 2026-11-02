@@ -3,7 +3,8 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { makeMaterials } from "./materials";
 import {
   facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, STEPS_RUN, rectCorners,
-  bulgedOutline, cantinaForecourt, type Rect, type Rooms, type Vec2,
+  bulgedOutline, cantinaForecourt, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR,
+  type Rect, type Rooms, type Vec2,
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
 import { gardenHeight, gardenBounds } from "../data/cantina-terrain";
@@ -13,21 +14,28 @@ import { facultyPlaces } from "../data/places";
 type BoxOptions = { tile?: readonly number[]; offset?: readonly number[]; rotation?: number };
 type Range = readonly [number, number];
 type BlockSpec = {
-  length: number; depth: number; levels: number; bay: number; gallery: number;
+  length: number; depth: number; levels: number; bay: number; margin: number; gallery: number;
   /** +1: galería hacia +z del marco local; -1: hacia -z. */
   front: 1 | -1;
   topWall: number; roof: T.Material; louvers: boolean;
+  /** Cartel de la galería en cada nivel (vacío: sin cartel). */
   label: (level: number) => string;
   /** Aulas de cada nivel; donde terminan antes del extremo del bloque solo sigue la galería. */
   rooms: (level: number) => Rooms;
+  /** Puerta de cada aula: doble (Bloque 1, `classroomDoor`) o de una hoja de 1 m. */
+  door: "double" | "single";
+  /** Número del prisma sobre cada puerta (`index` desde el extremo -x); null: sin prisma. */
+  roomSign?: (level: number, index: number) => string | null;
   /** Tramos (x) de la galería sin baranda ni lamas: descansos, ascensor, accesos. */
   openings: (level: number) => Range[];
   /** Tramos (x) sin baranda en el borde interior de la galería, más allá de las aulas (llegada de una escalera). */
   innerOpenings?: (level: number) => Range[];
-  /** Columnas del borde de la galería, enteras desde la planta baja hasta la cubierta. */
-  columns: { spacing: number; radius: number };
+  /** Columnas del borde de la galería, enteras desde la planta baja hasta la cubierta, en las líneas de la estructura. */
+  columns: { radius: number };
   /** Tramos (x) del borde de la galería sin columna (los apoya otro elemento, como la torre). */
   noColumns?: Range[];
+  /** Niveles con banda de hormigón alrededor del bloque, en el canto de su losa (`levels`: bajo la cubierta). */
+  bands?: number[];
 };
 
 /** CyT en metros sobre el plano del equipo (faculty-blueprint.ts), con texturas del escaneo. */
@@ -270,18 +278,95 @@ export function createFaculty() {
     solid.add(new T.Mesh(geo));
   }
 
+  /** Puerta doble de aula (IMG_5639) centrada en x = d, en la pared z cuya galería queda hacia `front`.
+   * Vista desde la galería: hoja izquierda fija, con la ventana cuadrada; la derecha, abierta hacia el
+   * aula, deja el paso. Marco con montante de dos paños. Devuelve la altura del marco. */
+  function doubleDoor(d: number, y: number, z: number, front: number) {
+    const { width: w, height: h, frame: f, window: win, windowSill: sill, transom: t } = classroomDoor;
+    const leaf = w / 2, top = h + t + 2 * f, left = -front, mat = m.door;
+    for (const side of [-1, 1]) box(f, top, 0.12, d + side * (w + f) / 2, y + top / 2, z, mat, true);
+    box(w, f, 0.12, d, y + top - f / 2, z, mat);
+    box(w, f, 0.1, d, y + h + f / 2, z, mat);
+    box(f, t, 0.1, d, y + h + f + t / 2, z, mat);
+    for (const side of [-1, 1]) box((w - f) / 2, t, 0.02, d + side * (w + f) / 4, y + h + f + t / 2, z, m.glass, true);
+    // Hoja fija, cerrada, con la ventana de 45 cm desde 1,30 m.
+    const xl = d + (left * leaf) / 2, lw = leaf - 0.01, jamb = (lw - win) / 2;
+    box(lw, sill, 0.05, xl, y + sill / 2, z, mat, true);
+    box(lw, h - sill - win, 0.05, xl, y + (h + sill + win) / 2, z, mat, true);
+    for (const side of [-1, 1]) box(jamb, win, 0.05, xl + side * (win + jamb) / 2, y + sill + win / 2, z, mat, true);
+    box(win, win, 0.02, xl, y + sill + win / 2, z, m.glass, true);
+    // Hoja de abrir, girada sobre su bisagra (en el marco derecho) hacia el aula.
+    const hinge = d - left * leaf, swing = 1.45;
+    box(lw, h, 0.05, hinge + left * Math.cos(swing) * leaf / 2, y + h / 2, z - front * Math.sin(swing) * leaf / 2, mat, false,
+      { rotation: -swing });
+    return top;
+  }
+  /** Prisma triangular con el número del aula, contra la pared sobre la puerta (IMG_5639): dos caras
+   * inclinadas con el texto y la base, contra el muro, lisa. */
+  function roomSign(text: string, x: number, y: number, z: number, front: number) {
+    const canvas = document.createElement("canvas"); canvas.width = 256; canvas.height = 80;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#1f4c7c"; ctx.fillRect(0, 0, 256, 80);
+    ctx.fillStyle = "#f4f1e8"; ctx.font = "600 40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(text, 128, 42, 236);
+    const map = new T.CanvasTexture(canvas); map.colorSpace = T.SRGBColorSpace;
+    const l = 0.5, h = 0.1, apex = 0.11 * front, u = (px: number) => front > 0 ? (px + l / 2) / l : (l / 2 - px) / l;
+    const position: number[] = [], uv: number[] = [];
+    const quad = (a: number[], b: number[], va: number, vb: number) => {
+      // a y b: (y, z) de los bordes de arriba y de abajo de la cara; el texto queda derecho.
+      for (const [px, [py, pz], v] of [[-l / 2, a, va], [l / 2, a, va], [l / 2, b, vb], [-l / 2, a, va], [l / 2, b, vb], [-l / 2, b, vb]] as const) {
+        position.push(px, py, pz); uv.push(u(px), v);
+      }
+    };
+    quad([h, 0], [0, apex], 1, 0);
+    quad([0, apex], [-h, 0], 1, 0);
+    for (const px of [-l / 2, l / 2]) for (const [py, pz] of [[h, 0], [0, apex], [-h, 0]]) { position.push(px, py, pz); uv.push(0.01, 0.02); }
+    const geo = new T.BufferGeometry();
+    geo.setAttribute("position", new T.Float32BufferAttribute(position, 3)); geo.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
+    geo.computeVertexNormals();
+    const mesh = new T.Mesh(geo, new T.MeshBasicMaterial({ map, side: T.DoubleSide }));
+    mesh.position.set(x, y, z); visual.add(mesh);
+  }
+  /** Letras corpóreas claras sobre ladrillo, en un plano vertical que mira hacia +x (cara este). Cada
+   * renglón: texto, alto de letra y altura de su eje desde el borde superior, en metros. */
+  function lettering(lines: { text: string; size: number; at: number; weight?: string }[], width: number, height: number,
+    x: number, y: number, z: number) {
+    const px = 2048 / width, canvas = document.createElement("canvas");
+    canvas.width = 2048; canvas.height = Math.round(height * px);
+    const ctx = canvas.getContext("2d")!;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#f1ece0";
+    // Sombra corta: las letras están separadas del muro.
+    ctx.shadowColor = "rgba(40, 20, 10, 0.55)"; ctx.shadowOffsetX = -4; ctx.shadowOffsetY = 7; ctx.shadowBlur = 5;
+    for (const { text, size, at, weight = "600" } of lines) {
+      ctx.font = `${weight} ${Math.round(size * px)}px Georgia, "Times New Roman", serif`;
+      ctx.fillText(text, canvas.width / 2, at * px, canvas.width * 0.96);
+    }
+    const map = new T.CanvasTexture(canvas); map.colorSpace = T.SRGBColorSpace; map.anisotropy = 8;
+    const mat = new T.MeshStandardMaterial({ map, transparent: true, depthWrite: false, roughness: 0.55, metalness: 0.15 });
+    const mesh = new T.Mesh(new T.PlaneGeometry(width, height), mat);
+    mesh.position.set(x, y, z); mesh.rotation.y = Math.PI / 2; visual.add(mesh);
+  }
+
   /** Bloque de aulas con galería abierta (Bloque 1 y Bloque G). */
   function academicBlock(s: BlockSpec) {
     const { length: L, depth: D, levels, bay, gallery: G, front } = s;
     const zWall = front * (D / 2 - G), zEdge = front * D / 2, zBack = -front * D / 2;
-    const zGallery = front * (D / 2 - G / 2), zRooms = -front * G / 2, bays = Math.round(L / bay);
+    const zGallery = front * (D / 2 - G / 2), zRooms = -front * G / 2;
     const roofY = (levels - 1) * H + s.topWall;
-    const modules = Array.from({ length: bays - 1 }, (_, i) => -L / 2 + (i + 1) * bay);
-    // Columnas del borde de la galería: cada una sube entera hasta la cubierta.
-    const { spacing, radius: r } = s.columns, end = Math.max(0.2, r);
-    const columns = [-L / 2 + end, ...Array.from({ length: Math.round(L / spacing) - 1 }, (_, k) => -L / 2 + (k + 1) * spacing),
-      L / 2 - end].filter((x) => !s.noColumns?.some(([a, b]) => x > a && x < b));
+    // Líneas de la estructura: pilastras de la pared de las aulas (`modules`) y columnas del borde de la
+    // galería, que suben enteras hasta la cubierta. `stops` corta la fachada en tramos de punta a punta.
+    const modules = pilasters(s), stops = [-L / 2, ...modules, L / 2];
+    const { radius: r } = s.columns, end = Math.max(0.2, r);
+    const columns = structureLines(s).map((x) => Math.max(-L / 2 + end, Math.min(L / 2 - end, x)))
+      .filter((x) => !s.noColumns?.some(([a, b]) => x > a && x < b));
+    const edge = [-L / 2, ...columns, L / 2];
     for (const x of columns) pole(r, roofY, x, roofY / 2, zEdge - front * (r + 0.03), m.concrete, true);
+    // Bandas de hormigón que rodean el bloque en el canto de las losas (fotos de la cabecera este).
+    for (const level of s.bands ?? []) {
+      const yb = (level === levels ? roofY : level * H) - 0.25, hb = 0.5, t = 0.24;
+      for (const z of [D / 2 + t / 2, -D / 2 - t / 2]) box(L + 2 * t, hb, t, 0, yb, z, m.concrete);
+      for (const x of [L / 2 + t / 2, -L / 2 - t / 2]) box(t, hb, D, x, yb, 0, m.concrete);
+    }
     for (let level = 0; level < levels; level++) {
       const y = level * H, top = level === levels - 1, hw = top ? s.topWall : H, open = s.openings(level);
       const { from: a, to: b, walls, doors } = s.rooms(level);
@@ -292,9 +377,11 @@ export function createFaculty() {
       // Galería: granito con franjas sobre las líneas de módulo; aulas: baldosa clara.
       box(L, 0.03, G, 0, y + 0.015, zGallery, m.galleryFloor, false, { offset: [0.5, 0] });
       box(b - a, 0.03, D - G, (a + b) / 2, y + 0.015, zRooms, m.tile);
-      if (level) {
+      if (level && !s.bands?.includes(level)) {
         box(L + 0.1, 0.32, 0.08, 0, y - 0.1, zEdge + front * 0.04, m.white);
         box(b - a + 0.1, 0.32, 0.08, (a + b) / 2, y - 0.1, zBack - front * 0.04, m.white);
+      }
+      if (level) {
         for (const [p, q] of beyond) {
           box(q - p, 0.32, 0.08, (p + q) / 2, y - 0.1, zWall - front * 0.04, m.white);
           for (const [c, d] of spans(p, q, s.innerOpenings?.(level) ?? [])) rail(c, d, y, zWall + front * 0.08);
@@ -303,25 +390,34 @@ export function createFaculty() {
       // Pared de la galería: pilastras de hormigón en las líneas de módulo, ladrillo hasta 2,85 m con la
       // puerta de cada aula y dintel de hormigón.
       const posts = [a, ...modules.filter((x) => x > a + 0.5 && x < b - 0.5), b];
+      const opening = s.door === "double" ? classroomDoor.width / 2 + classroomDoor.frame : 0.5;
       for (let i = 0; i + 1 < posts.length; i++) {
         const left = posts[i] + (i ? 0.225 : 0.12), right = posts[i + 1] - (i + 2 < posts.length ? 0.225 : 0.12);
         if (i) box(0.45, hw, 0.32, posts[i], y + hw / 2, zWall + front * 0.06, m.concrete, true);
-        const edges = [left, ...doors.filter((d) => d > left && d < right).flatMap((d) => [d - 0.5, d + 0.5]), right];
+        const edges = [left, ...doors.filter((d) => d > left && d < right).flatMap((d) => [d - opening, d + opening]), right];
         for (let k = 0; k < edges.length; k += 2) if (edges[k + 1] - edges[k] > 0.05)
           box(edges[k + 1] - edges[k], 2.85, 0.2, (edges[k] + edges[k + 1]) / 2, y + 1.425, zWall, m.brick, true);
         box(right - left, hw - 2.85, 0.2, (left + right) / 2, y + 2.85 + (hw - 2.85) / 2, zWall, m.concrete, true);
       }
-      for (const d of doors) {
-        box(1, 0.6, 0.05, d, y + 2.45, zWall, m.glass);
-        box(1.04, 0.08, 0.22, d, y + 2.15, zWall, m.metal);
-        const hinge = d - 0.48, swing = 1.2;
-        box(0.95, 2.1, 0.05, hinge + Math.cos(swing) * 0.475, y + 1.05, zWall - front * Math.sin(swing) * 0.475, m.metal, false,
-          { rotation: front * swing });
-      }
+      doors.forEach((d, i) => {
+        if (s.door === "single") {
+          box(1, 0.6, 0.05, d, y + 2.45, zWall, m.glass);
+          box(1.04, 0.08, 0.22, d, y + 2.15, zWall, m.metal);
+          const hinge = d - 0.48, swing = 1.2;
+          box(0.95, 2.1, 0.05, hinge + Math.cos(swing) * 0.475, y + 1.05, zWall - front * Math.sin(swing) * 0.475, m.metal, false,
+            { rotation: front * swing });
+          return;
+        }
+        // Puerta doble con montante; encima, ladrillo hasta el dintel y el prisma con el número del aula.
+        const frameTop = doubleDoor(d, y, zWall, front);
+        box(2 * opening, 2.85 - frameTop, 0.2, d, y + (2.85 + frameTop) / 2, zWall, m.brick, true);
+        const label = s.roomSign?.(level, i);
+        if (label) roomSign(label, d, y + frameTop + 0.14, zWall + front * 0.1, front);
+      });
       // Tabiques entre aulas y fachada posterior con ventanales por módulo, recortada donde terminan las aulas.
       for (const x of walls) box(0.12, hw, D - G - 0.2, x, y + hw / 2, zRooms - front * 0.1, m.plaster, true);
-      for (let i = 0; i < bays; i++) {
-        const x0 = Math.max(a, -L / 2 + i * bay), x1 = Math.min(b, -L / 2 + (i + 1) * bay), w = x1 - x0, xc = (x0 + x1) / 2;
+      for (let i = 0; i + 1 < stops.length; i++) {
+        const x0 = Math.max(a, stops[i]), x1 = Math.min(b, stops[i + 1]), w = x1 - x0, xc = (x0 + x1) / 2;
         if (w < 0.05) continue;
         if (w < 1.6) { box(w, hw, 0.2, xc, y + hw / 2, zBack, m.brick, true); continue; }
         box(w, 1, 0.2, xc, y + 0.5, zBack, m.brick, true);
@@ -331,28 +427,39 @@ export function createFaculty() {
         for (let k = 1; k < 4; k++) box(0.05, 1.7, 0.09, x0 + 0.6 + (k * (w - 1.2)) / 4, y + 1.85, zBack, m.metal);
         box(w - 1.2, 0.05, 0.09, xc, y + 2.1, zBack, m.metal);
       }
-      // Borde de la galería: viga transversal en cada línea de módulo con columna; baranda y lamas
-      // entre columnas.
+      // Borde de la galería: viga transversal en cada línea de módulo con columna; baranda entre
+      // columnas (y en los voladizos de los extremos) y, encima, dos paños de lamas por módulo.
       if (!top) for (const x of modules) if (columns.some((c) => Math.abs(c - x) < 0.01))
         box(0.28, 0.42, G, x, y + H - 0.45, zGallery, m.concrete);
-      if (level) for (let i = 0; i + 1 < columns.length; i++) for (const [p, q] of spans(columns[i] + r, columns[i + 1] - r, open)) {
-        rail(p, q, y, zEdge - front * 0.08);
-        if (s.louvers) box(q - p, 0.96, 0.04, (p + q) / 2, y + 2.6, zEdge - front * 0.03, m.louver);
+      if (level) for (let i = 0; i + 1 < edge.length; i++) {
+        const p0 = edge[i] + (i ? r : 0.1), q0 = edge[i + 1] - (i + 2 < edge.length ? r : 0.1), mid = (p0 + q0) / 2;
+        for (const [p, q] of spans(p0, q0, open)) rail(p, q, y, zEdge - front * 0.08);
+        if (!s.louvers) continue;
+        const panels: Range[] = q0 - p0 > 2.5 ? [[p0, mid - 0.03], [mid + 0.03, q0]] : [[p0, q0]];
+        for (const panel of panels) for (const [p, q] of spans(panel[0], panel[1], open)) {
+          if (q - p < 0.2) continue;
+          box(q - p, 0.96, 0.04, (p + q) / 2, y + 2.6, zEdge - front * 0.03, m.louver);
+          for (const x of [p + 0.025, q - 0.025]) box(0.05, 1, 0.06, x, y + 2.6, zEdge - front * 0.03, m.steel);
+        }
       }
-      for (let i = 1; i < bays; i += 3) {
-        const x = -L / 2 + (i + 0.5) * bay + 0.6;
-        if (x > a + 1 && x < b - 1 && doors.every((d) => Math.abs(d - x) > 1.5)) bench(x, zWall + front * 0.42, y, front);
+      for (let i = 1; i + 1 < stops.length; i += 3) {
+        const x = (stops[i] + stops[i + 1]) / 2 + 0.6;
+        if (x > a + 1 && x < b - 1 && doors.every((d) => Math.abs(d - x) > opening + 1)) bench(x, zWall + front * 0.42, y, front);
       }
       for (const x of [a, b]) box(0.24, hw, D - G, x, y + hw / 2, zRooms, m.brick, true);
-      for (const x of [-L / 2, L / 2])
-        if (level && !open.some(([p, q]) => p <= x + 0.5 && q >= x - 0.5)) railZ(Math.min(zWall, zEdge) + 0.1, Math.max(zWall, zEdge) - 0.1, y, x - Math.sign(x) * 0.08);
-      sign(s.label(level), -L / 2 + 2.5 * bay, y + 3.02, zWall + front * 0.13, 1.6, front < 0 ? Math.PI : 0);
+      for (const x of [-L / 2, L / 2]) {
+        if (!level || open.some(([p, q]) => p <= x + 0.5 && q >= x - 0.5)) continue;
+        const xr = x - Math.sign(x) * 0.08, z0 = Math.min(zWall, zEdge) + 0.1, z1 = Math.max(zWall, zEdge) - 0.1;
+        railZ(z0, z1, y, xr);
+        // Los extremos de la galería también llevan lamas (cabecera este, fotos del 02/11/2026).
+        if (s.louvers) box(0.04, 0.96, z1 - z0, xr + Math.sign(x) * 0.05, y + 2.6, (z0 + z1) / 2, m.louver);
+      }
+      if (s.label(level)) sign(s.label(level), (stops[2] + stops[3]) / 2, y + 3.02, zWall + front * 0.13, 1.6, front < 0 ? Math.PI : 0);
     }
     hipRoof(L, D, roofY, 1.2, s.roof);
     // Cerchas bajo la cubierta en cada línea de módulo (visibles desde el último piso).
     const rise = 1.2, half = D / 2 + 0.6;
-    for (let i = 1; i < bays; i++) {
-      const x = -L / 2 + i * bay;
+    for (const x of modules) {
       if (Math.abs(x) > L / 2 - D / 2) continue;
       beam(v3(x, roofY - 0.05, -D / 2), v3(x, roofY - 0.05, D / 2), 0.035, m.steel);
       for (const sgn of [-1, 1]) {
@@ -370,17 +477,25 @@ export function createFaculty() {
   const [ex, ez] = plan.elevator.center, [ew, ed] = plan.elevator.size, tw = plan.tower, es = plan.eastStair;
   const towerDoor: Range = [tw.center[0] - tw.core / 2, tw.center[0] + tw.core / 2];
   const stairWest = es.x - es.width / 2, stairEast = es.x + es.width / 2, stairFoot = es.top - es.run;
+  /** El Bloque 1 está corrido en el plano (cabecera este fija): tramo del plano → x de su marco. */
+  const b1x = plan.main.center[0], local = ([a, b]: Range): Range => [a - b1x, b - b1x];
   frame(plan.main, () => {
     academicBlock({
       ...block1, front: 1, topWall: 4.1, roof: m.roof, louvers: true,
-      label: (level) => level ? "AULAS" : "LABORATORIOS",
+      label: (level) => level ? "" : "LABORATORIOS",
       rooms: (level) => plan.rooms.main[level],
-      openings: (level) => [...(level ? [landingAt(level)] : []), [ex - ew / 2, ex + ew / 2], towerDoor],
+      door: "double",
+      // 10x, 20x y 30x por piso. En IMG_5639, mirando al este, el 204 está antes que el 203: se numera
+      // desde la cabecera este (interpretación de la foto).
+      roomSign: (level, index) => level ? `Aula ${level}0${ROOMS_PER_FLOOR - index}` : null,
+      openings: (level) => [...(level ? [landingAt(level)] : []), [ex - ew / 2, ex + ew / 2] as Range, towerDoor].map(local),
       // Llegada de la escalera de la plaza a la galería del primer piso.
-      innerOpenings: (level) => level === 1 ? [[stairWest, stairEast]] : [],
-      columns: { spacing: block1.column, radius: 0.25 },
+      innerOpenings: (level) => level === 1 ? [local([stairWest, stairEast])] : [],
+      columns: { radius: 0.25 },
       // El núcleo de la torre de baños apoya el borde de la galería en su acceso.
-      noColumns: [towerDoor],
+      noColumns: [local(towerDoor)],
+      // Bandas en la base y el techo de los pisos 2 y 3, que separan los títulos de la cara este.
+      bands: [2, 3, block1.levels],
     });
     // Mesas del laboratorio en planta baja, sin cruzar los tabiques.
     for (let x = -15; x <= 5; x += 5) {
@@ -390,6 +505,21 @@ export function createFaculty() {
         for (const dx of [-1.1, 1.1]) box(0.06, 0.75, 0.7, x + dx, 0.39, z, m.metal);
       }
     }
+    // Títulos de la cara este, sobre el ladrillo de las aulas entre las bandas (fotos del 02/11/2026):
+    // en el tercer piso, la universidad y la facultad; en el segundo, el nombre del edificio.
+    const faceX = block1.length / 2 + 0.135, faceZ = -block1.gallery / 2;
+    lettering([
+      { text: "Universidad", size: 0.36, at: 0.45, weight: "500" },
+      { text: "Católica", size: 0.72, at: 1.0 },
+      { text: "«Nuestra Señora de la Asunción»", size: 0.15, at: 1.47, weight: "500" },
+      { text: "FACULTAD DE CIENCIAS Y TECNOLOGÍA", size: 0.4, at: 2.35 },
+    ], 9, 3.2, faceX, 3 * H + 2.05, faceZ);
+    lettering([
+      { text: "EDIFICIO", size: 0.42, at: 0.85, weight: "700" },
+      { text: "PROF. ING. LUIS ALBERTO MEYER JOU", size: 0.34, at: 1.6 },
+    ], 9, 2.6, faceX, 2 * H + 1.75, faceZ);
+  });
+  {
     // Escalera tipo Pompidou: tramo y descanso unido a la galería por piso, bajo una bóveda que
     // sigue la pisada (sube con los tramos y se aplana en los descansos).
     const z0 = st.z - st.width / 2, z1 = st.z + st.width / 2;
@@ -411,11 +541,11 @@ export function createFaculty() {
       for (const x of [xl + 0.15, xe, xs - 0.15]) for (const z of [z0 - 0.02, z1 + 0.02])
         beam(v3(x, tread(x), z), v3(x, spring(x), z), 0.04, m.steel);
     }
-    // Ascensor de 2,5 × 2,5 m: caja de hormigón con murales en sus caras este, sur y oeste hasta la
-    // mitad superior entre el primer y el segundo piso; puertas con marco azul hacia la galería
-    // (IMG_5706, IMG_5694). Por ahora las tres caras repiten el único mural fotografiado (IMG_5727).
+    // Ascensor de 2,5 × 2,5 m entre dos columnas: caja revocada en crema con murales en sus caras este,
+    // sur y oeste hasta la mitad superior entre el primer y el segundo piso; puertas con marco azul hacia
+    // la galería (IMG_5706, IMG_5694). Por ahora las tres caras repiten el único mural fotografiado (IMG_5727).
     const shaftTop = (block1.levels - 1) * H + 4.1 + 0.9, muralHeight = plan.elevator.mural - 0.1;
-    box(ew, shaftTop, ed, ex, shaftTop / 2, ez, m.concrete, true);
+    box(ew, shaftTop, ed, ex, shaftTop / 2, ez, m.render, true);
     const mural = new T.TextureLoader().load("/assets/photos/IMG_5727.webp");
     mural.colorSpace = T.SRGBColorSpace; mural.offset.set(0.748, 0.279); mural.repeat.set(0.102, 0.497);
     const muralMat = new T.MeshStandardMaterial({ map: mural, roughness: 0.9 });
@@ -457,10 +587,10 @@ export function createFaculty() {
       box(q - p, bodegaTop, 0.2, (p + q) / 2, bodegaTop / 2, es.top - 0.1, m.brick, true);
     box(1, bodegaTop - 2.1, 0.2, door, 2.1 + (bodegaTop - 2.1) / 2, es.top - 0.1, m.brick, true);
     box(0.95, 2.1, 0.05, door, 1.05, es.top + 0.02, m.steel, true);
-    // Escalera de la plataforma al primer piso (2,8 m): sube hacia el sur hasta la galería, frente al ascensor.
+    // Escalera de la plataforma al primer piso (2,1 m): sube hacia el sur hasta la galería, frente al ascensor.
     frame({ center: [es.x, es.top - es.run / 2], size: [es.run, es.width], angle: -Math.PI / 2 },
       () => flight(es.run / 2, PLAZA_LEVEL, -es.run / 2, H, 0, es.width));
-  });
+  }
 
   // ---- Torre de baños: núcleo desde la galería y dos semicírculos a sus costados ----
   {
@@ -557,7 +687,8 @@ export function createFaculty() {
       label: () => "BLOQUE G",
       rooms: (level) => plan.rooms.block2[level],
       openings: (level) => level ? [[gStair - 1.3, gStair]] : [],
-      columns: { spacing: blockG.bay, radius: 0.17 },
+      door: "single",
+      columns: { radius: 0.17 },
     });
     // Escalera de ida y vuelta sobre la fachada hacia el Bloque 1 (fotos IMG_5666/5668).
     const zA = -blockG.depth / 2 - 0.1 - gWidth / 2, zB = zA - gWidth;

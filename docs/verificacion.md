@@ -124,3 +124,11 @@ Integrado origin/main (79423d5), conservando las nueve dependencias y las mejora
 ## Recorrido desde el punto tocado — 02/11/2026
 
 TypeScript y build correctos. Suite frontend: 28/29; las cinco pruebas nuevas pasan (destinos independientes, altura de piso elevado, fachada con espacio libre, ausencia de destino/cielo y coordenadas del canvas). Permanece el fallo previo de plataforma de Manfred. Verificados en navegador dos destinos distintos, arrastre orbital y clic en el cielo. Se reemplaza el doble clic que iniciaba en el destino predeterminado por clic con selección mediante rayo sobre las colisiones reales.
+
+## Bloque 1 de 65 m, estructura, puertas y cara este — 02/11/2026
+
+- TypeScript y build aprobados (`npm run build`).
+- `npm test`: 30/31. Pasan las dos pruebas nuevas (65 m con la cabecera este fija y estructura cada 4,5 m; puertas dobles) y las actualizadas (ascensor y descansos entre columnas, escalera de la plaza de 2,1 m, Bloque G por su esquina NE, puertas lejos de las pilastras). Persiste solo el fallo previo de la plataforma de Manfred.
+- Colisiones reales de `createCampus` con Octree y la cápsula del caminante (radio 0,28 m), con una página temporal fuera del repositorio: los 16 puntos de visita libres; las 24 puertas del Bloque 1 se cruzan por la hoja abierta, de la galería al aula; las galerías de los cuatro niveles se recorren de punta a punta; los tres descansos de la escalera Pompidou llegan a la galería; la escalera de la plaza al primer piso y la rampa quedan libres. Es una comprobación geométrica por muestras, no un recorrido con el teclado.
+- Revisión visual en Edge sin ventana (WebGL por GPU, 1280 × 800): cara este desde el sureste y de frente (títulos entre bandas, lamas en el extremo de la galería, caja crema del ascensor), fachada sur (columnas, lamas en dos paños, descansos), galería del segundo piso y puerta del aula 204 comparada con `IMG_5639`, interior de un aula del tercer piso, escalera de la plaza y rampa comparadas con la foto del 02/11, ascensor y extremo oeste con la torre. Sin errores de JavaScript (solo un 404 de la página temporal). Capturas en `.local/references/bloque1-65m/`.
+- No se probó en la aplicación completa con el menú ni en móviles; no hubo cambios de backend ni de contratos.
