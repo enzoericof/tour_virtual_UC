@@ -430,35 +430,6 @@ h2 {
   width: 13px;
   height: 13px;
 }
-.location-chip {
-  position: fixed;
-  bottom: 94px;
-  left: 32px;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  background: #faf9f1eb;
-  padding: 14px 19px;
-  border: 1px solid #ffffffe0;
-  border-radius: 9px;
-  z-index: 3;
-  box-shadow: 0 5px 24px #243c3010;
-}
-.location-chip > svg {
-  color: #55755e;
-  width: 21px;
-  height: 21px;
-}
-.location-chip strong {
-  display: block;
-  font-size: 12px;
-}
-.location-chip span {
-  display: block;
-  font-size: 9px;
-  color: #7b8877;
-  margin-top: 5px;
-}
 .tools {
   position: fixed;
   bottom: 94px;
@@ -481,33 +452,6 @@ h2 {
   width: 18px;
   height: 18px;
 }
-.view-switcher {
-  position: fixed;
-  top: 113px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 3px;
-  padding: 5px;
-  z-index: 9;
-  border: 1px solid #d4decf;
-  border-radius: 12px;
-  background: #fbfbf0f2;
-  box-shadow: 0 5px 24px #243c3010;
-}
-.view-switcher button {
-  padding: 10px 15px;
-  border-radius: 8px;
-  font-size: 11px;
-  color: #637567;
-  white-space: nowrap;
-}
-.view-switcher button[aria-pressed="true"] {
-  background: #294f3d;
-  color: #fbfbf0;
-}
-.view-switcher button:focus-visible { outline: 2px solid #b39b60; outline-offset: 2px; }
-body.in-tour .view-switcher { display: none; }
 .geographic-map {
   height: auto !important;
   aspect-ratio: var(--map-ratio);
@@ -518,10 +462,6 @@ body.in-tour .view-switcher { display: none; }
 .geographic-map .map-pin { width: 18px; height: 18px; font-size: 8px; }
 .map-credit { font-size: 10px; color: #73806e; margin-top: 22px; }
 .map-credit a { color: inherit; }
-@media (max-width: 760px) {
-  .view-switcher { top: 87px; padding: 4px; }
-  .view-switcher button { font-size: 9px; padding: 9px 7px; }
-}
 .bottom-bar {
   position: fixed;
   bottom: 0;
@@ -1066,10 +1006,6 @@ form .primary {
     width: 300px;
     right: 16px;
   }
-  .location-chip {
-    bottom: 83px;
-    left: 16px;
-  }
   .tools {
     left: 51%;
   }
@@ -1148,17 +1084,6 @@ form .primary {
   }
   .intro {
     max-width: 85vw;
-  }
-  .location-chip {
-    bottom: 76px;
-    max-width: 55%;
-    padding: 10px 12px;
-  }
-  .location-chip span {
-    font-size: 8px;
-  }
-  .location-chip strong {
-    font-size: 10px;
   }
   .tools {
     bottom: 76px;
@@ -1289,8 +1214,6 @@ body.ui-compact .menu-btn {
   backdrop-filter: blur(18px);
   z-index: 11;
 }
-.menu-panel .location-chip,
-.menu-panel .view-switcher,
 .menu-panel .tools,
 .menu-panel .bottom-bar {
   position: static;
@@ -1299,16 +1222,6 @@ body.ui-compact .menu-btn {
   backdrop-filter: none;
   max-width: none;
   height: auto;
-}
-.menu-panel .location-chip {
-  padding: 0 4px;
-  border: 0;
-  background: transparent;
-}
-.menu-panel .view-switcher {
-  justify-self: center;
-  flex-wrap: wrap;
-  justify-content: center;
 }
 .menu-panel .tools {
   justify-self: center;
@@ -1338,4 +1251,60 @@ body.ui-compact .vignette {
   .menu-btn kbd {
     display: none;
   }
+}
+
+/* Visor: el modelo es la pantalla de entrada; los espacios se abren a pedido. */
+.topbar {
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  height: 64px;
+  border-radius: 10px;
+  border-color: #e4e8df;
+  background: #fafbf7f5;
+  box-shadow: none;
+  backdrop-filter: blur(6px);
+}
+.brand-mark { width: 38px; height: 38px; font-size: 21px; }
+.brand strong { font-size: 14px; }
+.brand small { font-size: 10px; letter-spacing: 0.2px; margin-top: 3px; color: #718076; }
+.topbar nav { gap: 2px; }
+.topbar nav button { padding: 10px 12px; font-size: 12px; }
+.explorer { top: 146px; bottom: 24px; border-radius: 10px; }
+.explorer .section-top { padding: 18px 22px; }
+.explorer h2 { font-size: 19px; }
+.place-card .tag:empty { display: none; }
+.tools { left: 20px; right: auto; bottom: 20px; transform: none; padding: 4px; box-shadow: none; }
+.tools .icon-btn { width: 34px; height: 34px; }
+.control-hint { position: fixed; bottom: 27px; right: 24px; z-index: 4; padding: 8px 10px; border-radius: 5px; background: #fafbf7d9; }
+.walk-prompt { top: auto; bottom: 24px; left: auto; right: 24px; transform: none; flex-direction: row; padding: 12px 16px; gap: 16px; border-radius: 8px; box-shadow: none; }
+.walk-prompt > span { font-size: 13px; }
+.walk-prompt .primary { padding: 10px 14px; font-size: 12px; }
+.walk-prompt .text-btn { font-size: 11px; }
+body:has(.walk-prompt:not(.hidden)) > #app .control-hint { visibility: hidden; }
+.menu-panel .control-hint { position: static; background: transparent; padding: 0; flex-wrap: wrap; }
+@media (max-width: 1000px) {
+  .brand small { display: none; }
+  .topbar { gap: 12px; padding: 0 14px; }
+  .topbar nav button { padding: 9px; }
+  .topbar nav button span { display: none; }
+  .topbar nav button { min-width: 38px; }
+}
+@media (max-width: 760px) {
+  .topbar { top: 10px; left: 10px; right: 10px; height: 56px; gap: 6px; padding: 0 9px; }
+  .brand { gap: 8px; }
+  .brand-mark { width: 30px; height: 30px; font-size: 18px; }
+  .brand-mark > span { left: 9px; }
+  .brand strong { display: none; }
+  .topbar nav { margin-left: auto; }
+  .topbar nav button { min-width: 31px; padding: 7px; }
+  .account { border: 0; padding: 6px; }
+  .account span { display: none; }
+  .explorer { top: 120px; left: 10px; right: 10px; width: auto; bottom: 10px; max-height: none; }
+  .tools { bottom: 18px; left: 10px; }
+  .control-hint { display: none; }
+  .menu-panel .control-hint { display: flex; }
+  .control-hint kbd, .control-hint span:last-of-type { display: none; }
+  .walk-prompt { bottom: 76px; left: 10px; right: 10px; gap: 10px; padding: 10px; justify-content: space-between; }
+  .walk-prompt > span { display: none; }
 }

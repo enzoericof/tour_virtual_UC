@@ -10,8 +10,7 @@ export type Place = {
   position: [number, number, number];
   photo: string;
   photos: string[];
-  scan?: string;
-  status: "scan" | "reference" | "pending";
+  status: "reference" | "pending";
 };
 const originalPlaces: Place[] = [
   {
@@ -32,12 +31,11 @@ const originalPlaces: Place[] = [
     category: "Ciencia & tecnología",
     floor: "Planta baja · Bloque 1",
     description:
-      "Explorá una clase de laboratorio capturada con Scaniverse. Se conserva la geometría y la textura de la captura original; pueden existir pequeños huecos del escaneo.",
+      "Laboratorios de planta baja del Bloque 1, dentro del modelo de la facultad. Las fotografías sirven como referencia; el interior es aproximado.",
     position: [-14, 0, -5],
     photo: "IMG_5653",
     photos: ["IMG_5653", "IMG_5649", "IMG_5655", "IMG_5663"],
-    scan: "laboratorio",
-    status: "scan",
+    status: "reference",
   },
   {
     id: "pasillo-p3",
@@ -45,12 +43,11 @@ const originalPlaces: Place[] = [
     category: "Recorrido destacado",
     floor: "Piso 3 · Bloque 1",
     description:
-      "Ladrillos, bancos rojizos y barandas azul grisáceo: un recorrido por la captura real del pasillo. El escaneo es independiente del modelo general del campus.",
+      "Galería del tercer piso del Bloque 1, integrada al modelo de la facultad, con ladrillo visto, bancos y barandas.",
     position: [16, 10.5, -1],
     photo: "IMG_5625",
     photos: ["IMG_5625", "IMG_5626", "IMG_5621", "IMG_5638"],
-    scan: "pasillo-p3",
-    status: "scan",
+    status: "reference",
   },
   {
     id: "aula-p3",
@@ -58,12 +55,11 @@ const originalPlaces: Place[] = [
     category: "Espacios de aprendizaje",
     floor: "Piso 3 · Bloque 1",
     description:
-      "Una de las aulas de la facultad, registrada mediante escaneo 3D. La captura permite observar mobiliario y superficies reales.",
+      "Aula del tercer piso del Bloque 1. Se visita dentro del modelo construido; distribución y mobiliario aproximados, pendientes de validar con el equipo.",
     position: [5, 10.5, -7],
     photo: "IMG_5635",
     photos: ["IMG_5635", "IMG_5634", "IMG_5636"],
-    scan: "aula-p3",
-    status: "scan",
+    status: "reference",
   },
   {
     id: "cantina-cyt",
@@ -220,7 +216,6 @@ export const places: Place[] = facultyPlaces.map((p) => ({
 }));
 export const photoUrl = (id: string) => `/assets/photos/${id}.webp`;
 export const statusLabel = {
-  scan: "Escaneo real",
   reference: "Reconstrucción",
   pending: "Por validar",
 };

@@ -1,5 +1,5 @@
 import "./style.css";
-import { TourEngine, type CampusView } from "./scene/engine";
+import { TourEngine } from "./scene/engine";
 import { places, photoUrl, statusLabel, type Place } from "./data/places";
 import { icon } from "./ui/icons";
 import {
@@ -12,8 +12,6 @@ import {
   type Panel,
 } from "./services/api";
 import { CampusChat } from "./services/chat";
-import { mapPercent, campusBounds } from "./data/campus-geometry";
-import { drawCampusMap } from "./ui/campus-map";
 const $ = <T extends HTMLElement = HTMLElement>(s: string) =>
   document.querySelector<T>(s)!;
 const escape = (s: string) =>
@@ -24,20 +22,14 @@ const escape = (s: string) =>
         c
       ]!,
   );
-const overviewHint = `Arrastrá para girar <span>·</span> Rueda para acercarte <span>·</span> <kbd>M</kbd> Paneles`;
 $("#app").innerHTML = `
- <main id="viewport"></main><div class="vignette"></div>
- <header class="topbar"><button class="brand" id="home" aria-label="Volver al campus"><span class="brand-mark">UC<span>✦</span></span><span><strong>Ciencias y Tecnología</strong><small>FACULTAD DE CIENCIAS Y TECNOLOGÍA</small></span></button><nav aria-label="Principal"><button id="spaces-btn" class="active">${icon("map")}<span>Explorar</span></button><button id="library-btn">${icon("book")}<span>Biblioteca</span></button><button id="chat-btn">${icon("chat")}<span>Comunidad</span></button><button id="menu-btn" class="menu-btn" aria-expanded="false" aria-controls="menu-panel">${icon("menu")}<span>Menú</span><kbd>M</kbd></button></nav><button id="account-btn" class="account">${icon("user")}<span>Ingresar</span></button></header>
- <div class="menu-panel hidden" id="menu-panel" role="region" aria-label="Vistas y herramientas"><button class="secondary restore" id="restore-panels">Mostrar paneles <kbd>M</kbd></button></div>
- <section class="intro" id="intro"><div class="eyebrow"><span class="dot"></span> TU FACULTAD, DESDE OTRA PERSPECTIVA</div><h1>Tu facultad.<br>Más <em>cerca.</em></h1><p>Recorré sus pasillos, descubrí sus espacios<br>y encontrate con la comunidad.</p><button class="primary" id="begin">Comenzar recorrido ${icon("arrow")}</button><div class="intro-note">${icon("walk")} Primera persona <span>·</span> Exploración libre</div></section>
- <aside class="explorer" id="explorer"><div class="section-top"><div><span class="eyebrow">DESCUBRÍ CyT</span><h2>Elegí tu próximo lugar</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="scan">Escaneos 3D <span>3</span></button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div><div class="explorer-foot">${icon("layers")} Primera versión · referencias reales</div></aside>
- <div class="location-chip" id="location-chip">${icon("pin")}<div><strong id="location-name">Ciencias y Tecnología</strong><span id="location-floor">Vista general · distribución aproximada</span></div></div>
- <div class="view-switcher" role="group" aria-label="Vistas del campus"><button data-view="campus" aria-pressed="true">Sector CyT</button><button data-view="plan" aria-pressed="false">Vista de planta</button><button data-view="faculty-plan" aria-pressed="false">Plano de CyT</button><button data-view="faculty" aria-pressed="false">Mi facultad</button></div>
- <div class="tools"><button id="overview" class="icon-btn" title="Vista general" aria-label="Vista general">${icon("cube")}</button><button id="map-btn" class="icon-btn" title="Mapa del campus" aria-label="Mapa del campus">${icon("map")}</button><button id="quality" class="icon-btn" title="Cambiar calidad gráfica" aria-label="Cambiar calidad gráfica">${icon("sun")}</button><button id="fullscreen" class="icon-btn" title="Pantalla completa" aria-label="Pantalla completa">${icon("expand")}</button><button id="help" class="icon-btn" title="Ayuda" aria-label="Ayuda">${icon("help")}</button></div>
- <div class="bottom-bar"><span class="edition">UC <i>/</i> TOUR VIRTUAL <span>2026</span></span><div class="control-hint" id="control-hint">${overviewHint}</div><span class="performance"><i></i><span id="fps">—</span> FPS</span></div>
- <div class="walk-prompt hidden" id="walk-prompt"><span id="walk-prompt-text">Listo para explorar</span><button class="primary" id="resume">${icon("walk")} Entrar al recorrido</button><small>W A S D para moverte · Mouse para mirar · Esc para salir</small><button class="text-btn" id="inspect">Ver modelo completo</button></div>
+ <main id="viewport"></main>
+ <header class="topbar"><button class="brand" id="home" aria-label="Volver al campus"><span class="brand-mark">UC<span>✦</span></span><span><strong>Ciencias y Tecnología</strong><small>Campus Santa Librada</small></span></button><nav aria-label="Principal"><button aria-label="Explorar" id="spaces-btn" aria-expanded="false" aria-controls="explorer">${icon("map")}<span>Explorar</span></button><button aria-label="Caminar" id="begin">${icon("walk")}<span>Caminar</span></button><button aria-label="Biblioteca" id="library-btn">${icon("book")}<span>Biblioteca</span></button><button aria-label="Comunidad" id="chat-btn">${icon("chat")}<span>Comunidad</span></button><button aria-label="Menú" id="menu-btn" class="menu-btn" aria-expanded="false" aria-controls="menu-panel">${icon("menu")}<span>Menú</span><kbd>M</kbd></button></nav><button aria-label="Cuenta" id="account-btn" class="account">${icon("user")}<span>Ingresar</span></button></header>
+ <div class="menu-panel hidden" id="menu-panel" role="region" aria-label="Herramientas"><button class="secondary restore" id="restore-panels">Mostrar paneles <kbd>M</kbd></button></div>
+ <aside class="explorer collapsed" id="explorer" aria-label="Espacios de la facultad"><div class="section-top"><div><h2>Espacios</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div></aside>
+ <div class="tools"><button id="overview" class="icon-btn" title="Restablecer vista" aria-label="Restablecer vista">${icon("cube")}</button><button id="quality" class="icon-btn" title="Cambiar calidad gráfica" aria-label="Cambiar calidad gráfica">${icon("sun")}</button><button id="fullscreen" class="icon-btn" title="Pantalla completa" aria-label="Pantalla completa">${icon("expand")}</button><button id="help" class="icon-btn" title="Ayuda" aria-label="Ayuda">${icon("help")}</button></div>
+ <div class="walk-prompt hidden" id="walk-prompt"><span id="walk-prompt-text">Recorrido en pausa</span><button class="primary" id="resume">${icon("walk")} Caminar</button><button class="text-btn" id="inspect">Volver a la vista general</button></div>
  <div id="crosshair" class="hidden">+</div><button id="interaction" class="interaction hidden"></button>
- <div class="loading hidden" id="loading"><div class="loading-card"><span class="eyebrow">PREPARANDO TU VISITA</span><h2 id="loading-text">Cargando espacio…</h2><div class="progress"><div id="progress"></div></div><p>Las texturas y los detalles reales están en camino.</p></div></div>
  <dialog id="dialog"><button class="icon-btn dialog-close" aria-label="Cerrar">${icon("close")}</button><div id="dialog-content"></div></dialog>
  <div id="toast" role="status" class="toast hidden"></div>
 `;
@@ -49,9 +41,8 @@ let online = false;
 let highQuality = true;
 let toastTimer = 0;
 const chat = new CampusChat();
-// Paneles recogidos: con una tecla, la portada y los controles flotantes pasan al menú de
-// la barra superior; «M» (o «Mostrar paneles») los devuelve a su lugar.
-const floating = [".location-chip", ".view-switcher", ".tools", ".bottom-bar"].map((selector) => {
+// M alterna las herramientas; los espacios solo se abren desde Explorar.
+const floating = [".tools"].map((selector) => {
   const element = $(selector), mark = document.createComment(selector);
   element.before(mark);
   return { element, mark };
@@ -63,8 +54,7 @@ function setMenu(open: boolean) {
 function setCompact(compact: boolean) {
   document.body.classList.toggle("ui-compact", compact);
   if (compact) {
-    $("#intro").classList.add("hidden");
-    $("#explorer").classList.add("collapsed");
+    setExplorer(false);
     for (const { element } of floating) $("#menu-panel").insertBefore(element, $("#restore-panels"));
   } else {
     for (const { element, mark } of floating) mark.after(element);
@@ -72,9 +62,6 @@ function setCompact(compact: boolean) {
   }
 }
 const compact = () => document.body.classList.contains("ui-compact");
-// Teclas que no recogen la portada: navegación con teclado y modificadores.
-const passiveKeys = new Set(["Tab", "Enter", "Escape", "CapsLock", "ShiftLeft", "ShiftRight", "ControlLeft",
-  "ControlRight", "AltLeft", "AltRight", "MetaLeft", "MetaRight", "ContextMenu"]);
 function toast(message: string) {
   $("#toast").textContent = message;
   $("#toast").classList.remove("hidden");
@@ -104,7 +91,6 @@ function renderPlaces() {
     (p) =>
       (p.name + " " + p.floor).toLowerCase().includes(query) &&
       (filter === "all" ||
-        (filter === "scan" && p.scan) ||
         (filter === "outside" &&
           ["patio", "jardin", "estacionamiento", "plaza"].includes(p.id))),
   );
@@ -112,7 +98,7 @@ function renderPlaces() {
     ? shown
         .map(
           (p) =>
-            `<button class="place-card ${selected?.id === p.id ? "chosen" : ""}" data-place="${p.id}"><img src="${photoUrl(p.photo)}" alt="" loading="lazy"><span class="place-copy"><small>${escape(p.floor)}</small><strong>${escape(p.name)}</strong><span class="tag ${p.status}">${p.scan ? icon("cube") : ""}${statusLabel[p.status]}</span></span><span class="place-arrow">↗</span></button>`,
+            `<button class="place-card ${selected?.id === p.id ? "chosen" : ""}" data-place="${p.id}"><img src="${photoUrl(p.photo)}" alt="" loading="lazy"><span class="place-copy"><small>${escape(p.floor)}</small><strong>${escape(p.name)}</strong><span class="tag ${p.status}">${p.status === "pending" ? statusLabel[p.status] : ""}</span></span><span class="place-arrow">↗</span></button>`,
         )
         .join("")
     : '<p class="empty">No encontramos ese espacio. Probá con otro nombre.</p>';
@@ -128,11 +114,9 @@ function showPlace(p: Place) {
   selected = p;
   renderPlaces();
   openDialog(
-    `<div class="place-detail"><img class="detail-hero" src="${photoUrl(p.photo)}" alt="${escape(p.name)}"><div class="detail-body"><span class="eyebrow">${escape(p.category)} · ${statusLabel[p.status]}</span><h2>${escape(p.name)}</h2><p class="subtle">${escape(p.floor)}</p><p>${escape(p.description)}</p><div class="actions"><button class="primary" id="visit-place">${p.scan ? "Entrar al escaneo" : "Ir a este espacio"} ${icon("arrow")}</button>${p.scan ? '<button class="secondary" id="place-campus">Ubicar en el campus</button>' : ""}</div><div class="photo-strip">${p.photos.map((id) => `<button data-photo="${id}" aria-label="Ampliar fotografía ${id}"><img src="${photoUrl(id)}" alt="Referencia de ${escape(p.name)}" loading="lazy"></button>`).join("")}</div><div id="info-panels"><p class="subtle">Cargando panel informativo…</p></div></div></div>`,
+    `<div class="place-detail"><img class="detail-hero" src="${photoUrl(p.photo)}" alt="${escape(p.name)}"><div class="detail-body"><span class="eyebrow">${escape(p.category)} · ${statusLabel[p.status]}</span><h2>${escape(p.name)}</h2><p class="subtle">${escape(p.floor)}</p><p>${escape(p.description)}</p><div class="actions"><button class="primary" id="visit-place">Ir a este espacio ${icon("arrow")}</button></div><div class="photo-strip">${p.photos.map((id) => `<button data-photo="${id}" aria-label="Ampliar fotografía ${id}"><img src="${photoUrl(id)}" alt="Referencia de ${escape(p.name)}" loading="lazy"></button>`).join("")}</div><div id="info-panels"><p class="subtle">Cargando panel informativo…</p></div></div></div>`,
   );
   $("#visit-place").onclick = () => visit(p);
-  if (p.scan)
-    $("#place-campus").onclick = () => visit({ ...p, scan: undefined });
   document.querySelectorAll<HTMLButtonElement>("[data-photo]").forEach(
     (b) =>
       (b.onclick = () => {
@@ -196,15 +180,9 @@ function editPanel(p: Place, panel: Panel) {
 }
 async function visit(p?: Place) {
   closeDialog();
-  $("#intro").classList.add("hidden");
-  $("#explorer").classList.add("collapsed");
+  setExplorer(false);
   selected = p ?? null;
-  $("#location-name").textContent = p?.name ?? "Ciencias y Tecnología";
-  $("#location-floor").textContent = p
-    ? `${p.floor} · ${statusLabel[p.status]}`
-    : "Vista general · distribución aproximada";
   await engine.go(p);
-  if (!p) document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === "campus")));
   renderPlaces();
 }
 function onMode(mode: string) {
@@ -213,23 +191,13 @@ function onMode(mode: string) {
   $("#crosshair").classList.toggle("hidden", !walking);
   $("#walk-prompt").classList.toggle("hidden", mode !== "paused");
   $(".topbar").classList.toggle("muted", walking);
-  $("#control-hint").innerHTML = walking
-    ? `<kbd>W A S D</kbd> Moverte <span>·</span> ${engine.walker.fallback ? "Arrastrá para mirar" : "Mouse para mirar"} <span>·</span> <kbd>Esc</kbd> Menú`
-    : mode === "paused"
-      ? "Recorrido en pausa · retomá cuando quieras"
-      : overviewHint;
   if (!walking) $("#interaction").classList.add("hidden");
   else setMenu(false);
 }
 try {
   engine = new TourEngine($("#viewport"));
   engine.onMode = onMode;
-  engine.onProgress = (text, percent) => {
-    $("#loading").classList.toggle("hidden", !text);
-    $("#loading-text").textContent = text;
-    $("#progress").style.width = `${Math.round(percent * 100)}%`;
-  };
-  engine.onStats = (fps) => ($("#fps").textContent = String(fps));
+  engine.overview();
   engine.onError = toast;
   engine.onLocation = (p) => {
     const b = $("#interaction");
@@ -250,60 +218,43 @@ try {
 }
 $("#begin").onclick = async () => {
   await visit(places[0]);
+  engine.startWalking();
 };
 $("#resume").onclick = () => {
   closeDialog();
   engine.startWalking();
 };
-$("#inspect").onclick = () => {
-  if (engine.location === "campus") void setCampusView("faculty");
-  else {
-    engine.overview();
-    document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => b.setAttribute("aria-pressed", "false"));
-  }
-};
-$("#overview").onclick = () => {
-  void setCampusView("campus");
-};
-async function setCampusView(mode: CampusView) {
-  if (engine.location !== "campus") await engine.go();
-  engine.overview(mode);
+$("#inspect").onclick = resetOverview;
+$("#overview").onclick = resetOverview;
+function resetOverview() {
+  engine.overview();
   selected = null;
   renderPlaces();
-  $("#intro").classList.add("hidden");
-  $("#explorer").classList.add("collapsed");
-  $("#location-name").textContent = "Ciencias y Tecnología";
-  $("#location-floor").textContent = mode === "faculty" ? "Bloques y conexiones · referencia del equipo" : mode === "faculty-plan" ? "Plano de CyT · norte hacia arriba" : mode === "plan" ? "Vista de planta · norte hacia arriba" : "CyT · canchas y estacionamientos";
-  document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === mode)));
+  setExplorer(false);
 }
-document.querySelectorAll<HTMLButtonElement>("[data-view]").forEach((b) => {
-  b.onclick = () => { void setCampusView(b.dataset.view as CampusView); };
-});
 $("#menu-btn").onclick = () => setMenu($("#menu-panel").classList.contains("hidden"));
 $("#restore-panels").onclick = () => setCompact(false);
 window.addEventListener("keydown", (e) => {
   if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
   const target = e.target instanceof Element ? e.target : null;
   if (target?.closest("input, textarea, select, [contenteditable]") || $<HTMLDialogElement>("#dialog").open) return;
-  if (e.code === "Escape") return setMenu(false);
-  if (e.code === "KeyM") return setCompact(!compact());
-  if (passiveKeys.has(e.code) || (e.code === "Space" && target?.closest("button, a"))) return;
-  if (!compact() && !$("#intro").classList.contains("hidden")) setCompact(true);
+  if (e.code === "Escape") { setMenu(false); setExplorer(false); }
+  if (e.code === "KeyM") setCompact(!compact());
 });
 document.addEventListener("pointerdown", (e) => {
   if (!(e.target instanceof Element && e.target.closest("#menu-panel, #menu-btn"))) setMenu(false);
 });
-$("#home").onclick = () => {
-  setCompact(false);
-  void visit();
-  $("#intro").classList.remove("hidden");
-  $("#explorer").classList.remove("collapsed");
-};
+function setExplorer(open: boolean) {
+  $("#explorer").classList.toggle("collapsed", !open);
+  $("#spaces-btn").classList.toggle("active", open);
+  $("#spaces-btn").setAttribute("aria-expanded", String(open));
+}
+$("#home").onclick = () => { setCompact(false); setExplorer(false); resetOverview(); };
 $("#spaces-btn").onclick = () => {
   engine.pause();
-  $("#explorer").classList.toggle("collapsed");
+  setExplorer($("#explorer").classList.contains("collapsed"));
 };
-$("#close-explorer").onclick = () => $("#explorer").classList.add("collapsed");
+$("#close-explorer").onclick = () => setExplorer(false);
 $<HTMLInputElement>("#search").oninput = renderPlaces;
 document.querySelectorAll<HTMLButtonElement>("[data-filter]").forEach(
   (b) =>
@@ -335,43 +286,8 @@ $("#fullscreen").onclick = () => {
 };
 $("#help").onclick = () =>
   openDialog(
-    `<span class="eyebrow">TU VISITA, A TU RITMO</span><h2>Cómo recorrer el campus</h2><div class="help-grid"><kbd>W A S D</kbd><p>Caminar. También podés usar las flechas.</p><kbd>Mouse</kbd><p>Mirar alrededor. En vista general, arrastrar y acercar con la rueda.</p><kbd>Shift</kbd><p>Caminar más rápido.</p><kbd>Espacio</kbd><p>Saltar para superar pequeños desniveles.</p><kbd>E</kbd><p>Abrir información del espacio cercano.</p><kbd>Esc</kbd><p>Soltar el cursor y volver al menú.</p><kbd>M</kbd><p>Recoger la portada y los paneles en el menú de la barra superior, o devolverlos a su lugar. Cualquier tecla también recoge la portada.</p></div><p class="subtle">El sector de CyT es una reconstrucción aproximada. Los tres espacios con la etiqueta “Escaneo real” usan tus capturas de Scaniverse. Se recomienda teclado y mouse para caminar; en pantallas táctiles podés inspeccionar modelos y fotografías.</p>`,
+    `<span class="eyebrow">TU VISITA, A TU RITMO</span><h2>Cómo recorrer el campus</h2><div class="help-grid"><kbd>W A S D</kbd><p>Caminar. También podés usar las flechas.</p><kbd>Mouse</kbd><p>Mirar alrededor. En vista general, arrastrar y acercar con la rueda.</p><kbd>Shift</kbd><p>Caminar más rápido.</p><kbd>Espacio</kbd><p>Saltar para superar pequeños desniveles.</p><kbd>E</kbd><p>Abrir información del espacio cercano.</p><kbd>Esc</kbd><p>Soltar el cursor y volver al menú.</p><kbd>M</kbd><p>Ocultar o mostrar las herramientas del recorrido.</p></div><p class="subtle">El sector de CyT es una reconstrucción aproximada. Se recomienda teclado y mouse para caminar; en pantallas táctiles podés inspeccionar modelos y fotografías.</p><p class="subtle">Base geográfica: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>.</p>`,
   );
-$("#map-btn").onclick = () => {
-  openDialog(
-    `<span class="eyebrow">ORIENTATE EN EL CAMPUS</span><h2>Ciencias y Tecnología</h2><p class="subtle">CyT, las canchas y los estacionamientos cercanos. Elegí un punto para visitar sus espacios.</p><div class="campus-map geographic-map" style="--map-ratio:${(campusBounds.maxX - campusBounds.minX) / (campusBounds.maxZ - campusBounds.minZ)}"><canvas id="geographic-map" aria-label="Plano de Ciencias y Tecnología, canchas y estacionamientos"></canvas>${places
-      .filter(
-        (p) =>
-          !["piso-1", "piso-2", "aula-p3", "banos", "pasillo-p3"].includes(
-            p.id,
-          ),
-      )
-      .map(
-        (p, i) =>
-          `<button class="map-pin" data-map="${p.id}" style="left:${mapPercent(p.position).left}%;top:${mapPercent(p.position).top}%" title="${escape(p.name)}">${i + 1}</button>`,
-      )
-      .join("")}</div><div class="map-legend">${places
-      .filter(
-        (p) =>
-          !["piso-1", "piso-2", "aula-p3", "banos", "pasillo-p3"].includes(
-            p.id,
-          ),
-      )
-      .map(
-        (p, i) =>
-          `<button data-map="${p.id}"><span>${i + 1}</span>${escape(p.name)}</button>`,
-      )
-      .join("")}</div><p class="map-credit">Base: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · Ubicaciones internas por validar.</p>`,
-  );
-  drawCampusMap($<HTMLCanvasElement>("#geographic-map"));
-  document
-    .querySelectorAll<HTMLButtonElement>("[data-map]")
-    .forEach(
-      (b) =>
-        (b.onclick = () =>
-          showPlace(places.find((p) => p.id === b.dataset.map)!)),
-    );
-};
 function account() {
   if (user) {
     openDialog(

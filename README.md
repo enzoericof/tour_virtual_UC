@@ -8,21 +8,21 @@ La integración de ramas del 01/11 conserva también el aporte `campus-backend/`
 
 - Sector de Ciencias y Tecnología con las medidas del equipo: Bloque 1 (75 × 12 m, planta baja y tres pisos) con su escalera tipo Pompidou, ascensor con murales, cabecera este con escalera y rampa hacia la plaza techada, media sombra y torre de baños; Bloque G (65 × 12 m); patios; plazas techada y abierta, Bedelía, cantina y Sala Manfred sobre una plataforma a 1,40 m; dos canchas vecinas y estacionamientos cercanos. Se excluyen las demás facultades y el seminario.
 - Paredes de ladrillo, piso de granito, hormigón, cubierta y lamas con texturas sacadas del escaneo del pasillo del tercer piso.
-- Tres espacios de **escaneo real**: laboratorio de planta baja, aula del tercer piso y pasillo del tercer piso. Se cargan individualmente para limitar memoria y descarga.
+- Todo el recorrido usa el modelo construido de la facultad. Los escaneos navegables de laboratorio, pasillo y aula del tercer piso fueron retirados; esos espacios conservan sus identificadores y fotografías de referencia.
 - Primera persona, teclado y mouse, colisiones, gravedad y escaleras en el bloque principal. Si el navegador no permite capturar el cursor, se puede mirar arrastrando.
-- Vista general con cámara orbital, búsqueda de espacios, filtros, mapa y fotografías ampliables. Con una tecla, la portada y los paneles se recogen en un menú de la barra superior.
+- Vista general con cámara orbital, búsqueda de espacios, filtros y fotografías ampliables. El inicio muestra el modelo a pantalla completa. Los espacios se abren desde Explorar; M recoge las herramientas.
 - Registro, inicio/cierre de sesión, biblioteca de trabajos por enlace y edición/eliminación de trabajos propios.
 - Paneles informativos obtenidos del servidor; creación, edición y eliminación para administradores.
 - Chat STOMP entre usuarios autenticados, con identidad asignada por el servidor. No se guarda historial.
 - Migración Flyway, pruebas de permisos y un contenedor de aplicación con PostgreSQL.
 
-**Es un prototipo inicial, no una réplica terminada.** Los edificios con medida del equipo respetan esas medidas; el resto de las proporciones, la vegetación y los recintos sin escaneo son aproximados. Segundo piso y baños están señalados como pendientes de validación. Las capturas originales tienen huecos y deformaciones que siguen visibles; no se generaron detalles que no existían en las fuentes. Los escaneos se visitan como escenas independientes, todavía sin alineación continua con el campus reconstruido.
+**Es un prototipo inicial, no una réplica terminada.** Los edificios con medida del equipo respetan esas medidas; el resto de las proporciones, la vegetación y los recintos sin escaneo son aproximados. Segundo piso y baños están señalados como pendientes de validación. Los interiores son reconstrucciones aproximadas, no capturas navegables.
 
 El **Bloque G corresponde al “Bloque 2” de las carpetas y de la vista aérea**, confirmado por Horacio. Cantina y Bedelía están ambas en el alcance ampliado. No se incluyen todavía avatares sincronizados, una persona animada, subida de archivos, agente IA ni un despliegue público. El escaneo de persona fue inspeccionado y preparado localmente; requiere recorte, retopología y rigging antes de servir como avatar.
 
 ## Inicio rápido: recorrido 3D
 
-Requisitos: **Node.js 24 LTS** y npm. Los modelos y las fotografías utilizados están incluidos en esta rama; no hace falta conectar Drive para ejecutar la aplicación.
+Requisitos: **Node.js 24 LTS** y npm. Las fotografías y texturas utilizadas están incluidas; no hace falta conectar Drive para ejecutar la aplicación.
 
 ```sh
 git clone https://github.com/enzoericof/tour_virtual_UC.git
@@ -74,7 +74,7 @@ La configuración de Compose está limitada a la máquina local. Para un desplie
 
 ## Controles
 
-Cuatro vistas: **Sector CyT**, **Vista de planta**, **Plano de CyT** y **Mi facultad**. El mapa y el recorrido comparten una sola distribución ([ids, fuentes, coordenadas y límites](docs/base-geografica.md)).
+Dos modos: **vista general** al iniciar y **recorrido a pie** desde Caminar. El botón de restablecer vista permite regresar al encuadre inicial. Ambos comparten una sola distribución ([ids, fuentes, coordenadas y límites](docs/base-geografica.md)).
 
 | Acción | Control |
 | --- | --- |
@@ -84,10 +84,10 @@ Cuatro vistas: **Sector CyT**, **Vista de planta**, **Plano de CyT** y **Mi facu
 | Saltar pequeños desniveles | Espacio |
 | Información del espacio cercano | E |
 | Pausar y liberar cursor | Esc |
-| Recoger la portada y los paneles en el menú de la barra superior, o devolverlos | M (cualquier tecla también recoge la portada) |
+| Ocultar o mostrar las herramientas | M  |
 | Inspeccionar el conjunto | Botón de vista general; arrastrar y rueda |
 
-En dispositivos táctiles se pueden inspeccionar modelos, mapas y fotos. El recorrido a pie está pensado para teclado y mouse.
+En dispositivos táctiles se pueden inspeccionar modelos y fotos. El recorrido a pie está pensado para teclado y mouse.
 
 ## Stack
 

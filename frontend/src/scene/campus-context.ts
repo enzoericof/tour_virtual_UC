@@ -6,7 +6,7 @@ export function createCampusContext() {
   const group = new T.Group(), colliders = new T.Group();
   group.name = "CyT · canchas y estacionamientos";
   const material = (color: string) => new T.MeshStandardMaterial({ color, roughness: 0.95 });
-  const ground = material("#768961"), outside = material("#d7dacb");
+  const ground = material("#768961");
   const road = material("#b4b1a5"), parking = material("#b6b2a2");
   const pitchMat = material("#6a8e4a");
   const baseGeo = new T.BoxGeometry(1, 1, 1);
@@ -33,11 +33,18 @@ export function createCampusContext() {
     const mesh = new T.Mesh(geo, mat); mesh.receiveShadow = true; group.add(mesh);
   }
   const w = campusBounds.maxX - campusBounds.minX + 10, d = campusBounds.maxZ - campusBounds.minZ + 10;
-  const base = new T.Mesh(baseGeo, outside);
-  base.scale.set(w, 0.4, d);
-  base.position.set((campusBounds.minX + campusBounds.maxX) / 2, -0.25, (campusBounds.minZ + campusBounds.maxZ) / 2);
-  base.receiveShadow = true; group.add(base);
-  const floor = new T.Mesh(baseGeo); floor.scale.copy(base.scale); floor.position.copy(base.position); colliders.add(floor);
+  // El terreno continúa más allá del sector: no hay borde de maqueta visible.
+  const terrainGeometry = new T.PlaneGeometry(20000, 20000);
+  terrainGeometry.rotateX(-Math.PI / 2);
+  const terrain = new T.Mesh(terrainGeometry, ground);
+  terrain.name = "Terreno continuo";
+  terrain.position.y = -0.05;
+  terrain.receiveShadow = true;
+  group.add(terrain);
+  const floor = new T.Mesh(baseGeo);
+  floor.scale.set(w, 0.4, d);
+  floor.position.set((campusBounds.minX + campusBounds.maxX) / 2, -0.25, (campusBounds.minZ + campusBounds.maxZ) / 2);
+  colliders.add(floor);
   polygon(layout.boundary, ground, -0.025);
   layout.parking.filter((p) => !inFacultyZone(p.points)).forEach((p) => polygon(p.points, parking, 0.008));
   layout.roads.filter((r) => !inFacultyZone(r.points)).forEach((r) => strip(r.points, r.width, road));

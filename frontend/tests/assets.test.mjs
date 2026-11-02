@@ -10,12 +10,15 @@ test('Every referenced photograph is available in the prepared asset bundle',()=
  const missing=names.filter(n=>!fs.existsSync(new URL(`photos/${n}.webp`,root)));
  assert.deepEqual(missing,[],'Run scripts/prepare-assets.py with the downloaded Drive folder.');
 });
-for(const name of ['laboratorio','aula-p3','pasillo-p3'])test(`${name}: valid GLB with bounded and aligned binary buffers`,()=>{
- const data=fs.readFileSync(new URL(`scans/${name}.glb`,root));assert.equal(data.readUInt32LE(0),0x46546c67);assert.equal(data.readUInt32LE(4),2);assert.equal(data.readUInt32LE(8),data.length);
- const length=data.readUInt32LE(12),json=JSON.parse(data.subarray(20,20+length).toString());const binaryLength=data.readUInt32LE(20+length);
- for(const view of json.bufferViews){assert.equal((view.byteOffset??0)%4,0);assert.ok((view.byteOffset??0)+view.byteLength<=binaryLength);}
- for(const mesh of json.meshes)for(const p of mesh.primitives)assert.ok(json.accessors[p.attributes.POSITION].count>1000);
- assert.ok(data.length<15*1024*1024,'Optimized asset exceeds the per-scan budget.');
+test('The tour uses the built model and does not serve the retired scans',()=>{
+ const engine=fs.readFileSync(new URL('../src/scene/engine.ts',import.meta.url),'utf8');
+ const catalogue=fs.readFileSync(new URL('../src/data/places.ts',import.meta.url),'utf8');
+ assert.ok(!engine.includes('GLTFLoader'));
+ assert.ok(!/scan:\s*"/.test(catalogue));
+ for(const name of ['laboratorio','aula-p3','pasillo-p3']){
+  assert.ok(!fs.existsSync(new URL(`scans/${name}.glb`,root)),`${name} is still publicly served`);
+  assert.ok(catalogue.includes(`id: "${name}"`),`${name}: keep the faculty space`);
+ }
 });
 test('Scan-derived textures exist, stay small and match their tile sizes and provenance',()=>{
  const catalogue=JSON.parse(fs.readFileSync(new URL('textures/textures.json',root),'utf8'));
