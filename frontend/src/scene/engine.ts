@@ -5,6 +5,7 @@ import { Walker } from "../navigation/walker";
 import { places, type Place } from "../data/places";
 import { campusCenter, facultyToWorld } from "../data/campus-geometry";
 import { facultyVisitTargets } from "../data/faculty-blueprint";
+import { annexVisitTargets } from "../data/faculty-annexes";
 export class TourEngine {
   readonly scene = new T.Scene();
   readonly camera = new T.PerspectiveCamera(52, 1, 0.08, 2600);
@@ -145,7 +146,7 @@ export class TourEngine {
     return best;
   }
   private lookTarget(placeId: string, spawn: T.Vector3) {
-    const target = facultyVisitTargets[placeId];
+    const target = facultyVisitTargets[placeId] ?? annexVisitTargets[placeId];
     return target ? new T.Vector3(...facultyToWorld(target)) : spawn.clone().add(new T.Vector3(-8, 1.5, -3));
   }
   startWalking() {

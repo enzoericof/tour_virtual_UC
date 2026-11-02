@@ -75,3 +75,7 @@ Revisado en navegador entrando desde la explanada y girando a la izquierda: hela
 ## Menú único de pausa — 02/11/2026
 
 Retiradas la mira central y la indicación con E. Al caminar solo queda ESC · Pausar. Al pausar se muestra una única ventana con continuar, espacios, biblioteca, comunidad, cuenta, información del lugar, calidad, pantalla completa, ayuda y vista general. Comprobados en navegador caminar, Escape, botón de pausa, explorar y visitar Cantina, biblioteca, información del lugar, ayuda, regreso al recorrido y vista general. Capturas locales: output/recorrido-limpio.png y output/menu-pausa.png.
+
+## Dependencias adicionales — revisión local 02/11/2026
+
+Nueve dependencias aproximadas según el plano general aportado por el usuario. Se mantienen la interfaz, el encuadre inicial y el núcleo existente. Rótulos físicos, zócalos de ladrillo, ventanas moduladas, accesos abiertos y plantas escalonadas en Ingeniería y CTA–DICIA. DEI–LED reemplaza el anterior volumen genérico. Sin fotografías ajenas ni árboles adicionales. Revisados el inicio, la lista de nueve destinos y la llegada a Kampus Print; sin errores de página. Límites y medidas provisionales en docs/base-geografica.md. Capturas en .local/references/anexos-inicio.png y .local/references/kampus-print-acceso.png. El usuario autorizó integrar y subir estas dependencias a main el 02/11/2026.

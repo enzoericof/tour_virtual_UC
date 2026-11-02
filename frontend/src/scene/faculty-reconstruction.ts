@@ -7,6 +7,7 @@ import {
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
 import { gardenHeight, gardenBounds } from "../data/cantina-terrain";
+import { facultyAnnexes, annexPaths, annexCoveredPaths } from "../data/faculty-annexes";
 import { facultyPlaces } from "../data/places";
 
 type BoxOptions = { tile?: readonly number[]; offset?: readonly number[]; rotation?: number };
@@ -1065,18 +1066,62 @@ export function createFaculty() {
     for (let y = 0.85; y < 5.3; y += 0.16)
       box(0.12, 0.065, 4.5, w / 2 + 0.2, y, front - 2.2, m.metal);
   }, PLAZA_LEVEL - 0.45);
-  frame(plan.electronics, () => {
-    const [w, d] = plan.electronics.size;
-    box(w, 0.2, d, 0, 0, 0, m.concrete, true);
-    box(w, 3.2, 0.22, 0, 1.6, -d / 2, m.brick, true);
-    for (const x of [-w / 2, w / 2]) box(0.22, 3.2, d, x, 1.6, 0, m.brick, true);
-    for (let x = -w / 2 + 1.2; x <= w / 2 - 1.2; x += 2.75) {
-      pole(0.14, 3.4, x, 1.7, d / 2 - 0.2, m.concrete);
-      box(2.6, 2.3, 0.1, x, 1.8, d / 2 - 2.3, m.glass);
+  // ---- Anexos del plano general: exteriores provisionales, sin interiores relevados ----
+  for (const annex of facultyAnnexes) frame(annex.rect, () => {
+    const h = annex.height, outline = annex.outline;
+    const maxZ = Math.max(...outline.map((p) => p[1]));
+    prism(outline, -0.1, 0.15, m.concrete);
+    // Planta escalonada conservada en Ingeniería y CTA–DICIA; alero siguiendo el contorno.
+    prism(outline, h, 0.18, m.roof);
+    for (let i = 0; i < outline.length; i++) {
+      const a = outline[i], b = outline[(i + 1) % outline.length];
+      const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
+      const front = a[1] === maxZ && b[1] === maxZ;
+      const cx = (a[0] + b[0]) / 2, cz = (a[1] + b[1]) / 2;
+      // Tramos laterales de la puerta y ventanas, con dintel, zócalo y montantes.
+      const parts: Range[] = front ? [[-length / 2,-1.05],[1.05,length / 2]] : [[-length / 2,length / 2]];
+      for (const [start,end] of parts) {
+        const mid = (start + end) / 2, x = cx + mid * Math.cos(angle), z = cz + mid * Math.sin(angle);
+        const opts = { rotation: -angle };
+        box(end-start, 1, 0.2, x, 0.55, z, m.brick, true, opts);
+        box(end-start, h-2.5, 0.2, x, (h+2.5)/2, z, m.brick, true, opts);
+        box(end-start, 1.45, 0.08, x, 1.78, z, m.glass, true, opts);
+        const count = Math.ceil((end-start)/2.4);
+        for (let k=0;k<=count;k++) {
+          const t = start + (end-start)*k/count;
+          box(0.1,1.5,0.16,cx+t*Math.cos(angle),1.78,cz+t*Math.sin(angle),m.metal,false,opts);
+        }
+      }
+      if (front) {
+        box(2.1,h-2.5,0.2,cx,(h+2.5)/2,cz,m.brick,true,{rotation:-angle});
+        // Acceso abierto: no colocar un vidrio de colisión en la puerta.
+        box(3.2,0.12,1.4,cx,2.9,cz+0.6,m.concrete);
+        sign(annex.name.toUpperCase(),cx,3.25,cz+0.13,Math.min(annex.rect.size[0]-1,9));
+      }
     }
-    hipRoof(w, d, 3.5, 0.8, m.roof);
-    sign("ELECTRÓNICA E INFORMÁTICA", 0, 2.9, d / 2 - 0.05, 7.5);
+    box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
   });
+  annexPaths.forEach((points) => path(points, 2));
+  // Galería de unión LED / DEI, sin cerrar el paso con paredes.
+  for (const points of annexCoveredPaths) for (let i=1;i<points.length;i++) {
+    const [ax,az]=points[i-1], [bx,bz]=points[i], length=Math.hypot(bx-ax,bz-az);
+    box(2.3,0.14,length+0.2,(ax+bx)/2,3.05,(az+bz)/2,m.roof,false,{rotation:Math.atan2(bx-ax,bz-az)});
+    path([points[i-1],points[i]],2.3);
+    const count=Math.ceil(length/4);
+    for(let k=0;k<=count;k++) {
+      const t=k/count;
+      pole(0.09,3,ax+(bx-ax)*t+(bz-az)/length*1.05,1.5,az+(bz-az)*t-(bx-ax)/length*1.05,m.concrete,true);
+    }
+  }
+  // Suelo de colisión del sector añadido; el césped continuo ya pertenece al contexto.
+  const annexCorners=facultyAnnexes.flatMap((a)=>rectCorners(a.rect));
+  const xs=annexCorners.map((p)=>p[0]), zs=annexCorners.map((p)=>p[1]);
+  const minX=Math.min(...xs)-15,maxX=Math.max(...xs)+15,minZ=Math.min(...zs)-20,maxZ=Math.max(...zs)+15;
+  const annexGround=new T.Mesh(unit);
+  annexGround.scale.set(maxX-minX,0.1,maxZ-minZ);
+  annexGround.position.set((minX+maxX)/2,-0.1,(minZ+maxZ)/2);
+  solid.add(annexGround);
 
   // ---- Áreas comunes, caminos y estacionamiento ----
   pave(plan.courtyard, m.grass, 0.015);
