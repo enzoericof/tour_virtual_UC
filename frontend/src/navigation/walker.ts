@@ -93,6 +93,12 @@ export class Walker {
     this.velocity.set(0, 0, 0);
     this.camera.position.copy(this.body.end);
   }
+  canStandAt(feet: T.Vector3): boolean {
+    return !this.world.capsuleIntersect(new Capsule(
+      feet.clone().add(new T.Vector3(0, 0.3, 0)),
+      feet.clone().add(new T.Vector3(0, 1.5, 0)), this.body.radius,
+    ));
+  }
   findSpawn(mesh: T.Object3D, preferred = new T.Vector3()): T.Vector3 {
     const ray = new T.Raycaster();
     const candidate = new T.Vector3();

@@ -162,7 +162,8 @@ export const facultyBlueprint = {
   openPlaza,
   bedelia,
   cantina,
-  electronics: { center: [88 + plazaShift + 5 * X[0], -1 + 5 * X[1]], size: [26, 10], angle: gridAngle } as Rect,
+  // DEI–LED: posición provisional según el plano general aportado el 02/11.
+  electronics: { center: add(cantina.center, [X, 4.2], [Z, 27.8]), size: [28.8, 12], angle: gridAngle + Math.PI } as Rect,
   /** Sala Manfred: auditorio de 12 × 9 m con frente hacia la rampa y entrada/marquesina orientada a la plaza techada. */
   manfred: { center: [manfredEast - manfredSize[0] / 2, manfredFront - manfredSize[1] / 2] as Vec2, size: manfredSize, angle: 0, bulge: manfredBulge },
   /** Entrada y marquesina de Sala Manfred orientada hacia la plaza techada (foto zona_techada_y_manfred.HEIC). */

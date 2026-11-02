@@ -1317,3 +1317,6 @@ body.is-paused .topbar, body.is-paused .tools, body.is-paused #menu-panel { disp
   .pause-card { padding: 22px; }
   .pause-tour { right: 16px; bottom: 16px; }
 }
+
+.place-placeholder { width: 70px; min-height: 78px; flex-shrink: 0; display: grid; place-items: center; border-radius: 6px; background: #e9ede4; color: #617563; }
+.place-placeholder svg { width: 28px; height: 28px; }

@@ -75,3 +75,41 @@ Revisado en navegador entrando desde la explanada y girando a la izquierda: hela
 ## Menú único de pausa — 02/11/2026
 
 Retiradas la mira central y la indicación con E. Al caminar solo queda ESC · Pausar. Al pausar se muestra una única ventana con continuar, espacios, biblioteca, comunidad, cuenta, información del lugar, calidad, pantalla completa, ayuda y vista general. Comprobados en navegador caminar, Escape, botón de pausa, explorar y visitar Cantina, biblioteca, información del lugar, ayuda, regreso al recorrido y vista general. Capturas locales: output/recorrido-limpio.png y output/menu-pausa.png.
+
+
+## Piso y árbol según vista elevada — 02/11/2026
+
+Revisión en navegador del pavimento continuo desde plaza techada hasta cantina, escalones laterales y árbol con tronco fino, hojas individuales y dos arbustos en cantero oval. Se conserva el lugar del árbol solicitado anteriormente. Recorrido de ida y vuelta por la explanada sin obstrucciones nuevas en el paso. Captura local: output/cantina/piso-arbol-vista-elevada.png. Proporciones estimadas a partir de la nueva fotografía; sin afirmar réplica exacta.
+
+
+## Cantina: ventanas, salida y mostrador — 02/11/2026
+
+Comprobados en navegador el mostrador extendido, caja bajo TV a la izquierda y ventanas a media altura. Recorrido real desde la entrada principal, salida por la nueva puerta derecha al jardín y reingreso por el mismo hueco. Capturas locales: output/cantina/mostrador-caja-izquierda.png y ventanas-salida-derecha.png. La puerta se representa abierta; no tiene animación de apertura/cierre.
+
+
+## Reconstrucción interior según tres fotos — 02/11/2026
+
+Rehecho el comedor según las tres nuevas fotografías, sustituyendo sillas verdes y cielorraso claro. Revisados en navegador estructura oscura, franja vidriada inclinada, tubos suspendidos, splits, hormigón, ventanas, mesas de madera y sillas negras. Comprobada circulación desde el acceso principal y salida/reingreso por la puerta recolocada junto al mostrador. Capturas locales: output/cantina/interior-referencia-real.png, hormigon-ventanas-splits.png y puerta-junto-mostrador.png. Dimensiones aproximadas; la puerta permanece abierta.
+
+
+## Mostrador oblicuo y puerta al fondo — 02/11/2026
+
+Ajustados mostrador, retorno izquierdo, pilar y cenefa en un mismo marco oblicuo; puerta posterior desplazada. Revisada visualmente la diagonal y el cierre del frente en navegador. La comprobación completa de entrada/salida en esta última ubicación no quedó concluida; no reutilizar como resultado de este cambio la prueba de la ubicación anterior.
+
+
+## Puerta en la pared del fondo — 02/11/2026
+
+Comprobado en navegador: puerta en pared de ladrillo al final del pasillo, ventana continua a su derecha. Captura local output/cantina/puerta-pared-fondo.png. Se retiró el acceso de la pared lateral.
+
+
+## Lateral de blindex y terraza techada — 02/11/2026
+
+Revisión visual desde el comedor: lateral de vidrio completo, hoja abierta, baldosas exteriores, mesas y sillas negras, estructura y cubierta. Captura local output/cantina/blindex-terraza-techada.png. Se utilizó una posición temporal de cámara para inspección y se retiró después; no se incorpora un nuevo modo de navegación.
+## Dependencias adicionales — revisión local 02/11/2026
+
+Nueve dependencias aproximadas según el plano general aportado por el usuario. Se mantienen la interfaz, el encuadre inicial y el núcleo existente. Rótulos físicos, zócalos de ladrillo, ventanas moduladas, accesos abiertos y plantas escalonadas en Ingeniería y CTA–DICIA. DEI–LED reemplaza el anterior volumen genérico. Sin fotografías ajenas ni árboles adicionales. Revisados el inicio, la lista de nueve destinos y la llegada a Kampus Print; sin errores de página. Límites y medidas provisionales en docs/base-geografica.md. Capturas en .local/references/anexos-inicio.png y .local/references/kampus-print-acceso.png. El usuario autorizó integrar y subir estas dependencias a main el 02/11/2026.
+
+
+## Recorrido desde el punto tocado — 02/11/2026
+
+Comprobado en navegador el clic sobre dos sectores distintos del suelo desde la vista general: llegada al sector elegido e inicio del recorrido. Arrastrar sigue orbitando sin trasladar; clic en el cielo conserva la vista general. La llegada usa las coordenadas tocadas y busca apoyo libre cercano cuando hay un obstáculo. Captura local output/llegada-punto-elegido.png.

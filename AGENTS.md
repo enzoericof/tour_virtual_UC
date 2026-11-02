@@ -129,3 +129,7 @@ Versión 0.1.0: frontend ejecutable sin escaneos navegables, reconstrucción apr
 ## Simplificación del inicio — 02/11/2026
 
 Por solicitud del usuario, el inicio muestra el modelo cercano sin portada ni lista de espacios abierta. Los tres GLB navegables se retiraron del directorio público; laboratorio, pasillo y aula conservan sus ids como lugares del modelo construido. Las texturas extraídas anteriormente se conservan. El usuario autorizó integrar y subir estos cambios a main el 02/11/2026. La interfaz conserva dos modos (vista inicial y recorrido), sin selector, tarjeta de ubicación ni barra de indicaciones; las herramientas quedan en la esquina inferior izquierda.
+
+## Dependencias adicionales — revisión local 02/11/2026
+
+Se agregaron nueve dependencias desde el plano general. Fuente, ids y límites en docs/base-geografica.md, sección «Dependencias del plano general». `faculty-annexes.ts` define geometría y llegadas referidas a la cantina; no duplicar estos volúmenes. El rótulo «Laboratorio de Diseño» se reemplaza por «Kampus Print» por pedido del usuario. El usuario autorizó integrar y subir estas nueve dependencias a main el 02/11/2026.

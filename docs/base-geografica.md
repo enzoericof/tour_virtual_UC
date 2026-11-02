@@ -143,3 +143,54 @@ Continuación de escalones solicitada por Horacio: tres peldaños grises de 15 c
 ### Sector de ventas interior — 02/11/2026
 
 La foto interior aportada por Horacio sitúa la venta a la izquierda al entrar. Sustituye el mostrador posterior provisional: vitrina frontal de perfiles negros y base de ladrillo hueco terracota, tres heladeras (una roja y dos oscuras), estantes con luz cálida, cafetera/molino, caja, pantalla suspendida, ventilador y rieles de focos bajo cenefa clara. No se modelan personas ni se usa la foto como textura. Las proporciones se estiman visualmente; resto de comedor y cocina siguen pendientes de relevamiento. Mesas izquierdas desplazadas hacia el centro para liberar la atención. Dos luces locales sin sombras adicionales.
+
+
+## Piso y árbol según vista elevada — 02/11/2026
+
+La vista elevada aportada por Horacio el 02/11/2026 orienta el acabado del piso: piezas rectangulares de aproximadamente 40 × 20 cm, gris cálido, juntas finas y variación mate. Textura procedural alineada entre explanada y unión con la plaza; contornos y tres escalones existentes conservados. Árbol en la posición indicada anteriormente: tronco delgado ligeramente inclinado, ramificación fina y copa de hojas pequeñas, alcorque ovalado y dos arbustos bajos. Medidas y especie siguen siendo aproximadas.
+
+
+## Cantina: ventanas, salida y mostrador — 02/11/2026
+
+Ajuste solicitado por Horacio sobre la captura interior: mostrador de 10,8 m a lo largo del lado izquierdo, caja en el extremo izquierdo bajo la TV y vitrina desplazada hacia la derecha. Pared posterior con siete paños horizontales entre 1,20 y 2,20 m sobre el piso interior. Puerta de blindex en el extremo derecho de esa pared, de 1,80 m de paso, representada abierta hacia fuera. Rellano y tres peldaños conectan con el jardín; muros y colisiones se recortan en el hueco. Dimensiones aproximadas de modelado.
+
+
+## Reconstrucción interior según tres fotos — 02/11/2026
+
+Las tres nuevas fotos interiores de Horacio corrigen la interpretación anterior: puerta junto al extremo posterior del mostrador (x local −4,30; z −6), en la pared opuesta al frente vidriado. Sustituye la puerta anterior en x +6,50. Ventana horizontal corrida desde la puerta hacia el comedor, cinco paños entre 1,03 y 1,85 m sobre el piso. Pared y viga de hormigón, cubierta oscura con estructura vista, franja inclinada de vidrio junto a fachada, tubos dobles suspendidos y tres splits. Comedor con ocho mesas cuadradas de madera, sillas negras metálicas/perforadas y tres mesas altas con banquetas bajo las ventanas. Caja conservada bajo la TV a la izquierda. Proporciones y número de muebles estimados; estas fotos sustituyen la distribución provisional anterior.
+
+
+## Mostrador oblicuo y puerta al fondo — 02/11/2026
+
+La nueva foto y aclaración de Horacio reemplazan la alineación recta anterior del sector de ventas: giro local de 0,10 rad (aprox. 5,7°), con el extremo derecho retirado. Mostrador continuo hasta el cerramiento izquierdo, con retorno y colisión que cierran ese acceso. Paso del personal únicamente por el extremo derecho, detrás del pilar. Puerta lateral llevada más al fondo, a x local −7,15 en la pared z −6, con paso de 1,40 m; sustituye la ubicación −4,30. Conjunto de atención centrado en (−6,55; −0,20), evitando intersección de su fondo con el muro exterior. Ángulo y medidas son aproximaciones visuales, pendientes de medición.
+
+
+## Puerta en la pared del fondo — 02/11/2026
+
+Corrección explícita de Horacio: puerta en la pared de ladrillo al final del pasillo, perpendicular al lateral de ventanas. Centro local (−9; −5,15), ancho 1,40 m. Se cierra el hueco anterior del lateral z = −6 y se prolonga su ventana. Recortados el muro del fondo y el respaldo del sector de ventas para liberar el acceso. Rellano y escalones girados con la puerta. Esta ubicación sustituye todas las ubicaciones anteriores sobre la pared de ventanas.
+
+
+## Lateral de blindex y terraza techada — 02/11/2026
+
+Por solicitud de Horacio, el muro opuesto al sector de ventas (x local +9) se sustituye por blindex de piso a cubierta, seis paños con una hoja corrida que abre el paso z = 2..4. Se retiran las lamas anteriores de ese lateral. Terraza de 5 × 14 m, entre x +9 y +14 y z −6..+8, a la cota del piso interior; mismo material de baldosas de la explanada, base maciza, tres mesas con seis sillas, cubierta liviana y tres columnas exteriores. Tres peldaños al jardín. Geometría aproximada para revisión, sin mover otros edificios.
+## Dependencias del plano general — revisión local 02/11/2026
+
+Fuente: plano general aportado por el usuario (`codex-clipboard-296323a6-7094-4c1f-9ab1-4e64cb8f9eec.png`). No tiene escala ni alturas. El usuario pidió incorporar los sectores faltantes y nombrar **Kampus Print** al edificio rotulado Laboratorio de Diseño. Sin confirmación de que ese sea su uso histórico.
+
+Geometría adicional en `frontend/src/data/faculty-annexes.ts`, referida al centro actual de la cantina y al giro del conjunto. No se mueven ni reescalan Bloque 1, Bloque G, Manfred, Bedelía o cantina. Se reemplaza el antiguo volumen genérico de Electrónica por DEI–LED; no se duplica. Sus dimensiones y ubicación actualizadas quedan en `facultyBlueprint.electronics`.
+
+| Sector | Id | Representación |
+| --- | --- | --- |
+| Laboratorio de Ingeniería | `lab-ingenieria` | Contorno con prolongación posterior, junto a la cantina |
+| Laboratorio de Maquetas | `lab-maquetas` | Edificio separado debajo de Ingeniería en el plano |
+| Kampus Print | `kampus-print` | Edificio independiente frente al lado exterior de Bloque 1 |
+| CTA–DICIA | `cta-dicia` | Planta escalonada en L |
+| DEI–LED | `dei-led` | Pabellón separado, con conexión cubierta al ala LED |
+| LED | `led` | Primera dependencia del ala lateral |
+| DA / CAP | `da-cap` | Segundo módulo; se conserva la denominación del plano |
+| DAS | `das` | Tercer módulo |
+| DG | `dg` | Extremo del ala lateral |
+
+Formas y posiciones relativas interpretadas del plano; alturas, materiales, fachadas y medidas son aproximaciones. Exteriores con ventanas, accesos abiertos y rótulos; interior vacío, sin inventar mobiliario ni servicios. Todos aparecen en Explorar como «Por validar», con llegada exterior y orientación hacia su fachada. No se les asignaron fotografías de otros recintos. Caminos a nivel del suelo conectan los anexos con el sendero existente detrás de Manfred; la circulación rodea CTA–DICIA. El terreno de colisión se extiende al nuevo sector, sin añadir árboles ni recursos descargables.
+
+El usuario autorizó integrar y subir este cambio a main el 02/11/2026.

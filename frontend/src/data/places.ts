@@ -1,3 +1,4 @@
+import { facultyAnnexes } from "./faculty-annexes";
 import { facultyToWorld } from "./campus-geometry";
 import { facultyVisitPoints } from "./faculty-blueprint";
 
@@ -206,6 +207,11 @@ const originalPlaces: Place[] = [
     status: "reference",
   },
 ];
+originalPlaces.push(...facultyAnnexes.map((b): Place => ({
+  id: b.id, name: b.name, category: "Dependencias de CyT", floor: "Planta baja · exterior",
+  description: "Ubicación y forma exterior aproximadas según el plano general de CyT. Dimensiones, fachadas e interior pendientes de relevamiento.",
+  position: [b.entrance[0], 0.1, b.entrance[1]], photo: "", photos: [], status: "pending",
+})));
 export const facultyPlaces: Place[] = originalPlaces.map((p) => ({
   ...p,
   position: facultyVisitPoints[p.id] ?? p.position,

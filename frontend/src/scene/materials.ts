@@ -42,6 +42,30 @@ function texture(kind: "tile" | "grass" | "concrete") {
   return t;
 }
 
+/** Adoquines de la explanada de cantina: referencia elevada aportada por Horacio.
+ * Textura de 1,6 × 1,6 m, piezas de 40 × 20 cm, juntas finas y desgaste mate. */
+function courtyardPaving() {
+  const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1024;
+  const ctx = canvas.getContext("2d")!;
+  const noise = (n: number) => { const v = Math.sin(n * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
+  ctx.fillStyle = "#77776b"; ctx.fillRect(0, 0, 1024, 1024);
+  for (let row = 0; row < 8; row++) for (let col = -1; col < 5; col++) {
+    const x = col * 256 + (row % 2) * 128, y = row * 128;
+    const tone = Math.floor(151 + noise(row * 17 + col) * 25);
+    ctx.fillStyle = `rgb(${tone},${tone - 1},${tone - 13})`;
+    ctx.fillRect(x + 2, y + 2, 252, 124);
+    ctx.strokeStyle = "#ddd6c344"; ctx.lineWidth = 2;
+    ctx.strokeRect(x + 4, y + 4, 248, 120);
+  }
+  for (let i = 0; i < 65000; i++) {
+    ctx.fillStyle = i % 2 ? "#302f2414" : "#fff9eb18";
+    ctx.fillRect(noise(i + 1) * 1024, noise(i + 98001) * 1024, 1.5, 1.5);
+  }
+  const map = new T.CanvasTexture(canvas);
+  map.wrapS = map.wrapT = T.RepeatWrapping; map.colorSpace = T.SRGBColorSpace; map.anisotropy = 8;
+  return tiled(map, [1.6, 1.6], { roughness: 0.98 });
+}
+
 /** Texturas derivadas del escaneo del pasillo del tercer piso (scripts/extract-scan-textures.py).
  * Cada valor es el tamaño real, en metros, que cubre una repetición; debe coincidir con
  * frontend/public/assets/textures/textures.json (lo comprueba npm test). */
@@ -75,6 +99,7 @@ function tiled(map: T.Texture, tile: readonly number[], options: T.MeshStandardM
 
 export function makeMaterials() {
   return {
+    courtyardPaving: courtyardPaving(),
     brick: scanMaterial("ladrillo", { roughness: 0.95 }),
     concrete: scanMaterial("hormigon", { roughness: 0.92 }),
     // Franjas cada cuarto de módulo (5 m / 4), como en el escaneo (5,14 m / 4).

@@ -8,6 +8,7 @@ La integración de ramas del 01/11 conserva también el aporte `campus-backend/`
 
 - Sector de Ciencias y Tecnología con las medidas del equipo: Bloque 1 (75 × 12 m, planta baja y tres pisos) con su escalera tipo Pompidou, ascensor con murales, cabecera este con escalera y rampa hacia la plaza techada, media sombra y torre de baños; Bloque G (65 × 12 m); patios; plazas techada y abierta, Bedelía, cantina y Sala Manfred sobre una plataforma a 1,40 m; dos canchas vecinas y estacionamientos cercanos. Se excluyen las demás facultades y el seminario.
 - Paredes de ladrillo, piso de granito, hormigón, cubierta y lamas con texturas sacadas del escaneo del pasillo del tercer piso.
+- Exteriores aproximados de Ingeniería, Maquetas, Kampus Print, CTA–DICIA, DEI–LED y dependencias LED, DA/CAP, DAS y DG; accesibles desde Explorar. [Fuente y límites](docs/base-geografica.md#dependencias-del-plano-general--revisión-local-02112026).
 - Todo el recorrido usa el modelo construido de la facultad. Los escaneos navegables de laboratorio, pasillo y aula del tercer piso fueron retirados; esos espacios conservan sus identificadores y fotografías de referencia.
 - Primera persona, teclado y mouse, colisiones, gravedad y escaleras en el bloque principal. Si el navegador no permite capturar el cursor, se puede mirar arrastrando.
 - Vista general con cámara orbital, búsqueda de espacios, filtros y fotografías ampliables. El inicio muestra el modelo a pantalla completa. Los espacios se abren desde Explorar; M recoge las herramientas.
@@ -78,6 +79,7 @@ Dos modos: **vista general** al iniciar y **recorrido a pie** desde Caminar. El 
 
 | Acción | Control |
 | --- | --- |
+| Ir al punto elegido desde la vista general | Un clic sobre el modelo; inicia el recorrido en ese punto o en un apoyo libre cercano |
 | Caminar | W A S D o flechas (4,5 m/s) |
 | Mirar | Mouse; arrastrar si la captura del cursor no está disponible |
 | Caminar más rápido | Shift izquierdo (8 m/s) |
