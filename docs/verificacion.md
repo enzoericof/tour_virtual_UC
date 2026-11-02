@@ -80,3 +80,33 @@ Build y TypeScript correctos. Suite 21/22: mismo fallo previo de Manfred; aproba
 ## Menú único de pausa — 02/11/2026
 
 TypeScript y build del frontend aprobados. Verificados en navegador el recorrido sin paneles ni mira ni aviso E, pausa con Escape y botón, menú único, biblioteca, información del lugar, ayuda, explorador, visita a Cantina, reanudación y regreso a la vista general. No se modificó geometría ni se repitió su suite; último resultado registrado: 21/22, con el fallo previo de la plataforma de Manfred.
+
+
+## Piso y árbol según vista elevada — 02/11/2026
+
+TypeScript y build aprobados. Suite frontend: 21/22; permanece el fallo ya registrado de plataforma de Manfred. Aprobadas las comprobaciones de conectividad del pavimento y continuidad del jardín. Revisión visual en navegador de baldosas, árbol, cantero, escalones y recorrido por la explanada.
+
+
+## Cantina: ventanas, salida y mostrador — 02/11/2026
+
+Build y TypeScript aprobados. Verificación en navegador del mostrador y caja, franja de ventanas, salida al jardín y reingreso por blindex sin atravesar muros ni vidrio. No se repitió la suite de datos del plano: sus datos no cambiaron; último estado 21/22, fallo previo de Manfred.
+
+
+## Reconstrucción interior según tres fotos — 02/11/2026
+
+TypeScript y build aprobados tras la reconstrucción del comedor. Verificados visualmente materiales, techo, iluminación, aires y muebles; recorrido por el comedor y salida/reingreso por la puerta junto al mostrador. Sin cambios en datos del plano ni contratos del backend. No se repitió la suite de datos: último resultado 21/22 con el fallo previo de plataforma de Manfred.
+
+
+## Mostrador oblicuo y puerta al fondo — 02/11/2026
+
+TypeScript y build aprobados tras el giro del sector de ventas, extensión del mostrador y traslado de puerta. git diff --check correcto. Revisión visual parcial en navegador. Comprobación adicional sobre la geometría real de colisiones de createFaculty mediante Octree: 612 muestras a tres alturas, radio 0,30 m, sobre el paso derecho, salida y regreso. Se detectó y corrigió el estrechamiento causado por el pilar; comprobación final aprobada. Esto verifica el paso geométrico, no sustituye una revisión manual completa de la experiencia. No se repitió la suite de datos del plano (sin cambios en esos datos; último resultado 21/22, fallo previo de Manfred).
+
+
+## Puerta en la pared del fondo — 02/11/2026
+
+Build y TypeScript aprobados. Revisión visual de la puerta en la pared perpendicular a las ventanas. Prueba sobre las colisiones reales de createFaculty con Octree: 459 muestras libres a tres alturas, radio de 0,30 m, desde el paso derecho hasta el exterior por la nueva puerta.
+
+
+## Lateral de blindex y terraza techada — 02/11/2026
+
+TypeScript y build aprobados. Sobre las colisiones reales de createFaculty: 243 muestras libres, radio 0,30 m, a tres alturas desde el pasillo junto al vidrio hasta la terraza. Revisados visualmente blindex, piso, techo y mobiliario. No se repitió la suite de datos del plano; último estado 21/22 con fallo previo de Manfred.
