@@ -6,7 +6,7 @@ Monolito: el backend Spring Boot sirve la API, el WebSocket y, en Docker, el fro
 
 | Capa | Contenido |
 | --- | --- |
-| Frontend `frontend/src` | Three.js directo, TypeScript estricto, Vite. `data/` (catálogo `places.ts`, geografía), `scene/`, `navigation/` (cápsula, colisiones, gravedad), `services/` (`api.ts` REST, `chat.ts` STOMP), `ui/`. Los 3 GLB (`laboratorio`, `aula-p3`, `pasillo-p3`) se cargan bajo demanda. |
+| Frontend `frontend/src` | Three.js directo, TypeScript estricto, Vite. `data/` (catálogo `places.ts`, geografía), `scene/`, `navigation/` (cápsula, colisiones, gravedad), `services/` (`api.ts` REST, `chat.ts` STOMP), `ui/`. Un único modelo de CyT para todas las visitas; sin cargador de escenas GLB. |
 | Backend `py.edu.uc.tour` | `users` (registro, login), `security` (sesiones, CSRF, alta de ADMIN), `content` (trabajos y paneles), `chat`. |
 | Datos | JPA + Flyway (`V1__initial_schema.sql`: `campus_user`, `work`, `panel`; `ddl-auto=validate`). PostgreSQL 18 en entrega; H2 en modo PostgreSQL solo con el perfil `local`. |
 | Despliegue | `Dockerfile` en 3 etapas (build del frontend → copia a `static/` del JAR → JRE). `compose.yaml`: `app` (8080, solo en 127.0.0.1) y `database` (sin puerto publicado, volumen `campus-data`). |

@@ -100,13 +100,6 @@
       "sha256": "8106ff9bf8887093f2cf92abe2a1f25d366e36855a647ea1a8204888b06c7435"
     },
     {
-      "source": "Piso 3 - Bloque 1\\Clase - Piso 3.glb",
-      "sourceSha256": "42e78ceff62306b0a126144d7fede5be852388245bf8f6e9e48b09cca267ef57",
-      "asset": "scans/aula-p3.glb",
-      "bytes": 9111756,
-      "sha256": "00fea3262056da9a514175da9a1574faf8cf6b60915684bb5a027ac49e94d8cb"
-    },
-    {
       "source": "Piso 3 - Bloque 1\\IMG_5621.HEIC",
       "sourceSha256": "800032db47323e484b7b24d413169aa64b24d460763265fcd534f47a81dbfa03",
       "asset": "photos/IMG_5621.webp",
@@ -156,13 +149,6 @@
       "sha256": "4aa16c8dbe3b46132c54e94932ea54f654d099cc1333eda76c9ef3833d1dd2fd"
     },
     {
-      "source": "Piso 3 - Bloque 1\\Pasillo - Piso 3.glb",
-      "sourceSha256": "84647bb3a8089527cabef1a66f6f6a458bfbb8fd1e0947dcfa3e7647c8b798e8",
-      "asset": "scans/pasillo-p3.glb",
-      "bytes": 10348692,
-      "sha256": "4295f789d6a1f724b6d82265100a2a577e9d7493ef678d8b93c4dfadc894a639"
-    },
-    {
       "source": "Planta Baja - Bloque 1\\IMG_5649.HEIC",
       "sourceSha256": "6d4cc4ba31dcea729c1cd8420d2e410378afa62df88ea218314ed5344ae7f010",
       "asset": "photos/IMG_5649.webp",
@@ -196,13 +182,6 @@
       "asset": "photos/IMG_5680.webp",
       "bytes": 287012,
       "sha256": "99834b598418ce2455bf6b279bfcbf27e270ff8ff503dc7f06460450272eee0c"
-    },
-    {
-      "source": "Planta Baja - Bloque 1\\Laboratorio - Planta Baja.glb",
-      "sourceSha256": "13d1b3a8c727ed08b2eaf82b76b46894d231e63c8df84218b1036c05e580b97d",
-      "asset": "scans/laboratorio.glb",
-      "bytes": 9298596,
-      "sha256": "02cb9e76aa299639fdabf38db9a598ba506438c4cc20af1d59aa15fbe31e8901"
     },
     {
       "source": "Plaza Techada\\IMG_5688.HEIC",

@@ -70,7 +70,7 @@ Versiones exactas: tabla del README (única fuente). Decisiones: Three.js direct
 Detalle y justificación: [docs/base-geografica.md](docs/base-geografica.md); consultarlo antes de mover bloques o cambiar coordenadas.
 
 - El escenario se limita a **CyT, las dos canchas vecinas y los estacionamientos cercanos**. `campus-geometry.ts` selecciona ese sector de `campus-layout.json`, que queda como referencia. No reincorporar otras facultades ni el seminario sin nueva indicación del equipo.
-- `faculty-blueprint.ts` es la única geometría de CyT para las cuatro vistas («Sector CyT», «Vista de planta», «Plano de CyT», «Mi facultad») y el modo a pie. No recuperar los bloques paralelos antiguos ni duplicar anexos con volúmenes OSM. El Bloque G es oblicuo respecto del Bloque 1.
+- `faculty-blueprint.ts` es la única geometría de CyT para la vista general inicial y el recorrido a pie (únicos modos de navegación). No recuperar los bloques paralelos antiguos ni duplicar anexos con volúmenes OSM. El Bloque G es oblicuo respecto del Bloque 1.
 - Secuencia: **bloque de aulas → plaza techada → plaza abierta → cantina girada**, junto al Departamento de Electrónica e Informática. La plaza abierta queda a cielo abierto y unida al pavimento de la techada. `plaza` es la techada; `plaza-abierta` es independiente. Plaza techada, cuadrado, Bedelía, cantina y Sala Manfred están sobre una plataforma a 1,40 m, entre la planta baja y el primer piso; los bloques quedan en el nivel del suelo. La aclaración del equipo y las capturas del 31/10/2026 prevalecen sobre el rótulo «Cantina» de la imagen anotada antigua.
 - `X` este, `Z` sur, `Y` vertical, metros. Los puntos de visita pasan por `facultyToWorld`, que solo gira y traslada el plano métrico: no escalarlo ni volver a registrarlo sobre píxeles de imágenes. Las medidas del equipo están en base-geografica.md y las comprueba `npm test`.
 - Red peatonal conectada y circulaciones despejadas. Sin bosques: dos árboles principales del patio, cuatro referencias adicionales en CyT y pocos en el contexto, según base-geografica.md.
@@ -124,4 +124,8 @@ Una tarea termina cuando cumple sus criterios de aceptación, se verificó de fo
 
 ## Estado
 
-Versión 0.1.0: frontend ejecutable, tres escaneos navegables, reconstrucción aproximada del sector CyT, backend de usuarios, contenidos y chat, pruebas, Maven Wrapper y Compose. Qué se probó y qué falta: [docs/verificacion.md](docs/verificacion.md) y [docs/pendientes.md](docs/pendientes.md). PostgreSQL 18 es la base de entrega; el perfil `local` con H2 es solo para desarrollo. Sin despliegue público ni avatares sincronizados.
+Versión 0.1.0: frontend ejecutable sin escaneos navegables, reconstrucción aproximada del sector CyT, backend de usuarios, contenidos y chat, pruebas, Maven Wrapper y Compose. Qué se probó y qué falta: [docs/verificacion.md](docs/verificacion.md) y [docs/pendientes.md](docs/pendientes.md). PostgreSQL 18 es la base de entrega; el perfil `local` con H2 es solo para desarrollo. Sin despliegue público ni avatares sincronizados.
+
+## Simplificación del inicio — 02/11/2026
+
+Por solicitud del usuario, el inicio muestra el modelo cercano sin portada ni lista de espacios abierta. Los tres GLB navegables se retiraron del directorio público; laboratorio, pasillo y aula conservan sus ids como lugares del modelo construido. Las texturas extraídas anteriormente se conservan. El usuario autorizó integrar y subir estos cambios a main el 02/11/2026. La interfaz conserva dos modos (vista inicial y recorrido), sin selector, tarjeta de ubicación ni barra de indicaciones; las herramientas quedan en la esquina inferior izquierda.

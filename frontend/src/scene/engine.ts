@@ -1,12 +1,10 @@
 import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { createCampus } from "./campus";
 import { Walker } from "../navigation/walker";
 import { places, type Place } from "../data/places";
-import { campusBounds, campusCenter, facultyToWorld } from "../data/campus-geometry";
+import { campusCenter, facultyToWorld } from "../data/campus-geometry";
 import { facultyVisitTargets } from "../data/faculty-blueprint";
-export type CampusView = "campus" | "plan" | "faculty" | "faculty-plan";
 export class TourEngine {
   readonly scene = new T.Scene();
   readonly camera = new T.PerspectiveCamera(52, 1, 0.08, 2600);
@@ -14,8 +12,6 @@ export class TourEngine {
   readonly orbit: OrbitControls;
   readonly walker: Walker;
   readonly campus = createCampus();
-  private scan: T.Group | null = null;
-  private loading = 0;
   private sun = new T.DirectionalLight(0xfff2d6, 2.4);
   private hemi = new T.HemisphereLight(0xdbeaf4, 0xb1ada0, 1.7);
   private previous = performance.now();
@@ -25,7 +21,6 @@ export class TourEngine {
   /** Punto al que mira el visitante al aparecer en `spawn`. */
   private gaze = this.lookTarget("acceso", this.spawn);
   private canvas: HTMLCanvasElement;
-  onProgress = (_text: string, _percent: number) => {};
   onMode = (_mode: string) => {};
   onLocation = (_place: Place | null) => {};
   onStats = (_fps: number) => {};
@@ -44,8 +39,22 @@ export class TourEngine {
     this.canvas = this.renderer.domElement;
     this.canvas.setAttribute("aria-label", "Escenario 3D del campus");
     container.append(this.canvas);
-    this.scene.background = new T.Color("#d4e2e3");
-    this.scene.fog = new T.Fog("#d4e2e3", 1200, 2500);
+    // Cielo envolvente sin descargas; el horizonte comparte color con la bruma.
+    const skyCanvas = document.createElement("canvas");
+    skyCanvas.width = 16;
+    skyCanvas.height = 256;
+    const skyContext = skyCanvas.getContext("2d")!;
+    const skyGradient = skyContext.createLinearGradient(0, 0, 0, 256);
+    skyGradient.addColorStop(0, "#68a9df");
+    skyGradient.addColorStop(0.48, "#c7e0ed");
+    skyGradient.addColorStop(1, "#c7e0ed");
+    skyContext.fillStyle = skyGradient;
+    skyContext.fillRect(0, 0, 16, 256);
+    const sky = new T.CanvasTexture(skyCanvas);
+    sky.colorSpace = T.SRGBColorSpace;
+    sky.mapping = T.EquirectangularReflectionMapping;
+    this.scene.background = sky;
+    this.scene.fog = new T.Fog("#c7e0ed", 450, 1900);
     this.sun.position.set(-240, 500, 240);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
@@ -121,8 +130,6 @@ export class TourEngine {
     }
   };
   nearest() {
-    if (this.current !== "campus")
-      return places.find((p) => p.scan === this.current) ?? null;
     let best: Place | null = null;
     let distance = 5;
     for (const p of places) {
@@ -149,45 +156,16 @@ export class TourEngine {
     this.orbit.enabled = false;
     this.walker.walk();
   }
-  overview(mode: CampusView = "campus") {
+  overview() {
     this.walker.pause();
     this.walker.enabled = false;
     this.orbit.enabled = true;
-    if (this.current === "campus") {
-      this.campus.setDetail(mode === "faculty" || mode === "faculty-plan");
-      this.orbit.maxDistance = 650;
-      if (mode === "faculty-plan") {
-        // Centro del conjunto: Bloque 1, Bloque G, plazas, cantina y estacionamiento.
-        const focus = new T.Vector3(...facultyToWorld([30, 0, 24]));
-        this.orbit.target.copy(focus);
-        this.camera.position.copy(focus).add(new T.Vector3(0, 175, 0.01));
-      } else if (mode === "faculty") {
-        // Desde el sudoeste: galerías, escalera, torre de baños y Bloque G.
-        const focus = new T.Vector3(...facultyToWorld([8, 4, 14]));
-        this.orbit.target.copy(focus);
-        this.camera.position.copy(focus).add(new T.Vector3(-62, 48, 72));
-      } else {
-        this.orbit.target.set(campusCenter[0], 0, campusCenter[1]);
-        const span = Math.max(campusBounds.maxZ - campusBounds.minZ, (campusBounds.maxX - campusBounds.minX) / this.camera.aspect);
-        const fit = span / (2 * Math.tan(T.MathUtils.degToRad(this.camera.fov / 2))) * 1.5;
-        if (mode === "plan") {
-          // Leave room above the campus for the persistent view controls.
-          const focusZ = campusCenter[1] - span * 0.08;
-          this.orbit.target.z = focusZ;
-          this.camera.position.set(campusCenter[0], fit, focusZ + 0.01);
-        } else this.camera.position.copy(this.orbit.target).add(new T.Vector3(fit * 0.40, fit * 0.54, fit * 0.63));
-      }
-    } else if (this.scan) {
-      const b = new T.Box3().setFromObject(this.scan),
-        size = b.getSize(new T.Vector3()),
-        center = b.getCenter(new T.Vector3());
-      this.orbit.target.copy(center);
-      const d = Math.max(size.x, size.z) * 0.8;
-      this.camera.position
-        .copy(center)
-        .add(new T.Vector3(d * 0.75, d * 0.65, d));
-      this.orbit.maxDistance = 160;
-    }
+    this.campus.setDetail(true);
+    this.orbit.maxDistance = 650;
+    // Una sola vista general, compartida por el inicio y el regreso del recorrido.
+    const focus = new T.Vector3(...facultyToWorld([-5, 6, -1]));
+    this.orbit.target.copy(focus);
+    this.camera.position.copy(focus).add(new T.Vector3(-27, 24, -62));
     this.orbit.update();
     this.onMode("overview");
   }
@@ -195,107 +173,18 @@ export class TourEngine {
     this.walker.pause();
   }
   async go(place?: Place) {
-    const request = ++this.loading;
-    this.onProgress("", 1);
     this.pause();
     this.walker.enabled = false;
     this.orbit.enabled = false;
-    if (!place?.scan) {
-      this.disposeScan();
-      this.current = "campus";
-      this.campus.group.visible = true;
-      this.sun.visible = this.hemi.visible = true;
-      this.scene.background = new T.Color("#d4e2e3");
-      this.scene.fog = new T.Fog("#d4e2e3", 1200, 2500);
-      this.campus.setDetail(Boolean(place));
-      this.walker.setWorld(this.campus.colliders);
-      this.spawn = place
-        ? new T.Vector3(...place.position).add(new T.Vector3(0, 0.15, 0))
-        : new T.Vector3(...places.find((p) => p.id === "acceso")!.position);
-      this.gaze = this.lookTarget(place?.id ?? "acceso", this.spawn);
-      if (place) {
-        this.walker.teleport(this.spawn);
-        this.walker.enabled = true;
-        this.camera.lookAt(this.gaze);
-        this.onMode("paused");
-      } else this.overview();
-      return;
-    }
-    this.onProgress(`Cargando ${place.name.toLowerCase()}…`, 0);
-    try {
-      const gltf = await new GLTFLoader().loadAsync(
-        `/assets/scans/${place.scan}.glb`,
-        (e) => {
-          if (request === this.loading)
-            this.onProgress(
-              `Cargando ${place.name.toLowerCase()}…`,
-              e.total ? e.loaded / e.total : 0.3,
-            );
-        },
-      );
-      if (request !== this.loading) {
-        this.disposeObject(gltf.scene);
-        return;
-      }
-      this.disposeScan();
-      this.scan = gltf.scene;
-      this.scan.traverse((o) => {
-        if (o instanceof T.Mesh) {
-          const old = Array.isArray(o.material) ? o.material[0] : o.material;
-          const mat = new T.MeshBasicMaterial({
-            map: old.map,
-            side: T.DoubleSide,
-          });
-          o.material = mat;
-          old.dispose();
-          o.frustumCulled = true;
-        }
-      });
-      this.scan.updateMatrixWorld(true);
-      this.scene.add(this.scan);
-      this.campus.group.visible = false;
-      this.sun.visible = this.hemi.visible = false;
-      this.scene.background = new T.Color("#b7c7cd");
-      this.scene.fog = null;
-      this.current = place.scan;
-      this.onProgress("Preparando colisiones y recorrido…", 0.96);
-      await new Promise((r) => setTimeout(r, 30));
-      if (request !== this.loading) return;
-      this.walker.setWorld(this.scan);
-      this.spawn = this.walker.findSpawn(this.scan);
+    this.campus.setDetail(true);
+    this.spawn = new T.Vector3(...(place ?? places.find((p) => p.id === "acceso")!).position);
+    this.gaze = this.lookTarget(place?.id ?? "acceso", this.spawn);
+    if (place) {
       this.walker.teleport(this.spawn);
-      this.gaze = this.spawn.clone().add(new T.Vector3(place.scan === "pasillo-p3" ? -10 : 0, 1.5, place.scan === "pasillo-p3" ? 0 : 8));
-      this.camera.lookAt(this.gaze);
       this.walker.enabled = true;
-      this.onProgress("", 1);
+      this.camera.lookAt(this.gaze);
       this.onMode("paused");
-    } catch (error) {
-      if (request !== this.loading) return;
-      this.onProgress("", 1);
-      this.onError(
-        `No se pudo cargar el escaneo. Verificá que los archivos de recursos estén instalados. ${error instanceof Error ? error.message : ""}`,
-      );
-      await this.go();
-    }
-  }
-  private disposeObject(root: T.Object3D) {
-    root.traverse((o) => {
-      if (o instanceof T.Mesh) {
-        o.geometry.dispose();
-        const materials = Array.isArray(o.material) ? o.material : [o.material];
-        for (const m of materials) {
-          if ("map" in m && (m as T.MeshBasicMaterial).map)
-            (m as T.MeshBasicMaterial).map!.dispose();
-          m.dispose();
-        }
-      }
-    });
-  }
-  private disposeScan() {
-    if (!this.scan) return;
-    this.scene.remove(this.scan);
-    this.disposeObject(this.scan);
-    this.scan = null;
+    } else this.overview();
   }
   quality(high: boolean) {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, high ? 1.8 : 1));
