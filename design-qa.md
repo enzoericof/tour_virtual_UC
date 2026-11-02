@@ -34,3 +34,10 @@ Verificado con la cápsula del proyecto sobre las colisiones del campus. Los 16 
 Consola de la app: sin errores de JavaScript; solo las respuestas 502 de la API, porque el backend no estaba en marcha. Solo se revisó en 1280 × 800; no se repitió en 390 × 844 ni en móviles físicos. Las 20 pruebas frontend y el build pasaron.
 
 final result: passed
+
+
+## Cantina — 02/11/2026
+
+Referencias: IMG_5714, IMG_5719, IMG_5720 e IMG_5721 aportadas por Horacio. Se sustituyeron la cubierta a cuatro aguas y el cartel inventado por fascia terracota modulada, marquesina con tensores y ventanas altas. Acceso vidriado con abertura, bancos oscuros, macetas, sansevierias y lamas laterales. La terraza tiene tres peldaños con rampa de colisión; el interior es provisional.
+
+Retiro y límites: docs/base-geografica.md. Revisión en navegador a 808 × 764, sin errores visuales bloqueantes en el frente. Captura local: output/cantina/despues.png (no versionada). La compilación pasa; la suite conserva un fallo previo de Manfred, detallado en docs/verificacion.md.

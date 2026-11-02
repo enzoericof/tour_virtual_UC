@@ -776,24 +776,87 @@ export function createFaculty() {
 
   // Losa del pasillo cubierto entre la Sala Manfred y Bedelía.
   prism(plan.corridor, PLAZA_LEVEL + 3.6, 0.2, m.concrete, false);
+  // Cantina: IMG_5714/5719/5720/5721, frente vidriado bajo marquesina suspendida.
   frame(plan.cantina, () => {
-    const [w, d] = plan.cantina.size;
-    box(w, 0.25, d, 0, 0.32, 0, m.stone, true);
-    box(w, 4.1, 0.2, 0, 2.4, -d / 2, m.brick, true);
-    for (const x of [-w / 2, w / 2]) box(0.24, 4.1, d, x, 2.4, 0, m.brick, true);
-    hipRoof(w - 1.2, d - 1.2, 4.5, 0.9, m.blue);
-    box(w + 0.7, 1.05, 0.12, 0, 4.22, d / 2 + 0.2, new T.MeshStandardMaterial({ color: "#b7795e", roughness: 0.9 }));
-    box(w - 1, 0.16, 3.5, 0, 0.36, d / 2 + 1.75, m.stone, true);
-    for (let x = -w / 2 + 1.5; x <= w / 2 - 1.4; x += 3) {
-      if (Math.abs(x) < 1) box(1.35, 2.8, 0.06, x + 0.95, 1.9, d / 2 - 0.6, m.glass, false, { rotation: Math.PI / 2.5 });
-      else box(2.8, 2.8, 0.06, x, 1.9, d / 2, m.glass, true);
-      pole(0.04, 3.1, x + 1.45, 2.02, d / 2 + 0.12);
-      box(2.9, 0.07, 0.1, x, 3.36, d / 2 + 0.1, m.metal);
-      if (Math.abs(x) > 3) bench(x, d / 2 + 2.2, 0.45, 1);
+    const [w, d] = plan.cantina.size, front = d / 2;
+    const terracotta = new T.MeshStandardMaterial({ color: "#c88d70", roughness: 0.86 });
+    const dark = new T.MeshStandardMaterial({ color: "#393d3b", roughness: 0.62, metalness: 0.45 });
+    const aluminum = new T.MeshStandardMaterial({ color: "#b8b7aa", roughness: 0.4, metalness: 0.65 });
+    const glazing = new T.MeshStandardMaterial({ color: "#71817d", roughness: 0.22, metalness: 0.35, transparent: true, opacity: 0.6 });
+    const paving = new T.MeshStandardMaterial({ color: "#b5ac92", roughness: 0.95 });
+    const terrace = m.tile.clone(); terrace.color.set("#c9bfa6"); terrace.userData.tile = m.tile.userData.tile;
+    // Terraza continua al cuadrado; tres peldaños bajos y rampa de colisión en el borde.
+    box(w + 1, 0.12, d + 3.4, 0, 0.39, 1.6, terrace, true);
+    for (let k = 0; k < 3; k++)
+      box(w + 1.4 + k * 0.4, 0.15, 0.38, 0, 0.375 - k * 0.15, front + 3.5 + k * 0.38, m.stone);
+    ramp(v3(0, 0, front + 4.65), v3(0, 0.45, front + 3.3), w + 1);
+    box(w, 4.8, 0.24, 0, 2.85, -front, m.brick, true);
+    for (const x of [-w / 2, w / 2]) box(0.24, 4.8, d, x, 2.85, 0, m.brick, true);
+    box(w + 0.4, 0.18, d + 0.5, 0, 5.3, 0, m.roof, true);
+    // El paño izquierdo de ladrillo reduce la vidriera al sector de acceso real.
+    const left = -w / 2 + 4.5, right = w / 2 - 0.4;
+    box(4.4, 3.6, 0.24, -w / 2 + 2.2, 2.25, front, m.brick, true);
+    box(right - left, 0.18, 0.25, (left + right) / 2, 3.68, front, aluminum);
+    box(right - left, 0.1, 0.25, (left + right) / 2, 0.5, front, aluminum);
+    // Paso central de 2,4 m abierto: el resto de los paños tiene colisión.
+    const door = 1.4, opening = 2.4;
+    for (const [a, b] of [[left, door - opening / 2], [door + opening / 2, right]]) {
+      box(b - a, 3, 0.045, (a + b) / 2, 2.02, front, glazing, true);
+      for (let x = a; x <= b + 0.01; x += (b - a) / Math.ceil((b - a) / 1.8))
+        box(0.045, 3.15, 0.09, x, 2.06, front + 0.04, aluminum);
     }
-    // Dos escalones de la terraza hacia el cuadrado.
-    for (const k of [0, 1]) box(w - 1 + k * 0.6, 0.3 - k * 0.12, 0.5, 0, 0.15 - k * 0.06, d / 2 + 3.75 + k * 0.5, m.stone, true);
-    sign("CANTINA · CyT", 0, 4.2, d / 2 + 0.28, 3.8);
+    // Hoja corrediza recogida junto a la abertura y tirador.
+    box(1.15, 2.95, 0.045, door + 1.85, 2, front + 0.08, glazing);
+    box(0.025, 0.5, 0.06, door + 1.32, 1.75, front + 0.14, aluminum);
+    // Ventanas altas en sombra, cubierta plana y gran fascia de paneles salmón.
+    box(w - 0.5, 0.65, 0.06, 0, 4.15, front - 0.4, glazing);
+    box(w + 0.5, 1.45, 0.16, 0, 5.04, front + 0.28, terracotta);
+    for (let x = -w / 2; x <= w / 2 + 0.01; x += 0.75)
+      box(0.024, 1.46, 0.04, x, 5.04, front + 0.38, aluminum);
+    for (const y of [4.32, 4.8, 5.28, 5.76]) box(w + 0.5, 0.018, 0.025, 0, y, front + 0.38, aluminum);
+    const awning = box(w - 0.3, 0.12, 1.65, 0, 3.96, front + 1.03, terracotta);
+    awning.rotation.x = 0.12;
+    box(w, 0.12, 0.12, 0, 3.82, front + 1.85, dark);
+    for (let x = -w / 2 + 0.25; x <= w / 2; x += 3) {
+      beam(v3(x, 5.75, front + 0.4), v3(x, 3.86, front + 1.85), 0.025, dark);
+      beam(v3(x, 3.86, front + 1.85), v3(x, 3.75, front - 0.1), 0.035, dark);
+    }
+    for (const x of [left, right]) pole(0.075, 3.4, x, 2.15, front + 0.75, dark, true);
+    // Bancos de hierro de la terraza: asiento de listones y respaldo de rombos.
+    function ironBench(x: number, z: number) {
+      for (let i = 0; i < 5; i++) box(1.85, 0.035, 0.075, x, 0.92, z - 0.18 + i * 0.085, dark);
+      for (const dx of [-0.78, 0.78]) {
+        pole(0.025, 0.5, x + dx, 0.7, z + 0.15, dark);
+        pole(0.025, 0.95, x + dx, 0.93, z - 0.22, dark);
+        box(0.04, 0.04, 0.48, x + dx, 1.15, z, dark);
+      }
+      for (const y of [1.03, 1.4]) box(1.85, 0.035, 0.035, x, y, z - 0.22, dark);
+      for (let dx = -0.8; dx < 0.8; dx += 0.2) {
+        beam(v3(x + dx, 1.03, z - 0.22), v3(x + dx + 0.2, 1.4, z - 0.22), 0.012, dark);
+        beam(v3(x + dx, 1.4, z - 0.22), v3(x + dx + 0.2, 1.03, z - 0.22), 0.012, dark);
+      }
+    }
+    for (const x of [-3.4, -0.9, 5.8]) ironBench(x, front + 1.65);
+    // Mesas visibles a través de la fachada y mostrador contra el fondo.
+    box(w - 2, 0.9, 0.85, 0, 0.9, -front + 1.5, m.brick, true);
+    for (const x of [-3, 1, 5]) for (const z of [-1.8, 2.2]) {
+      box(1.4, 0.07, 0.8, x, 1.2, z, paving);
+      for (const dx of [-0.5, 0.5]) pole(0.025, 0.7, x + dx, 0.82, z, dark);
+    }
+    // Jardinera de sansevierias junto al muro izquierdo y maceta alta de la explanada.
+    box(3.8, 0.2, 0.7, -w / 2 + 2.2, 0.52, front + 0.45, m.brick, true);
+    for (let i = 0; i < 22; i++) {
+      const leaf = box(0.075, 0.4 + (i % 4) * 0.12, 0.04, -w / 2 + 0.6 + i * 0.15, 0.9, front + 0.45 + (i % 2) * 0.15, m.leaves[i % 4]);
+      leaf.rotation.z = Math.sin(i * 2) * 0.3;
+    }
+    for (const x of [-5.8, 6.7]) {
+      pole(0.3, 0.9, x, 0.9, front + 2.9, terracotta, true);
+      for (let i = 0; i < 5; i++) beam(v3(x, 1.3, front + 2.9), v3(x + Math.sin(i * 2) * 0.3, 2.1, front + 2.9 + Math.cos(i * 2) * 0.3), 0.012, m.bark);
+    }
+    // Pantalla de lamas azul gris en el lateral derecho, visible en IMG_5719/5720.
+    for (const z of [front - 0.2, front - 2.2, front - 4.2]) pole(0.055, 4.9, w / 2 + 0.15, 2.9, z, dark);
+    for (let y = 0.85; y < 5.3; y += 0.16)
+      box(0.12, 0.065, 4.5, w / 2 + 0.2, y, front - 2.2, m.metal);
   }, PLAZA_LEVEL);
   frame(plan.electronics, () => {
     const [w, d] = plan.electronics.size;

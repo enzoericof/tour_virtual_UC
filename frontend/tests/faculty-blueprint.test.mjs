@@ -210,3 +210,15 @@ test("The rotated canteen lies beyond the uncovered plaza, after the covered cir
   assert.ok(!insidePolygon(openCenter, rectCorners(plan.cantina)));
   assert.ok(!insidePolygon(openCenter, rectCorners(plan.coveredPlaza)), "Open plaza must remain outside both roofs");
 });
+
+
+test("Canteen forecourt leaves at least 20 m clear across the shared platform", () => {
+  const p = plan.openPlaza;
+  assert.ok(dist(p[0], p[1]) >= 20, "Clearance from covered plaza to canteen");
+  for (const fraction of [0.1, 0.5, 0.9]) {
+    const point = [p[0][0] + (p[2][0] - p[0][0]) * fraction,
+      p[0][1] + (p[2][1] - p[0][1]) * fraction];
+    assert.ok(onPlatform(point), "Expanded forecourt must remain supported");
+    assert.ok(!insidePolygon(point, rectCorners(plan.cantina)));
+  }
+});

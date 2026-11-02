@@ -119,10 +119,11 @@ const plazaNorth = add(plazaWest, [X, 10]);
 const coveredPlaza = rectFromCorner(plazaWest, [10, 15], gridAngle);
 const [, , , plazaSouth] = rectCorners(coveredPlaza);
 /** Cuadrado descubierto entre la plaza techada (oeste), Bedelía (norte) y la cantina (este). */
-const square = { corner: plazaNorth, size: [17, 15] as Vec2 };
+const square = { corner: plazaNorth, size: [22, 15] as Vec2 };
 const cantinaFront = add(plazaNorth, [X, square.size[0]]);
 // Fachada larga (18 m) hacia el cuadrado: el eje local x corre a lo largo de esa fachada y
 // el frente local (+z) mira al oeste, al cuadrado.
+// Retiro visual de 5 m solicitado por Horacio (02/11/2026); sin medida de campo.
 const cantina = rectFromCorner(add(cantinaFront, [Z, 3], [X, 12]), [18, 12], gridAngle + Math.PI / 2);
 const bedeliaCorner = add(plazaNorth, [X, -1], [Z, -10]);
 const bedelia = rectFromCorner(bedeliaCorner, [20, 10], gridAngle);
@@ -148,7 +149,7 @@ export const facultyBlueprint = {
   openPlaza: [plazaNorth, cantinaFront, add(cantinaFront, [Z, square.size[1]]), add(plazaNorth, [Z, square.size[1]])] as Vec2[],
   bedelia,
   cantina,
-  electronics: { center: [88 + plazaShift, -1], size: [26, 10], angle: gridAngle } as Rect,
+  electronics: { center: [88 + plazaShift + 5 * X[0], -1 + 5 * X[1]], size: [26, 10], angle: gridAngle } as Rect,
   /** Sala Manfred: auditorio de 12 × 9 m con frente hacia la rampa y entrada/marquesina orientada a la plaza techada. */
   manfred: { center: [manfredEast - manfredSize[0] / 2, manfredFront - manfredSize[1] / 2] as Vec2, size: manfredSize, angle: 0, bulge: manfredBulge },
   /** Entrada y marquesina de Sala Manfred orientada hacia la plaza techada (foto zona_techada_y_manfred.HEIC). */
@@ -167,7 +168,7 @@ export const facultyBlueprint = {
       [galleryStepsTop, half.z], [galleryStepsTop, eastStair.top], [stairEast, eastStair.top], [stairEast, stairFoot],
       [ramp.east, stairFoot], [ramp.east, ramp.top], [ramp.west, ramp.top], [ramp.west, -half.z], [manfredWest, -half.z]],
     rectCorners(coveredPlaza),
-    [plazaNorth, add(plazaNorth, [X, 19]), add(plazaNorth, [X, 19], [Z, 3]), add(cantinaFront, [Z, 3]),
+    [plazaNorth, add(plazaNorth, [X, square.size[0]]), add(plazaNorth, [X, square.size[0]], [Z, 3]), add(cantinaFront, [Z, 3]),
       add(cantinaFront, [Z, square.size[1]]), add(plazaNorth, [Z, square.size[1]])],
     rectCorners(bedelia),
     rectCorners(cantina),
@@ -284,7 +285,7 @@ export const facultyVisitPoints: Record<string, [number, number, number]> = {
   laboratorio: [-7.5, 0.1, -2.2],
   "pasillo-p3": [3, 10.5, 4.75],
   "aula-p3": [0, 10.5, -1.5],
-  "cantina-cyt": at(add(cantinaFacade, [X, -9]), onPlatform),
+  "cantina-cyt": at(add(cantinaFacade, [X, -15]), onPlatform),
   bedelia: at(add(bedeliaFacade, [Z, 6]), onPlatform),
   // Boca del pasillo entre Manfred y Bedelía, como en las fotos IMG_5685 e IMG_5686.
   "sala-manfred": [manfredEast + 1.7, onPlatform, manfredFront + 0.5],
