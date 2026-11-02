@@ -1,5 +1,18 @@
 # Correcciones documentales
 
+## GitGuardian — 01/11/2026
+
+El check del PR #1 registró dos apariciones del mismo incidente (39336961), ambas en `compose.yaml`: interpretó el texto de ayuda del operador de variable obligatoria como una contraseña. Las dos asignaciones tomaban `DATABASE_PASSWORD` del entorno; no contenían una credencial literal.
+
+Se simplificaron ambas expresiones conservando el operador `:?`: Compose sigue rechazando una variable ausente o vacía. Se comprobaron esos dos rechazos y la validación correcta con un valor temporal, mediante `docker compose config --quiet`, sin iniciar servicios ni imprimir secretos. No se añaden exclusiones de seguridad ni se reescribe el historial compartido.
+
+El incidente histórico requiere clasificación como falso positivo en el espacio de GitGuardian. Los checks nuevos y la clasificación del incidente histórico son estados distintos; no presentar la corrección del archivo como cierre automático del incidente.
+
+## Integración del 01/11/2026
+
+- La documentación solo describía `backend/`; al incorporar `feature/campus-backend` se añade el estado del proyecto separado en [arquitectura.md](arquitectura.md#aporte-campus-backend). Su compilación no implica que sustituya al servidor activo ni que se hayan unificado contratos o seguridad.
+- AGENTS.md aún fijaba cuatro árboles en CyT. Se sincronizó con el aporte de dos árboles principales del patio y las cuatro referencias adicionales descritas en base-geografica.md.
+
 Incoherencias halladas al contrastar los documentos con el código y las pruebas. Una fila por error: qué decía, qué es correcto y dónde está la verdad. Añadir al final, bajo un encabezado con la fecha.
 
 ## 31/10/2026

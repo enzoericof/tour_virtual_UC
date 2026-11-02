@@ -16,3 +16,23 @@ replica_3d/
 frontend/replica.html
 frontend/src/replica.ts
 frontend/src/replica.css
+arbol_ia
+
+# Java / Spring Boot
+build/
+*.class
+*.jar
+*.war
+hs_err_pid*
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Variables de entorno y credenciales locales
+.env.*
+!.env.example
+
+# Logs adicionales
+spring.log
