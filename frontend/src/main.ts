@@ -28,12 +28,26 @@ $("#app").innerHTML = `
  <div class="menu-panel hidden" id="menu-panel" role="region" aria-label="Herramientas"><button class="secondary restore" id="restore-panels">Mostrar paneles <kbd>M</kbd></button></div>
  <aside class="explorer collapsed" id="explorer" aria-label="Espacios de la facultad"><div class="section-top"><div><h2>Espacios</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div></aside>
  <div class="tools"><button id="overview" class="icon-btn" title="Restablecer vista" aria-label="Restablecer vista">${icon("cube")}</button><button id="quality" class="icon-btn" title="Cambiar calidad gráfica" aria-label="Cambiar calidad gráfica">${icon("sun")}</button><button id="fullscreen" class="icon-btn" title="Pantalla completa" aria-label="Pantalla completa">${icon("expand")}</button><button id="help" class="icon-btn" title="Ayuda" aria-label="Ayuda">${icon("help")}</button></div>
- <div class="walk-prompt hidden" id="walk-prompt"><span id="walk-prompt-text">Recorrido en pausa</span><button class="primary" id="resume">${icon("walk")} Caminar</button><button class="text-btn" id="inspect">Volver a la vista general</button></div>
- <div id="crosshair" class="hidden">+</div><button id="interaction" class="interaction hidden"></button>
+ <button id="pause-tour" class="pause-tour hidden" aria-label="ESC · Pausar recorrido"><kbd>ESC</kbd> Pausar</button>
+ <section id="walk-prompt" class="pause-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+  <div class="pause-card"><span class="eyebrow">TU RECORRIDO</span><h2 id="pause-title">En pausa</h2>
+  <button class="primary pause-resume" id="resume">${icon("walk")} Continuar recorrido</button>
+  <div class="pause-options">
+   <button data-pause-action="spaces-btn">${icon("map")} Explorar espacios</button>
+   <button data-pause-action="library-btn">${icon("book")} Biblioteca</button>
+   <button data-pause-action="chat-btn">${icon("chat")} Comunidad</button>
+   <button data-pause-action="account-btn">${icon("user")} Mi cuenta</button>
+   <button id="pause-place">${icon("help")} Información de este lugar</button>
+   <button data-pause-action="quality">${icon("sun")} Calidad gráfica</button>
+   <button data-pause-action="fullscreen">${icon("expand")} Pantalla completa</button>
+   <button data-pause-action="help">${icon("help")} Ayuda</button>
+  </div><button class="text-btn pause-overview" id="inspect">${icon("cube")} Volver a la vista general</button></div>
+ </section>
  <dialog id="dialog"><button class="icon-btn dialog-close" aria-label="Cerrar">${icon("close")}</button><div id="dialog-content"></div></dialog>
  <div id="toast" role="status" class="toast hidden"></div>
 `;
 let engine: TourEngine;
+let currentMode = "overview";
 let user: User | null = null;
 let selected: Place | null = null;
 let filter = "all";
@@ -77,10 +91,12 @@ function openDialog(html: string) {
   $("#dialog-content").innerHTML = html;
   const d = $<HTMLDialogElement>("#dialog");
   if (!d.open) d.showModal();
+  syncPauseMenu();
 }
 function closeDialog() {
   $<HTMLDialogElement>("#dialog").close();
 }
+$("#dialog").addEventListener("close", syncPauseMenu);
 $(".dialog-close").onclick = closeDialog;
 $<HTMLDialogElement>("#dialog").addEventListener("click", (e) => {
   if (e.target === $("#dialog")) closeDialog();
@@ -185,32 +201,31 @@ async function visit(p?: Place) {
   await engine.go(p);
   renderPlaces();
 }
+function syncPauseMenu() {
+  const dialogOpen = $<HTMLDialogElement>("#dialog").open;
+  const exploring = !$("#explorer").classList.contains("collapsed");
+  $("#walk-prompt").classList.toggle("hidden", currentMode !== "paused" || dialogOpen || exploring);
+}
 function onMode(mode: string) {
+  currentMode = mode;
   const walking = mode === "walking";
   document.body.classList.toggle("in-tour", walking || mode === "paused");
-  $("#crosshair").classList.toggle("hidden", !walking);
-  $("#walk-prompt").classList.toggle("hidden", mode !== "paused");
-  $(".topbar").classList.toggle("muted", walking);
-  if (!walking) $("#interaction").classList.add("hidden");
-  else setMenu(false);
+  document.body.classList.toggle("is-walking", walking);
+  document.body.classList.toggle("is-paused", mode === "paused");
+  $("#pause-tour").classList.toggle("hidden", !walking);
+  if (walking) { setMenu(false); setExplorer(false); $("#toast").classList.add("hidden"); }
+  const nearby = engine?.nearest();
+  $<HTMLButtonElement>("#pause-place").disabled = !nearby;
+  syncPauseMenu();
+  if (mode === "paused") queueMicrotask(() => {
+    if (!$("#walk-prompt").classList.contains("hidden")) $("#resume").focus();
+  });
 }
 try {
   engine = new TourEngine($("#viewport"));
   engine.onMode = onMode;
   engine.overview();
   engine.onError = toast;
-  engine.onLocation = (p) => {
-    const b = $("#interaction");
-    b.classList.toggle("hidden", !p || !engine.walker.active);
-    if (p) {
-      b.innerHTML = `<kbd>E</kbd> ${escape(p.name)}`;
-      b.onclick = () => showPlace(p);
-    }
-  };
-  engine.walker.onInteract = () => {
-    const p = engine.nearest();
-    if (p) showPlace(p);
-  };
 } catch (e) {
   openDialog(
     `<h2>No se pudo iniciar la vista 3D</h2><p>Probá un navegador con WebGL y aceleración gráfica habilitada.</p><p>${escape((e as Error).message)}</p>`,
@@ -224,6 +239,11 @@ $("#resume").onclick = () => {
   closeDialog();
   engine.startWalking();
 };
+$("#pause-tour").onclick = () => engine.pause();
+$("#pause-place").onclick = () => { const place = engine.nearest(); if (place) showPlace(place); };
+document.querySelectorAll<HTMLButtonElement>("[data-pause-action]").forEach((button) => {
+  button.onclick = () => $<HTMLButtonElement>("#" + button.dataset.pauseAction!).click();
+});
 $("#inspect").onclick = resetOverview;
 $("#overview").onclick = resetOverview;
 function resetOverview() {
@@ -239,7 +259,7 @@ window.addEventListener("keydown", (e) => {
   const target = e.target instanceof Element ? e.target : null;
   if (target?.closest("input, textarea, select, [contenteditable]") || $<HTMLDialogElement>("#dialog").open) return;
   if (e.code === "Escape") { setMenu(false); setExplorer(false); }
-  if (e.code === "KeyM") setCompact(!compact());
+  if (e.code === "KeyM" && currentMode === "overview") setCompact(!compact());
 });
 document.addEventListener("pointerdown", (e) => {
   if (!(e.target instanceof Element && e.target.closest("#menu-panel, #menu-btn"))) setMenu(false);
@@ -248,6 +268,7 @@ function setExplorer(open: boolean) {
   $("#explorer").classList.toggle("collapsed", !open);
   $("#spaces-btn").classList.toggle("active", open);
   $("#spaces-btn").setAttribute("aria-expanded", String(open));
+  syncPauseMenu();
 }
 $("#home").onclick = () => { setCompact(false); setExplorer(false); resetOverview(); };
 $("#spaces-btn").onclick = () => {
@@ -286,7 +307,7 @@ $("#fullscreen").onclick = () => {
 };
 $("#help").onclick = () =>
   openDialog(
-    `<span class="eyebrow">TU VISITA, A TU RITMO</span><h2>Cómo recorrer el campus</h2><div class="help-grid"><kbd>W A S D</kbd><p>Caminar. También podés usar las flechas.</p><kbd>Mouse</kbd><p>Mirar alrededor. En vista general, arrastrar y acercar con la rueda.</p><kbd>Shift</kbd><p>Caminar más rápido.</p><kbd>Espacio</kbd><p>Saltar para superar pequeños desniveles.</p><kbd>E</kbd><p>Abrir información del espacio cercano.</p><kbd>Esc</kbd><p>Soltar el cursor y volver al menú.</p><kbd>M</kbd><p>Ocultar o mostrar las herramientas del recorrido.</p></div><p class="subtle">El sector de CyT es una reconstrucción aproximada. Se recomienda teclado y mouse para caminar; en pantallas táctiles podés inspeccionar modelos y fotografías.</p><p class="subtle">Base geográfica: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>.</p>`,
+    `<span class="eyebrow">TU VISITA, A TU RITMO</span><h2>Cómo recorrer el campus</h2><div class="help-grid"><kbd>W A S D</kbd><p>Caminar. También podés usar las flechas.</p><kbd>Mouse</kbd><p>Mirar alrededor. En vista general, arrastrar y acercar con la rueda.</p><kbd>Shift</kbd><p>Caminar más rápido.</p><kbd>Espacio</kbd><p>Saltar para superar pequeños desniveles.</p><kbd>Esc</kbd><p>Pausar y abrir las opciones del recorrido.</p><kbd>M</kbd><p>Ocultar o mostrar las herramientas en la vista general.</p></div><p class="subtle">El sector de CyT es una reconstrucción aproximada. Se recomienda teclado y mouse para caminar; en pantallas táctiles podés inspeccionar modelos y fotografías.</p><p class="subtle">Base geográfica: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>.</p>`,
   );
 function account() {
   if (user) {

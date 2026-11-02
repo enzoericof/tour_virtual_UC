@@ -561,32 +561,6 @@ h2 {
 .hidden {
   display: none !important;
 }
-#crosshair {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  font: 22px monospace;
-  color: white;
-  text-shadow: 0 0 4px #222;
-  pointer-events: none;
-}
-.topbar.muted {
-  opacity: 0.35;
-  pointer-events: none;
-}
-.interaction {
-  position: fixed;
-  bottom: 180px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 6px;
-  padding: 10px 15px;
-  background: #f6f8eeed;
-  box-shadow: 0 4px 25px #0002;
-  font-size: 12px;
-  z-index: 9;
-}
 kbd {
   font:
     10px "DM Sans",
@@ -1307,4 +1281,39 @@ body:has(.walk-prompt:not(.hidden)) > #app .control-hint { visibility: hidden; }
   .control-hint kbd, .control-hint span:last-of-type { display: none; }
   .walk-prompt { bottom: 76px; left: 10px; right: 10px; gap: 10px; padding: 10px; justify-content: space-between; }
   .walk-prompt > span { display: none; }
+}
+
+/* Recorrido limpio: las opciones viven en una sola ventana al pausar. */
+body.is-walking .topbar, body.is-walking .tools, body.is-walking #explorer,
+body.is-walking #menu-panel, body.is-walking #toast,
+body.is-paused .topbar, body.is-paused .tools, body.is-paused #menu-panel { display: none !important; }
+.pause-tour {
+  position: fixed; right: 24px; bottom: 24px; z-index: 8;
+  display: flex; align-items: center; gap: 9px; padding: 11px 16px;
+  border: 1px solid #ffffff50; border-radius: 9px; background: #173d32d9;
+  color: #fffdf5; font-size: 13px; cursor: pointer;
+}
+.pause-tour kbd { font-size: 11px; color: inherit; border: 1px solid #ffffff60; padding: 3px 5px; border-radius: 4px; }
+.pause-overlay {
+  position: fixed; inset: 0; z-index: 8; display: grid; place-items: center;
+  padding: 24px; overflow-y: auto; background: #10271e40; backdrop-filter: blur(3px);
+}
+.pause-card { width: min(460px, 100%); padding: 30px; border-radius: 18px; background: #fbfaf4; box-shadow: 0 24px 80px #132e3430; }
+.pause-card h2 { margin: 6px 0 22px; font-size: 30px; }
+.pause-resume { width: 100%; justify-content: center; }
+.pause-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 20px 0; }
+.pause-options button {
+  display: flex; align-items: center; gap: 9px; text-align: left; min-height: 52px;
+  padding: 11px; border: 1px solid #dee3d8; border-radius: 8px; background: transparent;
+  color: #284c3d; font-size: 12px; cursor: pointer;
+}
+.pause-options button:hover { background: #eaf0e5; }
+.pause-options button:disabled { opacity: 0.4; cursor: default; }
+.pause-options svg, .pause-overview svg { width: 18px; height: 18px; flex-shrink: 0; }
+.pause-overview { display: flex; gap: 8px; justify-content: center; width: 100%; padding: 10px 0; }
+.pause-tour:focus-visible, .pause-card button:focus-visible { outline: 3px solid #94ac79; outline-offset: 3px; }
+@media (max-width: 480px) {
+  .pause-overlay { padding: 14px; }
+  .pause-card { padding: 22px; }
+  .pause-tour { right: 16px; bottom: 16px; }
 }

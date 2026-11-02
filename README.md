@@ -82,10 +82,12 @@ Dos modos: **vista general** al iniciar y **recorrido a pie** desde Caminar. El 
 | Mirar | Mouse; arrastrar si la captura del cursor no está disponible |
 | Caminar más rápido | Shift izquierdo (8 m/s) |
 | Saltar pequeños desniveles | Espacio |
-| Información del espacio cercano | E |
-| Pausar y liberar cursor | Esc |
-| Ocultar o mostrar las herramientas | M  |
+| Información del espacio cercano | Menú de pausa → Información de este lugar |
+| Pausar, liberar cursor y abrir opciones | Esc o botón ESC · Pausar |
+| Ocultar o mostrar las herramientas en vista general | M |
 | Inspeccionar el conjunto | Botón de vista general; arrastrar y rueda |
+
+Durante el recorrido solo se muestra el botón ESC · Pausar, sin mira central ni avisos con E. Al pausar aparece un único menú con las opciones existentes; Continuar recorrido conserva la posición.
 
 En dispositivos táctiles se pueden inspeccionar modelos y fotos. El recorrido a pie está pensado para teclado y mouse.
 

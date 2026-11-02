@@ -56,7 +56,6 @@ export class Walker {
       )
         e.preventDefault();
       this.keys.add(e.code);
-      if (e.code === "KeyE") this.onInteract();
     });
     let dragging = false;
     canvas.addEventListener("pointerdown", (e) => {
