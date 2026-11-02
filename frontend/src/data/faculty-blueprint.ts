@@ -162,7 +162,7 @@ export const facultyBlueprint = {
    * de la cabecera y la franja hasta la plaza techada; los demás son la plaza, el cuadrado (con el
    * rincón entre Bedelía y la cantina), Bedelía y la cantina. */
   platform: [
-    [[manfredWest, manfredBack], [manfredEast, manfredBack], [manfredEast, bedeliaCorner[1]], bedeliaCorner,
+    [[manfredWest, manfredFront], [manfredEast, manfredFront], [manfredEast, bedeliaCorner[1]], bedeliaCorner,
       add(bedeliaCorner, [Z, 10]), plazaNorth, plazaWest, pointAtZ(plazaWest, plazaSouth, half.z),
       [galleryStepsTop, half.z], [galleryStepsTop, eastStair.top], [stairEast, eastStair.top], [stairEast, stairFoot],
       [ramp.east, stairFoot], [ramp.east, ramp.top], [ramp.west, ramp.top], [ramp.west, -half.z], [manfredWest, -half.z]],
