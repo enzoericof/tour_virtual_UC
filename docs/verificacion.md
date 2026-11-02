@@ -110,3 +110,12 @@ Build y TypeScript aprobados. Revisión visual de la puerta en la pared perpendi
 ## Lateral de blindex y terraza techada — 02/11/2026
 
 TypeScript y build aprobados. Sobre las colisiones reales de createFaculty: 243 muestras libres, radio 0,30 m, a tres alturas desde el pasillo junto al vidrio hasta la terraza. Revisados visualmente blindex, piso, techo y mobiliario. No se repitió la suite de datos del plano; último estado 21/22 con fallo previo de Manfred.
+## Dependencias adicionales — revisión local 02/11/2026
+
+Compilación y TypeScript correctos. Pruebas: 23/24; pasan las dos nuevas comprobaciones de llegadas fuera de edificios y caminos sin atravesar las construcciones; persiste únicamente el fallo preexistente de plataforma de Manfred. En navegador se comprobó el inicio, la lista con los nueve sectores y el acceso a Kampus Print con el menú de pausa, sin errores de página. No se afirma una verificación interior completa de todos los anexos. Exteriores provisionales según el plano general; sin fotografías asignadas a sectores sin captura. Capturas locales: anexos-inicio.png y kampus-print-acceso.png. El usuario autorizó integrar y subir estas dependencias a main el 02/11/2026.
+
+
+## Integración de cantina y últimos cambios de main — 02/11/2026
+
+Integrado origin/main (79423d5), conservando las nueve dependencias y las mejoras de cantina. Build y TypeScript correctos. Suite combinada: 23/24; continúa únicamente el fallo previo de la plataforma de Manfred. Conflictos documentales resueltos conservando ambas contribuciones.
+

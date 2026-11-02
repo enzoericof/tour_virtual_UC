@@ -173,3 +173,24 @@ Corrección explícita de Horacio: puerta en la pared de ladrillo al final del p
 ## Lateral de blindex y terraza techada — 02/11/2026
 
 Por solicitud de Horacio, el muro opuesto al sector de ventas (x local +9) se sustituye por blindex de piso a cubierta, seis paños con una hoja corrida que abre el paso z = 2..4. Se retiran las lamas anteriores de ese lateral. Terraza de 5 × 14 m, entre x +9 y +14 y z −6..+8, a la cota del piso interior; mismo material de baldosas de la explanada, base maciza, tres mesas con seis sillas, cubierta liviana y tres columnas exteriores. Tres peldaños al jardín. Geometría aproximada para revisión, sin mover otros edificios.
+## Dependencias del plano general — revisión local 02/11/2026
+
+Fuente: plano general aportado por el usuario (`codex-clipboard-296323a6-7094-4c1f-9ab1-4e64cb8f9eec.png`). No tiene escala ni alturas. El usuario pidió incorporar los sectores faltantes y nombrar **Kampus Print** al edificio rotulado Laboratorio de Diseño. Sin confirmación de que ese sea su uso histórico.
+
+Geometría adicional en `frontend/src/data/faculty-annexes.ts`, referida al centro actual de la cantina y al giro del conjunto. No se mueven ni reescalan Bloque 1, Bloque G, Manfred, Bedelía o cantina. Se reemplaza el antiguo volumen genérico de Electrónica por DEI–LED; no se duplica. Sus dimensiones y ubicación actualizadas quedan en `facultyBlueprint.electronics`.
+
+| Sector | Id | Representación |
+| --- | --- | --- |
+| Laboratorio de Ingeniería | `lab-ingenieria` | Contorno con prolongación posterior, junto a la cantina |
+| Laboratorio de Maquetas | `lab-maquetas` | Edificio separado debajo de Ingeniería en el plano |
+| Kampus Print | `kampus-print` | Edificio independiente frente al lado exterior de Bloque 1 |
+| CTA–DICIA | `cta-dicia` | Planta escalonada en L |
+| DEI–LED | `dei-led` | Pabellón separado, con conexión cubierta al ala LED |
+| LED | `led` | Primera dependencia del ala lateral |
+| DA / CAP | `da-cap` | Segundo módulo; se conserva la denominación del plano |
+| DAS | `das` | Tercer módulo |
+| DG | `dg` | Extremo del ala lateral |
+
+Formas y posiciones relativas interpretadas del plano; alturas, materiales, fachadas y medidas son aproximaciones. Exteriores con ventanas, accesos abiertos y rótulos; interior vacío, sin inventar mobiliario ni servicios. Todos aparecen en Explorar como «Por validar», con llegada exterior y orientación hacia su fachada. No se les asignaron fotografías de otros recintos. Caminos a nivel del suelo conectan los anexos con el sendero existente detrás de Manfred; la circulación rodea CTA–DICIA. El terreno de colisión se extiende al nuevo sector, sin añadir árboles ni recursos descargables.
+
+El usuario autorizó integrar y subir este cambio a main el 02/11/2026.

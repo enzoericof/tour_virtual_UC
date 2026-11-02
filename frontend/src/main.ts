@@ -114,7 +114,7 @@ function renderPlaces() {
     ? shown
         .map(
           (p) =>
-            `<button class="place-card ${selected?.id === p.id ? "chosen" : ""}" data-place="${p.id}"><img src="${photoUrl(p.photo)}" alt="" loading="lazy"><span class="place-copy"><small>${escape(p.floor)}</small><strong>${escape(p.name)}</strong><span class="tag ${p.status}">${p.status === "pending" ? statusLabel[p.status] : ""}</span></span><span class="place-arrow">↗</span></button>`,
+            `<button class="place-card ${selected?.id === p.id ? "chosen" : ""}" data-place="${p.id}">${p.photo ? `<img src="${photoUrl(p.photo)}" alt="" loading="lazy">` : `<span class="place-placeholder" aria-hidden="true">${icon("cube")}</span>`}<span class="place-copy"><small>${escape(p.floor)}</small><strong>${escape(p.name)}</strong><span class="tag ${p.status}">${p.status === "pending" ? statusLabel[p.status] : ""}</span></span><span class="place-arrow">↗</span></button>`,
         )
         .join("")
     : '<p class="empty">No encontramos ese espacio. Probá con otro nombre.</p>';
@@ -130,7 +130,7 @@ function showPlace(p: Place) {
   selected = p;
   renderPlaces();
   openDialog(
-    `<div class="place-detail"><img class="detail-hero" src="${photoUrl(p.photo)}" alt="${escape(p.name)}"><div class="detail-body"><span class="eyebrow">${escape(p.category)} · ${statusLabel[p.status]}</span><h2>${escape(p.name)}</h2><p class="subtle">${escape(p.floor)}</p><p>${escape(p.description)}</p><div class="actions"><button class="primary" id="visit-place">Ir a este espacio ${icon("arrow")}</button></div><div class="photo-strip">${p.photos.map((id) => `<button data-photo="${id}" aria-label="Ampliar fotografía ${id}"><img src="${photoUrl(id)}" alt="Referencia de ${escape(p.name)}" loading="lazy"></button>`).join("")}</div><div id="info-panels"><p class="subtle">Cargando panel informativo…</p></div></div></div>`,
+    `<div class="place-detail">${p.photo ? `<img class="detail-hero" src="${photoUrl(p.photo)}" alt="${escape(p.name)}">` : ""}<div class="detail-body"><span class="eyebrow">${escape(p.category)} · ${statusLabel[p.status]}</span><h2>${escape(p.name)}</h2><p class="subtle">${escape(p.floor)}</p><p>${escape(p.description)}</p><div class="actions"><button class="primary" id="visit-place">Ir a este espacio ${icon("arrow")}</button></div><div class="photo-strip">${p.photos.map((id) => `<button data-photo="${id}" aria-label="Ampliar fotografía ${id}"><img src="${photoUrl(id)}" alt="Referencia de ${escape(p.name)}" loading="lazy"></button>`).join("")}</div><div id="info-panels"><p class="subtle">Cargando panel informativo…</p></div></div></div>`,
   );
   $("#visit-place").onclick = () => visit(p);
   document.querySelectorAll<HTMLButtonElement>("[data-photo]").forEach(

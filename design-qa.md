@@ -105,3 +105,6 @@ Comprobado en navegador: puerta en pared de ladrillo al final del pasillo, venta
 ## Lateral de blindex y terraza techada — 02/11/2026
 
 Revisión visual desde el comedor: lateral de vidrio completo, hoja abierta, baldosas exteriores, mesas y sillas negras, estructura y cubierta. Captura local output/cantina/blindex-terraza-techada.png. Se utilizó una posición temporal de cámara para inspección y se retiró después; no se incorpora un nuevo modo de navegación.
+## Dependencias adicionales — revisión local 02/11/2026
+
+Nueve dependencias aproximadas según el plano general aportado por el usuario. Se mantienen la interfaz, el encuadre inicial y el núcleo existente. Rótulos físicos, zócalos de ladrillo, ventanas moduladas, accesos abiertos y plantas escalonadas en Ingeniería y CTA–DICIA. DEI–LED reemplaza el anterior volumen genérico. Sin fotografías ajenas ni árboles adicionales. Revisados el inicio, la lista de nueve destinos y la llegada a Kampus Print; sin errores de página. Límites y medidas provisionales en docs/base-geografica.md. Capturas en .local/references/anexos-inicio.png y .local/references/kampus-print-acceso.png. El usuario autorizó integrar y subir estas dependencias a main el 02/11/2026.
