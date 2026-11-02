@@ -88,7 +88,7 @@ export function footprintPose(id: string) {
 /** Centro y orientación de la huella OSM del Bloque 1 (75,0 × 13,4 m). */
 export const facultyPose = footprintPose(FACULTY_MAIN);
 
-/** Plano de CyT (metros, centro del Bloque 1) → mundo. Solo gira y traslada: las medidas del
+/** Plano de CyT (metros, centro de la huella OSM del Bloque 1) → mundo. Solo gira y traslada: las medidas del
  * plano se conservan; no se estira hacia la huella OSM. */
 export function facultyToWorld(position: readonly number[]): [number, number, number] {
   const p = facultyPose, x = position[0], z = position[2];

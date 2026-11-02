@@ -142,6 +142,10 @@ export function makeMaterials() {
     ),
     asphalt: new T.MeshStandardMaterial({ color: "#81847c", roughness: 1 }),
     blue: new T.MeshStandardMaterial({ color: "#2b5d8c", roughness: 0.6, metalness: 0.3 }),
+    // Chapa pintada gris azulada de las puertas de las aulas (IMG_5639).
+    door: new T.MeshStandardMaterial({ color: "#566d78", roughness: 0.55, metalness: 0.25 }),
+    // Revoque crema de la caja del ascensor, visto desde el patio y la plaza (fotos del 02/11/2026).
+    render: new T.MeshStandardMaterial({ color: "#d8cfae", roughness: 0.9 }),
     white: new T.MeshStandardMaterial({ color: "#ece9da", roughness: 0.9 }),
   };
 }

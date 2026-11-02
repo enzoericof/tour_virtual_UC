@@ -49,3 +49,7 @@ Captura de Horacio codex-clipboard-78b5a729-f49b-4b70-9731-9e3afcf2c0fd.png: acl
 ## Lateral de blindex y terraza techada — 02/11/2026
 
 Captura codex-clipboard-18fc0035-6fe2-40c0-a98f-e0c49f61a50d.png y solicitud de Horacio: sustituir el muro lateral de ladrillo por blindex y crear exterior pavimentado con mesas, sillas y techo. Sus medidas y mobiliario no fueron relevados.
+
+## Bloque 1: puertas y cara este — 02/11/2026
+
+Fotos aportadas por el usuario en la conversación: `IMG_5639.HEIC` (iPhone, 30/10/2026; galería del segundo piso con las puertas de las aulas 204 y 203, en la raíz del repositorio sin seguimiento) y cuatro capturas sin nombre de archivo: la cabecera este desde el patio y desde la plaza, la escalera de la plaza al primer piso con la rampa y el ascensor desde la galería del Bloque G. Orientan la puerta doble, el prisma con el número, los títulos, las bandas de hormigón y el revoque del ascensor. Son referencias de comparación: no se incorporan al producto ni se usan como texturas.
