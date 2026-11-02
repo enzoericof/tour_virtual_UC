@@ -79,6 +79,7 @@ Dos modos: **vista general** al iniciar y **recorrido a pie** desde Caminar. El 
 
 | Acción | Control |
 | --- | --- |
+| Ir al punto elegido desde la vista general | Un clic sobre el modelo; inicia el recorrido en ese punto o en un apoyo libre cercano |
 | Caminar | W A S D o flechas (4,5 m/s) |
 | Mirar | Mouse; arrastrar si la captura del cursor no está disponible |
 | Caminar más rápido | Shift izquierdo (8 m/s) |

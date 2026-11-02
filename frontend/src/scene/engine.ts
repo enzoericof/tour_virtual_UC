@@ -2,6 +2,7 @@ import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { createCampus } from "./campus";
 import { Walker } from "../navigation/walker";
+import { pickDestination, pointerOnCanvas } from "../navigation/pick-destination";
 import { places, type Place } from "../data/places";
 import { campusCenter, facultyToWorld } from "../data/campus-geometry";
 import { facultyVisitTargets } from "../data/faculty-blueprint";
@@ -99,8 +100,35 @@ export class TourEngine {
         "El navegador perdió el contexto gráfico. Recargá la página para continuar.",
       );
     });
-    this.canvas.addEventListener("dblclick", () => {
-      if (!this.walker.enabled) this.startWalking();
+    let press: { x: number; y: number; id: number; time: number; dragged: boolean } | null = null;
+    this.canvas.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0 || !event.isPrimary || this.walker.enabled) return;
+      press = { x: event.clientX, y: event.clientY, id: event.pointerId, time: performance.now(), dragged: false };
+    });
+    this.canvas.addEventListener("pointermove", (event) => {
+      if (press && Math.hypot(event.clientX - press.x, event.clientY - press.y) > 6) press.dragged = true;
+    });
+    this.canvas.addEventListener("pointercancel", () => { press = null; });
+    this.canvas.addEventListener("pointerup", (event) => {
+      const start = press; press = null;
+      if (!start || start.id !== event.pointerId || start.dragged || this.walker.enabled
+        || performance.now() - start.time > 700
+        || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 6) return;
+      const ray = new T.Raycaster();
+      ray.far = 2600;
+      ray.setFromCamera(pointerOnCanvas(event.clientX, event.clientY, this.canvas.getBoundingClientRect()), this.camera);
+      const destination = pickDestination(ray, this.campus.colliders, (feet) => this.walker.canStandAt(feet));
+      if (!destination) return;
+      const direction = this.camera.getWorldDirection(new T.Vector3()); direction.y = 0;
+      if (direction.lengthSq() < 0.001) direction.set(0, 0, -1);
+      this.spawn.copy(destination);
+      this.gaze.copy(destination).addScaledVector(direction.normalize(), 8); this.gaze.y += 1.5;
+      this.campus.setDetail(true);
+      this.orbit.enabled = false;
+      this.walker.teleport(destination);
+      this.camera.lookAt(this.gaze);
+      this.walker.enabled = true;
+      this.walker.walk();
     });
     this.animate();
   }
