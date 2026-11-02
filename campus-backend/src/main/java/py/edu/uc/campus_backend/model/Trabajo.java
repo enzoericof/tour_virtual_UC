@@ -21,6 +21,10 @@ public class Trabajo {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "materia_id", nullable = false)
+    private Materia materia;
+
     @Column(name = "fecha_publicacion", nullable = false, updatable = false)
     private LocalDateTime fechaPublicacion;
 
@@ -78,6 +82,14 @@ public class Trabajo {
 
     public LocalDateTime getFechaPublicacion() {
         return fechaPublicacion;
+    }
+
+    public Materia getMateria() {
+        return materia;
+    }
+
+    public void setMateria(Materia materia) {
+        this.materia = materia;
     }
 
     public LocalDateTime getFechaActualizacion() {

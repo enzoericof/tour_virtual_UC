@@ -3,6 +3,8 @@ package py.edu.uc.campus_backend.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import py.edu.uc.campus_backend.dto.RegistroRequest;
 import py.edu.uc.campus_backend.dto.UsuarioResponse;
@@ -20,6 +22,20 @@ public class UsuarioService {
             PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional(readOnly = true)
+    public Usuario obtenerActivo(String correo) {
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.UNAUTHORIZED, "El usuario de la sesión ya no existe."));
+        if (!Boolean.TRUE.equals(usuario.getActivo())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La cuenta está desactivada.");
+        }
+        if (!Short.valueOf((short) 1).equals(usuario.getRol()) && !usuario.esAdministrador()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "El rol de la cuenta no es válido.");
+        }
+        return usuario;
     }
 
     @Transactional

@@ -88,6 +88,10 @@ public class Usuario {
         return rol;
     }
 
+    public boolean esAdministrador() {
+        return Short.valueOf((short) 2).equals(rol);
+    }
+
     public void setRol(Short rol) {
         this.rol = rol;
     }
