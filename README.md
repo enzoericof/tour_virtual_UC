@@ -78,9 +78,9 @@ Dos modos: **vista general** al iniciar y **recorrido a pie** desde Caminar. El 
 
 | Acción | Control |
 | --- | --- |
-| Caminar | W A S D o flechas |
+| Caminar | W A S D o flechas (4,5 m/s) |
 | Mirar | Mouse; arrastrar si la captura del cursor no está disponible |
-| Caminar más rápido | Shift izquierdo |
+| Caminar más rápido | Shift izquierdo (8 m/s) |
 | Saltar pequeños desniveles | Espacio |
 | Información del espacio cercano | E |
 | Pausar y liberar cursor | Esc |

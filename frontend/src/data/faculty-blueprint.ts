@@ -125,6 +125,19 @@ const cantinaFront = add(plazaNorth, [X, square.size[0]]);
 // el frente local (+z) mira al oeste, al cuadrado.
 // Retiro visual de 5 m solicitado por Horacio (02/11/2026); sin medida de campo.
 const cantina = rectFromCorner(add(cantinaFront, [Z, 3], [X, 12]), [18, 12], gridAngle + Math.PI / 2);
+/** Explanada de cantina: contorno quebrado de la foto IMG_5720, en su marco local.
+ * Frente hacia +z; el tramo diagonal recorta el jardín como un hexágono invertido. */
+export const cantinaForecourt = {
+  outline: [[-10, 6], [10, 6], [10, 12], [5, 12], [-4, 16], [-10, 16]] as Vec2[],
+  edge: [[-10, 16], [-4, 16], [5, 12], [10, 12]] as Vec2[],
+  tree: [0, 21] as Vec2,
+  // Borde del cuadrado hacia el jardín; termina antes del pilar de la plaza (z ≈ 28,35).
+  sideSteps: { x: 3, from: 12.9, to: 27.4 },
+};
+// Unión pavimentada continua entre la plaza techada y la cantina. El recorte del
+// jardín queda al costado; no debe cortar el recorrido principal (corrección de Horacio).
+const openPlaza = [plazaNorth, cantinaFront, add(cantinaFront, [Z, square.size[1]]),
+  add(plazaNorth, [Z, square.size[1]])];
 const bedeliaCorner = add(plazaNorth, [X, -1], [Z, -10]);
 const bedelia = rectFromCorner(bedeliaCorner, [20, 10], gridAngle);
 const bedeliaWest = (z: number) => pointAtZ(bedeliaCorner, add(bedeliaCorner, [Z, 10]), z);
@@ -139,14 +152,14 @@ const corridor: Vec2[] = [[manfredEast, bedeliaCorner[1]], bedeliaCorner, bedeli
   [manfredEast, manfredFront - manfredBulge]];
 const corridorTop: Vec2 = [(manfredEast + bedeliaCorner[0]) / 2, bedeliaCorner[1]];
 const corridorFoot = add(corridorTop, [[0, -1], STEPS_RUN]);
-const squareSteps = add(plazaNorth, [X, 5], [Z, square.size[1]]);
+const squareSteps = fromRect(cantina, [-11, 22]);
 const galleryStepsTop = half.x + STEPS_RUN;
 
 export const facultyBlueprint = {
   main: { center: [0, 0], size: [block1.length, block1.depth], angle: 0 } as Rect,
   block2: gRect,
   coveredPlaza,
-  openPlaza: [plazaNorth, cantinaFront, add(cantinaFront, [Z, square.size[1]]), add(plazaNorth, [Z, square.size[1]])] as Vec2[],
+  openPlaza,
   bedelia,
   cantina,
   electronics: { center: [88 + plazaShift + 5 * X[0], -1 + 5 * X[1]], size: [26, 10], angle: gridAngle } as Rect,
@@ -168,10 +181,10 @@ export const facultyBlueprint = {
       [galleryStepsTop, half.z], [galleryStepsTop, eastStair.top], [stairEast, eastStair.top], [stairEast, stairFoot],
       [ramp.east, stairFoot], [ramp.east, ramp.top], [ramp.west, ramp.top], [ramp.west, -half.z], [manfredWest, -half.z]],
     rectCorners(coveredPlaza),
-    [plazaNorth, add(plazaNorth, [X, square.size[0]]), add(plazaNorth, [X, square.size[0]], [Z, 3]), add(cantinaFront, [Z, 3]),
-      add(cantinaFront, [Z, square.size[1]]), add(plazaNorth, [Z, square.size[1]])],
+    openPlaza,
     rectCorners(bedelia),
     rectCorners(cantina),
+    cantinaForecourt.outline.map((p) => fromRect(cantina, p)),
   ] as Vec2[][],
   platformSteps: [
     // Prolongación de la galería de planta baja del Bloque 1 hasta la plataforma, junto al ascensor
@@ -241,7 +254,7 @@ export const facultyBlueprint = {
   tree1: [21.5, 15] as Vec2,
   /** Árbol 2: árbol autóctono alto en el patio oeste (foto árbol_2.HEIC, posición 2 en cómo_debe_ser.png). */
   tree2: [-20, 22] as Vec2,
-  trees: [[2, 19], [53 + plazaShift, -5.5], [50, 22], [20, 62]] as Vec2[],
+  trees: [[2, 19], [50, 22], [20, 62]] as Vec2[],
   picnic: [[-14, 15], [-8, 13.5], [-2, 13], [24, 13.5], [52.5, 13], [54, 26]] as Vec2[],
   /** Canteros con banco del cuadrado. */
   planters: [[46.1 + plazaShift, -7.35], [54.4 + plazaShift, -10.9]] as Vec2[],
@@ -285,14 +298,14 @@ export const facultyVisitPoints: Record<string, [number, number, number]> = {
   laboratorio: [-7.5, 0.1, -2.2],
   "pasillo-p3": [3, 10.5, 4.75],
   "aula-p3": [0, 10.5, -1.5],
-  "cantina-cyt": at(add(cantinaFacade, [X, -15]), onPlatform),
-  bedelia: at(add(bedeliaFacade, [Z, 6]), onPlatform),
+  "cantina-cyt": at(fromRect(cantina, [-2.5, 21]), onPlatform),
+  bedelia: at(add(bedeliaFacade, [Z, 1]), onPlatform),
   // Boca del pasillo entre Manfred y Bedelía, como en las fotos IMG_5685 e IMG_5686.
   "sala-manfred": [manfredEast + 1.7, onPlatform, manfredFront + 0.5],
   patio: [-2, 0.1, 20],
   jardin: [52, 0.1, 18],
   plaza: [42.5 + plazaShift, onPlatform, 1.5],
-  "plaza-abierta": [49.5 + plazaShift, onPlatform, -3.5],
+  "plaza-abierta": at(fromRect(cantina, [-11, 20]), onPlatform),
   "piso-1": [13, 3.5, 4.75],
   "piso-2": [13, 7, 4.75],
   // Acceso de la torre desde la galería, entre las puertas de ambos baños.

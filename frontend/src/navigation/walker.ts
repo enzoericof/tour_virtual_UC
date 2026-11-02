@@ -26,7 +26,7 @@ export class Walker {
     private canvas: HTMLElement,
   ) {
     this.controls = new PointerLockControls(camera, canvas);
-    this.controls.pointerSpeed = 0.75;
+    this.controls.pointerSpeed = 1.5;
     this.controls.addEventListener("lock", () => {
       this.enabled = true;
       this.onLockChange(true);
@@ -72,9 +72,9 @@ export class Walker {
         camera.quaternion,
         "YXZ",
       );
-      rotation.y -= e.movementX * 0.002;
+      rotation.y -= e.movementX * 0.003;
       rotation.x = T.MathUtils.clamp(
-        rotation.x - e.movementY * 0.002,
+        rotation.x - e.movementY * 0.003,
         -1.45,
         1.45,
       );
@@ -158,7 +158,7 @@ export class Walker {
     if (this.keys.has("KeyA") || this.keys.has("ArrowLeft"))
       direction.sub(side);
     direction.normalize();
-    const speed = this.keys.has("ShiftLeft") ? 4.8 : 2.6;
+    const speed = this.keys.has("ShiftLeft") ? 8 : 4.5;
     const steps = 5;
     for (let i = 0; i < steps; i++) {
       const delta = dt / steps;

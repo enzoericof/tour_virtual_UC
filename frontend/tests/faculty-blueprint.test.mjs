@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   facultyBlueprint as plan, facultyCorners as corner, block1, blockG, gridAngle, FLOOR_HEIGHT, PLAZA_LEVEL, STEPS_RUN,
-  ROOMS_PER_FLOOR, rectCorners, facultyVisitPoints, facultyVisitTargets, worldPolygon, inFacultyZone, towerOutline,
+  cantinaForecourt, ROOMS_PER_FLOOR, rectCorners, facultyVisitPoints, facultyVisitTargets, worldPolygon, inFacultyZone, towerOutline,
   towerAnnex, manfredOutline,
 } from "../src/data/faculty-blueprint.ts";
 import { insidePolygon, facultyToWorld } from "../src/data/campus-geometry.ts";
@@ -127,7 +127,7 @@ test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit
   for (const key of ["coveredPlaza", "bedelia", "cantina", "manfred"]) assert.ok(onPlatform(plan[key].center), key);
   assert.ok(onPlatform(center(plan.corridor)), "Corridor between Manfred and Bedelía");
   assert.ok(onPlatform(center(plan.openPlaza)), "Open plaza");
-  for (const id of ["acceso", "plaza", "plaza-abierta", "bedelia", "cantina-cyt", "sala-manfred"]) {
+  for (const id of ["acceso", "plaza", "plaza-abierta", "bedelia", "sala-manfred"]) {
     const p = facultyVisitPoints[id];
     assert.ok(onPlatform([p[0], p[2]]) && close(p[1], PLAZA_LEVEL + 0.15), id);
   }
@@ -214,11 +214,30 @@ test("The rotated canteen lies beyond the uncovered plaza, after the covered cir
 
 test("Canteen forecourt leaves at least 20 m clear across the shared platform", () => {
   const p = plan.openPlaza;
-  assert.ok(dist(p[0], p[1]) >= 20, "Clearance from covered plaza to canteen");
+  const axis = [-Math.sin(plan.cantina.angle), Math.cos(plan.cantina.angle)];
+  const projections = p.map(([x, z]) => x * axis[0] + z * axis[1]);
+  assert.ok(Math.max(...projections) - Math.min(...projections) >= 20, "Clearance from covered plaza to canteen");
+  const [tx, tz] = cantinaForecourt.tree, angle = plan.cantina.angle;
+  assert.ok(onPlatform([plan.cantina.center[0] + tx * Math.cos(angle) - tz * Math.sin(angle),
+    plan.cantina.center[1] + tx * Math.sin(angle) + tz * Math.cos(angle)]), "Tree bed stays on the paved plaza");
+  assert.ok(close(facultyVisitPoints["cantina-cyt"][1], PLAZA_LEVEL + 0.15), "Canteen arrival above the paved plaza");
   for (const fraction of [0.1, 0.5, 0.9]) {
     const point = [p[0][0] + (p[2][0] - p[0][0]) * fraction,
       p[0][1] + (p[2][1] - p[0][1]) * fraction];
     assert.ok(onPlatform(point), "Expanded forecourt must remain supported");
     assert.ok(!insidePolygon(point, rectCorners(plan.cantina)));
+  }
+});
+
+
+test("Pavement connects covered plaza to canteen with a clear walking width", () => {
+  const start = plan.coveredPlaza.center;
+  const end = [facultyVisitPoints["cantina-cyt"][0], facultyVisitPoints["cantina-cyt"][2]];
+  const across = [Math.cos(plan.cantina.angle), Math.sin(plan.cantina.angle)];
+  for (let i = 0; i <= 30; i++) for (const offset of [-1, 0, 1]) {
+    const t = i / 30;
+    const p = [start[0] + (end[0] - start[0]) * t + across[0] * offset,
+      start[1] + (end[1] - start[1]) * t + across[1] * offset];
+    assert.ok(onPlatform(p), "No grass gap in the paved connection");
   }
 });

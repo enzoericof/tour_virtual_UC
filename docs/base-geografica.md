@@ -110,3 +110,36 @@ python scripts/import-campus-map.py ruta/al/campus.osm
 ```
 
 Usa solo la biblioteca estándar de Python, descarta metadatos personales de colaboradores y **sobrescribe `frontend/src/data/campus-layout.json`**; no toca `faculty-blueprint.ts`. Después ejecutar `npm test` en `frontend/`: comprueba que siguen existiendo los ids seleccionados (2 huellas, 2 estacionamientos, 2 canchas) y que el plano conserva las medidas del equipo. Antes de cambiar el plano, contrastar medidas, fotos y escaneos; preservar ids y conectividad peatonal.
+
+
+### Interior inicial de cantina — 02/11/2026
+
+Distribución provisional solicitada por Horacio, sin fotos interiores ni medidas de mobiliario. Dos hileras de tres mesas con cuatro sillas cada una, pasillo central desde el acceso, mostrador posterior con vitrina y caja, estantes, heladera y devolución. Cielorraso claro con seis luminarias de material emisivo (no añaden luces dinámicas). Mesas, sillas y mostrador tienen cuerpos simplificados de colisión. Esta propuesta sirve para revisar circulación; no representa un relevamiento de la cantina real.
+
+
+### Terraza y jardín de cantina — 02/11/2026
+
+Ajuste según IMG_5720 y comparación aportada por Horacio: relleno sólido de la terraza y peldaños hasta el terreno para cerrar el voladizo accidental; césped lateral y delantero derecho al nivel de la plaza, enlazado al terreno mediante pendientes suaves, sin caras verticales. Cuatro hojas de blindex, la segunda corrida 2,4 m detrás de la primera para mantener el acceso. Árbol delante del paño izquierdo de ladrillo, con alcorque, piedras y arbustos. Posiciones y tamaños estimados de la fotografía; no se cambian los bloques ni sus medidas. El árbol corresponde a una nueva referencia específica de la cantina, además de los árboles del patio.
+
+Corrección posterior de Horacio: eliminado el paredón de césped; terreno continuo con caída suavizada en 10 m. Entre jardín inmediato y terraza quedan solo tres escalones grises de 15 cm (45 cm en total). La plataforma general de CyT conserva su referencia; la pendiente absorbe la transición exterior.
+
+
+Ajuste posterior: eliminado el árbol de referencia en (53 + plazaShift, -5.5) que tapaba la vista desde la plaza. El árbol con alcorque se desplazó 1,2 m a la derecha y 1,3 m hacia el visitante (marco de cantina). Se redujo 45 cm la cota máxima del césped hacia el borde sur del cuadrado y se agregaron tres peldaños grises de 15 cm a lo largo de ese borde, con rampa invisible de colisión. La pendiente exterior permanece suave.
+
+
+### Contorno de explanada — 02/11/2026
+
+La foto de Horacio sustituye el borde rectangular: explanada de seis vértices con borde frontal quebrado (tramo izquierdo, diagonal y tramo derecho), definida en cantinaForecourt. Los tres escalones siguen ese contorno y la plaza abierta se recorta para no rellenar el jardín por debajo. Árbol y arbustos sobre el sector izquierdo de la explanada, incluidos en ese mismo plano. Piso interior y explanada se unifican a PLAZA_LEVEL; jardín inmediato 45 cm por debajo, con pendiente suave hacia el terreno exterior. Se retiran las escalinatas rectas superpuestas. Dimensiones aproximadas interpretadas de la foto, pendientes de medición.
+
+Corrección de la unión con la plaza: se restaura el cuadrado pavimentado continuo de 22 × 15 m entre la plaza techada y cantina. La explanada avanza 2 m más hacia la plaza; su recorte y escalinata quedan hacia el jardín lateral. Esta corrección reemplaza el recorte anterior que interrumpía el paso con césped.
+
+
+### Unión del césped y árbol en el círculo — 02/11/2026
+
+La malla del jardín ahora abarca la transición completa de 10 m por fuera de todas sus zonas elevadas, con bordes a la cota del terreno; antes se cortaba dentro de la pendiente. Alturas y límites en cantina-terrain.ts. Mesas del jardín ajustadas a esa superficie. Árbol y cantero trasladados al antiguo marcador beige de cantina: coordenadas locales (0, 21). Marcador retirado y llegada desplazada 2,5 m al costado para no aparecer dentro del árbol. Sustituye las ubicaciones aproximadas anteriores.
+
+Continuación de escalones solicitada por Horacio: tres peldaños grises de 15 cm por el borde sur del cuadrado, desde el encuentro con la escalinata de cantina hasta 0,95 m antes del pilar cercano de la plaza techada. Tramo local x = 3, z = 12,9 a 27,4; salida hacia el jardín. Incluye rampa de colisión para circulación.
+
+### Sector de ventas interior — 02/11/2026
+
+La foto interior aportada por Horacio sitúa la venta a la izquierda al entrar. Sustituye el mostrador posterior provisional: vitrina frontal de perfiles negros y base de ladrillo hueco terracota, tres heladeras (una roja y dos oscuras), estantes con luz cálida, cafetera/molino, caja, pantalla suspendida, ventilador y rieles de focos bajo cenefa clara. No se modelan personas ni se usa la foto como textura. Las proporciones se estiman visualmente; resto de comedor y cocina siguen pendientes de relevamiento. Mesas izquierdas desplazadas hacia el centro para liberar la atención. Dos luces locales sin sombras adicionales.

@@ -3,9 +3,10 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { makeMaterials } from "./materials";
 import {
   facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, STEPS_RUN, rectCorners,
-  bulgedOutline, type Rect, type Rooms, type Vec2,
+  bulgedOutline, cantinaForecourt, type Rect, type Rooms, type Vec2,
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
+import { gardenHeight, gardenBounds } from "../data/cantina-terrain";
 import { facultyPlaces } from "../data/places";
 
 type BoxOptions = { tile?: readonly number[]; offset?: readonly number[]; rotation?: number };
@@ -578,7 +579,7 @@ export function createFaculty() {
     prism(outline, 0, PLAZA_LEVEL, m.concrete);
     pave(outline, m.stone, PLAZA_LEVEL + 0.005);
   }
-  for (const s of plan.platformSteps)
+  for (const s of plan.platformSteps.filter((_, i) => i !== 1))
     frame({ center: s.top, size: [STEPS_RUN, s.width], angle: s.angle }, () => steps(STEPS_RUN, 0, PLAZA_LEVEL, s.width));
 
   // ---- Plaza techada: cubierta exenta, separada de la cabecera este del Bloque 1 ----
@@ -785,11 +786,52 @@ export function createFaculty() {
     const glazing = new T.MeshStandardMaterial({ color: "#71817d", roughness: 0.22, metalness: 0.35, transparent: true, opacity: 0.6 });
     const paving = new T.MeshStandardMaterial({ color: "#b5ac92", roughness: 0.95 });
     const terrace = m.tile.clone(); terrace.color.set("#c9bfa6"); terrace.userData.tile = m.tile.userData.tile;
-    // Terraza continua al cuadrado; tres peldaños bajos y rampa de colisión en el borde.
-    box(w + 1, 0.12, d + 3.4, 0, 0.39, 1.6, terrace, true);
-    for (let k = 0; k < 3; k++)
-      box(w + 1.4 + k * 0.4, 0.15, 0.38, 0, 0.375 - k * 0.15, front + 3.5 + k * 0.38, m.stone);
-    ramp(v3(0, 0, front + 4.65), v3(0, 0.45, front + 3.3), w + 1);
+    // Terreno y relleno macizo: la terraza sobresale de la plataforma original del plano.
+    // La base llega al suelo (y mundial = 0); el césped continúa por sus laterales.
+    box(w + 12, 0.12, d + 18, 2, -PLAZA_LEVEL - 0.035, 5, m.grass);
+    // Jardín continuo: reemplaza los bloques verticales por terreno que desciende
+    // gradualmente al suelo. La única subida junto al acceso son 3 × 15 cm.
+    const lawnVertices: number[] = [], lawnUV: number[] = [];
+    function lawnTriangle(a: Vec2, b: Vec2, c: Vec2) {
+      for (const [x, z] of [a, b, c]) { lawnVertices.push(x, gardenHeight(x, z) - (PLAZA_LEVEL - 0.45), z); lawnUV.push(x / 4, z / 4); }
+    }
+    for (let x = gardenBounds.minX; x < gardenBounds.maxX; x++) for (let z = gardenBounds.minZ; z < gardenBounds.maxZ; z++) {
+      lawnTriangle([x, z], [x, z + 1], [x + 1, z]);
+      lawnTriangle([x + 1, z], [x, z + 1], [x + 1, z + 1]);
+    }
+    const lawnGeometry = new T.BufferGeometry();
+    lawnGeometry.setAttribute("position", new T.Float32BufferAttribute(lawnVertices, 3));
+    lawnGeometry.setAttribute("uv", new T.Float32BufferAttribute(lawnUV, 2));
+    lawnGeometry.computeVertexNormals();
+    const lawn = new T.Mesh(lawnGeometry, m.grass); lawn.receiveShadow = true; visual.add(lawn);
+    solid.add(new T.Mesh(lawnGeometry));
+    const baseHeight = PLAZA_LEVEL + 0.39;
+    box(w + 1, baseHeight, d, 0, -PLAZA_LEVEL + baseHeight / 2, 0, m.concrete, true);
+    box(w + 1, 0.12, d, 0, 0.39, 0, terrace, true);
+    prism(cantinaForecourt.outline, -PLAZA_LEVEL, PLAZA_LEVEL + 0.45, terrace, true);
+    const stepStone = new T.MeshStandardMaterial({ color: "#929697", roughness: 0.95 });
+    // Los tres escalones siguen el borde quebrado entero, incluida la diagonal.
+    for (let k = 0; k < 3; k++) {
+      const inner = cantinaForecourt.edge.map(([x, z]): Vec2 => [x, z + k * 0.4]);
+      const outer = cantinaForecourt.edge.map(([x, z]): Vec2 => [x, z + (k + 1) * 0.4]);
+      prism([...inner, ...outer.reverse()], -PLAZA_LEVEL, PLAZA_LEVEL + 0.45 - k * 0.15, stepStone, false);
+    }
+    for (let i = 1; i < cantinaForecourt.edge.length; i++) {
+      const [ax, az] = cantinaForecourt.edge[i - 1], [bx, bz] = cantinaForecourt.edge[i];
+      // Mismo contorno para la colisión: dos triángulos por tramo de escalinata.
+      const points = [v3(ax, 0.45, az), v3(bx, 0.45, bz), v3(ax, 0, az + 1.2), v3(bx, 0, bz + 1.2)];
+      const geometry = new T.BufferGeometry().setFromPoints([points[0], points[2], points[1], points[1], points[2], points[3]]);
+      geometry.computeVertexNormals(); solid.add(new T.Mesh(geometry));
+    }
+    // Continuación de los tres peldaños junto al jardín, hasta antes del pilar azul.
+    const sideSteps = cantinaForecourt.sideSteps;
+    const sideLength = sideSteps.to - sideSteps.from, sideZ = (sideSteps.from + sideSteps.to) / 2;
+    for (let k = 0; k < 3; k++) {
+      const height = PLAZA_LEVEL + 0.45 - k * 0.15;
+      box(0.4, height, sideLength, sideSteps.x + 0.2 + k * 0.4,
+        -PLAZA_LEVEL + height / 2, sideZ, stepStone);
+    }
+    ramp(v3(sideSteps.x + 1.2, 0, sideZ), v3(sideSteps.x, 0.45, sideZ), sideLength);
     box(w, 4.8, 0.24, 0, 2.85, -front, m.brick, true);
     for (const x of [-w / 2, w / 2]) box(0.24, 4.8, d, x, 2.85, 0, m.brick, true);
     box(w + 0.4, 0.18, d + 0.5, 0, 5.3, 0, m.roof, true);
@@ -798,16 +840,19 @@ export function createFaculty() {
     box(4.4, 3.6, 0.24, -w / 2 + 2.2, 2.25, front, m.brick, true);
     box(right - left, 0.18, 0.25, (left + right) / 2, 3.68, front, aluminum);
     box(right - left, 0.1, 0.25, (left + right) / 2, 0.5, front, aluminum);
-    // Paso central de 2,4 m abierto: el resto de los paños tiene colisión.
-    const door = 1.4, opening = 2.4;
-    for (const [a, b] of [[left, door - opening / 2], [door + opening / 2, right]]) {
-      box(b - a, 3, 0.045, (a + b) / 2, 2.02, front, glazing, true);
-      for (let x = a; x <= b + 0.01; x += (b - a) / Math.ceil((b - a) / 1.8))
-        box(0.045, 3.15, 0.09, x, 2.06, front + 0.04, aluminum);
+    // Cuatro hojas de blindex de piso a dintel. La segunda corre 2,4 m hacia la
+    // izquierda, detrás de la primera: queda un paso real sin sumar una quinta hoja.
+    const panelWidth = (right - left) / 4;
+    for (let i = 0; i < 4; i++) {
+      const shift = i === 1 ? -2.4 : 0;
+      const x = left + (i + 0.5) * panelWidth + shift;
+      const z = front + (i === 1 ? -0.09 : 0);
+      box(panelWidth - 0.05, 3, 0.035, x, 2.02, z, glazing, true);
+      for (const dx of [-panelWidth / 2, panelWidth / 2])
+        box(0.045, 3.15, 0.075, x + dx, 2.06, z + 0.025, aluminum);
+      for (const y of [0.5, 3.58]) box(panelWidth, 0.045, 0.07, x, y, z + 0.025, aluminum);
+      if (i === 1 || i === 2) box(0.025, 0.42, 0.07, x - panelWidth / 2 + 0.15, 1.75, z + 0.08, aluminum);
     }
-    // Hoja corrediza recogida junto a la abertura y tirador.
-    box(1.15, 2.95, 0.045, door + 1.85, 2, front + 0.08, glazing);
-    box(0.025, 0.5, 0.06, door + 1.32, 1.75, front + 0.14, aluminum);
     // Ventanas altas en sombra, cubierta plana y gran fascia de paneles salmón.
     box(w - 0.5, 0.65, 0.06, 0, 4.15, front - 0.4, glazing);
     box(w + 0.5, 1.45, 0.16, 0, 5.04, front + 0.28, terracotta);
@@ -837,11 +882,134 @@ export function createFaculty() {
       }
     }
     for (const x of [-3.4, -0.9, 5.8]) ironBench(x, front + 1.65);
-    // Mesas visibles a través de la fachada y mostrador contra el fondo.
-    box(w - 2, 0.9, 0.85, 0, 0.9, -front + 1.5, m.brick, true);
-    for (const x of [-3, 1, 5]) for (const z of [-1.8, 2.2]) {
-      box(1.4, 0.07, 0.8, x, 1.2, z, paving);
-      for (const dx of [-0.5, 0.5]) pole(0.025, 0.7, x + dx, 0.82, z, dark);
+    // Interior provisional: pasillo central libre; distribución sin relevamiento interior.
+    const tableTop = new T.MeshStandardMaterial({ color: "#d7c7aa", roughness: 0.6 });
+    const chairSeat = new T.MeshStandardMaterial({ color: "#667b73", roughness: 0.7 });
+    const light = new T.MeshStandardMaterial({ color: "#fff5da", emissive: "#fff0c9", emissiveIntensity: 0.9 });
+    box(w - 0.3, 0.12, d - 0.3, 0, 4.7, 0, m.plaster);
+    for (const z of [-3.5, 0, 3.5]) {
+      box(w - 0.4, 0.18, 0.12, 0, 4.55, z, dark);
+      for (const x of [-4.5, 4.5]) {
+        box(2.2, 0.1, 0.27, x, 4.42, z, aluminum);
+        box(2.05, 0.025, 0.22, x, 4.36, z, light);
+      }
+    }
+    // Sector de venta a la izquierda al entrar (foto interior aportada por Horacio).
+    // Marco del mostrador: +z mira al comedor, x recorre heladeras → cafetera.
+    frame({ center: [-7, -0.2], size: [8, 3.6], angle: -Math.PI / 2 }, () => {
+      const black = new T.MeshStandardMaterial({ color: "#1b2020", roughness: 0.38, metalness: 0.25 });
+      const cream = new T.MeshStandardMaterial({ color: "#e4dfce", roughness: 0.85 });
+      const backing = new T.MeshStandardMaterial({ color: "#403b32", roughness: 0.9 });
+      const red = new T.MeshStandardMaterial({ color: "#b92b29", roughness: 0.42, metalness: 0.2 });
+      const warm = new T.MeshStandardMaterial({ color: "#ffdf8c", emissive: "#ffc35b", emissiveIntensity: 1.6 });
+      const displayGlass = new T.MeshStandardMaterial({ color: "#b6d1cd", transparent: true, opacity: 0.2, roughness: 0.12, metalness: 0.1 });
+      // Fondo oscuro y gran viga/cenefa clara sobre la zona de atención.
+      box(8.5, 3.1, 0.15, 0, 2, -1.75, backing);
+      box(9, 0.6, 3.9, 0, 3.8, -0.1, cream);
+      for (const x of [-4.3, 4.3]) box(0.25, 3.1, 0.7, x, 2, -1.5, cream);
+      // Frente de ladrillos huecos: huecos reales entre piezas, interior oscuro detrás.
+      box(8, 0.72, 0.8, 0, 0.83, 1.3, black, true);
+      for (let row = 0; row < 6; row++) {
+        const y = 0.53 + row * 0.105;
+        box(8, 0.035, 0.045, 0, y, 1.73, terracotta);
+        for (let x = -3.95; x < 4; x += 0.16) box(0.035, 0.105, 0.045, x, y + 0.05, 1.73, terracotta);
+      }
+      box(8.2, 0.09, 1, 0, 1.22, 1.3, black);
+      // Vitrina refrigerada frontal con perfiles negros, dos niveles y bandejas.
+      box(6.5, 0.55, 0.06, -0.65, 1.53, 1.77, displayGlass);
+      for (const x of [-3.9, -1.73, 0.44, 2.6]) box(0.055, 0.64, 0.08, x, 1.55, 1.78, black);
+      for (const y of [1.26, 1.82]) box(6.6, 0.06, 0.95, -0.65, y, 1.32, black);
+      box(6.4, 0.025, 0.75, -0.65, 1.52, 1.35, aluminum);
+      for (const y of [1.29, 1.55]) {
+        box(6.35, 0.015, 0.02, -0.65, y + 0.17, 1.65, light);
+        for (let i = 0; i < 10; i++) {
+          const x = -3.55 + i * 0.62;
+          box(0.48, 0.025, 0.43, x, y, 1.35, m.white);
+          if (i < 5) {
+            const food = pole(0.12, 0.26, x, y + 0.12, 1.35, tableTop); food.rotation.z = Math.PI / 2;
+          } else box(0.32, 0.12, 0.25, x, y + 0.08, 1.35, i % 2 ? m.leaves[1] : terracotta);
+        }
+      }
+      // Tres heladeras expositoras: roja, negra y negra, con botellas por estante.
+      for (const [i, x] of [-3.15, -1.95, -0.75].entries()) {
+        const casing = i === 0 ? red : black;
+        box(1.1, 2.35, 0.12, x, 1.63, -1.5, casing, true);
+        for (const dx of [-0.51, 0.51]) box(0.08, 2.35, 0.8, x + dx, 1.63, -1.16, casing);
+        for (const y of [0.51, 2.75]) box(1.1, 0.12, 0.8, x, y, -1.16, casing);
+        box(0.91, 1.92, 0.06, x, 1.58, -0.72, displayGlass);
+        for (const dx of [-0.46, 0.46]) box(0.025, 1.88, 0.025, x + dx, 1.58, -0.68, light);
+        box(0.08, 0.6, 0.08, x + 0.38, 1.63, -0.61, aluminum);
+        for (const y of [0.78, 1.24, 1.7, 2.16]) {
+          box(0.93, 0.035, 0.62, x, y, -1.1, aluminum);
+          for (let j = 0; j < 6; j++) {
+            const drink = [m.leaves[2], red, m.blue, m.white][j % 4];
+            pole(0.045, 0.25, x - 0.36 + j * 0.145, y + 0.15, -0.92, drink);
+            pole(0.02, 0.07, x - 0.36 + j * 0.145, y + 0.31, -0.92, drink);
+          }
+        }
+      }
+      // Estantería cálida con frascos, paquetes y vajilla sobre la mesada posterior.
+      box(3.4, 0.9, 0.65, 2.15, 0.93, -1.15, aluminum, true);
+      for (const x of [0.4, 3.9]) box(0.055, 2.45, 0.5, x, 2.08, -1.4, black);
+      for (const y of [1.6, 2.2, 2.8]) {
+        box(3.5, 0.055, 0.5, 2.15, y, -1.4, tableTop);
+        box(3.4, 0.02, 0.025, 2.15, y - 0.04, -1.13, warm);
+        for (let i = 0; i < 7; i++) {
+          const x = 0.65 + i * 0.45;
+          if (i % 2) pole(0.09, 0.24, x, y + 0.15, -1.35, terracotta);
+          else box(0.22, 0.3, 0.17, x, y + 0.18, -1.35, i % 3 ? cream : m.leaves[1]);
+        }
+      }
+      // Cafetera, molino, terminal de caja y pequeña pizarra sobre el mostrador.
+      box(1.05, 0.63, 0.6, 2.5, 1.65, -1.02, black);
+      box(0.95, 0.16, 0.07, 2.5, 1.7, -0.68, aluminum);
+      for (const x of [2.22, 2.72]) { pole(0.025, 0.16, x, 1.48, -0.67, aluminum); pole(0.06, 0.1, x, 1.37, -0.57, m.white); }
+      box(0.27, 0.32, 0.3, 3.4, 1.55, -1.03, aluminum);
+      pole(0.1, 0.25, 3.4, 1.82, -1.03, displayGlass);
+      box(0.5, 0.08, 0.4, 3.4, 1.31, 1.3, black);
+      box(0.45, 0.35, 0.09, 3.4, 1.54, 1.1, black);
+      box(0.37, 0.25, 0.012, 3.4, 1.55, 1.155, light);
+      box(0.46, 0.54, 0.06, 2.6, 1.55, 1.4, tableTop);
+      box(0.39, 0.46, 0.025, 2.6, 1.56, 1.44, black);
+      // Pantalla suspendida a la izquierda y ventilador circular en la pared.
+      box(1.7, 1.02, 0.08, -3.3, 3.02, 1.05, black);
+      box(1.55, 0.88, 0.015, -3.3, 3.02, 1.1, new T.MeshStandardMaterial({ color: "#101414", roughness: 0.2 }));
+      beam(v3(-3.3, 3.55, 1.02), v3(-3.3, 3.8, 1.02), 0.035, black);
+      const fan = new T.Mesh(new T.TorusGeometry(0.28, 0.018, 8, 28), aluminum);
+      fan.position.set(-3.9, 2.96, -1.59); visual.add(fan);
+      for (let i = 0; i < 8; i++) {
+        const a = i * Math.PI / 8;
+        beam(v3(-3.9 - Math.cos(a) * 0.27, 2.96 - Math.sin(a) * 0.27, -1.58),
+          v3(-3.9 + Math.cos(a) * 0.27, 2.96 + Math.sin(a) * 0.27, -1.58), 0.006, aluminum);
+      }
+      // Rieles negros y focos dirigidos a la mesada; sin luces con sombras adicionales.
+      for (const x of [-2, 1.4]) {
+        box(2.65, 0.045, 0.055, x, 3.42, 0.15, black);
+        for (const dx of [-1, 0, 1]) {
+          pole(0.065, 0.23, x + dx, 3.28, 0.15, black);
+          pole(0.055, 0.015, x + dx, 3.155, 0.15, warm);
+        }
+        const glow = new T.PointLight(0xffd6a0, 9, 5, 2); glow.position.set(x, 2.9, -0.1); visual.add(glow);
+      }
+    });
+    function furnitureBody(w: number, h: number, d: number, x: number, y: number, z: number) {
+      const body = new T.Mesh(unit); body.scale.set(w, h, d); body.position.set(x, y, z); solid.add(body);
+    }
+    function chair(x: number, z: number, facing: number) {
+      box(0.46, 0.07, 0.46, x, 0.9, z, chairSeat);
+      box(0.46, 0.42, 0.055, x, 1.15, z + facing * 0.22, chairSeat);
+      for (const dx of [-0.18, 0.18]) for (const dz of [-0.18, 0.18])
+        pole(0.018, 0.44, x + dx, 0.67, z + dz, dark);
+      furnitureBody(0.46, 0.48, 0.46, x, 0.7, z);
+    }
+    // Dos hileras de tres mesas, 24 sillas; paso central amplio desde la puerta.
+    for (const x of [-1.6, 5]) for (const z of [-1, 1.7, 4.1]) {
+      box(1.65, 0.08, 0.85, x, 1.22, z, tableTop);
+      for (const dx of [-0.63, 0.63]) for (const dz of [-0.3, 0.3])
+        pole(0.025, 0.73, x + dx, 0.82, z + dz, dark);
+      furnitureBody(1.65, 0.8, 0.85, x, 0.85, z);
+      for (const dx of [-0.5, 0.5]) for (const side of [-1, 1]) chair(x + dx, z + side * 0.85, side);
+      box(0.15, 0.16, 0.12, x, 1.34, z, m.white);
     }
     // Jardinera de sansevierias junto al muro izquierdo y maceta alta de la explanada.
     box(3.8, 0.2, 0.7, -w / 2 + 2.2, 0.52, front + 0.45, m.brick, true);
@@ -853,11 +1021,50 @@ export function createFaculty() {
       pole(0.3, 0.9, x, 0.9, front + 2.9, terracotta, true);
       for (let i = 0; i < 5; i++) beam(v3(x, 1.3, front + 2.9), v3(x + Math.sin(i * 2) * 0.3, 2.1, front + 2.9 + Math.cos(i * 2) * 0.3), 0.012, m.bark);
     }
+    const treeGroup = new T.Group(), treeColliders = new T.Group();
+    visual.add(treeGroup); solid.add(treeColliders);
+    const apronVisual = visual, apronSolid = solid;
+    visual = treeGroup; solid = treeColliders;
+    // Árbol de la foto IMG_5720: al frente, a la izquierda del acceso, en un
+    // alcorque con arbustos bajos. Escala y ubicación estimadas a partir de la foto.
+    const [treeX, treeZ] = cantinaForecourt.tree;
+    const earth = new T.MeshStandardMaterial({ color: "#786247", roughness: 1 });
+    const bed = new T.Mesh(new T.CylinderGeometry(1.65, 1.65, 0.12, 36), earth);
+    bed.position.set(treeX, 0.055, treeZ); bed.receiveShadow = true; visual.add(bed);
+    // Relleno y suelo plantado dentro de la explanada, al mismo nivel que la plaza.
+    box(3.7, PLAZA_LEVEL, 3.5, treeX, -PLAZA_LEVEL / 2, treeZ, m.concrete, true);
+    pole(0.22, 7.7, treeX, 3.9, treeZ, m.bark, true);
+    for (let i = 0; i < 7; i++) {
+      const a = i * 2.4, spread = 1.8 + (i % 3) * 0.4;
+      const end = v3(treeX + Math.cos(a) * spread, 7.3 + (i % 3) * 0.6, treeZ + Math.sin(a) * spread);
+      beam(v3(treeX, 3.5 + (i % 2), treeZ), end, 0.075, m.bark);
+      for (let j = 0; j < 3; j++) {
+        const foliage = new T.Mesh(new T.IcosahedronGeometry(1, 1), m.leaves[(i + j) % 4]);
+        foliage.scale.set(1.4, 0.75, 1.15);
+        foliage.position.copy(end).add(v3(Math.sin(j * 2 + i) * 0.9, j * 0.35, Math.cos(j * 2 + i) * 0.9));
+        foliage.castShadow = true; visual.add(foliage);
+      }
+    }
+    for (const [dx, dz] of [[-1.2, 0.1], [1.25, 0.25], [0.5, -1.1]]) {
+      for (let j = 0; j < 4; j++) {
+        const shrub = new T.Mesh(new T.IcosahedronGeometry(0.45, 1), m.leaves[j % 3]);
+        shrub.scale.set(1, 0.8, 0.9);
+        shrub.position.set(treeX + dx + Math.sin(j * 2) * 0.24, 0.48 + (j % 2) * 0.1, treeZ + dz + Math.cos(j * 2) * 0.2);
+        shrub.castShadow = true; visual.add(shrub);
+      }
+    }
+    for (let i = 0; i < 16; i++) {
+      const a = i * Math.PI / 8;
+      const stone = new T.Mesh(new T.IcosahedronGeometry(0.13, 0), i % 2 ? m.brick : m.stone);
+      stone.position.set(treeX + Math.cos(a) * 1.6, 0.12, treeZ + Math.sin(a) * 1.6); visual.add(stone);
+    }
+    treeGroup.position.y = treeColliders.position.y = 0.45;
+    visual = apronVisual; solid = apronSolid;
     // Pantalla de lamas azul gris en el lateral derecho, visible en IMG_5719/5720.
     for (const z of [front - 0.2, front - 2.2, front - 4.2]) pole(0.055, 4.9, w / 2 + 0.15, 2.9, z, dark);
     for (let y = 0.85; y < 5.3; y += 0.16)
       box(0.12, 0.065, 4.5, w / 2 + 0.2, y, front - 2.2, m.metal);
-  }, PLAZA_LEVEL);
+  }, PLAZA_LEVEL - 0.45);
   frame(plan.electronics, () => {
     const [w, d] = plan.electronics.size;
     box(w, 0.2, d, 0, 0, 0, m.concrete, true);
@@ -877,10 +1084,14 @@ export function createFaculty() {
   pave(plan.parking, m.grass, 0.02);
   plan.paths.forEach((p) => path(p));
   for (const [x, z] of plan.picnic) {
-    box(2.5, 0.06, 1, x, 0.77, z, m.metal);
+    const dx = x - plan.cantina.center[0], dz = z - plan.cantina.center[1], a = plan.cantina.angle;
+    const lx = dx * Math.cos(a) + dz * Math.sin(a), lz = -dx * Math.sin(a) + dz * Math.cos(a);
+    const y = lx >= gardenBounds.minX && lx <= gardenBounds.maxX && lz >= gardenBounds.minZ && lz <= gardenBounds.maxZ
+      ? gardenHeight(lx, lz) : 0;
+    box(2.5, 0.06, 1, x, y + 0.77, z, m.metal);
     for (const dz of [-0.85, 0.85]) {
-      box(2.7, 0.08, 0.42, x, 0.43, z + dz, m.blue);
-      for (const dx of [-0.9, 0.9]) pole(0.035, 0.75, x + dx, 0.38, z + dz * 0.5);
+      box(2.7, 0.08, 0.42, x, y + 0.43, z + dz, m.blue);
+      for (const dx of [-0.9, 0.9]) pole(0.035, 0.75, x + dx, y + 0.38, z + dz * 0.5);
     }
   }
   // Árbol 1: mango frondoso del patio este (foto árbol_1.HEIC, posición 1 en cómo_debe_ser.png).
@@ -973,7 +1184,7 @@ export function createFaculty() {
   }
   // Marcadores de los puntos de visita en el suelo y sobre la plataforma (no en los pisos altos).
   for (const place of facultyPlaces) {
-    if (place.position[1] > PLAZA_LEVEL + 0.5) continue;
+    if (place.position[1] > PLAZA_LEVEL + 0.5 || place.id === "cantina-cyt") continue;
     const marker = new T.Mesh(new T.CylinderGeometry(0.24, 0.24, 0.04, 16), new T.MeshBasicMaterial({ color: 0xbca36d }));
     marker.position.set(place.position[0], (place.position[1] > 1 ? PLAZA_LEVEL : 0) + 0.13, place.position[2]); marker.userData.placeId = place.id;
     marker.userData.keep = true; group.add(marker); markers.push(marker);

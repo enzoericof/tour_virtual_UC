@@ -67,7 +67,7 @@ const originalPlaces: Place[] = [
     category: "Vida universitaria",
     floor: "Plataforma de la plaza (+1,40 m)",
     description:
-      "Un espacio para hacer una pausa y compartir. La reconstrucción del exterior se basa en las fotografías; la distribución interior es provisional.",
+      "Un espacio para hacer una pausa y compartir. Exterior y sector de ventas a la izquierda basados en fotografías. El resto del interior y sus dimensiones siguen siendo aproximados.",
     position: [40, 0, 15],
     photo: "IMG_5719",
     photos: ["IMG_5719", "IMG_5720", "IMG_5721"],

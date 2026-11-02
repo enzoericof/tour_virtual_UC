@@ -70,6 +70,7 @@ export class TourEngine {
     this.sun.shadow.normalBias = 0.035;
     this.scene.add(this.sun, this.hemi, this.campus.group);
     this.orbit = new OrbitControls(this.camera, this.canvas);
+    this.orbit.rotateSpeed = 1.5;
     this.orbit.enableDamping = true;
     this.orbit.maxPolarAngle = Math.PI * 0.48;
     this.orbit.minDistance = 4;
