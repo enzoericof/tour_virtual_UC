@@ -41,7 +41,7 @@ El recorrido incluye estos ítems (ids estables de `frontend/src/data/places.ts`
 | Bloque G | `bloque-g` |
 | Estacionamiento | `estacionamiento` |
 
-Cantina de CyT y Bedelía están ambas en el alcance. «Bloque 2» de las carpetas y de la vista aérea es el Bloque G (confirmó Horacio). Las medidas de la reconstrucción y los recintos sin captura específica siguen pendientes de validación.
+Cantina de CyT y Bedelía están ambas en el alcance. «Bloque 2» de las carpetas y de la vista aérea es el Bloque G (confirmó Horacio). Las medidas de la reconstrucción y los recintos sin captura específica siguen pendientes de validación: solo el Bloque 1 tiene medidas reales, y las que faltan tomar están en [docs/base-geografica.md](docs/base-geografica.md#estado-de-las-medidas-03112026). Issues principales: [docs/pendientes.md](docs/pendientes.md).
 
 Funciones requeridas: primera persona, movimiento libre, acceso a los recintos, paneles informativos, biblioteca de trabajos, registro e inicio de sesión, publicación de trabajos propios y administración de paneles.
 
@@ -124,7 +124,7 @@ Una tarea termina cuando cumple sus criterios de aceptación, se verificó de fo
 
 ## Estado
 
-Versión 0.1.0: frontend ejecutable sin escaneos navegables, reconstrucción aproximada del sector CyT, backend de usuarios, contenidos y chat, pruebas, Maven Wrapper y Compose. Qué se probó y qué falta: [docs/verificacion.md](docs/verificacion.md) y [docs/pendientes.md](docs/pendientes.md). PostgreSQL 18 es la base de entrega; el perfil `local` con H2 es solo para desarrollo. Sin despliegue público ni avatares sincronizados.
+Versión 0.1.0: frontend ejecutable sin escaneos navegables, reconstrucción aproximada del sector CyT, backend de usuarios, contenidos y chat, pruebas, Maven Wrapper y Compose. Qué se probó y qué falta: [docs/verificacion.md](docs/verificacion.md) y [docs/pendientes.md](docs/pendientes.md). PostgreSQL 18 es la base de entrega; el perfil `local` con H2 es solo para desarrollo. Sin despliegue público ni avatares sincronizados. Desde el 03/11/2026 `backend/` no está en el repositorio (retirado en `9c5d019` a favor de `campus-backend/`); hasta que el equipo resuelva la unificación, ver [docs/arquitectura.md](docs/arquitectura.md#aporte-campus-backend).
 
 ## Simplificación del inicio — 02/11/2026
 

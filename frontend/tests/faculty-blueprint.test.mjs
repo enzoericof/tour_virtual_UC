@@ -189,7 +189,12 @@ test("The toilet tower: a core from the gallery with two half-cylinders, 10 m ti
 
 test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit 0.9 m up, with ways down", () => {
   assert.ok(close(PLAZA_LEVEL, 0.03 + 5 * 0.174), "Five risers above the pink landing");
-  for (const key of ["coveredPlaza", "bedelia", "cantina", "manfred"]) assert.ok(onPlatform(plan[key].center), key);
+  for (const key of ["coveredPlaza", "bedelia", "cantina"]) assert.ok(onPlatform(plan[key].center), key);
+  // Sala Manfred: anfiteatro con gradas descendentes (commit 2631f6f). Queda fuera del prisma de la
+  // plataforma para que el foso baje y su frente da a la explanada, a la altura de la plataforma.
+  const manfredFront = plan.manfred.center[1] + plan.manfred.size[1] / 2;
+  assert.ok(!onPlatform(plan.manfred.center), "Sunken auditorium, outside the platform prism");
+  assert.ok(onPlatform([plan.manfred.center[0], manfredFront + 0.3]), "Its front opens onto the platform");
   assert.ok(onPlatform(center(plan.corridor)), "Corridor between Manfred and Bedelía");
   assert.ok(onPlatform(center(plan.openPlaza)), "Open plaza");
   for (const id of ["acceso", "plaza", "plaza-abierta", "bedelia", "sala-manfred"]) {
@@ -203,13 +208,18 @@ test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit
     assert.ok(!onPlatform([s.top[0] + down[0] * (STEPS_RUN + 0.3), s.top[1] + down[1] * (STEPS_RUN + 0.3)]), "Foot on the ground");
   }
   assert.ok(STEPS_RUN / PLAZA_LEVEL > 1.5, "Walkable steps");
-  // Steps that continue the ground-floor gallery of Bloque 1 up to the platform, by the elevator.
+  // Steps that continue the ground-floor gallery of Bloque 1 up to the platform, by the elevator. Since
+  // 174f9cd a pink landing at ground level prolongs the gallery past the east face; the steps rise from
+  // its far edge.
+  const landingX = plan.elevatorLanding.map(([x]) => x);
+  assert.ok(Math.min(...landingX) < east && Math.max(...landingX) > east, "The landing prolongs the gallery");
   const gallery = plan.platformSteps.find(({ top, angle }) => {
     const foot = [top[0] + Math.cos(angle) * STEPS_RUN, top[1] + Math.sin(angle) * STEPS_RUN];
-    return close(foot[0], east) && foot[1] > half.z - block1.gallery && foot[1] < half.z;
+    return close(foot[0], Math.max(...landingX)) && foot[1] > half.z - block1.gallery && foot[1] < half.z;
   });
   assert.ok(gallery && close(gallery.width, block1.gallery), "Steps from the ground-floor gallery");
-  assert.ok(dist(gallery.top, plan.elevator.center) < 7, "Next to the elevator");
+  const galleryFoot = [gallery.top[0] + Math.cos(gallery.angle) * STEPS_RUN, gallery.top[1] + Math.sin(gallery.angle) * STEPS_RUN];
+  assert.ok(dist(galleryFoot, plan.elevator.center) < 7, "They start next to the elevator");
   assert.ok(!onPlatform(plan.elevator.center) && !onPlatform(plan.tower.center), "Bloque 1 stays at ground level");
 });
 

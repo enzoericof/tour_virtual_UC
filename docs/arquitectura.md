@@ -13,6 +13,10 @@ Monolito: el backend Spring Boot sirve la API, el WebSocket y, en Docker, el fro
 
 ## Aporte campus-backend
 
+**Estado al 03/11/2026:** el commit `9c5d019` (CRUD de trabajos por materia en `campus-backend`) retiró la carpeta `backend/` del repositorio; su guía `campus-backend/setup.md` la llama «carpeta retirada». No se adaptaron el frontend, el `Dockerfile` ni `compose.yaml`: el frontend sigue llamando a `/api/v1` y a `/ws`, que `campus-backend` no ofrece, y la imagen de Docker no compila porque copia `backend/`. Hasta que el equipo decida cómo seguir, los contratos de esta página describen el servidor retirado (recuperable desde `fd95f87`) y no hay un servidor compatible con el frontend en `main`. Tarea en [pendientes](pendientes.md).
+
+`campus-backend` compila con su propio Maven Wrapper (03/11/2026). Expone `/api/auth/registro`, `/api/auth/login`, `/api/auth/me`, `/api/auth/logout`, `/api/materias` y `/api/trabajos` (listado paginado y por materia, alta, edición y baja del propietario o de un administrador). Lectura de trabajos solo con sesión, errores con la clave `mensaje` y CSRF desactivado: tres diferencias con lo que exige AGENTS.md para el servidor integrado.
+
 Integrado desde `feature/campus-backend` el 01/11/2026 para conservar el trabajo del equipo. Es un proyecto separado con usuarios, autenticación y modelos de trabajos/archivos; no está conectado al frontend ni al Dockerfile. El servidor activo continúa en `backend/`.
 
 El aporte usa Java 21 en su POM y rutas `/api/auth/registro`, `/api/auth/login` y `/api/auth/logout`, distintas de `/api/v1`. Apunta a PostgreSQL local `TP_INFO3`, con variables `DB_USER` y `DB_PASSWORD`; su prueba de contexto requiere esa base. La configuración actual desactiva CSRF y necesita adecuarse a la política del proyecto antes de usarla como sustituto del servidor. Ambos proyectos configuran el puerto 8080 y no deben arrancarse juntos con esa configuración.

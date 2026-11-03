@@ -171,3 +171,14 @@ Se restituye el ancho original de 2,10 m y el eje del tramo; la bajada se extien
 ## Inicio recuperado - 03/11/2026
 
 Vista general verificada en navegador tras reiniciar Vite: campus visible y sin dialogo de error. El servidor anterior mezclaba plano almacenado en memoria con reconstruccion nueva. Captura: output/plaza-techada/inicio-recuperado.png. Build y prueba nueva de construccion completa correctos.
+
+## Bloque 1 de 65 m — 02/11/2026
+
+Referencias: `IMG_5639` y las cuatro fotos del usuario del 02/11 ([referencias](docs/referencias.md)). Capturas de la implementación en `.local/references/bloque1-65m/` (1280 × 800, Edge sin ventana), con encuadres equivalentes a las fotos; no se exige igualdad de encuadre.
+
+- Puerta doble: hoja izquierda fija con ventana cuadrada, derecha abierta, montante de dos paños y número «Aula 204» sobre ladrillo; color gris azulado. Coincide en disposición con `IMG_5639`. El 03/11 el montante pasó a la mitad de alto y el número a dos placas en punta, legibles desde cada lado de la galería (`placa-oeste.jpg`, `placa-este.jpg`, `puerta-frente.jpg`).
+- Cara este: «Universidad Católica» y «Facultad de Ciencias y Tecnología» en el tercer piso y «Edificio / Prof. Ing. Luis Alberto Meyer Jou» en el segundo, separados por las bandas de hormigón que rodean el bloque. Tipografía con serifa genérica, no la del cartel real.
+- Fachada sur: columnas cada 4,5 m, dos paños de lamas por módulo y descansos de la Pompidou entre columnas. Ascensor crema entre las dos últimas columnas, como en las fotos.
+- Escalera de la plaza (2,1 m) y rampa: misma relación que en la foto (escalera a la izquierda, columna entre ambas, rampa con pasamanos sobre el ladrillo).
+
+Pendiente: los murales del ascensor siguen repitiendo `IMG_5727`; la foto de la cabecera desde el patio muestra en otra cara un mural de líneas grises distinto. Sin revisión en móviles.

@@ -2,7 +2,7 @@
 
 Primera versión funcional del Trabajo Práctico de **Informática III 2026**, desarrollada para un equipo de seis integrantes. Representa la Facultad de Ciencias y Tecnología de la Universidad Católica con Three.js y una base de usuarios, contenidos y chat en Spring Boot.
 
-La integración de ramas del 01/11 conserva también el aporte `campus-backend/`. El servidor utilizado por el frontend y Docker sigue siendo `backend/`; el aporte separado requiere unificación antes de sustituirlo. Ver [estado de ambos proyectos](docs/arquitectura.md#aporte-campus-backend).
+**Atención (03/11/2026):** `backend/` fue retirado del repositorio en favor de `campus-backend/`, sin adaptar el frontend ni Docker; las instrucciones de backend y Docker de este README describen el servidor retirado. Ver [estado de ambos proyectos](docs/arquitectura.md#aporte-campus-backend) y la guía [campus-backend/setup.md](campus-backend/setup.md).
 
 ## Qué incluye esta versión
 

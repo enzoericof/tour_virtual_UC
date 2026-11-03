@@ -217,3 +217,12 @@ Integrado origin/main 44a208c conservando acceso, caminero, cinco pilares y sus 
 ## Recuperacion del inicio 3D - 03/11/2026
 
 Se reprodujo el error de lectura de map en prism(g.garden): Vite servia una version anterior del plano sin garden, mientras la reconstruccion ya usaba la version integrada. La construccion con modulos actuales funcionaba. Reiniciado el servidor, la carga real en navegador vuelve a mostrar el campus. Se agrega prueba de arranque de createFaculty con plano actual, materiales presentes y coordenadas finitas; aprobada. Build correcto. El dialogo conserva el detalle y ahora registra la excepcion en consola sin atribuir todos los fallos a WebGL. Evidencia: output/plaza-techada/inicio-recuperado.png. No se modifico la geografia.
+
+## Revisión general — 03/11/2026
+
+- `npm test`: **31/31** en la rama; **39/39** tras integrar `origin/main` `849c037`. Se corrigió la prueba de Manfred, que esperaba la sala sobre la plataforma desde antes del anfiteatro de `2631f6f`, y se retiró la escalinata muerta que ese fallo ocultaba. TypeScript y build aprobados.
+- Recorridos con el `Walker` del proyecto sobre las colisiones reales (página temporal fuera del repositorio): explanada → puerta de Manfred → gradas → escenario; galería del segundo piso → aula 204; plataforma → escalera de 2,1 m → galería del primer piso; escalera Pompidou de planta baja al primer piso; rampa a la galería de planta baja; galería del tercer piso de punta a punta. Todos llegan, sin errores de página. Siguen libres para la cápsula los 16 puntos de visita y las 24 puertas.
+- Revisión visual de las placas del número de aula desde ambos lados de la galería y del montante más bajo. Capturas en `.local/references/bloque1-65m/`.
+- `campus-backend`: `mvnw -DskipTests package` correcto (Java 21). No se ejecutó su prueba de contexto ni su arranque, que requieren PostgreSQL `TP_INFO3`.
+- `backend/` ya no existe en el repositorio: no se pueden ejecutar `./mvnw verify` ni la prueba de chat, y la imagen de Docker no compila. Ver [pendientes](pendientes.md).
+- Tras integrar `849c037`: 39/39 y build correctos. Se corrigieron dos expresiones de la cara este que Git combinó sin conflicto (llegada `acceso` fuera de la plataforma) y el foso de Manfred, que quedaba bajo el césped. Los seis recorridos con el caminante se repitieron sobre el modelo integrado y llegan (el escenario de Manfred, a +0,28 m); el caminante de `main` exige el cursor capturado, que la página temporal simula. Sin errores de página.
