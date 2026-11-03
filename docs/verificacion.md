@@ -194,3 +194,21 @@ Build y TypeScript correctos. Suite: 34/35 aprobadas; queda el fallo previo de n
 ## Escalera alargada con ancho original — 03/11/2026
 
 Build y TypeScript correctos. Suite 34/35: persiste únicamente el fallo previo de nivel de Manfred. Prueba del plano ajustada para conservar ancho de 2,10 m, eje original y desembarco superior, con recorrido de 6 m. Octree real: 909 muestras libres con radio 0,28 m a tres alturas en tres líneas de ascenso, y apoyo continuo desde la plaza al primer piso. Inspección visual en navegador. Captura: `output/plaza-techada/escalera-alargada-ancho-original.png`. Cámara y script temporales retirados.
+
+## Caminero y escalinata — revisión local 02/11/2026
+
+TypeScript y build correctos. Nueva prueba del ángulo recto y de ausencia de plataforma sobre las huellas: aprobada. Suite: 34/36 aprobadas; los mismos dos fallos anteriores (`Walkable slope` del extremo este y nivel de Manfred) se reprodujeron antes de editar. Revisión visual de escalera, unión de la lona y vista elevada en navegador con la geometría real. Comprobaciones temporales: 38 rayos sobre ambos brazos de la escalera, 31 sobre el caminero (tolerancia de 3 cm en el cruce con el ramal inclinado) y 93 posiciones de cápsula de radio 0,28 m bajo la cubierta, libres en tres franjas del paso. No se afirma una prueba manual de movimiento con captura del mouse: el navegador integrado la rechaza. Visor temporal retirado después de la revisión. Trabajo local, sin commit ni push.
+
+### Corrección del caminero — 03/11/2026
+
+Toldo azul y unión a los tres peldaños señalados por el usuario, paralelo al eje corto del Bloque G. Build correcto y tres pruebas específicas aprobadas: escalera en esquina, conexión/orientación del caminero y red peatonal conectada. En el nuevo trazado: 93 rayos interiores de suelo (tolerancia de 3 cm) y 93 cápsulas libres de radio 0,28 m en tres franjas bajo el toldo. Revisión visual elevada y desde el camino hacia los peldaños. Se conserva la mesa lateral. Visor temporal retirado; capturas de revisión ignoradas por Git. Sin commit ni push.
+
+### Detalle del acceso — 03/11/2026
+
+Cinco pilares, bebedero, banco y cantero irregular revisados visualmente desde tres ángulos. Build correcto; suite 36/38 aprobadas, con los dos fallos anteriores del extremo este y Manfred. Nueva prueba de cantidad/separación de pilares, apoyo del bebedero y jardín fuera de la plataforma: aprobada. Sobre colisiones reales: 38 rayos en ambos brazos de la escalinata y 39 cápsulas libres en la circulación interior de la galería. Tres rayos adicionales confirman apoyo del banco en el piso visible de la plataforma. Visor temporal retirado, capturas ignoradas por Git. Todo local, sin commit ni push.
+
+
+## Integracion de Plaza Techada en main - 03/11/2026
+
+Integrado origin/main 44a208c conservando acceso, caminero, cinco pilares y sus acabados. Conflictos documentales resueltos conservando ambas aportaciones; luminarias detalladas conservan las cuatro posiciones de main. Banco retirado segun solicitud de Horacio. Build correcto; 37/38 pruebas aprobadas, persiste solamente el fallo previo de nivel de Manfred.
+

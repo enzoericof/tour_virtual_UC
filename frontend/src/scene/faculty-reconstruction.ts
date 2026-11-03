@@ -86,6 +86,47 @@ export function createFaculty() {
     mesh.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), b.clone().sub(a).normalize());
   }
   const v3 = (x: number, y: number, z: number) => new T.Vector3(x, y, z);
+  /** Lona azul continua con caída leve entre apoyos y faldón festoneado. */
+  function fabricCover(curve: T.Curve<T.Vector3>, width: number, supports: number[]) {
+    const length = curve.getLength(), segments = Math.ceil(length / 0.12), across = 8;
+    const positions: number[] = [], uv: number[] = [], indices: number[] = [];
+    const at = (t: number, u: number) => {
+      const p = curve.getPointAt(t), tangent = curve.getTangentAt(t);
+      const side = v3(-tangent.z, 0, tangent.x).normalize();
+      return p.addScaledVector(side, u * width / 2).add(v3(0, u * 0.08 - 0.06 * (1 - u * u), 0));
+    };
+    for (let i = 0; i <= segments; i++) for (let j = 0; j <= across; j++) {
+      const t = i / segments, u = j / across * 2 - 1, p = at(t, u);
+      positions.push(p.x, p.y, p.z); uv.push(j / across * width, t * length);
+      if (i < segments && j < across) {
+        const a = i * (across + 1) + j, b = a + across + 1;
+        indices.push(a, b, a + 1, a + 1, b, b + 1);
+      }
+    }
+    const geometry = new T.BufferGeometry();
+    geometry.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
+    geometry.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
+    geometry.setIndex(indices); geometry.computeVertexNormals();
+    const cover = new T.Mesh(geometry, m.awning); cover.castShadow = cover.receiveShadow = true; visual.add(cover);
+    for (const side of [-1, 1]) {
+      const vertices: number[] = [], coords: number[] = [], faces: number[] = [];
+      for (let i = 0; i <= segments; i++) {
+        const t = i / segments, p = at(t, side);
+        const drop = 0.13 + 0.035 * Math.sin(Math.PI * ((t * length / 0.45) % 1));
+        vertices.push(p.x, p.y, p.z, p.x, p.y - drop, p.z);
+        coords.push(t * length, 0, t * length, drop);
+        if (i < segments) { const a = i * 2; faces.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+      }
+      const edge = new T.BufferGeometry(); edge.setAttribute("position", new T.Float32BufferAttribute(vertices, 3));
+      edge.setAttribute("uv", new T.Float32BufferAttribute(coords, 2)); edge.setIndex(faces); edge.computeVertexNormals();
+      const valance = new T.Mesh(edge, m.awning); valance.castShadow = true; visual.add(valance);
+    }
+    for (const t of supports) {
+      const a = at(t, -0.95), b = at(t, 0.95);
+      beam(a, b, 0.025, m.metal);
+      for (const p of [a, b]) pole(0.035, p.y, p.x, p.y / 2, p.z, m.metal, true);
+    }
+  }
   function sign(text: string, x: number, y: number, z: number, width = 2, rotation = 0) {
     const canvas = document.createElement("canvas"); canvas.width = 512; canvas.height = 100;
     const ctx = canvas.getContext("2d")!;
@@ -762,8 +803,12 @@ export function createFaculty() {
   prism(plan.elevatorLanding, -0.06, 0.09, m.granite);
   const landingBand = new T.MeshStandardMaterial({ color: "#596664", roughness: 0.85 });
   box(STEPS_RUN, 0.004, 0.07, block1.length / 2 + STEPS_RUN / 2, 0.032, 5.95, landingBand);
+  const pavingJoint = new T.MeshStandardMaterial({color:"#6f5a51",roughness:1});
+  for(let x=37.2;x<39.9;x+=0.6) box(0.003,0.002,2.5,x,0.0315,4.75,pavingJoint);
+  for(let z=3.6;z<6;z+=0.6) box(3.05,0.002,0.003,38.375,0.0315,z,pavingJoint);
 
-  // ---- Plataforma compartida: plaza techada, Bedelía, cantina, Manfred y cabecera este ----
+  // ---- Plataforma a 0,90 m: plaza techada, cuadrado, Bedelía, cantina, Sala Manfred y cabecera este ----
+
   for (const outline of plan.platform) {
     prism(outline, 0, PLAZA_LEVEL, m.concrete);
     pave(outline, m.stone, PLAZA_LEVEL + 0.005);
@@ -774,11 +819,26 @@ export function createFaculty() {
   {
     const count = 5, tread = STEPS_RUN / count, base = 0.03;
     const groove = new T.MeshStandardMaterial({ color: "#8d918c", roughness: 0.9 });
+    const riser = m.accessStone.clone(); riser.color.set("#bab7aa"); riser.side = T.DoubleSide;
+    const nosing = m.accessStone.clone(); nosing.color.set("#e8e4d5");
     for (let i = 0; i < count; i++) {
       const inner = elevatorStairEdge(i * tread), outer = elevatorStairEdge((i + 1) * tread);
       const top = base + (PLAZA_LEVEL - base) * (i + 1) / count;
       // Una sola huella poligonal por nivel: no hay encuentro entre cajas superpuestas.
-      prism([...inner, ...outer.slice().reverse()], 0, top, m.stone, false);
+      prism([...inner, ...outer.slice().reverse()], 0, top, m.accessStone, false);
+      // Contrahuella ligeramente más oscura y nariz de piedra, como en la foto de detalle.
+      const front = elevatorStairEdge(i*tread-0.002), bottom = base+(PLAZA_LEVEL-base)*i/count;
+      for(let side=0;side<2;side++) {
+        const a=front[side],b=front[side+1],geo=new T.BufferGeometry().setFromPoints([
+          v3(a[0],bottom,a[1]),v3(b[0],bottom,b[1]),v3(a[0],top,a[1]),
+          v3(b[0],bottom,b[1]),v3(b[0],top,b[1]),v3(a[0],top,a[1]),
+        ]);
+        const p=geo.attributes.position,uv:number[]=[];
+        for(let k=0;k<p.count;k++) uv.push((side?p.getX(k):p.getZ(k))/1.2,p.getY(k)/1.2);
+        geo.setAttribute("uv",new T.Float32BufferAttribute(uv,2));geo.computeVertexNormals();
+        const face=new T.Mesh(geo,riser);face.receiveShadow=true;visual.add(face);
+      }
+      pave([...elevatorStairEdge(i*tread-0.018),...elevatorStairEdge(i*tread+0.018).reverse()],nosing,top+0.002);
       for (const offset of [0.025, 0.05, 0.075]) {
         const a = elevatorStairEdge(i * tread + offset), b = elevatorStairEdge(i * tread + offset + 0.009);
         pave([...a, ...b.slice().reverse()], groove, top + 0.002);
@@ -818,7 +878,7 @@ export function createFaculty() {
       for (let i = 0; i < ss.count; i++) {
         const y = ss.bottom + (PLAZA_LEVEL - ss.bottom) * (i + 1) / ss.count;
         const z = ss.run - (i + 0.5) * ss.run / ss.count;
-        box(ss.width, y, ss.run / ss.count, 0, y / 2, z, m.stone);
+        box(ss.width, y, ss.run / ss.count, 0, y / 2, z, m.accessStone);
       }
     });
     ramp(v3(ss.center[0] + ss.direction[0] * ss.run, ss.bottom, ss.center[1] + ss.direction[1] * ss.run),
@@ -837,7 +897,8 @@ export function createFaculty() {
     // Pretil bajo de ladrillo sobre el borde exterior de la losa.
     edgeBox(g.outline[0], g.outline[3], 0.30, 0.18, g.roof + 0.37, m.brick);
     const fluorescent = new T.MeshStandardMaterial({ color: "#f5f5e8", emissive: "#fff7de", emissiveIntensity: 1.3 });
-    for (const t of [0.18, 0.5, 0.82]) {
+    for (const t of [0.125, 0.375, 0.625, 0.875]) {
+
       const a = g.outline[0], b = g.outline[3], c = g.outline[1];
       const x = a[0] + (b[0] - a[0]) * t + (c[0] - a[0]) / 2;
       const z = a[1] + (b[1] - a[1]) * t + (c[1] - a[1]) / 2;
@@ -910,25 +971,63 @@ export function createFaculty() {
       box(0.018, 0.025, 0.23, a[0] + (b[0] - a[0]) * t, PLAZA_LEVEL + 0.04,
         a[1] + (b[1] - a[1]) * t, m.steel, false, { rotation: angle });
     }
-    frame(g.planter, () => {
-      // Cantero al costado del descanso, sin cruzar el acceso de la galería.
-      box(3.5, 0.16, 1, 0, 0.08, 0, m.concrete, true);
-      box(3.3, 0.04, 0.8, 0, 0.16, 0, m.bark);
-      const leafGeo = new T.BufferGeometry().setFromPoints([
-        v3(-0.06, 0, 0), v3(0.06, 0, 0), v3(0.1, 0.6, 0.04),
-        v3(-0.06, 0, 0), v3(0.1, 0.6, 0.04), v3(0.05, 1, 0.1),
-      ]);
-      leafGeo.computeVertexNormals();
-      const leafMat = new T.MeshStandardMaterial({ color: "#42583b", side: T.DoubleSide, roughness: 1 });
-      for (let i = 0; i < 18; i++) for (let j = 0; j < 4; j++) {
-        const leaf = new T.Mesh(leafGeo, leafMat);
-        leaf.position.set(-1.5 + (i % 9) * 0.37, 0.18, i < 9 ? -0.23 : 0.2);
-        leaf.rotation.y = i * 2.4 + j * 1.6; leaf.rotation.z = (j - 1.5) * 0.12;
-        leaf.scale.y = 0.65 + ((i * 7 + j * 3) % 9) / 16;
-        leaf.castShadow = true; visual.add(leaf);
+    // Macizo a ras del suelo: sigue la esquina y el camino, sin la jardinera rectangular anterior.
+    prism(g.garden,0.012,0.035,m.bark);
+    const noise=(n:number)=>{const v=Math.sin(n*127.1+311.7)*43758.5453;return v-Math.floor(v);};
+    const leafGeo=new T.BufferGeometry(),vertices:number[]=[],uvs:number[]=[],faces:number[]=[];
+    for(let i=0;i<=10;i++) {
+      const t=i/10,w=0.064*Math.pow(1-t,0.35)+0.001,bend=0.15*t*t;
+      for(const side of [-1,0,1]) { vertices.push(side*w,t,bend+(1-Math.abs(side))*0.026);uvs.push((side+1)/2,t); }
+      if(i<10) for(let j=0;j<2;j++) {const a=i*3+j;faces.push(a,a+3,a+1,a+1,a+3,a+4);}
+    }
+    leafGeo.setAttribute("position",new T.Float32BufferAttribute(vertices,3));
+    leafGeo.setAttribute("uv",new T.Float32BufferAttribute(uvs,2));leafGeo.setIndex(faces);leafGeo.computeVertexNormals();
+    let plant=0;
+    for(let x=40.65;x<46.5;x+=0.4) for(let z=5.6;z<9.7;z+=0.4) {
+      const n=plant++,px=x+(noise(n)-0.5)*0.14,pz=z+(noise(n+8)-0.5)*0.14;
+      if(!insidePolygon([px,pz],g.garden)||noise(n+25)<0.06) continue;
+      for(let j=0;j<5;j++) {
+        const leaf=new T.Mesh(leafGeo,m.accessLeaf),a=noise(n*7+j)*Math.PI*2;
+        leaf.position.set(px+Math.cos(a)*0.045,0.055,pz+Math.sin(a)*0.045);
+        leaf.rotation.order="YXZ";
+        leaf.rotation.set((noise(n+j+90)-0.5)*0.25,a,(noise(n+j+120)-0.5)*0.25);
+        const height=(0.65+noise(n+44)*0.6)*(0.8+noise(n*5+j+170)*0.3)*(pz>8.6?0.7:1);
+        leaf.scale.set(1+noise(n+j+140)*0.45,height,1);
+        leaf.castShadow=leaf.receiveShadow=true;visual.add(leaf);
       }
-    });
-    // Banco retirado: su lugar queda dentro de la nueva escalinata.
+    }
+    const silver=new T.MeshStandardMaterial({color:"#a7b7a2",roughness:1,side:T.DoubleSide});
+    const purple=new T.MeshStandardMaterial({color:"#526257",roughness:1,side:T.DoubleSide});
+    for(let i=0;i<g.garden.length;i++) {
+      const a=g.garden[i],b=g.garden[(i+1)%g.garden.length],length=Math.hypot(b[0]-a[0],b[1]-a[1]);
+      const count=Math.ceil(length/0.3);
+      for(let k=0;k<count;k++) {
+        const t=k/count,px=a[0]+(b[0]-a[0])*t,pz=a[1]+(b[1]-a[1])*t;
+        const stone=new T.Mesh(new T.IcosahedronGeometry(0.055,0),m.stone);
+        stone.position.set(px,0.038,pz);stone.scale.set(1.3,0.5,0.85);visual.add(stone);
+        if(i<4||k%2) continue;
+        for(let j=0;j<9;j++) {
+          const leaf=new T.Mesh(leafGeo,j%3?silver:purple),angle=j*Math.PI*2/9;
+          leaf.position.set(px,0.055,pz);leaf.rotation.order="YXZ";leaf.rotation.set(0.95,angle,0);
+          leaf.scale.set(0.7,0.32+noise(i*31+k+j)*0.13,1);leaf.castShadow=true;visual.add(leaf);
+        }
+      }
+    }
+    // Banco retirado por la ampliación longitudinal de la escalera.
+    // Bebedero junto al pilar: gabinete inoxidable, bandeja, grifo y soporte abierto.
+    frame(g.waterStation,()=>{
+      for(const x of [-0.23,0.23]) for(const z of [-0.19,0.19]) box(0.025,0.53,0.025,x,0.265,z,m.steel);
+      box(0.56,0.78,0.46,0,0.91,0,m.white,true);
+      box(0.54,0.035,0.44,0,1.315,0,m.steel);
+      box(0.48,0.72,0.025,0,0.91,0.242,m.steel);
+      box(0.25,0.24,0.03,0,0.91,0.263,m.metal);
+      box(0.33,0.025,0.14,0,0.77,0.28,m.steel);
+      for(let x=-0.13;x<0.14;x+=0.035) box(0.009,0.007,0.11,x,0.787,0.28,m.metal);
+      beam(v3(0.06,1.04,0.265),v3(0.06,1.04,0.34),0.014,m.steel);
+      beam(v3(0.06,1.04,0.34),v3(0.06,1.005,0.34),0.014,m.steel);
+      sign("AGUA",0,1.17,0.263,0.3);
+    },PLAZA_LEVEL);
+
   }
 
   // ---- Plaza techada: cubierta exenta, separada de la cabecera este del Bloque 1 ----
@@ -1786,7 +1885,10 @@ export function createFaculty() {
   pave(plan.courtyard, m.grass, 0.015);
   pave(plan.common1, m.grass, 0.018);
   pave(plan.parking, m.grass, 0.02);
-  plan.paths.forEach((p) => path(p));
+  plan.paths.forEach((p, index) => {
+    // El tramo bajo el caminero tiene su propio pavimento; los demás caminos se conservan.
+    if (index !== 3) path(p);
+  });
   // Acceso curvo con pendiente suave y toldo conectado al pasillo (fotos 16.25.45/52).
   {
     const g = plan.plazaGallery;
@@ -1799,7 +1901,9 @@ export function createFaculty() {
         const t = i / count, p = c.getPoint(t), tangent = c.getTangent(t);
         const side = v3(-tangent.z, 0, tangent.x).normalize().multiplyScalar(width / 2);
         for (const sign of [-1, 1]) {
-          const q = p.clone().addScaledVector(side, sign); positions.push(q.x, q.y, q.z); uvs.push((sign + 1) / 2, t * 5);
+          const q = p.clone().addScaledVector(side, sign); positions.push(q.x, q.y, q.z);
+          const tile = mat.userData.tile as number[] | undefined;
+          uvs.push(tile ? q.x / tile[0] : (sign + 1) / 2, tile ? q.z / tile[1] : t * 5);
         }
         if (i < count) { const k = i * 2; indices.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
       }
@@ -1816,28 +1920,48 @@ export function createFaculty() {
         wall.computeVertexNormals(); visual.add(new T.Mesh(wall,sideMaterial));
       }
     }
-    ribbon(curve, 2.2, m.stone, true, true);
+    ribbon(curve, 2.2, m.accessStone, true, true);
     // Piezas redondas bajas sobre el mismo plano inclinado, como el pavimento de referencia.
     for (let i = 1; i < 28; i++) {
       const t = i / 28, p = curve.getPoint(t), tangent = curve.getTangent(t), side = v3(-tangent.z,0,tangent.x).normalize();
       for (const offset of [-0.8,-0.4,0,0.4,0.8]) {
         const q = p.clone().addScaledVector(side,offset);
-        const disc = pole(0.17,0.008,q.x,q.y+0.005,q.z,m.concrete);
+        const disc = pole(0.17,0.008,q.x,q.y+0.005,q.z,m.accessStone);
         disc.quaternion.setFromUnitVectors(v3(0,1,0), side.clone().cross(tangent).normalize());
       }
     }
-    const canopy = new T.CubicBezierCurve3(v3(41,2.8,13),v3(41,3.1,10),v3(44.6,4.1,10.3),v3(44.6,g.roof,7.4));
-    ribbon(canopy,2.6,m.canopy,false);
-    for (const t of [0,0.5,1]) {
-      const p = canopy.getPoint(t), tangent = canopy.getTangent(t), side = v3(-tangent.z,0,tangent.x).normalize();
-      for (const sign of [-1,1]) {
-        const q=p.clone().addScaledVector(side,sign*1.25), ground=0;
-        pole(0.045,p.y-ground,q.x,(p.y+ground)/2,q.z,m.steel,true);
+    // Remate en la plaza, sobre los tres peldaños señalados por el usuario.
+    // Cubierta y piso continúan por el mismo eje, paralelo al costado corto del Bloque G.
+    const [[ax, az], [bx, bz]] = plan.coveredWalk;
+    const attachment = [ax-g.smallSteps.direction[0]*g.smallSteps.run, az-g.smallSteps.direction[1]*g.smallSteps.run];
+    const canopy = new T.CubicBezierCurve3(v3(attachment[0],g.roof+0.03,attachment[1]),
+      v3(attachment[0],4.1,attachment[1]),v3(ax,3.15,az),v3(ax,2.95,az));
+    fabricCover(canopy, 2.65, []);
+    // Rellano inferior rosado unido al camino, sin cajas cruzadas ni recortes de césped.
+    const lowerPath = new T.CubicBezierCurve3(v3(39,0.034,5.9),v3(39.8,0.034,7),v3(40.3,0.05,9.6),v3(41,0.05,11));
+    ribbon(lowerPath, 1.8, m.granite, true);
+    // Banda oscura en los bordes del piso rosado, como en las fotografías.
+    for (const offset of [-0.83, 0.83]) {
+      const band = new T.CurvePath<T.Vector3>();
+      for (let i = 0; i < 24; i++) {
+        const at = (t: number) => {
+          const p = lowerPath.getPoint(t), tangent = lowerPath.getTangent(t);
+          return p.addScaledVector(v3(-tangent.z,0,tangent.x).normalize(),offset).add(v3(0,0.002,0));
+        };
+        band.add(new T.LineCurve3(at(i / 24), at((i + 1) / 24)));
       }
-      beam(p.clone().addScaledVector(side,-1.3),p.clone().addScaledVector(side,1.3),0.04,m.steel);
+      ribbon(band, 0.055, landingBand, false);
     }
-    // Ramal corto al piso rosado, al nivel inferior, separado de la escalerita.
-    path([[41,11],[40.4,8],[39,6]],1.6);
+    const walkStart = v3(ax,g.smallSteps.bottom,az), walkEnd = v3(bx,0.05,bz);
+    // Perfil apenas elevado en el centro para que el césped existente no atraviese el pavimento.
+    const walk = new T.CubicBezierCurve3(walkStart,
+      walkStart.clone().lerp(walkEnd,1/3).add(v3(0,0.08,0)),
+      walkStart.clone().lerp(walkEnd,2/3).add(v3(0,0.08,0)),walkEnd);
+    ribbon(walk, 2.2, m.accessStone, true, true);
+    ribbon(new T.LineCurve3(v3(bx,0.05,bz),v3(55,0.05,37)), 2.2, m.accessStone, true);
+    const roof = new T.LineCurve3(v3(ax,2.95,az),v3(bx,2.8,bz));
+    const bays = Math.ceil(roof.getLength() / 4.5);
+    fabricCover(roof, 2.65, Array.from({length:bays + 1},(_,i)=>i / bays));
   }
 
   for (const [x, z] of plan.picnic) {
@@ -1930,14 +2054,6 @@ export function createFaculty() {
     pole(0.3, 5.5, x, y + 2.75, z, m.bark, true);
     const crown = new T.Mesh(new T.IcosahedronGeometry(1, 2), m.leaves[0]);
     crown.scale.set(3.4, 2.1, 3.1); crown.position.set(x, y + 6, z); crown.castShadow = true; visual.add(crown);
-  }
-  {
-    const [[ax, az], [bx, bz]] = plan.coveredWalk, length = Math.hypot(bx - ax, bz - az);
-    const walk = new T.Group(); walk.position.set((ax + bx) / 2, 0, (az + bz) / 2); walk.rotation.y = Math.atan2(bx - ax, bz - az);
-    visual.add(walk); const previous = visual; visual = walk;
-    box(2.6, 0.12, length, 0, 2.7, 0, m.blue);
-    for (const x of [-1.1, 1.1]) for (let z = -length / 2; z <= length / 2; z += 4) pole(0.05, 2.7, x, 1.35, z);
-    visual = previous;
   }
   // Marcadores de los puntos de visita en el suelo y sobre la plataforma (no en los pisos altos).
   for (const place of facultyPlaces) {

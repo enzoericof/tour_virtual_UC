@@ -255,3 +255,16 @@ Logo trasladado al paño izquierdo, z=1,00, conservando cara este y altura. En s
 ## Corrección del sentido de ampliación de escalera — 03/11/2026
 
 La aclaración de Horacio sustituye la ampliación anterior: se recuperan el ancho original de 2,10 m y su eje X original. El recorrido se prolonga a 6 m siguiendo la pared de ladrillos hacia la derecha de la vista del usuario, con el desembarco superior fijo; no se ensancha hacia la plaza. El pie queda en z=−2,50. Se conservan logo, ventana, retirada del banco y de los pilares señalados. Medidas estimadas de la indicación visual, pendientes de relevamiento.
+
+## Caminero y escalinata del acceso — revisión local 02/11/2026
+
+Referencias: fotos del usuario `fb4056a7`, `de258745`, `42edc80e`, `d705ed24` y `c39edc52`, más la satelital `e3413145` (prefijos de sus adjuntos). Dos brazos perpendiculares de cinco peldaños claros, unidos a inglete, sobre el piso rosado inferior. Se conserva la plataforma de 0,90 m y el desarrollo de 2,40 m; las fotos no aportan medidas nuevas. El piso superior sigue el borde de la escalera sin cruzar sus huellas.
+
+Corrección posterior del usuario: el toldo es **azul** y el caminero debe unirse a los **tres peldaños de la plaza techada** que señaló en el adjunto `2b0486ee`, paralelo al costado corto del Bloque G. El eje nace dentro del ancho del peldaño inferior, desplazado 0,80 m respecto de su centro para dejar la mesa existente al costado, y continúa 30 m en la dirección del eje corto del bloque. La lona remata arriba en la losa y baja sobre esos peldaños; faldones y apoyos delgados. Ancho estimado de paso 2,20 m, cubierta 2,65 m y altura baja entre 2,80 y 2,95 m. Piso desde la cota inferior de la escalera (0,30 m) hasta 0,05 m, con ajuste suave de hasta 6 cm en el centro para evitar que el terreno lo atraviese. Se conservan los enlaces con el rellano rosado y el estacionamiento. Acabados procedurales exclusivos del acceso; sin usar las fotos como texturas. Medidas estimadas, pendientes de relevamiento. Edificios, árboles y mobiliario mantienen su geometría.
+
+## Detalle del acceso, cinco pilares y bebedero — revisión local 03/11/2026
+
+Referencias del usuario: `5ce59583`, `1061ca46`, `e5b7f5d2`, `405896da` y `5581a0cd`. Se mantienen los cinco escalones de la esquina y sus colisiones; se diferencian piedra moteada, contrahuellas, nariz y ranuras. El banco junto al tabique triangular tiene tres asientos azules redondeados y patas de tubo, próximo al ladrillo. Se agrega el bebedero fotografiado, con gabinete, soporte abierto, bandeja y grifo, junto al segundo pilar, hacia el interior de la galería.
+
+Cinco pilares de hormigón en la fila de la galería de 15 m: centros a 0,5; 4; 7,5; 11 y 14,5 m. Separación estimada de 3,5 m, ajustada a la proporción del acceso; no es una medida de obra. Cantero irregular a ras del terreno, fuera del piso elevado, con sansevierias de tamaños variados, hojas moteadas y plantas bajas de borde; sustituye la jardinera rectangular aislada. Sin árboles nuevos ni cambios en el eje del toldo/caminero. La ampliación se limita al entorno fotografiado; dimensiones y especies requieren validación del equipo.
+

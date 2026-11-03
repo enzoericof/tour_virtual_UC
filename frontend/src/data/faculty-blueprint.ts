@@ -185,14 +185,11 @@ const corridorFoot = add(corridorTop, [[0, -1], STEPS_RUN]);
 const squareSteps = fromRect(cantina, [-11, 22]);
 const galleryStepsTop = half.x + 2 * STEPS_RUN;
 
-/** Bordes de escalera unidos a inglete: el vértice compartido tiene una sola posición.
- * Esquema del usuario: dos lados de escalera y un lado oblicuo de camino libre. */
+/** Dos brazos perpendiculares, unidos a inglete, según las fotos del acceso del 02/11.
+ * El borde inferior deja libre el rellano rosado; el superior recorta la plataforma. */
 export function elevatorStairEdge(distance: number): Vec2[] {
-  // El tramo del muro sigue recto. El lado hacia la plaza abre en diagonal
-  // (croquis corregido); ambos comparten el mismo inglete en cada nivel.
-  const length = Math.hypot(1.6, 1.7), nx = 1.7 / length, nz = -1.6 / length;
-  return [[41.5 + nx * distance, 5.2 + nz * distance],
-    [39.9 + distance * (1 + nz) / nx, 3.5 - distance],
+  return [[39.9 + distance, 5.2],
+    [39.9 + distance, 3.5 - distance],
     [stairEast, 3.5 - distance]];
 }
 const elevatorUpperEdge = elevatorStairEdge(STEPS_RUN);
@@ -205,6 +202,10 @@ const galleryPoint = (along: number, inward: number): Vec2 =>
    galleryWest[1] + Z[1] * along + X[1] * inward];
 const galleryOutline = [galleryPoint(0, -0.25), galleryPoint(0, 2.5),
   galleryPoint(15, 2.5), galleryPoint(15, -0.25)];
+// El caminero arranca al pie de los tres peldaños de la plaza y sigue el eje corto del Bloque G.
+// Se une al sector izquierdo del pie, dejando libre la mesa existente al costado derecho.
+const coveredWalkStart = galleryPoint(16.8, 0.55);
+const coveredWalkEnd = add(coveredWalkStart, [Z, 30]);
 
 export const facultyBlueprint = {
   main: { center: [b1x, 0], size: [block1.length, block1.depth], angle: 0 } as Rect,
@@ -218,12 +219,15 @@ export const facultyBlueprint = {
     
     roof: 4.65,
     metalRoofSetback: 1.1,
-    columns: [0.5, 5, 10, 14.5].map(t => galleryPoint(t, 0.25)),
+    // Cinco pilares en 14 m, según las fotos del frente y de la escalinata (03/11).
+    columns: [0.5, 4, 7.5, 11, 14.5].map(t => galleryPoint(t, 0.25)),
     offset: accessRetreat,
-    planter: { center: [42.45, 7.1], size: [3.5, 1.0], angle: Math.PI / 2 } as Rect,
+    garden: [[40.6,6.3],[41.1,5.55],[43.65,5.8],[45.65,7.3],
+      [46.5,8.9],[45,9.7],[42.8,9.1],[41.2,8.4]] as Vec2[],
+    waterStation: { center: galleryPoint(4, 1.1), size: [0.58, 0.5], angle: gridAngle + Math.PI / 2 } as Rect,
     smallSteps: { center: galleryPoint(15, 1.35), angle: gridAngle, direction: Z, width: 2.2, run: 1.8, bottom: 0.3, count: 3 },
     // Camino ascendente desde el cruce existente hasta el pie de los tres peldaños.
-    approach: [[41, 13, 0.03], [44, 14, 0.1],
+    approach: [[41, 11, 0.05], [44, 14, 0.1],
       [...galleryPoint(18, 1.35), 0.24], [...galleryPoint(16.8, 1.35), 0.3]] as [number, number, number][],
   },
   openPlaza,
@@ -258,8 +262,8 @@ export const facultyBlueprint = {
     rectCorners(cantina),
     cantinaForecourt.outline.map((p) => fromRect(cantina, p)),
   ] as Vec2[][],
-  /** Rellano pentagonal, con camino abierto en el chaflán hacia el pasillo. */
-  elevatorLanding: [[36.85, 6], [39.9, 6], [41.5, 5.2], [39.9, 3.5], [36.85, 3.5]] as Vec2[],
+  /** Piso rosado continuo al pie de ambos brazos de la escalinata. */
+  elevatorLanding: [[36.85, 6], [39.9, 6], [39.9, 3.5], [36.85, 3.5]] as Vec2[],
   platformSteps: [
     // Prolongación de la galería de planta baja del Bloque 1 hasta la plataforma, junto al ascensor
     // (foto IMG_5706): ocupa todo el ancho de la galería.
@@ -317,12 +321,12 @@ export const facultyBlueprint = {
   // Cuña de césped entre el Bloque G y el estacionamiento OSM 274489888.
   parking: [add(gSouthWest, [Z, 5]), add(gSouthEast, [Z, 4]), [46.5, 42.5], [9, 78.8]] as Vec2[],
   /** Paso peatonal cubierto del área común 1 hacia el estacionamiento. */
-  coveredWalk: [[41, 13], [55, 37]] as Vec2[],
+  coveredWalk: [coveredWalkStart, coveredWalkEnd] as Vec2[],
   paths: [
     [[-16, 9.4], [5, 9.4], [36.5, 9.4], [41, 11]],
     [[5, 9.4], [11.3, 30.7]],
     [[11.3, 30.7], [37.6, 16], [41, 11]],
-    [[41, 11], [55, 37]],
+    [[41, 11], coveredWalkStart, coveredWalkEnd, [55, 37]],
     [[55, 37], [30, 50]],
     // Del pie de la escalinata norte del pasillo de Manfred hacia el oeste, por detrás de la sala.
     [corridorFoot, [manfredEast - 1.5, manfredBack - 2], [manfredWest - 2, manfredBack - 2], [12, -12], [0, -22]],
