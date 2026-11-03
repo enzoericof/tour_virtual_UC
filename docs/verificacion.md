@@ -212,3 +212,8 @@ Cinco pilares, bebedero, banco y cantero irregular revisados visualmente desde t
 
 Integrado origin/main 44a208c conservando acceso, caminero, cinco pilares y sus acabados. Conflictos documentales resueltos conservando ambas aportaciones; luminarias detalladas conservan las cuatro posiciones de main. Banco retirado segun solicitud de Horacio. Build correcto; 37/38 pruebas aprobadas, persiste solamente el fallo previo de nivel de Manfred.
 
+
+
+## Recuperacion del inicio 3D - 03/11/2026
+
+Se reprodujo el error de lectura de map en prism(g.garden): Vite servia una version anterior del plano sin garden, mientras la reconstruccion ya usaba la version integrada. La construccion con modulos actuales funcionaba. Reiniciado el servidor, la carga real en navegador vuelve a mostrar el campus. Se agrega prueba de arranque de createFaculty con plano actual, materiales presentes y coordenadas finitas; aprobada. Build correcto. El dialogo conserva el detalle y ahora registra la excepcion en consola sin atribuir todos los fallos a WebGL. Evidencia: output/plaza-techada/inicio-recuperado.png. No se modifico la geografia.

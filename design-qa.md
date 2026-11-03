@@ -166,3 +166,8 @@ Verificados en navegador logo a la izquierda y ventana de dos paños a su derech
 ## Corrección de escalera — 03/11/2026
 
 Se restituye el ancho original de 2,10 m y el eje del tramo; la bajada se extiende siguiendo el muro hacia la derecha de la imagen, con recorrido de 6 m y llegada superior fija. Se conservan logo y ventana. Revisión en navegador: tramo, barandas y apoyo inferior acompañan la nueva longitud; no se amplía en profundidad hacia la plaza. Evidencia: `output/plaza-techada/escalera-alargada-ancho-original.png`. Build correcto; 34/35 pruebas, con fallo previo de Manfred.
+
+
+## Inicio recuperado - 03/11/2026
+
+Vista general verificada en navegador tras reiniciar Vite: campus visible y sin dialogo de error. El servidor anterior mezclaba plano almacenado en memoria con reconstruccion nueva. Captura: output/plaza-techada/inicio-recuperado.png. Build y prueba nueva de construccion completa correctos.

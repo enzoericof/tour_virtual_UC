@@ -228,8 +228,9 @@ try {
   engine.overview();
   engine.onError = toast;
 } catch (e) {
+  console.error("No se pudo iniciar la vista 3D", e);
   openDialog(
-    `<h2>No se pudo iniciar la vista 3D</h2><p>Probá un navegador con WebGL y aceleración gráfica habilitada.</p><p>${escape((e as Error).message)}</p>`,
+    `<h2>No se pudo iniciar la vista 3D</h2><p>Recargá la página. Si el problema continúa, revisá el detalle del error y la consola del navegador.</p><p>${escape((e as Error).message)}</p>`,
   );
 }
 $("#begin").onclick = async () => {
