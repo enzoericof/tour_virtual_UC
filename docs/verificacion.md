@@ -169,3 +169,28 @@ Build y TypeScript correctos. Cuatro pruebas nuevas aprobadas: giro relativo baj
 ## Integración en main — 02/11/2026
 
 Integrada feat/distribucion-mesas-cantina sobre origin/main 27433e0 por solicitud de Horacio. Conservados cambios de Bloque 1, escaleras y backend de main; conflictos documentales resueltos conservando ambas secciones. Build correcto. Suite integrada: 33/35 aprobadas, incluidas las cuatro de captura del mouse. Fallan Walkable slope del extremo este y nivel de Manfred; faculty-blueprint.ts y su prueba son idénticos a origin/main, sin cambios de esta integración. Sin modificaciones de backend en la rama de cantina.
+
+## Plaza Techada: servicios y acabados — 02/11/2026
+
+Build y TypeScript correctos. Revisión visual en navegador. Octree real: 819 muestras libres con radio 0,28 m a tres alturas, en tres líneas paralelas por delante del equipamiento; rayos confirman piso continuo a nivel de la plataforma. Cámara y script temporales retirados. No se repitió la suite de datos por este ajuste visual; último estado integrado 33/35 con fallos ya registrados de pendiente del extremo este y nivel de Manfred.
+
+## Reubicación junto a columna — 02/11/2026
+
+Build y TypeScript correctos. Inspección visual en navegador. 819 muestras libres en el Octree real, radio 0,28 m y tres alturas, por el paso del lado de la plaza junto al nuevo conjunto; piso continuo. Instrumentación temporal retirada. Sin cambios en controles ni pruebas de datos.
+
+## Traslado al pilar señalado — 02/11/2026
+
+Build y TypeScript correctos. Inspección visual desde la plaza. 819 muestras libres con esfera de radio 0,28 m a tres alturas en el paso frontal y acercamientos a bebedero y hielo, con piso continuo a la cota de la plataforma. Scripts y cámara temporales retirados.
+
+## Hielo centrado y logo CECYT — 02/11/2026
+
+Build y TypeScript correctos. Revisión visual en navegador de ambos cambios. Colisiones reales: 1092 muestras libres con radio 0,28 m a tres alturas en el paso frontal, acceso al hielo y acercamiento lateral al bebedero; rayos confirman piso continuo. Logo decorativo sin colisión nueva. Cámara y script temporales retirados.
+
+## Ventana CECYT y escalera ampliada — 03/11/2026
+
+Build y TypeScript correctos. Suite: 34/35 aprobadas; queda el fallo previo de nivel de Manfred. Prueba de geometría actualizada para verificar el borde oeste conservado, cobertura de la huella del banco y retirada de pilares señalados. La ampliación del recorrido también satisface ahora la comprobación de pendiente de la escalera. Octree real: 606 muestras libres a tres alturas con esfera de radio 0,28 m en dos líneas del tramo, con apoyo continuo desde plaza hasta primer piso. Revisión visual del conjunto. Cámara y script temporales retirados.
+
+
+## Escalera alargada con ancho original — 03/11/2026
+
+Build y TypeScript correctos. Suite 34/35: persiste únicamente el fallo previo de nivel de Manfred. Prueba del plano ajustada para conservar ancho de 2,10 m, eje original y desembarco superior, con recorrido de 6 m. Octree real: 909 muestras libres con radio 0,28 m a tres alturas en tres líneas de ascenso, y apoyo continuo desde la plaza al primer piso. Inspección visual en navegador. Captura: `output/plaza-techada/escalera-alargada-ancho-original.png`. Cámara y script temporales retirados.

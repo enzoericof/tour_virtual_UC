@@ -24,6 +24,8 @@ type BlockSpec = {
   rooms: (level: number) => Rooms;
   /** Puerta de cada aula: doble (Bloque 1, `classroomDoor`) o de una hoja de 1 m. */
   door: "double" | "single";
+  /** Ventana en el muro de cabecera del último recinto, con hueco real en el ladrillo. */
+  endWindow?: { level: number; z: number; width: number; sill: number; height: number };
   /** Número del prisma sobre cada puerta (`index` desde el extremo -x); null: sin prisma. */
   roomSign?: (level: number, index: number) => string | null;
   /** Tramos (x) de la galería sin baranda ni lamas: descansos, ascensor, accesos. */
@@ -446,7 +448,23 @@ export function createFaculty() {
         const x = (stops[i] + stops[i + 1]) / 2 + 0.6;
         if (x > a + 1 && x < b - 1 && doors.every((d) => Math.abs(d - x) > opening + 1)) bench(x, zWall + front * 0.42, y, front);
       }
-      for (const x of [a, b]) box(0.24, hw, D - G, x, y + hw / 2, zRooms, m.brick, true);
+      for (const x of [a, b]) {
+        const window = x === b && s.endWindow?.level === level ? s.endWindow : null;
+        if (!window) { box(0.24, hw, D - G, x, y + hw / 2, zRooms, m.brick, true); continue; }
+        const lo = zRooms - (D - G) / 2, hi = zRooms + (D - G) / 2;
+        const left = window.z - window.width / 2, right = window.z + window.width / 2;
+        box(0.24, window.sill, D - G, x, y + window.sill / 2, zRooms, m.brick, true);
+        box(0.24, hw - window.sill - window.height, D - G, x,
+          y + (hw + window.sill + window.height) / 2, zRooms, m.brick, true);
+        for (const [p, q] of [[lo, left], [right, hi]])
+          box(0.24, window.height, q - p, x, y + window.sill + window.height / 2, (p + q) / 2, m.brick, true);
+        box(0.035, window.height, window.width, x, y + window.sill + window.height / 2, window.z, m.glass, true);
+        for (const z of [left, window.z, right]) box(0.27, window.height + 0.08, 0.055, x,
+          y + window.sill + window.height / 2, z, m.white);
+        for (const h of [window.sill, window.sill + window.height])
+          box(0.27, 0.065, window.width + 0.1, x, y + h, window.z, m.white);
+        box(0.42, 0.07, window.width + 0.16, x + 0.06, y + window.sill - 0.05, window.z, m.concrete);
+      }
       for (const x of [-L / 2, L / 2]) {
         if (!level || open.some(([p, q]) => p <= x + 0.5 && q >= x - 0.5)) continue;
         const xr = x - Math.sign(x) * 0.08, z0 = Math.min(zWall, zEdge) + 0.1, z1 = Math.max(zWall, zEdge) - 0.1;
@@ -484,6 +502,7 @@ export function createFaculty() {
       ...block1, front: 1, topWall: 4.1, roof: m.roof, louvers: true,
       label: (level) => level ? "" : "LABORATORIOS",
       rooms: (level) => plan.rooms.main[level],
+      endWindow: { level: 1, z: -2.8, width: 2.4, sill: 0.9, height: 1.5 },
       door: "double",
       // 10x, 20x y 30x por piso. En IMG_5639, mirando al este, el 204 está antes que el 203: se numera
       // desde la cabecera este (interpretación de la foto).
@@ -587,9 +606,41 @@ export function createFaculty() {
       box(q - p, bodegaTop, 0.2, (p + q) / 2, bodegaTop / 2, es.top - 0.1, m.brick, true);
     box(1, bodegaTop - 2.1, 0.2, door, 2.1 + (bodegaTop - 2.1) / 2, es.top - 0.1, m.brick, true);
     box(0.95, 2.1, 0.05, door, 1.05, es.top + 0.02, m.steel, true);
-    // Escalera de la plataforma al primer piso (2,1 m): sube hacia el sur hasta la galería, frente al ascensor.
+    // Mismo ancho y eje originales; bajada prolongada siguiendo la pared de ladrillo.
     frame({ center: [es.x, es.top - es.run / 2], size: [es.run, es.width], angle: -Math.PI / 2 },
       () => flight(es.run / 2, PLAZA_LEVEL, -es.run / 2, H, 0, es.width));
+    // Placa del Centro de Estudiantes en el paño de ladrillo junto a la escalera.
+    // Reproducción vectorial de la referencia: cuatro enlaces, puntos azules y leyenda.
+    const logoCanvas = document.createElement("canvas"); logoCanvas.width = 1024; logoCanvas.height = 1536;
+    const ctx = logoCanvas.getContext("2d")!;
+    ctx.save(); ctx.translate(512, 390); ctx.scale(1.65, 1.65);
+    ctx.strokeStyle = "#163c4b"; ctx.lineWidth = 25; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.shadowColor = "#00000055"; ctx.shadowBlur = 5; ctx.shadowOffsetX = 3; ctx.shadowOffsetY = 4;
+    for (let i = 0; i < 4; i++) {
+      ctx.save(); ctx.rotate(i * Math.PI / 2);
+      ctx.beginPath(); ctx.moveTo(25, -55); ctx.lineTo(-79, -165);
+      ctx.bezierCurveTo(-118, -205, -181, -162, -164, -115);
+      ctx.quadraticCurveTo(-158, -96, -121, -58); ctx.stroke(); ctx.restore();
+    }
+    for (const [i, [x, y]] of [[-205, -205], [205, -205], [205, 205], [-205, 205]].entries()) {
+      ctx.fillStyle = i % 2 ? "#16b4dc" : "#155776";
+      ctx.beginPath(); ctx.arc(x, y, 31, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore(); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#163c4b";
+    ctx.shadowColor = "#00000055"; ctx.shadowBlur = 5; ctx.shadowOffsetX = 3; ctx.shadowOffsetY = 5;
+    ctx.font = "900 188px Arial, sans-serif"; ctx.fillText("CECYT", 512, 1000, 940);
+    ctx.font = "800 54px Arial, sans-serif";
+    ctx.fillText("CENTRO DE ESTUDIANTES", 512, 1180, 950);
+    ctx.fillText("CIENCIAS Y TECNOLOGÍA", 512, 1250, 950);
+    const logoMap = new T.CanvasTexture(logoCanvas); logoMap.colorSpace = T.SRGBColorSpace; logoMap.anisotropy = 8;
+    const wallX = plan.eastEnd.roomsEnd[1] + 0.14, logoY = H + 1.75, logoZ = 1;
+    const acrylic = new T.MeshStandardMaterial({ color: "#e2f2ee", transparent: true, opacity: 0.1, roughness: 0.2, depthWrite: false });
+    box(0.018, 2.65, 1.8, wallX, logoY, logoZ, acrylic);
+    const logo = new T.Mesh(new T.PlaneGeometry(1.7, 2.55), new T.MeshStandardMaterial({ map: logoMap,
+      transparent: true, alphaTest: 0.05, roughness: 0.7, polygonOffset: true, polygonOffsetFactor: -1 }));
+    logo.rotation.y = Math.PI / 2; logo.position.set(wallX + 0.025, logoY, logoZ); visual.add(logo);
+    for (const dy of [-1.22, 1.22]) for (const dz of [-0.79, 0.79])
+      beam(v3(wallX, logoY + dy, logoZ + dz), v3(wallX + 0.04, logoY + dy, logoZ + dz), 0.022, m.steel);
   }
 
   // ---- Torre de baños: núcleo desde la galería y dos semicírculos a sus costados ----
@@ -712,7 +763,7 @@ export function createFaculty() {
   const landingBand = new T.MeshStandardMaterial({ color: "#596664", roughness: 0.85 });
   box(STEPS_RUN, 0.004, 0.07, block1.length / 2 + STEPS_RUN / 2, 0.032, 5.95, landingBand);
 
-  // ---- Plataforma a 1,40 m: plaza techada, cuadrado, Bedelía, cantina, Sala Manfred y cabecera este ----
+  // ---- Plataforma compartida: plaza techada, Bedelía, cantina, Manfred y cabecera este ----
   for (const outline of plan.platform) {
     prism(outline, 0, PLAZA_LEVEL, m.concrete);
     pave(outline, m.stone, PLAZA_LEVEL + 0.005);
@@ -749,6 +800,16 @@ export function createFaculty() {
   {
     const g = plan.plazaGallery;
     prism(g.outline, g.roof, 0.22, m.concrete);
+    // Granito gris y juntas finas según la foto del sector junto a la escalera.
+    const galleryStone = m.stone.clone(); galleryStone.color.set("#d4d2c6");
+    pave(g.outline, galleryStone, PLAZA_LEVEL + 0.012);
+    const galleryCentre: Vec2 = [g.outline.reduce((n, p) => n + p[0], 0) / 4,
+      g.outline.reduce((n, p) => n + p[1], 0) / 4];
+    const joints = new T.MeshStandardMaterial({ color: "#969589", transparent: true, opacity: 0.35, roughness: 1 });
+    frame({ center: galleryCentre, size: [15, 2.75], angle: gridAngle + Math.PI / 2 }, () => {
+      for (let x = -7.5; x <= 7.5; x += 0.6) box(0.008, 0.002, 2.75, x, PLAZA_LEVEL + 0.014, 0, joints);
+      for (let z = -1.2; z <= 1.2; z += 0.6) box(15, 0.002, 0.008, 0, PLAZA_LEVEL + 0.014, z, joints);
+    });
     // Pasillo macizo debajo de toda la fila de pilares; mismo nivel que la plaza.
 
     // El pavimento longitudinal ya pertenece a la plataforma de la plaza.
@@ -763,7 +824,8 @@ export function createFaculty() {
     ramp(v3(ss.center[0] + ss.direction[0] * ss.run, ss.bottom, ss.center[1] + ss.direction[1] * ss.run),
       v3(ss.center[0], PLAZA_LEVEL, ss.center[1]), ss.width);
     // El pavimento lo define la plataforma, recortada por el borde superior de la escalera.
-    for (const [x, z] of g.columns)
+    // El primer apoyo aloja los servicios y se construye rectangular más abajo.
+    for (const [x, z] of g.columns.slice(1))
       pole(0.23, g.roof - PLAZA_LEVEL, x, (g.roof + PLAZA_LEVEL) / 2, z, m.concrete, true);
     const [frontA, frontB] = g.front;
     const galleryAngle = -Math.atan2(frontB[1] - frontA[1], frontB[0] - frontA[0]);
@@ -774,12 +836,71 @@ export function createFaculty() {
     edgeBox(frontA, frontB, 0.38, 0.42, g.roof - 0.19, m.concrete);
     // Pretil bajo de ladrillo sobre el borde exterior de la losa.
     edgeBox(g.outline[0], g.outline[3], 0.30, 0.18, g.roof + 0.37, m.brick);
+    const fluorescent = new T.MeshStandardMaterial({ color: "#f5f5e8", emissive: "#fff7de", emissiveIntensity: 1.3 });
     for (const t of [0.18, 0.5, 0.82]) {
       const a = g.outline[0], b = g.outline[3], c = g.outline[1];
       const x = a[0] + (b[0] - a[0]) * t + (c[0] - a[0]) / 2;
       const z = a[1] + (b[1] - a[1]) * t + (c[1] - a[1]) / 2;
-      box(1.2, 0.07, 0.18, x, g.roof - 0.06, z, m.white, false, { rotation: galleryAngle });
+      frame({ center: [x, z], size: [1.2, 0.24], angle: -galleryAngle }, () => {
+        box(1.24, 0.055, 0.25, 0, g.roof - 0.045, 0, m.white);
+        for (const dz of [-0.07, 0.07]) beam(v3(-0.53, g.roof - 0.09, dz), v3(0.53, g.roof - 0.09, dz), 0.022, fluorescent);
+        for (const dx of [-0.57, 0.57]) box(0.055, 0.08, 0.21, dx, g.roof - 0.07, 0, m.white);
+      });
     }
+    // Equipamiento reubicado alrededor de una columna rectangular: bebedero a la
+    // izquierda, maceta en la esquina y máquina de hielo a su derecha.
+    const equipmentAt = g.columns[0];
+    // Frente hacia la plaza (el observador de la captura), no hacia las escaleras.
+    frame({ center: equipmentAt, size: [2.8, 1.5], angle: gridAngle - Math.PI / 2 }, () => {
+      const inox = new T.MeshStandardMaterial({ color: "#cbd2cf", roughness: 0.45, metalness: 0.3 });
+      const white = new T.MeshStandardMaterial({ color: "#e5e4d8", roughness: 0.6, metalness: 0.12 });
+      const recess = new T.MeshStandardMaterial({ color: "#313d3d", roughness: 0.6 });
+      const columnHeight = g.roof - PLAZA_LEVEL - 0.015;
+      box(0.65, columnHeight, 0.65, 0, columnHeight / 2, 0, m.concrete, true);
+      // Bebedero de acero con pileta, rejilla de drenaje y grifo curvado.
+      box(0.56, 0.88, 0.52, -0.83, 0.49, 0, inox, true);
+      box(0.62, 0.055, 0.58, -0.83, 0.96, 0.02, inox);
+      box(0.47, 0.018, 0.38, -0.83, 0.992, 0.04, recess);
+      for (let i = 0; i < 7; i++) box(0.43, 0.012, 0.014, -0.83, 1.005, -0.09 + i * 0.043, inox);
+      const tap = new T.CatmullRomCurve3([v3(-0.99, 0.99, -0.17), v3(-0.99, 1.2, -0.17), v3(-0.9, 1.24, -0.12), v3(-0.83, 1.15, -0.04)]);
+      const faucet = new T.Mesh(new T.TubeGeometry(tap, 14, 0.018, 8, false), inox); visual.add(faucet);
+      box(0.08, 0.025, 0.04, -0.67, 1.015, -0.16, m.blue);
+      for (const x of [-1.03, -0.63]) for (const z of [-0.18, 0.18]) pole(0.025, 0.08, x, 0.04, z, recess);
+      // Dispensador de hielo blanco sobre patas, hueco frontal y ventilación lateral.
+      frame({ center: [0, 0.9], size: [0.76, 0.78], angle: 0 }, () => {
+        box(0.76, 1.27, 0.78, 0, 0.96, 0, white, true);
+        for (const x of [-0.29, 0.29]) for (const z of [-0.29, 0.29]) pole(0.022, 0.32, x, 0.16, z, inox);
+        box(0.69, 0.045, 0.72, 0, 1.61, 0, inox);
+        box(0.36, 0.25, 0.025, 0, 1.05, 0.397, recess);
+        box(0.31, 0.025, 0.18, 0, 0.92, 0.44, inox);
+        box(0.1, 0.12, 0.06, 0.03, 1.04, 0.43, inox);
+        for (let i = 0; i < 10; i++) box(0.015, 0.018, 0.48, 0.389, 0.49 + i * 0.035, 0.02, recess);
+        box(0.045, 0.045, 0.012, 0.24, 1.43, 0.397, m.blue);
+      });
+      // Maceta de terracota sobre soporte y hojas altas de sansevieria.
+      frame({ center: [-1.66, 0.8], size: [0.65, 0.65], angle: 0 }, () => {
+        const pot = new T.MeshStandardMaterial({ color: "#a94c30", roughness: 0.88 });
+        const leafMat = new T.MeshStandardMaterial({ color: "#31462c", side: T.DoubleSide, roughness: 0.85 });
+        const leafEdge = new T.MeshStandardMaterial({ color: "#89935b", side: T.DoubleSide, roughness: 0.9 });
+        pole(0.3, 0.045, 0.91, 0.15, 0, recess);
+        for (const a of [0, 2.1, 4.2]) pole(0.014, 0.16, 0.91 + Math.cos(a) * 0.23, 0.08, Math.sin(a) * 0.23, recess);
+        const planter = new T.Mesh(new T.CylinderGeometry(0.31, 0.22, 0.48, 24), pot);
+        planter.position.set(0.91, 0.4, 0); planter.castShadow = true; visual.add(planter);
+        pole(0.315, 0.045, 0.91, 0.65, 0, pot);
+        pole(0.285, 0.015, 0.91, 0.675, 0, m.bark);
+        const potBody = new T.Mesh(unit); potBody.scale.set(0.62, 0.68, 0.62);
+        potBody.position.set(0.91, 0.34, 0); solid.add(potBody);
+        for (let i = 0; i < 18; i++) {
+          const a = i * 2.4, reach = 0.16 + (i % 4) * 0.065, height = 0.8 + (i % 6) * 0.18;
+          const points = [v3(0, 0, 0), v3(-0.055, height * 0.5, reach * 0.3), v3(0, height, reach),
+            v3(0, 0, 0), v3(0, height, reach), v3(0.055, height * 0.5, reach * 0.3)];
+          const geo = new T.BufferGeometry().setFromPoints(points); geo.computeVertexNormals();
+          const leaf = new T.Mesh(geo, i % 4 ? leafMat : leafEdge);
+          leaf.position.set(0.91 + Math.cos(a) * 0.13, 0.68, Math.sin(a) * 0.13); leaf.rotation.y = a;
+          leaf.castShadow = true; visual.add(leaf);
+        }
+      });
+    }, PLAZA_LEVEL + 0.015);
     // Rejilla a lo largo de la unión diagonal con la cubierta metálica.
     const a = g.outline[1], b = g.outline[2], length = Math.hypot(b[0] - a[0], b[1] - a[1]);
     const angle = -Math.atan2(b[1] - a[1], b[0] - a[0]);
@@ -807,11 +928,7 @@ export function createFaculty() {
         leaf.castShadow = true; visual.add(leaf);
       }
     });
-    // Banco azul al pie del lateral de ladrillo, como en IMG_5707.
-    frame({ center: [stairEast + 0.7, 0.05], size: [1.7, 0.5], angle: Math.PI / 2 }, () => {
-      box(1.7, 0.07, 0.42, 0, 0.48, 0, m.blue, true);
-      for (const x of [-0.65, 0.65]) for (const z of [-0.15, 0.15]) pole(0.025, 0.45, x, 0.225, z, m.metal);
-    }, PLAZA_LEVEL);
+    // Banco retirado: su lugar queda dentro de la nueva escalinata.
   }
 
   // ---- Plaza techada: cubierta exenta, separada de la cabecera este del Bloque 1 ----

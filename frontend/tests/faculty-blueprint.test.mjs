@@ -92,14 +92,19 @@ test("The Pompidou stair and the elevator follow the team's description", () => 
     "The murals reach the upper half between the first and second floors");
 });
 
-test("East end: recessed ground and first floors, a 2.1 m stair in front of the elevator and a ramp running the other way", () => {
+test("East end: stair keeps its original width and axis while extending along the wall", () => {
   const { eastStair: es, eastEnd: { roomsEnd, ramp, columns }, elevator } = plan;
   assert.ok(roomsEnd[0] < roomsEnd[1] && roomsEnd[1] < east, "Ground and first floors end before the east face");
   assert.ok(roomsEnd.slice(2).every((x) => x === east), "Second and third floors cover the whole block");
-  // Stair from the platform to the first floor: 2.1 m (team measurement), inside the recess, rising south
-  // to the first-floor gallery just east of the elevator door.
+  // Original width and axis; the lower end advances along the wall, not toward the plaza.
   assert.equal(es.width, 2.1);
-  assert.ok(es.x - es.width / 2 > roomsEnd[1] && es.x + es.width / 2 < east, "Under the second and third floors");
+  assert.ok(close(es.x, east - 0.65 - 1.05), "Original axis preserved");
+  assert.ok(close(es.x - es.width / 2, roomsEnd[1] + 0.3), "West edge preserved");
+  assert.ok(es.x + es.width / 2 < east, "No widening toward the plaza");
+  assert.equal(es.run, 6);
+  assert.ok(close(es.top - es.run, -2.5), "Lower end extended along the wall");
+  assert.ok(!columns.some(([x,z]) => close(x,east - 0.25) && close(z,-1.25)), "Obstructing pillar removed");
+  assert.ok(!columns.some(([,z]) => close(z,-1.25)), "Pointed pillar on the wall removed too");
   assert.ok(close(es.top, half.z - block1.gallery), "It reaches the gallery");
   assert.ok(Math.abs(es.x - elevator.center[0]) < es.width / 2 + elevator.size[0] / 2, "In front of the elevator");
   assert.ok(es.x > elevator.center[0], "The elevator door is slightly west of the stair axis (IMG_5694)");

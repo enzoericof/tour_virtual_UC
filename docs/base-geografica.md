@@ -230,3 +230,28 @@ Sector de atención retirado hacia la izquierda: vitrina, bandejas y pizarra 0,8
 ## Puerta de cocina detrás de la divisoria — 02/11/2026
 
 Puerta posterior del personal desplazada 1,10 m hacia la izquierda del sector de venta, de z=−3,45 a z=−2,35. Hueco del fondo oscuro entre u=1,70 y 3,00, dentro del área del personal. Divisoria blanca prolongada hasta el muro posterior (v=−2,20..1,50) para impedir la entrada por detrás desde el pasillo de alumnos. Fondo de heladeras y estantes retirado otros 0,65 m a la izquierda para dejar libre la nueva conexión; soporte posterior derecho fuera del hueco. Se conservan puerta pública y paso de servicio techado hacia cocina.
+
+## Servicios de Plaza Techada — 02/11/2026
+
+Según la foto real de Horacio, se agregan bebedero de acero con pileta, drenaje y grifo, dispensador de hielo blanco con patas y ventilación, y maceta de terracota con hojas altas sobre soporte. Conjunto bajo la galería de hormigón, centro aproximado (43,34; −2,05), a 2,35 m del inicio longitudinal y 1,95 m hacia el interior, entre los dos primeros pilares. Modelos de comparación, sin marca ni mecanismos funcionales. Piso gris moteado con juntas de 0,60 m y luminarias de tubos dobles. Cotas, pilares, escaleras y cubierta metálica existentes conservados. Medidas y posiciones del equipamiento estimadas de la foto; se mantiene paso libre por delante.
+
+## Columna y reubicación de servicios — 02/11/2026
+
+Por indicación de Horacio, el conjunto se traslada a 4,10 m desde el inicio de la galería y 2,15 m hacia su interior. Columna nueva de hormigón, sección 0,65 × 0,65 m, desde el pavimento hasta la cara inferior de la losa (Y=4,65 m). En el marco del conjunto: bebedero a la izquierda (−0,83; 0), planta en la esquina frontal izquierda (−0,35; 0,80), máquina de hielo a su derecha (0,85; 0). Sustituye la ubicación anterior; no se duplican equipos. Posiciones estimadas de la captura y explicación del usuario.
+
+## Servicios en el pilar señalado — 02/11/2026
+
+Nueva aclaración de Horacio: usar el primer pilar de la galería junto a la escalera, g.columns[0], centro (40,96; −2,84), en lugar de la columna adicional de la ubicación anterior. El apoyo se modela rectangular de 0,65 m por lado, sin duplicarlo, hasta la losa. Equipamiento girado hacia la plaza, marco gridAngle−PI/2: bebedero (−0,83; 0), planta en la esquina derecha (0,35; 0,80), hielo a su derecha (1,35; 0,55). Se retira íntegramente el conjunto de su emplazamiento previo.
+
+## Hielo centrado y emblema CECYT — 02/11/2026
+
+Bebedero conservado. Hielo centrado sobre el eje del pilar, coordenadas locales (0; 0,90); planta desplazada a (−0,75; 0,80). Acceso lateral al bebedero y frente de la máquina libres. Placa CECYT de reproducción vectorial aproximada, con emblema azul/celeste, nombre y leyenda sobre acrílico transparente y cuatro fijaciones, en la cara este de ladrillo junto a la escalera: x=roomsEnd[1]+0,14, Y=5,25, z=−2,80. Dimensiones 1,80 × 2,65 m estimadas, sin modificar muro ni escalera.
+
+## Ventana CECYT y escalera ampliada — 03/11/2026
+
+Logo trasladado al paño izquierdo, z=1,00, conservando cara este y altura. En su posición anterior, z=−2,80, ventana de 2,40 × 1,50 m con antepecho 0,90 m sobre el primer piso, marcos claros, dos paños de vidrio y abertura real en el muro. Identificada por Horacio como habitación del Centro de Estudiantes; sin inventar equipamiento interior. Escalera ampliada de 2,10 a 3,10 m y recorrido de 3,50 a 4,90 m: conserva borde oeste y cota superior, y cubre la huella anterior del banco azul, que se retira. Se eliminan los apoyos de la fila z=−1,25 (pilar señalado en el muro y apoyo exterior frente al tramo). Las aulas y la rampa conservan su registro previo. Medidas nuevas estimadas a partir de la indicación visual; sustituyen la reconstrucción anterior.
+
+
+## Corrección del sentido de ampliación de escalera — 03/11/2026
+
+La aclaración de Horacio sustituye la ampliación anterior: se recuperan el ancho original de 2,10 m y su eje X original. El recorrido se prolonga a 6 m siguiendo la pared de ladrillos hacia la derecha de la vista del usuario, con el desembarco superior fijo; no se ensancha hacia la plaza. El pie queda en z=−2,50. Se conservan logo, ventana, retirada del banco y de los pilares señalados. Medidas estimadas de la indicación visual, pendientes de relevamiento.

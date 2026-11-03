@@ -86,3 +86,28 @@ Captura codex-clipboard-a893c004-13bd-4b0a-bde8-b6278c26daff.png e indicación d
 ## Separación del personal y cursor integrado — 02/11/2026
 
 Captura codex-clipboard-bb97ecad-fa84-40dc-bae5-9a04109eee01.png e indicación del usuario: puerta del personal detrás de la pared blanca y sin acceso desde el otro lado; mouse capturado durante el recorrido y recuperado al pulsar Esc.
+
+## Bebedero y máquina de hielo de Plaza Techada — 02/11/2026
+
+Foto real codex-clipboard-f8cf53a0-1c54-47b2-bb10-27daf87d17d8.png y captura del modelo codex-clipboard-52be663e-9614-4b7e-8aa0-9748fa884eda.png. Aportadas por Horacio para mejorar el sector junto a la escalera y agregar bebedero, máquina de hielo y maceta a la derecha. Se omiten personas; fotos usadas como comparación, sin marcas ni texturas copiadas.
+
+## Columna de servicios — 02/11/2026
+
+Captura codex-clipboard-15aeeee8-f315-4619-8ef1-a5a678ca4de3.png y solicitud de Horacio: reubicar los tres elementos alrededor de una columna rectangular de piso a techo, bebedero a la izquierda, planta en la esquina y máquina de hielo a su derecha.
+
+## Pilar señalado y orientación hacia el visitante — 02/11/2026
+
+Captura codex-clipboard-20b6ea4b-34bc-4f65-8f3a-65fb15d3330d.png: el punto blanco señala el pilar junto a la escalera. Horacio solicita bebedero mirando hacia su posición, planta a la derecha en la esquina y hielo a la derecha de la planta. Esta aclaración sustituye la ubicación anterior.
+
+## Emblema del Centro de Estudiantes — 02/11/2026
+
+Capturas de Horacio: codex-clipboard-a967fb5e-8661-4a8c-89f6-648830ef6825.png para centrar el hielo y mover la planta a la izquierda; codex-clipboard-3ff769be-dd4a-48f3-b098-7cd719258a29.png para el logo CECYT, leyenda y placa junto a la escalera. Emblema reconstruido mediante trazos y tipografía del proyecto, como aproximación de la foto; sin usar la fotografía de la pared como textura.
+
+## Ventana y ampliación de escalera — 03/11/2026
+
+Captura codex-clipboard-387d4bac-7544-4ea9-bd7b-e5c09edea4cf.png. Horacio solicita logo en el paño izquierdo, ventana en el sitio anterior para la habitación del Centro de Estudiantes, escalera hasta el pilar ocupando todo el banco y retirada del pilar señalado. Dimensiones de la nueva ventana y ampliación aproximadas.
+
+
+## Sentido de la escalera — 03/11/2026
+
+Referencia de Horacio: `C:/Users/horac/Downloads/ChatGPT Image Nov 3, 2026, 10_23_22 AM.png`, acompañada por la misma vista con línea roja sobre el tramo. Aclara que se debe conservar el ancho original y alargar la bajada hacia la derecha siguiendo el muro, sin ampliarla en profundidad hacia la plaza. Logo y ventana aprobados por el usuario.

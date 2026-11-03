@@ -269,16 +269,17 @@ export const facultyBlueprint = {
     // Salida norte del pasillo entre la Sala Manfred y Bedelía.
     { top: corridorTop, width: 2, angle: -Math.PI / 2 },
   ] as Steps[],
-  /** Escalera de la plataforma al primer piso, dentro de la cabecera este y bajo los pisos 2 y 3
-   * (foto IMG_5694): de 2,8 m, sube hacia el sur hasta la galería del primer piso (`top`, z de su
-   * borde interior) frente a la puerta del ascensor. Debajo, la bodega. */
-  eastStair,
+  /** Escalera de la plataforma al primer piso, de 2,10 m de ancho, frente al ascensor.
+   * Corrección de Horacio: conservar eje y ancho originales, prolongando la bajada a lo
+   * largo de la pared hacia la derecha en su vista; el desembarco superior queda fijo. */
+  eastStair: { ...eastStair, run: 6 },
   /** Cabecera este: extremo de las aulas por nivel (`roomsEnd`), la rampa (de `ramp.top`, al norte del
    * bloque, a la galería de planta baja) y las columnas que sostienen los pisos 2 y 3 donde planta baja
    * y primer piso se retraen. */
   eastEnd: {
     roomsEnd, ramp,
-    columns: [-half.z + 0.25, -1.25, eastStair.top - 0.25].flatMap((z) => [[recessColumns, z], [east - 0.25, z]] as Vec2[]),
+    columns: [-half.z + 0.25, -1.25, eastStair.top - 0.25].flatMap((z) => [[recessColumns, z], [east - 0.25, z]] as Vec2[])
+      .filter(([, z]) => z !== -1.25),
   },
   /** Seis aulas por piso en cada bloque, cada piso con otra distribución y otras puertas; en x del
    * marco de cada bloque. Las del Bloque 1 tienen la puerta doble (`classroomDoor`) y las del Bloque G

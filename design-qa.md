@@ -141,3 +141,28 @@ Revisados en navegador el sector de venta retirado a la izquierda, divisoria des
 ## Divisoria cerrada y captura del mouse — 02/11/2026
 
 Revisión del sector desde el pasillo: puerta del personal a la izquierda, divisoria continua hasta atrás y salida pública a su derecha. Captura output/cantina/divisoria-cocina-cerrada.png. En el navegador integrado, Caminar y Continuar rechazan Pointer Lock: se verifica pausa con aviso en lugar de iniciar el antiguo movimiento con cursor limitado. Captura real del sistema pendiente de validación manual en Chrome o Edge. Cámara temporal retirada.
+
+## Plaza Techada: equipamiento y acabados — 02/11/2026
+
+Verificados en navegador bebedero con grifo, máquina blanca con dispensador y ventilación, maceta alta con soporte, piso gris y tubos dobles. Captura output/plaza-techada/bebedero-hielo-maceta.png. Durante la revisión se corrigieron el tono del piso y el acabado metálico del bebedero. Cámara temporal retirada.
+
+## Servicios junto a columna rectangular — 02/11/2026
+
+Inspeccionada en navegador la columna continua hasta la losa, el bebedero izquierdo, maceta en la esquina frontal izquierda y máquina de hielo a su derecha. Se ajustó la esquina de la planta para dejar visibles ambos equipos. Captura output/plaza-techada/columna-y-equipamiento.png. Cámara temporal retirada.
+
+## Servicios mirando hacia la plaza — 02/11/2026
+
+Revisados en navegador el apoyo señalado junto a la escalera, bebedero frontal hacia la plaza, maceta en la esquina derecha y máquina de hielo a continuación. Columna adicional anterior retirada. Captura output/plaza-techada/servicios-pilar-senalado.png. Cámara temporal retirada.
+
+## Hielo centrado y logo CECYT — 02/11/2026
+
+Revisados en navegador el hielo alineado frente al pilar y la planta a su izquierda, manteniendo el bebedero. Emblema y textos revisados de cerca sobre el paño de ladrillo junto a la escalera. Capturas output/plaza-techada/hielo-centrado-cecyt.png y logo-cecyt.png. Cámara temporal retirada.
+
+## Ventana, logo izquierdo y escalera amplia — 03/11/2026
+
+Verificados en navegador logo a la izquierda y ventana de dos paños a su derecha, abertura en ladrillo, escalera ensanchada y prolongada, banco retirado y sin los apoyos de la fila que interfería con el tramo. Captura output/plaza-techada/ventana-cecyt-escalera-ampliada.png. Cámara temporal retirada.
+
+
+## Corrección de escalera — 03/11/2026
+
+Se restituye el ancho original de 2,10 m y el eje del tramo; la bajada se extiende siguiendo el muro hacia la derecha de la imagen, con recorrido de 6 m y llegada superior fija. Se conservan logo y ventana. Revisión en navegador: tramo, barandas y apoyo inferior acompañan la nueva longitud; no se amplía en profundidad hacia la plaza. Evidencia: `output/plaza-techada/escalera-alargada-ancho-original.png`. Build correcto; 34/35 pruebas, con fallo previo de Manfred.
