@@ -15,11 +15,13 @@ export class Walker {
   private ground = false;
   private spawn = new T.Vector3();
   enabled = false;
-  fallback = false;
+  private captureRequest = 0;
+  private capturePending = false;
   onLockChange = (_locked: boolean) => {};
+  onCaptureError = (_message: string) => {};
   onInteract = () => {};
   get active() {
-    return this.controls.isLocked || this.fallback;
+    return this.controls.isLocked;
   }
   constructor(
     readonly camera: T.PerspectiveCamera,
@@ -28,14 +30,25 @@ export class Walker {
     this.controls = new PointerLockControls(camera, canvas);
     this.controls.pointerSpeed = 1.5;
     this.controls.addEventListener("lock", () => {
+      if (!this.capturePending) {
+        this.canvas.ownerDocument.exitPointerLock();
+        return;
+      }
+      this.capturePending = false;
       this.enabled = true;
       this.onLockChange(true);
     });
     this.controls.addEventListener("unlock", () => {
       this.keys.clear();
+      this.velocity.set(0, 0, 0);
       this.onLockChange(false);
     });
+    canvas.ownerDocument.addEventListener("pointerlockerror", () => this.captureFailed(this.captureRequest));
     window.addEventListener("keydown", (e) => {
+      if (e.code === "Escape" && this.capturePending) {
+        this.pause();
+        return;
+      }
       if (!this.active) return;
       if (e.code === "Escape") {
         this.pause();
@@ -56,28 +69,6 @@ export class Walker {
       )
         e.preventDefault();
       this.keys.add(e.code);
-    });
-    let dragging = false;
-    canvas.addEventListener("pointerdown", (e) => {
-      if (this.fallback) {
-        dragging = true;
-        canvas.setPointerCapture(e.pointerId);
-      }
-    });
-    canvas.addEventListener("pointerup", () => (dragging = false));
-    canvas.addEventListener("pointermove", (e) => {
-      if (!dragging || !this.fallback) return;
-      const rotation = new T.Euler().setFromQuaternion(
-        camera.quaternion,
-        "YXZ",
-      );
-      rotation.y -= e.movementX * 0.003;
-      rotation.x = T.MathUtils.clamp(
-        rotation.x - e.movementY * 0.003,
-        -1.45,
-        1.45,
-      );
-      camera.quaternion.setFromEuler(rotation);
     });
     window.addEventListener("keyup", (e) => this.keys.delete(e.code));
     window.addEventListener("blur", () => this.pause());
@@ -125,26 +116,30 @@ export class Walker {
     return preferred.clone().setY(0.15);
   }
   walk() {
+    if (this.active || this.capturePending) return;
     this.enabled = true;
+    this.capturePending = true;
+    const request = ++this.captureRequest;
     try {
       const result = this.canvas.requestPointerLock();
-      if (result)
-        result.catch(() => {
-          this.fallback = true;
-          this.onLockChange(true);
-        });
+      result?.catch(() => this.captureFailed(request));
     } catch {
-      this.fallback = true;
-      this.onLockChange(true);
+      this.captureFailed(request);
     }
   }
+  private captureFailed(request: number) {
+    if (request !== this.captureRequest || !this.capturePending) return;
+    this.capturePending = false;
+    this.onLockChange(false);
+    this.onCaptureError("No se pudo capturar el mouse. Volvé a pulsar Continuar; si esta vista no lo permite, abrí el proyecto en Chrome o Edge para girar sin límites.");
+  }
   pause() {
-    const wasFallback = this.fallback;
-    this.fallback = false;
-    this.controls.unlock();
+    ++this.captureRequest;
+    this.capturePending = false;
     this.keys.clear();
     this.velocity.set(0, 0, 0);
-    if (wasFallback) this.onLockChange(false);
+    if (this.controls.isLocked) this.controls.unlock();
+    else this.onLockChange(false);
   }
   update(dt: number) {
     if (!this.enabled || !this.active) return;

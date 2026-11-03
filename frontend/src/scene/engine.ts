@@ -81,6 +81,7 @@ export class TourEngine {
     this.camera.position.set(campusCenter[0] + 480, 640, campusCenter[1] + 760);
     this.orbit.update();
     this.walker = new Walker(this.camera, this.canvas);
+    this.walker.onCaptureError = (message) => this.onError(message);
     this.walker.setWorld(this.campus.colliders);
     this.walker.onLockChange = (locked) => {
       this.orbit.enabled = !locked && !this.walker.enabled;

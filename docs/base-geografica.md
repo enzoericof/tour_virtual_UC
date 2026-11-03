@@ -196,3 +196,37 @@ Geometría adicional en `frontend/src/data/faculty-annexes.ts`, referida al cent
 Formas y posiciones relativas interpretadas del plano; alturas, materiales, fachadas y medidas son aproximaciones. Exteriores con ventanas, accesos abiertos y rótulos; interior vacío, sin inventar mobiliario ni servicios. Todos aparecen en Explorar como «Por validar», con llegada exterior y orientación hacia su fachada. No se les asignaron fotografías de otros recintos. Caminos a nivel del suelo conectan los anexos con el sendero existente detrás de Manfred; la circulación rodea CTA–DICIA. El terreno de colisión se extiende al nuevo sector, sin añadir árboles ni recursos descargables.
 
 El usuario autorizó integrar y subir este cambio a main el 02/11/2026.
+
+
+## Mesas junto a la pared y dos conjuntos de entrada — 02/11/2026
+
+Redistribución solicitada por Horacio: dos mesas altas y dos bajas alternadas bajo la ventana de hormigón, con el borde de las tapas a unos 8 cm del muro. Sillas a los lados y hacia el comedor; sin sillas entre mesa y pared. Fila interior próxima desplazada para acercarla a este sector. Frente a la entrada, dos mesas con cuatro sillas cada una (una por lado), centros locales (−3,4; 8,6) y (4,8; 8,6); sustituyen los tres bancos anteriores y conservan el paso central. La terraza lateral conserva su mobiliario.
+
+
+## Sillones de hierro y diagonal de la vitrina — 02/11/2026
+
+Sillas exteriores reemplazadas por sillones de hierro con respaldo de rombos, apoyabrazos curvos y asiento de listones. Se conservan posiciones y cantidades tanto frente al acceso como en la terraza. El frente de venta (mesada, base de ladrillos, vitrina, bandejas, caja y pizarra) suma un giro de 0,14 rad respecto de su marco anterior, con pivote en el extremo izquierdo; orientación total aproximada 13,8° respecto del eje del piso. La superficie de apoyo permanece horizontal. Mesada posterior y cafetera retiradas para no cruzarse con la vitrina. Ángulo interpretado de fotografía, pendiente de medición.
+
+## Vitrina escalonada, divisoria y salida del personal — 02/11/2026
+
+Los dos módulos centrales de vidrio terminan en Y local 1,76 m y el derecho en 2,18 m; conservan el giro del mostrador. Divisoria clara en u=4,55 del marco de atención, del piso a 3,55 m, con paso posterior de 1,10 m hacia la zona del personal. Nueva salida independiente en la pared exterior x=−9, centrada en z=4,60, de 1,10 m de ancho, hoja blanca abierta hacia afuera, descanso y tres escalones. Hueco alineado en el fondo oscuro. Se conserva la puerta pública al fondo del pasillo en z=−5,15. Coordenadas locales de cantina y dimensiones aproximadas interpretadas de fotografías.
+
+## Cocina semicircular de la cantina — 02/11/2026
+
+Horacio identifica el volumen curvo izquierdo de la foto como cocina del personal. Se agrega una planta semicircular adosada a x=−9, centro z=2,80, radio aproximado 3,40 m, hacia x negativo. Cerramiento de ladrillo de 0,23 m, ventana horizontal hacia la explanada, cubierta a Y local 3,35 m y parapeto a 3,77 m, más bajos que el salón. Piso a Y local 0,45 m, igual al mostrador. La puerta del personal en z=4,60 ahora comunica con esta cocina: se retiran su descanso y escalones exteriores anteriores. La puerta pública conserva su salida y escalones. Interior sin equipamiento hasta contar con referencias; dimensiones estimadas de la fotografía.
+
+## Acceso del personal por la derecha — 02/11/2026
+
+Corrección explícita de Horacio: puerta del personal al extremo derecho del frente de atención. Mesada y ladrillos acortados de 10,70 a 9,25 m, conservando el extremo izquierdo y el giro; vitrina ajustada a ese tramo, con dos paños bajos y uno alto. Puerta blanca abierta de 1,10 m en u=3,70 del marco girado del mostrador. Divisoria derecha continua hacia el pasillo público. Desde esta puerta se accede detrás del mostrador y a la cocina semicircular mediante la puerta posterior existente en z=4,60; ambas comparten el nivel del piso. La caja permanece bajo la TV a la izquierda.
+
+## Conexión derecha a cocina y fondo despejado — 02/11/2026
+
+La puerta posterior hacia la cocina se traslada de z=4,60 a z=−3,45, al lado derecho del frente de atención. Se cierra el antiguo hueco izquierdo y se abre el fondo oscuro entre u=2,80 y 4,10. Para mantener la cocina semicircular en su ubicación de la fotografía, se conecta mediante un corredor de servicio techado de aproximadamente 2 m de ancho, por detrás del muro de atención, al mismo nivel y con apertura real en el arco. La hoja queda abierta junto al muro para dejar paso. Heladeras, mueble posterior, estantes, productos y cafetera se desplazan juntos 0,90 m a la izquierda y 0,20 m hacia atrás; caja y TV mantienen su posición. Corredor y distancias son interpretación de la solicitud, pendientes de relevamiento.
+
+## Paso ampliado y TV diagonal — 02/11/2026
+
+Sector de atención retirado hacia la izquierda: vitrina, bandejas y pizarra 0,80 m; extremo derecho de mesada recortado 1,10 m, conservando el cierre junto a la fachada. Fondo desplazado en total 1,35 m a la izquierda y 0,30 m hacia atrás respecto de su distribución inicial. Divisoria y pilar derechos 1 m a la izquierda; divisoria acortada por detrás para no bloquear la conexión a cocina. Puerta de atención de 1,30 m, centro u=2,70 del marco del mostrador, con hoja paralela a la divisoria para despejar el paso. TV en u=−5,10 y v=1,05 del marco de ventas, giro de 0,50 rad hacia las mesas; caja desplazada bajo ese extremo. Se conservan ubicaciones exteriores de ambas puertas y cocina.
+
+## Puerta de cocina detrás de la divisoria — 02/11/2026
+
+Puerta posterior del personal desplazada 1,10 m hacia la izquierda del sector de venta, de z=−3,45 a z=−2,35. Hueco del fondo oscuro entre u=1,70 y 3,00, dentro del área del personal. Divisoria blanca prolongada hasta el muro posterior (v=−2,20..1,50) para impedir la entrada por detrás desde el pasillo de alumnos. Fondo de heladeras y estantes retirado otros 0,65 m a la izquierda para dejar libre la nueva conexión; soporte posterior derecho fuera del hueco. Se conservan puerta pública y paso de servicio techado hacia cocina.

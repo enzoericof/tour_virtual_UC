@@ -53,3 +53,36 @@ Captura codex-clipboard-18fc0035-6fe2-40c0-a98f-e0c49f61a50d.png y solicitud de 
 ## Bloque 1: puertas y cara este — 02/11/2026
 
 Fotos aportadas por el usuario en la conversación: `IMG_5639.HEIC` (iPhone, 30/10/2026; galería del segundo piso con las puertas de las aulas 204 y 203, en la raíz del repositorio sin seguimiento) y cuatro capturas sin nombre de archivo: la cabecera este desde el patio y desde la plaza, la escalera de la plaza al primer piso con la rampa y el ascensor desde la galería del Bloque G. Orientan la puerta doble, el prisma con el número, los títulos, las bandas de hormigón y el revoque del ascensor. Son referencias de comparación: no se incorporan al producto ni se usan como texturas.
+
+## Mesas junto a la pared y dos conjuntos de entrada — 02/11/2026
+
+Fotos aportadas por Horacio: codex-clipboard-7d6d7bff-6b93-4019-9db9-5f522f257bab.png (mesas altas/bajas y sillas junto a la pared) y codex-clipboard-33122d7b-4686-4d52-9ac9-615cf2f2da27.png (posición de los dos conjuntos exteriores frente al blindex). Se usan como comparación visual; cantidad de sillas exteriores solicitada explícitamente: cuatro por mesa.
+
+
+## Sillones de hierro y diagonal de la vitrina — 02/11/2026
+
+Referencias nuevas de Horacio: codex-clipboard-89805024-7ddd-46b7-86eb-17e466673661.png para sillones exteriores de hierro con rombos y brazos; codex-clipboard-01d9436f-f278-455f-abd7-79bc7b028a13.png para diagonal del frente de atención y vitrina. Uso de comparación, sin incorporar personas ni las fotos como textura.
+
+## Vitrina y divisoria — 02/11/2026
+
+Foto de Horacio: codex-clipboard-c0a876c5-77f5-4b39-8c26-2c0454dd83b7.png. Referencia para dos vidrios centrales bajos, módulo derecho alto y divisoria blanca. La salida exterior del personal responde a la indicación del usuario; posición y medidas aproximadas. Sin incorporar personas ni usar la foto como textura.
+
+## Cocina curva — 02/11/2026
+
+Foto aérea aportada por Horacio: codex-clipboard-0ebb2f07-4e4c-4376-b416-ee049510fdb0.png. El usuario confirma que el volumen semicircular a la izquierda es la cocina y que se entra desde la puerta del personal. Referencia para curva, ladrillo, ventana horizontal y cubierta baja con parapeto; sin evidencia del equipamiento interior. No se utiliza la foto como textura.
+
+## Corrección del lado de acceso — 02/11/2026
+
+Captura codex-clipboard-291d3fb0-dadd-4ad8-b6e1-bde8532b9a30.png y aclaración posterior del usuario: la puerta del personal debe quedar a la derecha, sustituyendo su primera indicación de izquierda. Acortar el mostrador para alojar la puerta.
+
+## Aclaración de circulación y controles — 02/11/2026
+
+Indicación de Horacio en el chat: tanto puerta de empleadas como acceso a cocina al lado derecho, mobiliario posterior a la izquierda y atrás para ampliar el paso, y giro de cámara con movimiento del mouse sin mantener clic. Sin nueva foto; se conservan las referencias anteriores.
+
+## Más circulación y tele diagonal — 02/11/2026
+
+Captura codex-clipboard-a893c004-13bd-4b0a-bde8-b6278c26daff.png e indicación de Horacio: correr atención y pared blanca a la izquierda para ambas circulaciones, y llevar la tele al extremo izquierdo girada hacia las mesas.
+
+## Separación del personal y cursor integrado — 02/11/2026
+
+Captura codex-clipboard-bb97ecad-fa84-40dc-bae5-9a04109eee01.png e indicación del usuario: puerta del personal detrás de la pared blanca y sin acceso desde el otro lado; mouse capturado durante el recorrido y recuperado al pulsar Esc.

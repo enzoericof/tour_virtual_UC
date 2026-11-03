@@ -132,3 +132,40 @@ TypeScript y build correctos. Suite frontend: 28/29; las cinco pruebas nuevas pa
 - Colisiones reales de `createCampus` con Octree y la cápsula del caminante (radio 0,28 m), con una página temporal fuera del repositorio: los 16 puntos de visita libres; las 24 puertas del Bloque 1 se cruzan por la hoja abierta, de la galería al aula; las galerías de los cuatro niveles se recorren de punta a punta; los tres descansos de la escalera Pompidou llegan a la galería; la escalera de la plaza al primer piso y la rampa quedan libres. Es una comprobación geométrica por muestras, no un recorrido con el teclado.
 - Revisión visual en Edge sin ventana (WebGL por GPU, 1280 × 800): cara este desde el sureste y de frente (títulos entre bandas, lamas en el extremo de la galería, caja crema del ascensor), fachada sur (columnas, lamas en dos paños, descansos), galería del segundo piso y puerta del aula 204 comparada con `IMG_5639`, interior de un aula del tercer piso, escalera de la plaza y rampa comparadas con la foto del 02/11, ascensor y extremo oeste con la torre. Sin errores de JavaScript (solo un 404 de la página temporal). Capturas en `.local/references/bloque1-65m/`.
 - No se probó en la aplicación completa con el menú ni en móviles; no hubo cambios de backend ni de contratos.
+
+## Mesas junto a la pared y dos conjuntos de entrada — 02/11/2026
+
+TypeScript y build aprobados para la redistribución de mobiliario. Revisión visual de ubicación contra el muro y recuento exterior (dos mesas, ocho sillas). No se repitió la suite por este ajuste visual localizado: último resultado 28/29 con el fallo previo de Manfred. Servidor de desarrollo reiniciado en 127.0.0.1:5173.
+
+
+## Sillones de hierro y diagonal de la vitrina — 02/11/2026
+
+Build y TypeScript correctos. Revisión visual de sillones y mostrador diagonal. Comprobadas sobre las colisiones reales 615 muestras libres, radio 0,30 m, en recorridos por el acceso principal y el pasillo derecho hacia la puerta del fondo, rodeando las sillas junto al muro. No se repitió la suite de datos por este ajuste localizado; último estado 28/29, fallo previo de Manfred.
+
+## Vitrina, divisoria y salida del personal — 02/11/2026
+
+Build y TypeScript correctos. Comprobación temporal sobre el Octree real: 738 muestras libres con esfera de radio 0,28 m a tres alturas, en el recorrido de la puerta pública y el paso de atención hacia la salida del personal. Revisión visual registrada en design-qa.md. Instrumentación temporal retirada. No se repitió la suite de datos para este cambio visual; último estado 28/29, fallo previo de Manfred.
+
+## Cocina semicircular — 02/11/2026
+
+Build y TypeScript correctos. Recorrido desde el pasillo, detrás del mostrador, por la puerta del personal y dentro de la cocina: 732 muestras libres sobre el Octree real, radio 0,28 m a tres alturas; rayos hacia abajo comprueban piso continuo a la cota de la cantina. Revisión visual exterior en navegador. Scripts y cámara temporales retirados; sin cambios en dependencias ni pruebas de datos.
+
+## Puerta del personal a la derecha — 02/11/2026
+
+Build y TypeScript correctos. Sobre el Octree real: 915 muestras libres con radio 0,28 m y tres alturas, desde el nuevo acceso derecho hasta la cocina; rayos hacia abajo verifican piso continuo. Revisión visual en navegador. Cámara y scripts temporales retirados.
+
+## Giro libre y conexión derecha a cocina — 02/11/2026
+
+Build y TypeScript correctos. Comprobación temporal del Walker real mediante eventos: mouse sin botones gira cuando no se puede capturar el cursor; pausa detiene el giro; táctil conserva arrastre. Geometría: 915 muestras libres con radio 0,28 m a tres alturas desde la puerta derecha del mostrador por la nueva puerta posterior y corredor hacia la cocina; rayos verifican piso continuo. Inspección visual en navegador; cámara y scripts retirados. La vista general conserva sus controles de arrastrar y rueda.
+
+## Paso ampliado y TV diagonal — 02/11/2026
+
+Build y TypeScript correctos. Octree real: 1830 muestras libres con radio 0,28 m a tres alturas en el acceso del personal, conexión a cocina y salida pública de alumnos. Rayos verifican piso continuo. Revisión visual en navegador. Scripts y cámara temporales retirados.
+
+## Captura real y puerta de cocina cubierta — 02/11/2026
+
+Build y TypeScript correctos. Cuatro pruebas nuevas aprobadas: giro relativo bajo captura, liberación con Esc y reanudación, rechazo de captura sin activar recorrido, cancelación de captura pendiente y liberación de captura tardía. Suite completa: 32/33 aprobadas; persiste el fallo anterior del nivel de Sala Manfred. Geometría: 1647 muestras libres para ambas puertas y cocina, piso continuo y colisión positiva en el antiguo hueco detrás de la divisoria. Navegador integrado rechaza captura; se comprobó el aviso y permanencia en pausa, sin afirmar validación real del cursor en Chrome. Scripts y cámara temporales retirados.
+
+## Integración en main — 02/11/2026
+
+Integrada feat/distribucion-mesas-cantina sobre origin/main 27433e0 por solicitud de Horacio. Conservados cambios de Bloque 1, escaleras y backend de main; conflictos documentales resueltos conservando ambas secciones. Build correcto. Suite integrada: 33/35 aprobadas, incluidas las cuatro de captura del mouse. Fallan Walkable slope del extremo este y nivel de Manfred; faculty-blueprint.ts y su prueba son idénticos a origin/main, sin cambios de esta integración. Sin modificaciones de backend en la rama de cantina.
