@@ -113,3 +113,37 @@ Nueve dependencias aproximadas según el plano general aportado por el usuario. 
 ## Recorrido desde el punto tocado — 02/11/2026
 
 Comprobado en navegador el clic sobre dos sectores distintos del suelo desde la vista general: llegada al sector elegido e inicio del recorrido. Arrastrar sigue orbitando sin trasladar; clic en el cielo conserva la vista general. La llegada usa las coordenadas tocadas y busca apoyo libre cercano cuando hay un obstáculo. Captura local output/llegada-punto-elegido.png.
+
+
+## Mesas junto a la pared y dos conjuntos de entrada — 02/11/2026
+
+Verificadas en navegador mesas altas y bajas alternadas junto al muro, sillas laterales y frontales, y dos mesas antes de entrar con cuatro sillas cada una y pasillo central libre. Capturas locales: output/cantina/mesas-contra-pared.png y dos-mesas-entrada.png. Posiciones de cámara temporales retiradas tras la revisión.
+
+
+## Sillones de hierro y diagonal de la vitrina — 02/11/2026
+
+Revisados visualmente en navegador respaldo de rombos, apoyabrazos y listones, conservando los dos conjuntos exteriores y sus ubicaciones. Frente de ladrillos y vitrina con giro común; caja y pizarra sobre la misma mesada. Capturas locales output/cantina/sillones-hierro-rombos.png y vitrina-diagonal.png. Cámara de inspección temporal retirada.
+
+## Vitrina, divisoria y salida de empleadas — 02/11/2026
+
+Revisados en navegador dos vidrios centrales bajos, módulo derecho alto y divisoria clara con paso posterior. Inspeccionada la nueva puerta desde detrás del mostrador: hoja blanca abierta, hueco exterior y descanso. Capturas output/cantina/vitrina-desnivel-divisoria.png y salida-personal.png. Cámara temporal retirada; sin nuevo modo de navegación.
+
+## Cocina semicircular — 02/11/2026
+
+Revisada desde una vista elevada: volumen de ladrillo a la izquierda del salón, curva continua, ventana horizontal y techo bajo con parapeto. Captura output/cantina/cocina-semicircular.png. La puerta de personal se integra a la cocina sin escalones interiores. Cámara temporal retirada después de la inspección.
+
+## Puerta del personal a la derecha — 02/11/2026
+
+Verificados en navegador mostrador más corto, puerta abierta en su extremo derecho y cierre del extremo izquierdo. Captura output/cantina/puerta-personal-derecha.png. Se conserva la conexión con la cocina curva. Cámara temporal retirada.
+
+## Fondo despejado y conexión derecha — 02/11/2026
+
+Revisados en navegador el fondo desplazado, eliminación del hueco izquierdo y puerta posterior derecha hacia un corredor pavimentado y techado. Capturas output/cantina/fondo-corrido-paso-derecho.png y conexion-cocina-derecha.png. Cámara temporal retirada.
+
+## Paso ampliado y TV diagonal — 02/11/2026
+
+Revisados en navegador el sector de venta retirado a la izquierda, divisoria desplazada, puerta abierta sin invadir la circulación y TV en el extremo izquierdo girada hacia las mesas. Captura output/cantina/paso-ampliado-tv-diagonal.png. Cámara de inspección temporal retirada.
+
+## Divisoria cerrada y captura del mouse — 02/11/2026
+
+Revisión del sector desde el pasillo: puerta del personal a la izquierda, divisoria continua hasta atrás y salida pública a su derecha. Captura output/cantina/divisoria-cocina-cerrada.png. En el navegador integrado, Caminar y Continuar rechazan Pointer Lock: se verifica pausa con aviso en lugar de iniciar el antiguo movimiento con cursor limitado. Captura real del sistema pendiente de validación manual en Chrome o Edge. Cámara temporal retirada.

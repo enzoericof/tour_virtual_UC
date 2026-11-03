@@ -1284,6 +1284,9 @@ body:has(.walk-prompt:not(.hidden)) > #app .control-hint { visibility: hidden; }
 }
 
 /* Recorrido limpio: las opciones viven en una sola ventana al pausar. */
+.game-pointer { display: none; pointer-events: none; position: fixed; left: 50%; top: 50%; width: 4px; height: 4px; transform: translate(-50%, -50%); border-radius: 50%; background: #fffdf5b0; box-shadow: 0 0 2px #173d32; z-index: 5; }
+body.is-walking .game-pointer { display: block; }
+body.is-walking { cursor: none; }
 body.is-walking .topbar, body.is-walking .tools, body.is-walking #explorer,
 body.is-walking #menu-panel, body.is-walking #toast,
 body.is-paused .topbar, body.is-paused .tools, body.is-paused #menu-panel { display: none !important; }

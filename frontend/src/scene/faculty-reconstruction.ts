@@ -844,6 +844,7 @@ export function createFaculty() {
     // La puerta está junto al mostrador; la ventana corrida sigue hacia el comedor.
     const interiorConcrete = m.concrete.clone(); interiorConcrete.color.set("#e4e0d4");
     const exitZ = -5.15, exitWidth = 1.4;
+    const staffExitZ = -2.35, staffExitWidth = 1.1;
     const sill = 1.48, windowTop = 2.3, wallTop = 5.25;
     const windowLeft = -w / 2 + 0.3, windowRight = w / 2 - 0.3;
     // El lateral de ventanas ya no tiene ningún hueco de puerta.
@@ -861,9 +862,10 @@ export function createFaculty() {
     box(w, 0.42, 0.42, 0, 3.85, -front + 0.12, interiorConcrete);
     // Puerta en la pared del fondo del pasillo (x = -9), perpendicular a las ventanas.
     // Recorte real del muro de ladrillo, pegado a la esquina posterior del sector de ventas.
-    for (const [a, b] of [[-front, exitZ - exitWidth / 2], [exitZ + exitWidth / 2, front]])
+    for (const [a, b] of [[-front, exitZ - exitWidth / 2], [exitZ + exitWidth / 2, staffExitZ - staffExitWidth / 2], [staffExitZ + staffExitWidth / 2, front]])
       box(0.24, 4.8, b - a, -w / 2, 2.85, (a + b) / 2, m.brick, true);
     box(0.24, wallTop - 3.2, exitWidth, -w / 2, (wallTop + 3.2) / 2, exitZ, m.brick, true);
+    box(0.24, wallTop - 3.2, staffExitWidth, -w / 2, (wallTop + 3.2) / 2, staffExitZ, m.brick, true);
     // Cerramiento lateral completo de blindex, como el frente de acceso.
     // Una hoja corre detrás de la siguiente y deja paso hacia la terraza (z = 2..4).
     const sideGlass = new T.MeshStandardMaterial({ color: "#c3d8d3", transparent: true, opacity: 0.23, roughness: 0.16, metalness: 0.12 });
@@ -896,23 +898,72 @@ export function createFaculty() {
       box(0.4, PLAZA_LEVEL + top, 14, w / 2 + 5.2 + i * 0.4, (top - PLAZA_LEVEL) / 2, 1, stepStone);
     }
     ramp(v3(w / 2 + 6.2, patioGround, 1), v3(w / 2 + 5, 0.45, 1), 14);
-    frame({ center: [-w / 2, exitZ], size: [exitWidth, 0.1], angle: -Math.PI / 2 }, () => {
-      for (const x of [-exitWidth / 2, exitWidth / 2]) box(0.065, 2.75, 0.12, x, 1.825, 0, aluminum);
-      box(exitWidth, 0.065, 0.12, 0, 3.2, 0, aluminum);
-      frame({ center: [-exitWidth / 2, 0], size: [exitWidth, 0.1], angle: -Math.PI / 2 }, () => {
-        box(exitWidth - 0.08, 2.66, 0.035, exitWidth / 2, 1.82, 0, windowGlass, true);
-        for (const x of [0, exitWidth]) box(0.04, 2.72, 0.06, x, 1.82, 0, aluminum);
-        for (const y of [0.46, 3.18]) box(exitWidth, 0.04, 0.06, exitWidth / 2, y, 0, aluminum);
-        box(0.035, 0.5, 0.1, exitWidth - 0.16, 1.6, 0.06, aluminum);
+    // Acceso del personal a la cocina curva adosada; la puerta pública sigue al exterior.
+    for (const [doorZ, doorWidth, doorMaterial] of [
+      [exitZ, exitWidth, windowGlass], [staffExitZ, staffExitWidth, m.white],
+    ] as const) {
+      frame({ center: [-w / 2, doorZ], size: [doorWidth, 0.1], angle: -Math.PI / 2 }, () => {
+        for (const x of [-doorWidth / 2, doorWidth / 2]) box(0.065, 2.75, 0.12, x, 1.825, 0, aluminum);
+        box(doorWidth, 0.065, 0.12, 0, 3.2, 0, aluminum);
+        frame({ center: [-doorWidth / 2, doorZ === staffExitZ ? -0.17 : 0], size: [doorWidth, 0.1],
+          angle: doorZ === staffExitZ ? Math.PI : -Math.PI / 2 }, () => {
+          box(doorWidth - 0.08, 2.66, 0.035, doorWidth / 2, 1.82, 0, doorMaterial, true);
+          for (const x of [0, doorWidth]) box(0.04, 2.72, 0.06, x, 1.82, 0, aluminum);
+          for (const y of [0.46, 3.18]) box(doorWidth, 0.04, 0.06, doorWidth / 2, y, 0, aluminum);
+          box(0.035, 0.5, 0.1, doorWidth - 0.16, 1.6, 0.06, aluminum);
+        });
+        if (doorZ === staffExitZ) return; // La cocina comparte el piso, sin peldaños interiores.
+        box(2.2, PLAZA_LEVEL + 0.45, 1.35, 0, (0.45 - PLAZA_LEVEL) / 2, -0.65, m.stone, true);
+        const ground = gardenHeight(-w / 2 - 2.8, doorZ) - (PLAZA_LEVEL - 0.45);
+        for (let i = 0; i < 3; i++) {
+          const top = 0.45 - (i + 1) * (0.45 - ground) / 3;
+          box(2.2, PLAZA_LEVEL + top, 0.5, 0, (top - PLAZA_LEVEL) / 2, -1.55 - i * 0.5, stepStone);
+        }
+        ramp(v3(0, ground, -2.8), v3(0, 0.45, -1.3), 2.2);
       });
-      box(2.2, PLAZA_LEVEL + 0.45, 1.35, 0, (0.45 - PLAZA_LEVEL) / 2, -0.65, m.stone, true);
-      const ground = gardenHeight(-w / 2 - 2.8, exitZ) - (PLAZA_LEVEL - 0.45);
-      for (let i = 0; i < 3; i++) {
-        const top = 0.45 - (i + 1) * (0.45 - ground) / 3;
-        box(2.2, PLAZA_LEVEL + top, 0.5, 0, (top - PLAZA_LEVEL) / 2, -1.55 - i * 0.5, stepStone);
-      }
-      ramp(v3(0, ground, -2.8), v3(0, 0.45, -1.3), 2.2);
-    });
+    }
+    // Cocina de la foto aérea: media circunferencia de ladrillo, más baja que el salón.
+    // El diámetro se apoya en la pared izquierda y encierra la puerta del personal.
+    const kitchenRadius = 3.4, kitchenZ = 2.8, kitchenSegments = 40;
+    const kitchenPoint = (angle: number, radius = kitchenRadius): Vec2 =>
+      [-w / 2 - Math.sin(angle) * radius, kitchenZ + Math.cos(angle) * radius];
+    const kitchenOutline = Array.from({ length: kitchenSegments + 1 }, (_, i) =>
+      kitchenPoint(i * Math.PI / kitchenSegments));
+    // Conexión de servicio desde la puerta derecha hasta la cocina curva existente.
+    const [serviceX, serviceZ] = kitchenPoint(32 * Math.PI / kitchenSegments);
+    const serviceEnd = staffExitZ - staffExitWidth / 2 - 0.15;
+    const serviceWidth = -w / 2 - serviceX, serviceLength = serviceZ - serviceEnd;
+    const serviceCenterX = (serviceX - w / 2) / 2, serviceCenterZ = (serviceZ + serviceEnd) / 2;
+    box(serviceWidth, PLAZA_LEVEL + 0.45, serviceLength, serviceCenterX,
+      (0.45 - PLAZA_LEVEL) / 2, serviceCenterZ, m.concrete, true);
+    box(serviceWidth, 0.025, serviceLength, serviceCenterX, 0.4625, serviceCenterZ, terrace);
+    box(0.23, 2.9, serviceLength, serviceX, 1.9, serviceCenterZ, m.brick, true);
+    box(serviceWidth, 2.9, 0.23, serviceCenterX, 1.9, serviceEnd, m.brick, true);
+    box(serviceWidth + 0.23, 0.12, serviceLength, serviceCenterX, 3.41, serviceCenterZ, m.roof, true);
+    prism(kitchenOutline, -PLAZA_LEVEL, PLAZA_LEVEL + 0.45, m.concrete);
+    pave(kitchenOutline, terrace, 0.463);
+    const kitchenRing = (a: number, b: number, outer: number, inner: number): Vec2[] =>
+      [kitchenPoint(a, outer), kitchenPoint(b, outer), kitchenPoint(b, inner), kitchenPoint(a, inner)];
+    for (let i = 0; i < kitchenSegments; i++) {
+      if (i >= 32) continue; // Apertura real hacia el corredor de servicio techado.
+      const a = i * Math.PI / kitchenSegments, b = (i + 1) * Math.PI / kitchenSegments;
+      const wall = kitchenRing(a, b, kitchenRadius, kitchenRadius - 0.23);
+      // Ventana horizontal en el tramo curvo que mira a la explanada.
+      const hasWindow = i >= 5 && i < 15;
+      if (hasWindow) {
+        prism(wall, 0.45, 1.25, m.brick);
+        prism(wall, 2.35, 1.35, m.brick);
+        prism(kitchenRing(a, b, kitchenRadius - 0.1, kitchenRadius - 0.135), 1.7, 0.65, windowGlass);
+        for (const y of [1.68, 2.35]) prism(wall, y, 0.055, aluminum, false);
+        if (i === 5 || i === 14) {
+          const edge = i === 5 ? a : b;
+          prism(kitchenRing(edge - 0.008, edge + 0.008, kitchenRadius, kitchenRadius - 0.23), 1.7, 0.65, aluminum);
+        }
+      } else prism(wall, 0.45, 3.25, m.brick);
+      // Remate continuo del parapeto sobre la cubierta baja.
+      prism(kitchenRing(a, b, kitchenRadius + 0.035, kitchenRadius - 0.265), 3.7, 0.07, m.stone, false);
+    }
+    prism(kitchenOutline, 3.35, 0.12, m.roof);
     box(w + 0.4, 0.18, d - 1.8, 0, 5.3, -1.15, m.roof, true);
     // El paño izquierdo de ladrillo reduce la vidriera al sector de acceso real.
     const left = -w / 2 + 4.5, right = w / 2 - 0.4;
@@ -946,21 +997,6 @@ export function createFaculty() {
       beam(v3(x, 3.86, front + 1.85), v3(x, 3.75, front - 0.1), 0.035, dark);
     }
     for (const x of [left, right]) pole(0.075, 3.4, x, 2.15, front + 0.75, dark, true);
-    // Bancos de hierro de la terraza: asiento de listones y respaldo de rombos.
-    function ironBench(x: number, z: number) {
-      for (let i = 0; i < 5; i++) box(1.85, 0.035, 0.075, x, 0.92, z - 0.18 + i * 0.085, dark);
-      for (const dx of [-0.78, 0.78]) {
-        pole(0.025, 0.5, x + dx, 0.7, z + 0.15, dark);
-        pole(0.025, 0.95, x + dx, 0.93, z - 0.22, dark);
-        box(0.04, 0.04, 0.48, x + dx, 1.15, z, dark);
-      }
-      for (const y of [1.03, 1.4]) box(1.85, 0.035, 0.035, x, y, z - 0.22, dark);
-      for (let dx = -0.8; dx < 0.8; dx += 0.2) {
-        beam(v3(x + dx, 1.03, z - 0.22), v3(x + dx + 0.2, 1.4, z - 0.22), 0.012, dark);
-        beam(v3(x + dx, 1.4, z - 0.22), v3(x + dx + 0.2, 1.03, z - 0.22), 0.012, dark);
-      }
-    }
-    for (const x of [-3.4, -0.9, 5.8]) ironBench(x, front + 1.65);
     // Comedor según las tres fotos: piso claro, cubierta negra y lucernario inclinado.
     const tableTop = new T.MeshStandardMaterial({ color: "#ac7d4f", roughness: 0.63 });
     const blackFurniture = new T.MeshStandardMaterial({ color: "#242a29", roughness: 0.43, metalness: 0.45 });
@@ -1010,82 +1046,127 @@ export function createFaculty() {
       const warm = new T.MeshStandardMaterial({ color: "#ffdf8c", emissive: "#ffc35b", emissiveIntensity: 1.6 });
       const displayGlass = new T.MeshStandardMaterial({ color: "#b6d1cd", transparent: true, opacity: 0.2, roughness: 0.12, metalness: 0.1 });
       // Fondo oscuro y gran viga/cenefa clara sobre la zona de atención.
-      box(9.8, 3.1, 0.15, -0.5, 2, -1.75, backing);
+      // Hueco alineado con la salida del personal en el muro exterior del fondo.
+      for (const [a, b] of [[-5.4, 1.7], [3, 4.4]])
+        box(b - a, 3.1, 0.15, (a + b) / 2, 2, -2.05, backing);
+      box(1.3, 0.6, 0.15, 2.35, 3.25, -2.05, backing);
       box(11.3, 0.6, 3.9, -0.65, 3.8, -0.1, cream);
-      for (const x of [-6.15, 4.1]) box(0.25, 3.1, 0.7, x, 2, -1.5, cream);
-      // El lado izquierdo llega al cerramiento frontal; no queda un acceso lateral.
+      for (const x of [-6.15, 3.15]) box(0.25, 3.1, 0.7, x, 2, -1.8, cream);
+      // El extremo izquierdo queda cerrado junto a la fachada.
       box(0.16, 1.04, 3.4, -6.12, 0.97, 0.1, terracotta, true);
       box(0.2, 3.1, 0.35, -6.12, 2, 1.3, cream, true);
-      // Pilar derecho y hueco posterior: único acceso a la zona de atención.
-      box(0.22, 3.1, 0.35, 4.4, 2, 1.3, dark, true);
-      // Frente de ladrillos huecos: huecos reales entre piezas, interior oscuro detrás.
-      box(10.7, 0.72, 0.8, -0.9, 0.83, 1.3, black, true);
-      for (let row = 0; row < 6; row++) {
-        const y = 0.53 + row * 0.105;
-        box(10.7, 0.035, 0.045, -0.9, y, 1.73, terracotta);
-        for (let x = -6.2; x < 4.45; x += 0.16) box(0.035, 0.105, 0.045, x, y + 0.05, 1.73, terracotta);
+      // Acceso del personal al extremo derecho del mostrador.
+      box(0.22, 3.1, 0.35, 3.4, 2, 1.3, dark, true);
+      // Divisoria blanca entre atención y pasillo público.
+      box(0.18, 3.1, 3.7, 3.55, 2, -0.35, cream, true);
+
+      // Giro adicional del frente de venta en planta, alrededor de su extremo izquierdo.
+      // Mesada, ladrillos, vitrina, bandejas y caja comparten exactamente ese giro.
+      function counterFrame(build: () => void) {
+        const vg = new T.Group(), cg = new T.Group();
+        const pivot = v3(-6.2, 0, 1.3);
+        const matrix = new T.Matrix4().makeTranslation(pivot.x, 0, pivot.z)
+          .multiply(new T.Matrix4().makeRotationY(0.14))
+          .multiply(new T.Matrix4().makeTranslation(-pivot.x, 0, -pivot.z));
+        vg.applyMatrix4(matrix); cg.applyMatrix4(matrix);
+        const pv = visual, ps = solid; pv.add(vg); ps.add(cg); visual = vg; solid = cg;
+        build(); visual = pv; solid = ps;
       }
-      box(10.9, 0.09, 1, -0.9, 1.22, 1.3, black);
-      // Vitrina refrigerada frontal con perfiles negros, dos niveles y bandejas.
-      box(6.5, 0.55, 0.06, 0.85, 1.53, 1.77, displayGlass);
-      for (const x of [-2.4, -0.23, 1.94, 4.1]) box(0.055, 0.64, 0.08, x, 1.55, 1.78, black);
-      for (const y of [1.26, 1.82]) box(6.6, 0.06, 0.95, 0.85, y, 1.32, black);
-      box(6.4, 0.025, 0.75, 0.85, 1.52, 1.35, aluminum);
-      for (const y of [1.29, 1.55]) {
-        box(6.35, 0.015, 0.02, 0.85, y + 0.17, 1.65, light);
-        for (let i = 0; i < 10; i++) {
-          const x = -2.05 + i * 0.62;
-          box(0.48, 0.025, 0.43, x, y, 1.35, m.white);
-          if (i < 5) {
-            const food = pole(0.12, 0.26, x, y + 0.12, 1.35, tableTop); food.rotation.z = Math.PI / 2;
-          } else box(0.32, 0.12, 0.25, x, y + 0.08, 1.35, i % 2 ? m.leaves[1] : terracotta);
+      counterFrame(() => {
+        // Frente de ladrillos huecos: huecos reales entre piezas, interior oscuro detrás.
+        const counterLeft = -6.25, counterRight = 1.9;
+        const counterWidth = counterRight - counterLeft, counterCenter = (counterLeft + counterRight) / 2;
+        box(counterWidth, 0.72, 0.8, counterCenter, 0.83, 1.3, black, true);
+        for (let row = 0; row < 6; row++) {
+          const y = 0.53 + row * 0.105;
+          box(counterWidth, 0.035, 0.045, counterCenter, y, 1.73, terracotta);
+          for (let x = counterLeft + 0.04; x < counterRight; x += 0.16) box(0.035, 0.105, 0.045, x, y + 0.05, 1.73, terracotta);
         }
-      }
-      // Tres heladeras expositoras: roja, negra y negra, con botellas por estante.
-      for (const [i, x] of [-3.15, -1.95, -0.75].entries()) {
-        const casing = i === 0 ? red : black;
-        box(1.1, 2.35, 0.12, x, 1.63, -1.5, casing, true);
-        for (const dx of [-0.51, 0.51]) box(0.08, 2.35, 0.8, x + dx, 1.63, -1.16, casing);
-        for (const y of [0.51, 2.75]) box(1.1, 0.12, 0.8, x, y, -1.16, casing);
-        box(0.91, 1.92, 0.06, x, 1.58, -0.72, displayGlass);
-        for (const dx of [-0.46, 0.46]) box(0.025, 1.88, 0.025, x + dx, 1.58, -0.68, light);
-        box(0.08, 0.6, 0.08, x + 0.38, 1.63, -0.61, aluminum);
-        for (const y of [0.78, 1.24, 1.7, 2.16]) {
-          box(0.93, 0.035, 0.62, x, y, -1.1, aluminum);
-          for (let j = 0; j < 6; j++) {
-            const drink = [m.leaves[2], red, m.blue, m.white][j % 4];
-            pole(0.045, 0.25, x - 0.36 + j * 0.145, y + 0.15, -0.92, drink);
-            pole(0.02, 0.07, x - 0.36 + j * 0.145, y + 0.31, -0.92, drink);
+        box(counterWidth + 0.2, 0.09, 1, counterCenter, 1.22, 1.3, black);
+        // Puerta blanca abierta en el espacio recortado al extremo derecho.
+        for (const x of [2.05, 3.35]) box(0.055, 2.75, 0.12, x, 1.825, 1.3, aluminum, true);
+        box(1.35, 0.065, 0.12, 2.7, 3.2, 1.3, aluminum);
+        // Dos paños centrales bajos y un módulo derecho más alto, según la foto.
+        const edges = [-3.2, -1.52, 0.16, 1.85];
+        for (let i = 0; i < 3; i++) {
+          const a = edges[i], b = edges[i + 1], width = b - a;
+          const x = (a + b) / 2, top = i === 2 ? 2.18 : 1.76;
+          box(width - 0.05, top - 1.26, 0.035, x, (top + 1.26) / 2, 1.77, displayGlass);
+          for (const edge of [a, b]) box(0.05, top - 1.22, 0.07, edge, (top + 1.22) / 2, 1.78, black);
+          for (const y of [1.26, top]) box(width, 0.05, 0.95, x, y, 1.32, black);
+          // Tapa de vidrio y lateral visible en el salto de altura del módulo derecho.
+          box(width - 0.06, 0.025, 0.85, x, top - 0.02, 1.32, displayGlass);
+          if (i === 2) box(0.025, top - 1.26, 0.85, a, (top + 1.26) / 2, 1.32, displayGlass);
+          box(width - 0.08, 0.025, 0.75, x, 1.45, 1.35, aluminum);
+        }
+        for (const y of [1.29, 1.47]) {
+          box(4.9, 0.015, 0.02, -0.675, y + 0.14, 1.65, light);
+          for (let i = 0; i < 10; i++) {
+            const x = -2.85 + i * 0.48;
+            box(0.48, 0.025, 0.43, x, y, 1.35, m.white);
+            if (i < 5) {
+              const food = pole(0.10, 0.26, x, y + 0.1, 1.35, tableTop); food.rotation.z = Math.PI / 2;
+            } else box(0.32, 0.12, 0.25, x, y + 0.08, 1.35, i % 2 ? m.leaves[1] : terracotta);
           }
         }
-      }
-      // Estantería cálida con frascos, paquetes y vajilla sobre la mesada posterior.
-      box(3.4, 0.9, 0.65, 2.15, 0.93, -1.15, aluminum, true);
-      for (const x of [0.4, 3.9]) box(0.055, 2.45, 0.5, x, 2.08, -1.4, black);
-      for (const y of [1.6, 2.2, 2.8]) {
-        box(3.5, 0.055, 0.5, 2.15, y, -1.4, tableTop);
-        box(3.4, 0.02, 0.025, 2.15, y - 0.04, -1.13, warm);
-        for (let i = 0; i < 7; i++) {
-          const x = 0.65 + i * 0.45;
-          if (i % 2) pole(0.09, 0.24, x, y + 0.15, -1.35, terracotta);
-          else box(0.22, 0.3, 0.17, x, y + 0.18, -1.35, i % 3 ? cream : m.leaves[1]);
+      });
+      // Hoja abierta paralela a la divisoria para no invadir la circulación detrás de la caja.
+      box(0.045, 2.66, 1.22, 3.26, 1.82, -0.64, cream, true);
+      box(0.09, 0.4, 0.035, 3.2, 1.65, -1.15, aluminum);
+      // Fondo desplazado en conjunto hacia la izquierda y atrás para ampliar el paso.
+      frame({ center: [-2, -0.3], size: [9, 1], angle: 0 }, () => {
+        // Tres heladeras expositoras: roja, negra y negra, con botellas por estante.
+        for (const [i, x] of [-3.15, -1.95, -0.75].entries()) {
+          const casing = i === 0 ? red : black;
+          box(1.1, 2.35, 0.12, x, 1.63, -1.5, casing, true);
+          for (const dx of [-0.51, 0.51]) box(0.08, 2.35, 0.8, x + dx, 1.63, -1.16, casing);
+          for (const y of [0.51, 2.75]) box(1.1, 0.12, 0.8, x, y, -1.16, casing);
+          box(0.91, 1.92, 0.06, x, 1.58, -0.72, displayGlass);
+          for (const dx of [-0.46, 0.46]) box(0.025, 1.88, 0.025, x + dx, 1.58, -0.68, light);
+          box(0.08, 0.6, 0.08, x + 0.38, 1.63, -0.61, aluminum);
+          for (const y of [0.78, 1.24, 1.7, 2.16]) {
+            box(0.93, 0.035, 0.62, x, y, -1.1, aluminum);
+            for (let j = 0; j < 6; j++) {
+              const drink = [m.leaves[2], red, m.blue, m.white][j % 4];
+              pole(0.045, 0.25, x - 0.36 + j * 0.145, y + 0.15, -0.92, drink);
+              pole(0.02, 0.07, x - 0.36 + j * 0.145, y + 0.31, -0.92, drink);
+            }
+          }
         }
-      }
-      // Cafetera, molino, terminal de caja y pequeña pizarra sobre el mostrador.
-      box(1.05, 0.63, 0.6, 2.5, 1.65, -1.02, black);
-      box(0.95, 0.16, 0.07, 2.5, 1.7, -0.68, aluminum);
-      for (const x of [2.22, 2.72]) { pole(0.025, 0.16, x, 1.48, -0.67, aluminum); pole(0.06, 0.1, x, 1.37, -0.57, m.white); }
-      box(0.27, 0.32, 0.3, 3.4, 1.55, -1.03, aluminum);
-      pole(0.1, 0.25, 3.4, 1.82, -1.03, displayGlass);
-      box(0.5, 0.08, 0.4, -3.3, 1.31, 1.3, black);
-      box(0.45, 0.35, 0.09, -3.3, 1.54, 1.1, black);
-      box(0.37, 0.25, 0.012, -3.3, 1.55, 1.155, light);
-      box(0.46, 0.54, 0.06, 2.6, 1.55, 1.4, tableTop);
-      box(0.39, 0.46, 0.025, 2.6, 1.56, 1.44, black);
-      // Pantalla suspendida a la izquierda y ventilador circular en la pared.
-      box(1.7, 1.02, 0.08, -3.3, 3.02, 1.05, black);
-      box(1.55, 0.88, 0.015, -3.3, 3.02, 1.1, new T.MeshStandardMaterial({ color: "#101414", roughness: 0.2 }));
-      beam(v3(-3.3, 3.55, 1.02), v3(-3.3, 3.8, 1.02), 0.035, black);
+        // Estantería cálida con frascos, paquetes y vajilla sobre la mesada posterior.
+        box(3.4, 0.9, 0.65, 2.15, 0.93, -1.55, aluminum, true);
+        for (const x of [0.4, 3.9]) box(0.055, 2.45, 0.5, x, 2.08, -1.4, black);
+        for (const y of [1.6, 2.2, 2.8]) {
+          box(3.5, 0.055, 0.5, 2.15, y, -1.4, tableTop);
+          box(3.4, 0.02, 0.025, 2.15, y - 0.04, -1.13, warm);
+          for (let i = 0; i < 7; i++) {
+            const x = 0.65 + i * 0.45;
+            if (i % 2) pole(0.09, 0.24, x, y + 0.15, -1.35, terracotta);
+            else box(0.22, 0.3, 0.17, x, y + 0.18, -1.35, i % 3 ? cream : m.leaves[1]);
+          }
+        }
+        // Cafetera, molino, terminal de caja y pequeña pizarra sobre el mostrador.
+        box(1.05, 0.63, 0.6, 2.5, 1.65, -1.42, black);
+        box(0.95, 0.16, 0.07, 2.5, 1.7, -1.08, aluminum);
+        for (const x of [2.22, 2.72]) { pole(0.025, 0.16, x, 1.48, -1.07, aluminum); pole(0.06, 0.1, x, 1.37, -0.97, m.white); }
+        box(0.27, 0.32, 0.3, 3.4, 1.55, -1.43, aluminum);
+        pole(0.1, 0.25, 3.4, 1.82, -1.43, displayGlass);
+      });
+      counterFrame(() => {
+        box(0.5, 0.08, 0.4, -5, 1.31, 1.3, black);
+        box(0.45, 0.35, 0.09, -5, 1.54, 1.1, black);
+        box(0.37, 0.25, 0.012, -5, 1.55, 1.155, light);
+      });
+      counterFrame(() => {
+        box(0.46, 0.54, 0.06, 0.7, 1.55, 1.4, tableTop);
+        box(0.39, 0.46, 0.025, 0.7, 1.56, 1.44, black);
+      });
+      // TV en el extremo izquierdo, orientada en diagonal hacia las mesas.
+      frame({ center: [-5.1, 1.05], size: [1.7, 0.1], angle: -0.5 }, () => {
+        box(1.7, 1.02, 0.08, 0, 3.02, 0, black);
+        box(1.55, 0.88, 0.015, 0, 3.02, 0.05, new T.MeshStandardMaterial({ color: "#101414", roughness: 0.2 }));
+        beam(v3(0, 3.55, 0), v3(0, 3.8, 0), 0.035, black);
+      });
       const fan = new T.Mesh(new T.TorusGeometry(0.28, 0.018, 8, 28), aluminum);
       fan.position.set(-3.9, 2.96, -1.59); visual.add(fan);
       for (let i = 0; i < 8; i++) {
@@ -1114,8 +1195,8 @@ export function createFaculty() {
       chairBack.holes.push(hole);
     }
     const perforatedBack = new T.ExtrudeGeometry(chairBack, { depth: 0.025, bevelEnabled: false, curveSegments: 5 });
-    function chair(x: number, z: number, facing: number, perforated = false, raised = 0) {
-      frame({ center: [x, z], size: [0.5, 0.5], angle: facing > 0 ? 0 : Math.PI }, () => {
+    function chair(x: number, z: number, facing: number, perforated = false, raised = 0, yaw = 0) {
+      frame({ center: [x, z], size: [0.5, 0.5], angle: (facing > 0 ? 0 : Math.PI) + yaw }, () => {
         const seatY = 0.91 + raised;
         box(0.44, 0.045, 0.43, 0, seatY, 0, blackFurniture);
         for (const dx of [-0.17, 0.17]) for (const dz of [-0.16, 0.16])
@@ -1130,8 +1211,33 @@ export function createFaculty() {
       });
       furnitureBody(0.46, 0.48 + raised, 0.46, x, 0.7 + raised / 2, z);
     }
+    // Sillones exteriores de hierro: respaldo de rombos, asiento de listones y brazos curvos.
+    // Las posiciones se conservan; solo cambia el modelo utilizado en el exterior.
+    function ironChair(x: number, z: number, facing: number, yaw = 0) {
+      frame({ center: [x, z], size: [0.62, 0.6], angle: (facing > 0 ? 0 : Math.PI) + yaw }, () => {
+        for (let i = 0; i < 6; i++) box(0.52, 0.032, 0.065, 0, 0.91, -0.19 + i * 0.075, blackFurniture);
+        for (const dx of [-0.23, 0.23]) for (const dz of [-0.19, 0.2])
+          beam(v3(dx, 0.9, dz), v3(dx * 1.2, 0.48, dz * 1.3), 0.022, blackFurniture);
+        for (const y of [1.01, 1.45]) box(0.59, 0.045, 0.045, 0, y, 0.24 + (y - 1.01) * 0.18, blackFurniture);
+        for (const dx of [-0.275, 0.275]) beam(v3(dx, 0.91, 0.22), v3(dx, 1.46, 0.32), 0.024, blackFurniture);
+        for (const sign of [-1, 1]) for (let b = -0.36; b <= 0.361; b += 0.12) {
+          const lo = Math.max(-0.24, sign > 0 ? -0.18 - b : b - 0.18);
+          const hi = Math.min(0.24, sign > 0 ? 0.18 - b : b + 0.18);
+          if (hi <= lo) continue;
+          const y0 = 1.23 + sign * lo + b, y1 = 1.23 + sign * hi + b;
+          beam(v3(lo, y0, 0.24 + (y0 - 1.01) * 0.18), v3(hi, y1, 0.24 + (y1 - 1.01) * 0.18), 0.011, blackFurniture);
+        }
+        for (const side of [-1, 1]) {
+          const arm = new T.CatmullRomCurve3([v3(side * 0.28, 0.9, -0.2), v3(side * 0.3, 1.13, -0.23), v3(side * 0.3, 1.19, 0.01), v3(side * 0.28, 1.2, 0.27)]);
+          const mesh = new T.Mesh(new T.TubeGeometry(arm, 16, 0.021, 6, false), blackFurniture);
+          mesh.castShadow = true; visual.add(mesh);
+          beam(v3(side * 0.25, 0.8, 0.16), v3(side * 0.29, 1.15, 0.03), 0.013, blackFurniture);
+        }
+      });
+      furnitureBody(0.62, 0.5, 0.58, x, 0.72, z);
+    }
     // Mesas cuadradas de madera, sin invadir el pasillo junto a la puerta.
-    for (const [column, x] of [-2.4, 1.1, 4.5, 7.5].entries()) for (const z of [0, 3.6]) {
+    for (const [column, x] of [-2.4, 1.1, 4.5, 7.5].entries()) for (const z of [-1.7, 3.6]) {
       box(1.1, 0.05, 1.05, x, 1.2, z, tableTop);
       pole(0.055, 0.7, x, 0.83, z, blackFurniture);
       box(0.68, 0.045, 0.45, x, 0.5, z, blackFurniture);
@@ -1139,12 +1245,37 @@ export function createFaculty() {
       for (const side of [-1, 1]) chair(x, z + side * 0.88, side, column % 2 === 0);
       pole(0.045, 0.12, x, 1.28, z, m.white);
     }
-    // Mesas altas oscuras y banquetas alineadas debajo de la ventana horizontal.
-    for (const x of [-0.6, 2.8, 6.2]) {
-      box(1.6, 0.045, 0.65, x, 1.55, -4.9, blackFurniture);
-      for (const dx of [-0.65, 0.65]) for (const dz of [-0.23, 0.23]) pole(0.022, 1.05, x + dx, 1, -4.9 + dz, blackFurniture);
-      furnitureBody(1.6, 1.1, 0.65, x, 1, -4.9);
-      for (const dx of [-0.45, 0.45]) chair(x + dx, -3.95, 1, false, 0.3);
+    // Contra la pared: alternar mesas altas y bajas, como en la foto de Horacio.
+    // Sin sillas detrás de las mesas ni separaciones amplias respecto del muro.
+    for (const x of [-2.3, 3.3]) {
+      box(1.5, 0.045, 0.65, x, 1.55, -5.48, blackFurniture);
+      for (const dx of [-0.62, 0.62]) for (const dz of [-0.23, 0.23]) pole(0.022, 1.05, x + dx, 1, -5.48 + dz, blackFurniture);
+      furnitureBody(1.5, 1.1, 0.65, x, 1, -5.48);
+      for (const side of [-1, 1]) chair(x + side * 1.03, -5.18, 1, false, 0.3, -side * Math.PI / 2);
+    }
+    for (const x of [0.5, 6.4]) {
+      box(1.25, 0.05, 0.85, x, 1.2, -5.38, tableTop);
+      pole(0.055, 0.7, x, 0.83, -5.38, blackFurniture);
+      box(0.68, 0.045, 0.45, x, 0.5, -5.38, blackFurniture);
+      furnitureBody(1.25, 0.73, 0.85, x, 0.84, -5.38);
+      for (const side of [-1, 1]) {
+        chair(x + side * 0.98, -5.12, 1, false, 0, -side * Math.PI / 2);
+        chair(x + side * 0.34, -4.48, 1, true);
+      }
+      pole(0.045, 0.12, x, 1.28, -5.38, m.white);
+    }
+    // Dos conjuntos frente a la entrada: cuatro sillas, una en cada lado de la mesa.
+    // Reemplazan los bancos anteriores y dejan el acceso central despejado.
+    for (const x of [-3.4, 4.8]) {
+      const z = front + 2.6;
+      box(1.2, 0.055, 1.1, x, 1.2, z, tableTop);
+      pole(0.055, 0.7, x, 0.83, z, blackFurniture);
+      box(0.65, 0.045, 0.45, x, 0.5, z, blackFurniture);
+      furnitureBody(1.2, 0.73, 1.1, x, 0.84, z);
+      for (const side of [-1, 1]) {
+        ironChair(x, z + side * 0.95, side);
+        ironChair(x + side * 1, z, 1, -side * Math.PI / 2);
+      }
     }
     // Mobiliario de terraza; el paso de blindex queda despejado entre las mesas.
     for (const z of [-3.7, -0.3, 5.1]) {
@@ -1153,7 +1284,7 @@ export function createFaculty() {
       pole(0.055, 0.7, x, 0.83, z, blackFurniture);
       box(0.65, 0.045, 0.45, x, 0.5, z, blackFurniture);
       furnitureBody(1.2, 0.73, 0.9, x, 0.84, z);
-      for (const side of [-1, 1]) chair(x, z + side * 0.88, side, true);
+      for (const side of [-1, 1]) ironChair(x, z + side * 0.88, side);
     }
     // Jardinera de sansevierias junto al muro izquierdo y maceta alta de la explanada.
     box(3.8, 0.2, 0.7, -w / 2 + 2.2, 0.52, front + 0.45, m.brick, true);
