@@ -124,7 +124,7 @@ Una tarea termina cuando cumple sus criterios de aceptación, se verificó de fo
 
 ## Estado
 
-Versión 0.1.0: frontend ejecutable sin escaneos navegables, reconstrucción aproximada del sector CyT, backend de usuarios, contenidos y chat, pruebas, Maven Wrapper y Compose. Qué se probó y qué falta: [docs/verificacion.md](docs/verificacion.md) y [docs/pendientes.md](docs/pendientes.md). PostgreSQL 18 es la base de entrega; el perfil `local` con H2 es solo para desarrollo. Sin despliegue público ni avatares sincronizados.
+Versión 0.1.0: frontend ejecutable sin escaneos navegables, reconstrucción aproximada del sector CyT, backend de usuarios, contenidos y chat, pruebas, Maven Wrapper y Compose. Qué se probó y qué falta: [docs/verificacion.md](docs/verificacion.md) y [docs/pendientes.md](docs/pendientes.md). PostgreSQL 18 es la base de entrega; el perfil `local` con H2 es solo para desarrollo. Sin despliegue público ni avatares sincronizados. Desde el 03/11/2026 `backend/` no está en el repositorio (retirado en `9c5d019` a favor de `campus-backend/`); hasta que el equipo resuelva la unificación, ver [docs/arquitectura.md](docs/arquitectura.md#aporte-campus-backend).
 
 ## Simplificación del inicio — 02/11/2026
 

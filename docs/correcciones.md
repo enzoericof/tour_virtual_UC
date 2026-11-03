@@ -88,3 +88,12 @@ Incoherencias halladas al contrastar los documentos con el código y las pruebas
 | `base-geografica.md` | «No se asignan números de aula»; una puerta de una hoja por aula | Puerta doble de 1,7 m con hoja fija y ventana, montante y prisma con el número (10x, 20x, 30x) | Aclaración del equipo, `IMG_5639` |
 | `base-geografica.md` | «Los módulos de 5 m del plano redondean los 5,14 m [del escaneo] para que entren 15 en los 75 m» | El escaneo (72 m) es un 11 % más largo que el bloque; corregido, su módulo da unos 4,6 m | Medida del equipo |
 | `faculty-blueprint.test.mjs` | El vértice del frente curvo de Manfred debía quedar entre los bordes de la rampa | Con la rampa 0,7 m más al este, el vértice queda 0,12 m al oeste de su borde; se comprueba que esté a menos de 1,5 m de su eje. Manfred sigue anclado a Bedelía | `npm test` |
+
+## 03/11/2026 — revisión general (rama `fix/puertas-placas-revision`)
+
+| Documento | Incorrecto | Correcto | Fuente de verdad |
+| --- | --- | --- | --- |
+| `faculty-blueprint.test.mjs` | La Sala Manfred debía estar sobre el prisma de la plataforma (fallo arrastrado desde el 01/11) | Desde `2631f6f` es un anfiteatro con gradas que bajan: queda fuera del prisma y su frente da a la explanada. La prueba comprueba eso | `2631f6f`, `npm test`, recorrido con el caminante |
+| `faculty-blueprint.ts`, `faculty-reconstruction.ts` | Escalinata recta al sur del cuadrado en `platformSteps`, salteada por índice al dibujar; su pie caía dentro de la plaza abierta (el fallo anterior lo ocultaba) | Retirada de los datos: la reemplazaron los escalones de la explanada de la cantina | `base-geografica.md` (contorno de explanada), `npm test` |
+| `base-geografica.md`, código | Número de aula en un prisma triangular horizontal; montante de 0,53 m | Dos placas verticales en punta hacia afuera, una hacia cada lado; montante de 0,265 m | Aclaración del usuario |
+| `README.md`, `AGENTS.md`, `arquitectura.md`, `verificacion.md` | `backend/` es el servidor activo del frontend y de Docker | Retirado en `9c5d019`; queda abierto, sin corrección de código, por decisión del usuario | `git ls-files`, `campus-backend/setup.md` |

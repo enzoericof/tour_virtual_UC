@@ -36,3 +36,6 @@ hs_err_pid*
 
 # Logs adicionales
 spring.log
+
+# Originales HEIC de la raíz (fotos del equipo): no se suben (AGENTS.md).
+/*.HEIC

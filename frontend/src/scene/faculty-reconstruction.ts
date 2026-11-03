@@ -301,31 +301,31 @@ export function createFaculty() {
       { rotation: -swing });
     return top;
   }
-  /** Prisma triangular con el número del aula, contra la pared sobre la puerta (IMG_5639): dos caras
-   * inclinadas con el texto y la base, contra el muro, lisa. */
+  /** Cartel con el número del aula sobre la puerta (IMG_5639): dos placas verticales unidas en una
+   * arista que sale de la pared, una mirando hacia cada lado de la galería; la base, contra el muro,
+   * no lleva texto. */
   function roomSign(text: string, x: number, y: number, z: number, front: number) {
-    const canvas = document.createElement("canvas"); canvas.width = 256; canvas.height = 80;
+    const canvas = document.createElement("canvas"); canvas.width = 256; canvas.height = 124;
     const ctx = canvas.getContext("2d")!;
-    ctx.fillStyle = "#1f4c7c"; ctx.fillRect(0, 0, 256, 80);
-    ctx.fillStyle = "#f4f1e8"; ctx.font = "600 40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText(text, 128, 42, 236);
+    ctx.fillStyle = "#1f4c7c"; ctx.fillRect(0, 0, 256, 124);
+    ctx.fillStyle = "#f4f1e8"; ctx.font = "600 50px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(text, 128, 64, 236);
     const map = new T.CanvasTexture(canvas); map.colorSpace = T.SRGBColorSpace;
-    const l = 0.5, h = 0.1, apex = 0.11 * front, u = (px: number) => front > 0 ? (px + l / 2) / l : (l / 2 - px) / l;
-    const position: number[] = [], uv: number[] = [];
-    const quad = (a: number[], b: number[], va: number, vb: number) => {
-      // a y b: (y, z) de los bordes de arriba y de abajo de la cara; el texto queda derecho.
-      for (const [px, [py, pz], v] of [[-l / 2, a, va], [l / 2, a, va], [l / 2, b, vb], [-l / 2, a, va], [l / 2, b, vb], [-l / 2, b, vb]] as const) {
-        position.push(px, py, pz); uv.push(u(px), v);
-      }
-    };
-    quad([h, 0], [0, apex], 1, 0);
-    quad([0, apex], [-h, 0], 1, 0);
-    for (const px of [-l / 2, l / 2]) for (const [py, pz] of [[h, 0], [0, apex], [-h, 0]]) { position.push(px, py, pz); uv.push(0.01, 0.02); }
+    // Planta con la galería hacia +z: base de 0,5 m sobre la pared y arista a 0,22 m. Cada placa va de
+    // la izquierda a la derecha de quien la mira de frente, para que el texto se lea derecho.
+    const half = 0.25, out = 0.22, h = 0.08, position: number[] = [], uv: number[] = [];
+    for (const [[ax, az], [bx, bz]] of [[[-half, 0], [0, out]], [[0, out], [half, 0]]]) {
+      for (const [px, py, pz, u, v] of [[ax, h, az, 0, 1], [bx, h, bz, 1, 1], [bx, -h, bz, 1, 0],
+        [ax, h, az, 0, 1], [bx, -h, bz, 1, 0], [ax, -h, az, 0, 0]]) { position.push(px, py, pz); uv.push(u, v); }
+    }
+    // Tapas de arriba y de abajo, del color del fondo.
+    for (const py of [h, -h]) for (const [px, pz] of [[-half, 0], [0, out], [half, 0]]) { position.push(px, py, pz); uv.push(0.01, 0.02); }
     const geo = new T.BufferGeometry();
     geo.setAttribute("position", new T.Float32BufferAttribute(position, 3)); geo.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
     geo.computeVertexNormals();
     const mesh = new T.Mesh(geo, new T.MeshBasicMaterial({ map, side: T.DoubleSide }));
-    mesh.position.set(x, y, z); visual.add(mesh);
+    // Galería hacia -z: se gira en vez de reflejarse, para no invertir el texto.
+    mesh.position.set(x, y, z); mesh.rotation.y = front > 0 ? 0 : Math.PI; visual.add(mesh);
   }
   /** Letras corpóreas claras sobre ladrillo, en un plano vertical que mira hacia +x (cara este). Cada
    * renglón: texto, alto de letra y altura de su eje desde el borde superior, en metros. */
@@ -711,7 +711,7 @@ export function createFaculty() {
     prism(outline, 0, PLAZA_LEVEL, m.concrete);
     pave(outline, m.stone, PLAZA_LEVEL + 0.005);
   }
-  for (const s of plan.platformSteps.filter((_, i) => i !== 1))
+  for (const s of plan.platformSteps)
     frame({ center: s.top, size: [STEPS_RUN, s.width], angle: s.angle }, () => steps(STEPS_RUN, 0, PLAZA_LEVEL, s.width));
 
   // ---- Plaza techada: cubierta exenta, separada de la cabecera este del Bloque 1 ----
@@ -774,10 +774,9 @@ export function createFaculty() {
       pole(0.09, 0.3, x, 1, d / 2 - 1.5, gold); pole(0.22, 0.25, x, 1.27, d / 2 - 1.5, gold);
     }
   }, PLAZA_LEVEL);
-  // Sala Manfred: auditorio con el escenario y el pizarrón al norte (fondo), el frente curvo hacia la
-  // rampa del Bloque 1, fachada vidriada con entrada 2 cortando la curva frontal (rectángulo verde).
-// ---- Sala Manfred (Reconstrucción Limpia - Anfiteatro Descendente) ----
-// ---- Sala Manfred (Anfiteatro Descendente con Paredes Extendidas) ----
+  // ---- Sala Manfred: anfiteatro con gradas que bajan hacia el escenario y el pizarrón al norte (fondo),
+  // el frente curvo hacia la rampa del Bloque 1 y la fachada vidriada con la entrada en la curva. Sus muros
+  // bajan hasta cerrar el foso, que queda por debajo del nivel de la plataforma. ----
   frame(plan.manfred, () => {
     const [w, d] = plan.manfred.size, bulge = plan.manfred.bulge, zf = d / 2 - bulge, hw = 3.6;
     const radius = (w * w / 4 + bulge * bulge) / (2 * bulge), zc = d / 2 - radius, outline = bulgedOutline(w, d, bulge);
@@ -879,8 +878,7 @@ export function createFaculty() {
     box(4.8, 1.4, 0.04, 0, pitY + 1.4, -d / 2 + 0.22, m.white);
   }, PLAZA_LEVEL);
 
-  // ---- TECHO 1 (MARQUESINA EXTIENDE LA COBERTURA SOBRE EL SECTOR SUPERIOR RED) ----
-// ---- TECHO 1 (COBERTURA EXTENDIDA HACIA LA DERECHA) ----
+  // ---- Techo 1: marquesina sobre la entrada de Manfred, extendida hacia Bedelía ----
   {
     const mf = plan.manfred;
     const [mw] = mf.size, mb = mf.bulge;

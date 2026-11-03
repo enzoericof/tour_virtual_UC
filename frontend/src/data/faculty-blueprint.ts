@@ -30,8 +30,9 @@ export const block1 = { length: 65, depth: 12, levels: 4, bay: 4.5, margin: 1, g
 export const blockG = { length: 65, depth: 12, levels: 3, bay: 5, margin: 0, gallery: 2.5 } as const;
 /** Puerta doble de las aulas del Bloque 1 (IMG_5639; medida del equipo del 02/11/2026): dos hojas que
  * suman 1,7 m; la izquierda, fija, con una ventana cuadrada de 45 cm a 1,30 m del suelo, y la derecha
- * de abrir. Alto de hojas y montante de dos paños estimados en la foto. */
-export const classroomDoor = { width: 1.7, height: 2, frame: 0.06, window: 0.45, windowSill: 1.3, transom: 0.53 } as const;
+ * de abrir. Alto de hojas estimado en la foto; montante de dos paños de la mitad de alto que el estimado
+ * inicial (pedido del usuario del 03/11/2026). */
+export const classroomDoor = { width: 1.7, height: 2, frame: 0.06, window: 0.45, windowSill: 1.3, transom: 0.265 } as const;
 /** Aulas por piso en ambos bloques, de anchos desiguales (aclaración del equipo, 01/11/2026). */
 export const ROOMS_PER_FLOOR = 6;
 /** Giro común del Bloque G, la plaza techada, Bedelía y la cantina respecto del Bloque 1:
@@ -178,6 +179,8 @@ const corridor: Vec2[] = [[manfredEast, bedeliaCorner[1]], bedeliaCorner, bedeli
   [manfredEast, manfredFront - manfredBulge]];
 const corridorTop: Vec2 = [(manfredEast + bedeliaCorner[0]) / 2, bedeliaCorner[1]];
 const corridorFoot = add(corridorTop, [[0, -1], STEPS_RUN]);
+// Borde sur del cuadrado, donde bajan los escalones de la cantina hacia el área común 1 (la escalinata
+// recta que había aquí se retiró con la explanada de la cantina, 02/11/2026).
 const squareSteps = fromRect(cantina, [-11, 22]);
 const galleryStepsTop = east + STEPS_RUN;
 
@@ -217,8 +220,6 @@ export const facultyBlueprint = {
     // Prolongación de la galería de planta baja del Bloque 1 hasta la plataforma, junto al ascensor
     // (foto IMG_5706): ocupa todo el ancho de la galería.
     { top: [galleryStepsTop, half.z - block1.gallery / 2], width: block1.gallery, angle: Math.PI },
-    // Hacia el área común 1, al sur del cuadrado.
-    { top: squareSteps, width: 8, angle: gridAngle + Math.PI / 2 },
     // Salida norte del pasillo entre la Sala Manfred y Bedelía.
     { top: corridorTop, width: 2, angle: -Math.PI / 2 },
   ] as Steps[],
@@ -278,7 +279,7 @@ export const facultyBlueprint = {
     [[55, 37], [30, 50]],
     // Del pie de la escalinata norte del pasillo de Manfred hacia el oeste, por detrás de la sala.
     [corridorFoot, [manfredEast - 1.5, manfredBack - 2], [manfredWest - 2, manfredBack - 2], [12, -12], [0, -22]],
-    // Subida a la plataforma por la escalinata del cuadrado, cruce de la plaza y pasillo de Manfred.
+    // Subida a la plataforma por el borde sur del cuadrado, cruce de la plaza y pasillo de Manfred.
     [[41, 11], [47, 11.5], add(squareSteps, [Z, STEPS_RUN]), squareSteps, add(plazaNorth, [X, -2], [Z, 0.5]),
       corridorTop, corridorFoot],
   ] as Vec2[][],

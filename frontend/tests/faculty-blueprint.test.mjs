@@ -152,7 +152,12 @@ test("The toilet tower: a core from the gallery with two half-cylinders, 10 m ti
 
 test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit 1.4 m up, with ways down", () => {
   assert.ok(close(PLAZA_LEVEL, 0.8 * FLOOR_HEIGHT / 2), "20 % below half a floor");
-  for (const key of ["coveredPlaza", "bedelia", "cantina", "manfred"]) assert.ok(onPlatform(plan[key].center), key);
+  for (const key of ["coveredPlaza", "bedelia", "cantina"]) assert.ok(onPlatform(plan[key].center), key);
+  // Sala Manfred: anfiteatro con gradas descendentes (commit 2631f6f). Queda fuera del prisma de la
+  // plataforma para que el foso baje y su frente da a la explanada, a la altura de la plataforma.
+  const manfredFront = plan.manfred.center[1] + plan.manfred.size[1] / 2;
+  assert.ok(!onPlatform(plan.manfred.center), "Sunken auditorium, outside the platform prism");
+  assert.ok(onPlatform([plan.manfred.center[0], manfredFront + 0.3]), "Its front opens onto the platform");
   assert.ok(onPlatform(center(plan.corridor)), "Corridor between Manfred and Bedelía");
   assert.ok(onPlatform(center(plan.openPlaza)), "Open plaza");
   for (const id of ["acceso", "plaza", "plaza-abierta", "bedelia", "sala-manfred"]) {
