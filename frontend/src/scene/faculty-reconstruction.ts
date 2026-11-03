@@ -268,6 +268,7 @@ export function createFaculty() {
     }
     return spring;
   }
+  
   /** Cubierta a cuatro aguas con cara inferior de chapa (textura del escaneo), centrada en x = cx. */
   function hipRoof(w: number, d: number, y: number, rise: number, top: T.Material, cx = 0) {
     const roof = new T.Group(), previous = visual; roof.position.x = cx; visual.add(roof); visual = roof;
@@ -579,6 +580,8 @@ export function createFaculty() {
       { text: "PROF. ING. LUIS ALBERTO MEYER JOU", size: 0.34, at: 1.6 },
     ], 9, 2.6, faceX, 2 * H + 1.75, faceZ);
   });
+
+  
   {
     // Escalera tipo Pompidou: tramo y descanso unido a la galería por piso, bajo una bóveda que
     // sigue la pisada (sube con los tramos y se aplana en los descansos).
@@ -1095,14 +1098,44 @@ export function createFaculty() {
     glazing(w, d / 2, Math.floor(Math.ceil(w / 1.2) / 2));
     sign(name, 0, 2.65, d / 2 + 0.08, Math.min(w - 1, 4.5));
   }
-  frame(plan.bedelia, () => {
+frame(plan.bedelia, () => {
     const [w, d] = plan.bedelia.size;
     glazedRoom(w, d, "BEDELÍA");
+    
+    // Mostradores / Escritorios interiores
     const gold = new T.MeshStandardMaterial({ color: "#c2a65a", metalness: 0.25, roughness: 0.45 });
     for (let x = -6; x <= 6; x += 1.5) {
       box(0.7, 0.07, 0.55, x, 0.8, d / 2 - 1.5, m.metal);
-      pole(0.09, 0.3, x, 1, d / 2 - 1.5, gold); pole(0.22, 0.25, x, 1.27, d / 2 - 1.5, gold);
+      pole(0.09, 0.3, x, 1, d / 2 - 1.5, gold); 
+      pole(0.22, 0.25, x, 1.27, d / 2 - 1.5, gold);
     }
+
+    // ==========================================
+    // GALERÍA AMPLIADA EN PROFUNDIDAD (TECHO ROJO Y BARRAS NEGRAS)
+    // ==========================================
+    const galleryDepth = 4.8;       // <-- AUMENTADO (de 2.6 a 4.8): Estira el techo hacia la derecha
+    const galleryH = 3.4;           // Altura del techo
+    const frontZ = d / 2;           // Fachada de vidrio
+
+    const xStart = -w / 2 - 4.8;    // Extensión a lo largo del pasillo
+    const xEnd = w / 2 - 1.2;
+    const colStep = 2.8;            // Separación entre columnas
+
+    const roofW = (xEnd - xStart) + 1.6;
+    const roofCenterX = (xStart + xEnd) / 2;
+
+    // 1. Losa de hormigón del techo extendida
+    box(roofW, 0.20, galleryDepth, roofCenterX, galleryH, frontZ + galleryDepth / 2, m.concrete, false);
+    
+    // 2. Cielorraso inferior
+    box(roofW, 0.02, galleryDepth, roofCenterX, galleryH - 0.11, frontZ + galleryDepth / 2, m.roofUnder, false);
+
+    // 3. Fila exterior de columnas de hormigón (posicionadas sobre las barras negras dibujadas)
+    const colZ = frontZ + galleryDepth - 0.2;
+    for (let x = xStart; x <= xEnd + 0.1; x += colStep) {
+      pole(0.18, galleryH, x, galleryH / 2, colZ, m.concrete, true);
+    }
+
   }, PLAZA_LEVEL);
   // ---- Sala Manfred: anfiteatro con gradas que bajan hacia el escenario y el pizarrón al norte (fondo),
   // el frente curvo hacia la rampa del Bloque 1 y la fachada vidriada con la entrada en la curva. Sus muros

@@ -148,7 +148,7 @@ const plazaNorth = add(plazaWest, [X, 10]);
 const accessRetreat = STEPS_RUN;
 // Ajuste visual hacia el Bloque 1, según la flecha de la referencia del usuario.
 const plazaLateralAdjustment = -0.8;
-const coveredPlaza = rectFromCorner([plazaWest[0] + accessRetreat + plazaLateralAdjustment, plazaWest[1]], [10, 15], gridAngle);
+const coveredPlaza = rectFromCorner([plazaWest[0] + accessRetreat + plazaLateralAdjustment, plazaWest[1]], [10, 20], gridAngle);
 const [, , , plazaSouth] = rectCorners(coveredPlaza);
 /** Cuadrado descubierto entre la plaza techada (oeste), Bedelía (norte) y la cantina (este). */
 const square = { corner: plazaNorth, size: [22, 15] as Vec2 };
@@ -170,7 +170,7 @@ export const cantinaForecourt = {
 // jardín queda al costado; no debe cortar el recorrido principal (corrección de Horacio).
 const openPlaza = [plazaNorth, cantinaFront, add(cantinaFront, [Z, square.size[1]]),
   add(plazaNorth, [Z, square.size[1]])];
-const bedeliaCorner = add(plazaNorth, [X, -1], [Z, -10]);
+const bedeliaCorner = add(plazaNorth, [X, +3], [Z, -15]);
 const bedelia = rectFromCorner(bedeliaCorner, [20, 10], gridAngle);
 const bedeliaWest = (z: number) => pointAtZ(bedeliaCorner, add(bedeliaCorner, [Z, 10]), z);
 // Sala Manfred (12 × 9 m): escenario y pizarrón al norte y el frente curvo al sur hacia la rampa.
@@ -254,11 +254,11 @@ export const facultyBlueprint = {
   platform: [
     [[manfredWest, manfredFront], [manfredEast, manfredFront], [manfredEast, bedeliaCorner[1]], bedeliaCorner,
       add(bedeliaCorner, [Z, 10]), plazaNorth, rectCorners(coveredPlaza)[0], pointAtZ(rectCorners(coveredPlaza)[0], plazaSouth, half.z),
-      ...elevatorUpperEdge, [stairEast, stairFoot],
+      ...elevatorUpperEdge, [stairEast, stairFoot], 
       [ramp.east, stairFoot], [ramp.east, ramp.top], [ramp.west, ramp.top], [ramp.west, -half.z], [manfredWest, -half.z]],
     rectCorners(coveredPlaza),
     // Unión lateral del pasillo recto con la plaza girada, sin grieta triangular.
-    
+    [plazaNorth, add(plazaNorth, [Z, -15]), add(plazaNorth, [X, 20], [Z, -15]), cantinaFront],
     // Cierra la cuña que dejó el retiro de la plaza junto al frente de Bedelía.
     [plazaNorth, rectCorners(coveredPlaza)[1], rectCorners(coveredPlaza)[0]],
     openPlaza,
