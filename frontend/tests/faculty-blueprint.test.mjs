@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   facultyBlueprint as plan, facultyCorners as corner, block1, blockG, gridAngle, FLOOR_HEIGHT, PLAZA_LEVEL, STEPS_RUN,
   cantinaForecourt, ROOMS_PER_FLOOR, rectCorners, facultyVisitPoints, facultyVisitTargets, worldPolygon, inFacultyZone, towerOutline,
-  towerAnnex, manfredOutline, structureLines, pilasters, classroomDoor,
+  towerAnnex, manfredOutline, structureLines, pilasters, classroomDoor, elevatorStairEdge,
 } from "../src/data/faculty-blueprint.ts";
 import { insidePolygon, facultyToWorld } from "../src/data/campus-geometry.ts";
 
@@ -11,6 +11,38 @@ const close = (a, b, tolerance = 0.01) => Math.abs(a - b) <= tolerance;
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const edges = (rect) => { const c = rectCorners(rect); return [dist(c[0], c[1]), dist(c[1], c[2])]; };
 const center = (points) => points.reduce((s, p) => [s[0] + p[0] / points.length, s[1] + p[1] / points.length], [0, 0]);
+
+test("Access stair keeps a right-angle corner and the platform does not cover its treads", () => {
+  for (let i = 1; i < 20; i++) {
+    const edge = elevatorStairEdge(STEPS_RUN * i / 20), [a, b, c] = edge;
+    assert.ok(close((a[0]-b[0])*(c[0]-b[0])+(a[1]-b[1])*(c[1]-b[1]), 0));
+    for (let side = 0; side < 2; side++) {
+      const p = center([edge[side], edge[side+1]]);
+      assert.ok(!plan.platform.some(outline => insidePolygon(p, outline)), "Raised floor overlaps the stair");
+    }
+  }
+});
+
+test("Covered walkway meets the plaza steps and follows the short side of Bloque G", () => {
+  const [start, end] = plan.coveredWalk, steps = plan.plazaGallery.smallSteps;
+  const offset = start.map((n,axis) => n-steps.center[axis]-steps.direction[axis]*steps.run);
+  assert.ok(close(offset[0]*steps.direction[0]+offset[1]*steps.direction[1],0), "Starts at the foot of the stairs");
+  assert.ok(Math.hypot(...offset) < steps.width/2, "Centerline meets the bottom tread, beside the table");
+  const corners = rectCorners(plan.block2), direction = [corners[3][0]-corners[0][0], corners[3][1]-corners[0][1]];
+  const walk = [end[0]-start[0], end[1]-start[1]];
+  assert.ok(close(walk[0]*direction[1]-walk[1]*direction[0], 0), "Walkway must be parallel to the short facade");
+  assert.ok(walk[0]*direction[0]+walk[1]*direction[1] > 0, "Walkway heads out from the plaza");
+});
+
+test("The photographed gallery has five pillars, a supported water station and a garden outside the steps", () => {
+  const g = plan.plazaGallery;
+  assert.equal(g.columns.length, 5);
+  for (let i=1;i<g.columns.length;i++)
+    assert.ok(dist(g.columns[i-1],g.columns[i])>3 && dist(g.columns[i-1],g.columns[i])<4, "Pillar bays follow the stair proportions");
+  assert.ok(plan.platform.some(outline=>insidePolygon(g.waterStation.center,outline)), "Water station stands on the plaza");
+  for(const point of g.garden)
+    assert.ok(!plan.platform.some(outline=>insidePolygon(point,outline)), "Garden must not cover the raised circulation");
+});
 function distanceToSegment(p, a, b) {
   const dx = b[0] - a[0], dz = b[1] - a[1];
   const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dz) / (dx * dx + dz * dz)));

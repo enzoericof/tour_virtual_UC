@@ -169,3 +169,15 @@ Build y TypeScript correctos. Cuatro pruebas nuevas aprobadas: giro relativo baj
 ## Integración en main — 02/11/2026
 
 Integrada feat/distribucion-mesas-cantina sobre origin/main 27433e0 por solicitud de Horacio. Conservados cambios de Bloque 1, escaleras y backend de main; conflictos documentales resueltos conservando ambas secciones. Build correcto. Suite integrada: 33/35 aprobadas, incluidas las cuatro de captura del mouse. Fallan Walkable slope del extremo este y nivel de Manfred; faculty-blueprint.ts y su prueba son idénticos a origin/main, sin cambios de esta integración. Sin modificaciones de backend en la rama de cantina.
+
+## Caminero y escalinata — revisión local 02/11/2026
+
+TypeScript y build correctos. Nueva prueba del ángulo recto y de ausencia de plataforma sobre las huellas: aprobada. Suite: 34/36 aprobadas; los mismos dos fallos anteriores (`Walkable slope` del extremo este y nivel de Manfred) se reprodujeron antes de editar. Revisión visual de escalera, unión de la lona y vista elevada en navegador con la geometría real. Comprobaciones temporales: 38 rayos sobre ambos brazos de la escalera, 31 sobre el caminero (tolerancia de 3 cm en el cruce con el ramal inclinado) y 93 posiciones de cápsula de radio 0,28 m bajo la cubierta, libres en tres franjas del paso. No se afirma una prueba manual de movimiento con captura del mouse: el navegador integrado la rechaza. Visor temporal retirado después de la revisión. Trabajo local, sin commit ni push.
+
+### Corrección del caminero — 03/11/2026
+
+Toldo azul y unión a los tres peldaños señalados por el usuario, paralelo al eje corto del Bloque G. Build correcto y tres pruebas específicas aprobadas: escalera en esquina, conexión/orientación del caminero y red peatonal conectada. En el nuevo trazado: 93 rayos interiores de suelo (tolerancia de 3 cm) y 93 cápsulas libres de radio 0,28 m en tres franjas bajo el toldo. Revisión visual elevada y desde el camino hacia los peldaños. Se conserva la mesa lateral. Visor temporal retirado; capturas de revisión ignoradas por Git. Sin commit ni push.
+
+### Detalle del acceso — 03/11/2026
+
+Cinco pilares, bebedero, banco y cantero irregular revisados visualmente desde tres ángulos. Build correcto; suite 36/38 aprobadas, con los dos fallos anteriores del extremo este y Manfred. Nueva prueba de cantidad/separación de pilares, apoyo del bebedero y jardín fuera de la plataforma: aprobada. Sobre colisiones reales: 38 rayos en ambos brazos de la escalinata y 39 cápsulas libres en la circulación interior de la galería. Tres rayos adicionales confirman apoyo del banco en el piso visible de la plataforma. Visor temporal retirado, capturas ignoradas por Git. Todo local, sin commit ni push.
