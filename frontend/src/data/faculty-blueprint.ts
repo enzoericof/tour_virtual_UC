@@ -16,9 +16,9 @@ export type Steps = { top: Vec2; width: number; angle: number };
 export type Rooms = { from: number; to: number; walls: number[]; doors: number[] };
 
 export const FLOOR_HEIGHT = 3.5;
-/** Plataforma de la plaza techada, el cuadrado, Bedelía, la cantina y la Sala Manfred, 1,40 m sobre la
- * planta baja del Bloque 1: el equipo la bajó un 20 % desde la media altura (1,75 m) el 01/11/2026. */
-export const PLAZA_LEVEL = 1.4;
+/** Nivel compartido de la plaza: cinco contrahuellas de 17,4 cm desde el piso rosado (0,03 m).
+ * Corrección solicitada el 02/11/2026; sustituye la cota anterior de 1,40 m. */
+export const PLAZA_LEVEL = 0.9;
 /** Recorrido de cada escalinata de la plataforma: ocho escalones de 17,5 × 30 cm. */
 export const STEPS_RUN = 2.4;
 /** Bloque 1 (techo gris): 65 × 12 m (medida del equipo del 02/11/2026; antes 75 m), planta baja y
@@ -142,7 +142,11 @@ const plazaShift = 6.5;
 const reach = block1.depth * -Math.sin(gridAngle);
 const plazaWest: Vec2 = [east - reach * X[0] + plazaShift, -half.z - reach * X[1]];
 const plazaNorth = add(plazaWest, [X, 10]);
-const coveredPlaza = rectFromCorner(plazaWest, [10, 15], gridAngle);
+// Retiro solicitado: una profundidad de escalera hacia la plaza (+x).
+const accessRetreat = STEPS_RUN;
+// Ajuste visual hacia el Bloque 1, según la flecha de la referencia del usuario.
+const plazaLateralAdjustment = -0.8;
+const coveredPlaza = rectFromCorner([plazaWest[0] + accessRetreat + plazaLateralAdjustment, plazaWest[1]], [10, 15], gridAngle);
 const [, , , plazaSouth] = rectCorners(coveredPlaza);
 /** Cuadrado descubierto entre la plaza techada (oeste), Bedelía (norte) y la cantina (este). */
 const square = { corner: plazaNorth, size: [22, 15] as Vec2 };
@@ -179,12 +183,49 @@ const corridor: Vec2[] = [[manfredEast, bedeliaCorner[1]], bedeliaCorner, bedeli
 const corridorTop: Vec2 = [(manfredEast + bedeliaCorner[0]) / 2, bedeliaCorner[1]];
 const corridorFoot = add(corridorTop, [[0, -1], STEPS_RUN]);
 const squareSteps = fromRect(cantina, [-11, 22]);
-const galleryStepsTop = east + STEPS_RUN;
+const galleryStepsTop = half.x + 2 * STEPS_RUN;
+
+/** Bordes de escalera unidos a inglete: el vértice compartido tiene una sola posición.
+ * Esquema del usuario: dos lados de escalera y un lado oblicuo de camino libre. */
+export function elevatorStairEdge(distance: number): Vec2[] {
+  // El tramo del muro sigue recto. El lado hacia la plaza abre en diagonal
+  // (croquis corregido); ambos comparten el mismo inglete en cada nivel.
+  const length = Math.hypot(1.6, 1.7), nx = 1.7 / length, nz = -1.6 / length;
+  return [[41.5 + nx * distance, 5.2 + nz * distance],
+    [39.9 + distance * (1 + nz) / nx, 3.5 - distance],
+    [stairEast, 3.5 - distance]];
+}
+const elevatorUpperEdge = elevatorStairEdge(STEPS_RUN);
+const galleryWest = rectCorners(coveredPlaza)[0];
+
+
+// Galería longitudinal: mismo eje que el lado largo de la plaza.
+const galleryPoint = (along: number, inward: number): Vec2 =>
+  [galleryWest[0] + Z[0] * along + X[0] * inward,
+   galleryWest[1] + Z[1] * along + X[1] * inward];
+const galleryOutline = [galleryPoint(0, -0.25), galleryPoint(0, 2.5),
+  galleryPoint(15, 2.5), galleryPoint(15, -0.25)];
 
 export const facultyBlueprint = {
   main: { center: [b1x, 0], size: [block1.length, block1.depth], angle: 0 } as Rect,
   block2: gRect,
   coveredPlaza,
+  /** Galería baja junto al ascensor, interpretada de IMG_5706/5707/5713.
+   * Mantiene la cubierta metálica principal independiente y el paso a las escaleras. */
+  plazaGallery: {
+    outline: galleryOutline,
+    front: [galleryPoint(0, 0.25), galleryPoint(15, 0.25)] as Vec2[],
+    
+    roof: 4.65,
+    metalRoofSetback: 1.1,
+    columns: [0.5, 5, 10, 14.5].map(t => galleryPoint(t, 0.25)),
+    offset: accessRetreat,
+    planter: { center: [42.45, 7.1], size: [3.5, 1.0], angle: Math.PI / 2 } as Rect,
+    smallSteps: { center: galleryPoint(15, 1.35), angle: gridAngle, direction: Z, width: 2.2, run: 1.8, bottom: 0.3, count: 3 },
+    // Camino ascendente desde el cruce existente hasta el pie de los tres peldaños.
+    approach: [[41, 13, 0.03], [44, 14, 0.1],
+      [...galleryPoint(18, 1.35), 0.24], [...galleryPoint(16.8, 1.35), 0.3]] as [number, number, number][],
+  },
   openPlaza,
   bedelia,
   cantina,
@@ -204,15 +245,21 @@ export const facultyBlueprint = {
    * rincón entre Bedelía y la cantina), Bedelía y la cantina. */
   platform: [
     [[manfredWest, manfredFront], [manfredEast, manfredFront], [manfredEast, bedeliaCorner[1]], bedeliaCorner,
-      add(bedeliaCorner, [Z, 10]), plazaNorth, plazaWest, pointAtZ(plazaWest, plazaSouth, half.z),
-      [galleryStepsTop, half.z], [galleryStepsTop, eastStair.top], [stairEast, eastStair.top], [stairEast, stairFoot],
+      add(bedeliaCorner, [Z, 10]), plazaNorth, rectCorners(coveredPlaza)[0], pointAtZ(rectCorners(coveredPlaza)[0], plazaSouth, half.z),
+      ...elevatorUpperEdge, [stairEast, stairFoot],
       [ramp.east, stairFoot], [ramp.east, ramp.top], [ramp.west, ramp.top], [ramp.west, -half.z], [manfredWest, -half.z]],
     rectCorners(coveredPlaza),
+    // Unión lateral del pasillo recto con la plaza girada, sin grieta triangular.
+    
+    // Cierra la cuña que dejó el retiro de la plaza junto al frente de Bedelía.
+    [plazaNorth, rectCorners(coveredPlaza)[1], rectCorners(coveredPlaza)[0]],
     openPlaza,
     rectCorners(bedelia),
     rectCorners(cantina),
     cantinaForecourt.outline.map((p) => fromRect(cantina, p)),
   ] as Vec2[][],
+  /** Rellano pentagonal, con camino abierto en el chaflán hacia el pasillo. */
+  elevatorLanding: [[36.85, 6], [39.9, 6], [41.5, 5.2], [39.9, 3.5], [36.85, 3.5]] as Vec2[],
   platformSteps: [
     // Prolongación de la galería de planta baja del Bloque 1 hasta la plataforma, junto al ascensor
     // (foto IMG_5706): ocupa todo el ancho de la galería.
@@ -269,7 +316,7 @@ export const facultyBlueprint = {
   // Cuña de césped entre el Bloque G y el estacionamiento OSM 274489888.
   parking: [add(gSouthWest, [Z, 5]), add(gSouthEast, [Z, 4]), [46.5, 42.5], [9, 78.8]] as Vec2[],
   /** Paso peatonal cubierto del área común 1 hacia el estacionamiento. */
-  coveredWalk: [[41, 11], [55, 37]] as Vec2[],
+  coveredWalk: [[41, 13], [55, 37]] as Vec2[],
   paths: [
     [[-16, 9.4], [5, 9.4], [36.5, 9.4], [41, 11]],
     [[5, 9.4], [11.3, 30.7]],
@@ -333,8 +380,8 @@ const lab = roomCenter(0, 2), classroom = roomCenter(3, 2);
 export const facultyVisitPoints: Record<string, [number, number, number]> = {
   // Rellano junto a la cabecera este: la bodega bajo la escalera, el ascensor y la galería de planta
   // baja, como en la foto IMG_5706.
-  acceso: [east + 2.7, onPlatform, 1.8],
-  laboratorio: [lab + 2, 0.1, -2.2],
+  acceso: [galleryStepsTop + 0.8, onPlatform, 1.8],
+  laboratorio: [-7.5, 0.1, -2.2],
   "pasillo-p3": [3, 10.5, 4.75],
   "aula-p3": [classroom, 10.5, -1.5],
   "cantina-cyt": at(fromRect(cantina, [-2.5, 21]), onPlatform),

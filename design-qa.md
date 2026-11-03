@@ -76,51 +76,33 @@ Revisado en navegador entrando desde la explanada y girando a la izquierda: hela
 
 Retiradas la mira central y la indicación con E. Al caminar solo queda ESC · Pausar. Al pausar se muestra una única ventana con continuar, espacios, biblioteca, comunidad, cuenta, información del lugar, calidad, pantalla completa, ayuda y vista general. Comprobados en navegador caminar, Escape, botón de pausa, explorar y visitar Cantina, biblioteca, información del lugar, ayuda, regreso al recorrido y vista general. Capturas locales: output/recorrido-limpio.png y output/menu-pausa.png.
 
+### 02/11/2026 — Galería junto al ascensor
 
-## Piso y árbol según vista elevada — 02/11/2026
-
-Revisión en navegador del pavimento continuo desde plaza techada hasta cantina, escalones laterales y árbol con tronco fino, hojas individuales y dos arbustos en cantero oval. Se conserva el lugar del árbol solicitado anteriormente. Recorrido de ida y vuelta por la explanada sin obstrucciones nuevas en el paso. Captura local: output/cantina/piso-arbol-vista-elevada.png. Proporciones estimadas a partir de la nueva fotografía; sin afirmar réplica exacta.
-
-
-## Cantina: ventanas, salida y mostrador — 02/11/2026
-
-Comprobados en navegador el mostrador extendido, caja bajo TV a la izquierda y ventanas a media altura. Recorrido real desde la entrada principal, salida por la nueva puerta derecha al jardín y reingreso por el mismo hueco. Capturas locales: output/cantina/mostrador-caja-izquierda.png y ventanas-salida-derecha.png. La puerta se representa abierta; no tiene animación de apertura/cierre.
+Revisadas dos capturas Chromium de la geometría real createFaculty con cámaras de inspección: vista desde la plaza hacia ascensor/escalera y vista elevada. Se comprobó la presencia de cubierta baja, columnas, banco, cantero y rejilla, conservando la cubierta principal. Tras la primera inspección se cambió el pavimento rosado por acabado claro y se cerró el cuerpo del cantero hasta el terreno. La reconstrucción es aproximada; falta validar medidas y recorrido peatonal completo.
 
 
-## Reconstrucción interior según tres fotos — 02/11/2026
-
-Rehecho el comedor según las tres nuevas fotografías, sustituyendo sillas verdes y cielorraso claro. Revisados en navegador estructura oscura, franja vidriada inclinada, tubos suspendidos, splits, hormigón, ventanas, mesas de madera y sillas negras. Comprobada circulación desde el acceso principal y salida/reingreso por la puerta recolocada junto al mostrador. Capturas locales: output/cantina/interior-referencia-real.png, hormigon-ventanas-splits.png y puerta-junto-mostrador.png. Dimensiones aproximadas; la puerta permanece abierta.
+Escalones descendentes junto al ascensor: captura cercana revisada desde el descanso superior. Se observan huellas claras con ranuras y continuidad con la plaza; retirado el solapamiento del piso nuevo sobre el tramo.
 
 
-## Mostrador oblicuo y puerta al fondo — 02/11/2026
-
-Ajustados mostrador, retorno izquierdo, pilar y cenefa en un mismo marco oblicuo; puerta posterior desplazada. Revisada visualmente la diagonal y el cierre del frente en navegador. La comprobación completa de entrada/salida en esta última ubicación no quedó concluida; no reutilizar como resultado de este cambio la prueba de la ubicación anterior.
+Foto marcada del ascensor: sustituido el muro lateral de plataforma por una segunda escalinata perpendicular. Revisada unión en L en Chromium; geometría visible y hueco de colisión comparten el recorte de plataforma.
 
 
-## Puerta en la pared del fondo — 02/11/2026
-
-Comprobado en navegador: puerta en pared de ladrillo al final del pasillo, ventana continua a su derecha. Captura local output/cantina/puerta-pared-fondo.png. Se retiró el acceso de la pared lateral.
+Rellano rosado inferior: revisada captura Chromium desde el patio hacia el ascensor y los dos tramos. Pavimento visible, continuo con la galería, a nivel inferior de las escaleras. Captura local .local/references/rellano-rosado.png. Sin errores JavaScript durante la carga.
 
 
-## Lateral de blindex y terraza techada — 02/11/2026
-
-Revisión visual desde el comedor: lateral de vidrio completo, hoja abierta, baldosas exteriores, mesas y sillas negras, estructura y cubierta. Captura local output/cantina/blindex-terraza-techada.png. Se utilizó una posición temporal de cámara para inspección y se retiró después; no se incorpora un nuevo modo de navegación.
-## Dependencias adicionales — revisión local 02/11/2026
-
-Nueve dependencias aproximadas según el plano general aportado por el usuario. Se mantienen la interfaz, el encuadre inicial y el núcleo existente. Rótulos físicos, zócalos de ladrillo, ventanas moduladas, accesos abiertos y plantas escalonadas en Ingeniería y CTA–DICIA. DEI–LED reemplaza el anterior volumen genérico. Sin fotografías ajenas ni árboles adicionales. Revisados el inicio, la lista de nueve destinos y la llegada a Kampus Print; sin errores de página. Límites y medidas provisionales en docs/base-geografica.md. Capturas en .local/references/anexos-inicio.png y .local/references/kampus-print-acceso.png. El usuario autorizó integrar y subir estas dependencias a main el 02/11/2026.
+Retiro de escalera frontal: comparada la vista desde el patio antes y después. El piso rosado ocupa la antigua huella del tramo y este queda 2,40 m hacia la plaza; eliminado el pavimento extendido al patio. Captura local .local/references/rellano-rosado.png.
 
 
-## Recorrido desde el punto tocado — 02/11/2026
+Unión de las escaleras con esquema aéreo: revisada vista desde el patio, peldaños continuos en la esquina sin el hueco del encuentro anterior. Rellano pentagonal y lado de camino libre. Captura local rellano-rosado.png.
 
-Comprobado en navegador el clic sobre dos sectores distintos del suelo desde la vista general: llegada al sector elegido e inicio del recorrido. Arrastrar sigue orbitando sin trasladar; clic en el cielo conserva la vista general. La llegada usa las coordenadas tocadas y busca apoyo libre cercano cuando hay un obstáculo. Captura local output/llegada-punto-elegido.png.
 
-## Bloque 1 de 65 m — 02/11/2026
+Cerrada la cuña entre los peldaños y el muro bajo la escalera al primer piso. Revisadas capturas oblicua y superior; pilar conservado. Capturas locales rellano-rosado.png y escaleras-unidas-aerea.png (esta última con corte horizontal solo para inspección).
 
-Referencias: `IMG_5639` y las cuatro fotos del usuario del 02/11 ([referencias](docs/referencias.md)). Capturas de la implementación en `.local/references/bloque1-65m/` (1280 × 800, Edge sin ventana), con encuadres equivalentes a las fotos; no se exige igualdad de encuadre.
 
-- Puerta doble: hoja izquierda fija con ventana cuadrada, derecha abierta, montante de dos paños y prisma «Aula 204» sobre ladrillo; color gris azulado. Coincide en disposición con `IMG_5639`.
-- Cara este: «Universidad Católica» y «Facultad de Ciencias y Tecnología» en el tercer piso y «Edificio / Prof. Ing. Luis Alberto Meyer Jou» en el segundo, separados por las bandas de hormigón que rodean el bloque. Tipografía con serifa genérica, no la del cartel real.
-- Fachada sur: columnas cada 4,5 m, dos paños de lamas por módulo y descansos de la Pompidou entre columnas. Ascensor crema entre las dos últimas columnas, como en las fotos.
-- Escalera de la plaza (2,1 m) y rampa: misma relación que en la foto (escalera a la izquierda, columna entre ambas, rampa con pasamanos sobre el ladrillo).
+L recta: arranque alineado con pilar, cinco huellas y banco acercado al descanso. Captura local escalera-cinco-peldanos.png.
 
-Pendiente: los murales del ascensor siguen repitiendo `IMG_5727`; la foto de la cabecera desde el patio muestra en otra cara un mural de líneas grises distinto. Sin revisión en móviles.
+
+Croquis corregido: lado del muro recto y lado de plaza diagonal. Vista superior con corte de inspección confirma el rellano de cinco lados y los cinco peldaños continuos.
+
+
+Pasillo y camino: captura local .local/references/pasillo-camino.png. Vista desde el exterior muestra base bajo columnas, cantero bajo, curva ascendente, tres peldaños y toldo conectado. Se corrigió durante la revisión la cuña entre pasillo y plataforma girada.

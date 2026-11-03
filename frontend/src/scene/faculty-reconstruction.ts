@@ -3,7 +3,7 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { makeMaterials } from "./materials";
 import {
   facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, STEPS_RUN, rectCorners,
-  bulgedOutline, cantinaForecourt, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR,
+  elevatorStairEdge, bulgedOutline, cantinaForecourt, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR,
   type Rect, type Rooms, type Vec2,
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
@@ -706,17 +706,124 @@ export function createFaculty() {
     }
   });
 
+  // Rellano de granito rosado al nivel del pasillo, no de la plaza elevada.
+  // La base aporta una superficie transitable y tapa el césped bajo este acceso.
+  prism(plan.elevatorLanding, -0.06, 0.09, m.granite);
+  const landingBand = new T.MeshStandardMaterial({ color: "#596664", roughness: 0.85 });
+  box(STEPS_RUN, 0.004, 0.07, block1.length / 2 + STEPS_RUN / 2, 0.032, 5.95, landingBand);
+
   // ---- Plataforma a 1,40 m: plaza techada, cuadrado, Bedelía, cantina, Sala Manfred y cabecera este ----
   for (const outline of plan.platform) {
     prism(outline, 0, PLAZA_LEVEL, m.concrete);
     pave(outline, m.stone, PLAZA_LEVEL + 0.005);
   }
-  for (const s of plan.platformSteps.filter((_, i) => i !== 1))
+  // Solo la salida norte conserva la escalera recta genérica.
+  for (const s of plan.platformSteps.slice(2))
     frame({ center: s.top, size: [STEPS_RUN, s.width], angle: s.angle }, () => steps(STEPS_RUN, 0, PLAZA_LEVEL, s.width));
+  {
+    const count = 5, tread = STEPS_RUN / count, base = 0.03;
+    const groove = new T.MeshStandardMaterial({ color: "#8d918c", roughness: 0.9 });
+    for (let i = 0; i < count; i++) {
+      const inner = elevatorStairEdge(i * tread), outer = elevatorStairEdge((i + 1) * tread);
+      const top = base + (PLAZA_LEVEL - base) * (i + 1) / count;
+      // Una sola huella poligonal por nivel: no hay encuentro entre cajas superpuestas.
+      prism([...inner, ...outer.slice().reverse()], 0, top, m.stone, false);
+      for (const offset of [0.025, 0.05, 0.075]) {
+        const a = elevatorStairEdge(i * tread + offset), b = elevatorStairEdge(i * tread + offset + 0.009);
+        pave([...a, ...b.slice().reverse()], groove, top + 0.002);
+      }
+    }
+    // Dos trapecios inclinados comparten exactamente la arista del inglete.
+    const lower = elevatorStairEdge(0), upper = elevatorStairEdge(STEPS_RUN);
+    for (let i = 0; i < 2; i++) {
+      const a = v3(lower[i][0], base, lower[i][1]), b = v3(lower[i + 1][0], base, lower[i + 1][1]);
+      const c = v3(upper[i][0], PLAZA_LEVEL, upper[i][1]), d = v3(upper[i + 1][0], PLAZA_LEVEL, upper[i + 1][1]);
+      const geometry = new T.BufferGeometry().setFromPoints([a, c, b, b, c, d]);
+      geometry.computeVertexNormals();
+      solid.add(new T.Mesh(geometry));
+    }
+  }
+
+  // Encuentro fotografiado desde la plaza: galería de hormigón, jardín y desagüe.
+  // Cotas estimadas; el ascensor, los niveles y ambas escaleras conservan su ubicación.
+  {
+    const g = plan.plazaGallery;
+    prism(g.outline, g.roof, 0.22, m.concrete);
+    // Pasillo macizo debajo de toda la fila de pilares; mismo nivel que la plaza.
+
+    // El pavimento longitudinal ya pertenece a la plataforma de la plaza.
+    const ss = g.smallSteps;
+    frame({ center: ss.center, size: [ss.width, ss.run], angle: ss.angle }, () => {
+      for (let i = 0; i < ss.count; i++) {
+        const y = ss.bottom + (PLAZA_LEVEL - ss.bottom) * (i + 1) / ss.count;
+        const z = ss.run - (i + 0.5) * ss.run / ss.count;
+        box(ss.width, y, ss.run / ss.count, 0, y / 2, z, m.stone);
+      }
+    });
+    ramp(v3(ss.center[0] + ss.direction[0] * ss.run, ss.bottom, ss.center[1] + ss.direction[1] * ss.run),
+      v3(ss.center[0], PLAZA_LEVEL, ss.center[1]), ss.width);
+    // El pavimento lo define la plataforma, recortada por el borde superior de la escalera.
+    for (const [x, z] of g.columns)
+      pole(0.23, g.roof - PLAZA_LEVEL, x, (g.roof + PLAZA_LEVEL) / 2, z, m.concrete, true);
+    const [frontA, frontB] = g.front;
+    const galleryAngle = -Math.atan2(frontB[1] - frontA[1], frontB[0] - frontA[0]);
+    const edgeBox = (a: Vec2, b: Vec2, h: number, depth: number, y: number, material: T.Material) =>
+      box(Math.hypot(b[0] - a[0], b[1] - a[1]), h, depth,
+        (a[0] + b[0]) / 2, y, (a[1] + b[1]) / 2, material, false,
+        { rotation: -Math.atan2(b[1] - a[1], b[0] - a[0]) });
+    edgeBox(frontA, frontB, 0.38, 0.42, g.roof - 0.19, m.concrete);
+    // Pretil bajo de ladrillo sobre el borde exterior de la losa.
+    edgeBox(g.outline[0], g.outline[3], 0.30, 0.18, g.roof + 0.37, m.brick);
+    for (const t of [0.18, 0.5, 0.82]) {
+      const a = g.outline[0], b = g.outline[3], c = g.outline[1];
+      const x = a[0] + (b[0] - a[0]) * t + (c[0] - a[0]) / 2;
+      const z = a[1] + (b[1] - a[1]) * t + (c[1] - a[1]) / 2;
+      box(1.2, 0.07, 0.18, x, g.roof - 0.06, z, m.white, false, { rotation: galleryAngle });
+    }
+    // Rejilla a lo largo de la unión diagonal con la cubierta metálica.
+    const a = g.outline[1], b = g.outline[2], length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const angle = -Math.atan2(b[1] - a[1], b[0] - a[0]);
+    box(length, 0.018, 0.24, (a[0] + b[0]) / 2, PLAZA_LEVEL + 0.025, (a[1] + b[1]) / 2, m.metal, false, { rotation: angle });
+    for (let i = 0; i <= Math.floor(length / 0.08); i++) {
+      const t = i * 0.08 / length;
+      box(0.018, 0.025, 0.23, a[0] + (b[0] - a[0]) * t, PLAZA_LEVEL + 0.04,
+        a[1] + (b[1] - a[1]) * t, m.steel, false, { rotation: angle });
+    }
+    frame(g.planter, () => {
+      // Cantero al costado del descanso, sin cruzar el acceso de la galería.
+      box(3.5, 0.16, 1, 0, 0.08, 0, m.concrete, true);
+      box(3.3, 0.04, 0.8, 0, 0.16, 0, m.bark);
+      const leafGeo = new T.BufferGeometry().setFromPoints([
+        v3(-0.06, 0, 0), v3(0.06, 0, 0), v3(0.1, 0.6, 0.04),
+        v3(-0.06, 0, 0), v3(0.1, 0.6, 0.04), v3(0.05, 1, 0.1),
+      ]);
+      leafGeo.computeVertexNormals();
+      const leafMat = new T.MeshStandardMaterial({ color: "#42583b", side: T.DoubleSide, roughness: 1 });
+      for (let i = 0; i < 18; i++) for (let j = 0; j < 4; j++) {
+        const leaf = new T.Mesh(leafGeo, leafMat);
+        leaf.position.set(-1.5 + (i % 9) * 0.37, 0.18, i < 9 ? -0.23 : 0.2);
+        leaf.rotation.y = i * 2.4 + j * 1.6; leaf.rotation.z = (j - 1.5) * 0.12;
+        leaf.scale.y = 0.65 + ((i * 7 + j * 3) % 9) / 16;
+        leaf.castShadow = true; visual.add(leaf);
+      }
+    });
+    // Banco azul al pie del lateral de ladrillo, como en IMG_5707.
+    frame({ center: [stairEast + 0.7, 0.05], size: [1.7, 0.5], angle: Math.PI / 2 }, () => {
+      box(1.7, 0.07, 0.42, 0, 0.48, 0, m.blue, true);
+      for (const x of [-0.65, 0.65]) for (const z of [-0.15, 0.15]) pole(0.025, 0.45, x, 0.225, z, m.metal);
+    }, PLAZA_LEVEL);
+  }
 
   // ---- Plaza techada: cubierta exenta, separada de la cabecera este del Bloque 1 ----
   {
-    const outline = rectCorners(plan.coveredPlaza), [w, n, e, s] = outline;
+    const outline = rectCorners(plan.coveredPlaza);
+    const dx = (outline[1][0] - outline[0][0]) / 10;
+    const dz = (outline[1][1] - outline[0][1]) / 10;
+    for (const i of [0, 3]) {
+      outline[i] = [outline[i][0] + dx * plan.plazaGallery.metalRoofSetback,
+        outline[i][1] + dz * plan.plazaGallery.metalRoofSetback];
+    }
+    const [w, n, e, s] = outline;
     const height = 4.6, roofY = PLAZA_LEVEL + height;
     flipFaces(pave(outline, m.roofUnder, roofY - 0.02).geometry);
     pave(outline, m.roof, roofY + 0.12);
@@ -733,7 +840,13 @@ export function createFaculty() {
     for (const [a, b] of [[n, e], [w, s]] as const) {
       for (const t of [0, 1 / 3, 2 / 3, 1]) {
         const p = inset([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], centre);
-        pole(0.16, height, p[0], PLAZA_LEVEL + height / 2, p[1], m.steel, true);
+        if (a === w) {
+          // Apoyos cortos sobre la losa, sin postes metálicos atravesando la galería.
+          const slabTop = plan.plazaGallery.roof + 0.22;
+          pole(0.16, roofY - slabTop, p[0], (roofY + slabTop) / 2, p[1], m.steel);
+        } else {
+          pole(0.16, height, p[0], PLAZA_LEVEL + height / 2, p[1], m.steel, true);
+        }
       }
       const [pa, pb] = [inset(a, centre), inset(b, centre)];
       beam(v3(pa[0], roofY - 0.45, pa[1]), v3(pb[0], roofY - 0.45, pb[1]), 0.07, m.steel);
@@ -1426,6 +1539,59 @@ export function createFaculty() {
   pave(plan.common1, m.grass, 0.018);
   pave(plan.parking, m.grass, 0.02);
   plan.paths.forEach((p) => path(p));
+  // Acceso curvo con pendiente suave y toldo conectado al pasillo (fotos 16.25.45/52).
+  {
+    const g = plan.plazaGallery;
+    const curve = new T.CubicBezierCurve3(...g.approach.map(([x, z, y]) => v3(x, y, z)) as [T.Vector3, T.Vector3, T.Vector3, T.Vector3]);
+    function ribbon(c: T.Curve<T.Vector3>, width: number, mat: T.Material, collide: boolean, skirt = false) {
+      const positions: number[] = [], uvs: number[] = [], indices: number[] = [];
+      const sideMaterial = m.stone.clone(); sideMaterial.side = T.DoubleSide;
+      const count = 48;
+      for (let i = 0; i <= count; i++) {
+        const t = i / count, p = c.getPoint(t), tangent = c.getTangent(t);
+        const side = v3(-tangent.z, 0, tangent.x).normalize().multiplyScalar(width / 2);
+        for (const sign of [-1, 1]) {
+          const q = p.clone().addScaledVector(side, sign); positions.push(q.x, q.y, q.z); uvs.push((sign + 1) / 2, t * 5);
+        }
+        if (i < count) { const k = i * 2; indices.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
+      }
+      const geo = new T.BufferGeometry(); geo.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
+      geo.setAttribute("uv", new T.Float32BufferAttribute(uvs, 2)); geo.setIndex(indices); geo.computeVertexNormals();
+      // El orden izquierda/derecha debe producir normales hacia arriba para la colisión.
+      if (geo.attributes.normal.getY(0) < 0) flipFaces(geo);
+      const mesh = new T.Mesh(geo, mat); mesh.receiveShadow = true; mesh.castShadow = !collide; visual.add(mesh);
+      if (collide) solid.add(new T.Mesh(geo));
+      if (skirt) for (const side of [0, 1]) for (let i = 0; i < count; i++) {
+        const k = (i * 2 + side) * 3, j = ((i + 1) * 2 + side) * 3;
+        const a = v3(positions[k], positions[k + 1], positions[k + 2]), b = v3(positions[j], positions[j + 1], positions[j + 2]);
+        const wall = new T.BufferGeometry().setFromPoints([a,b,a.clone().setY(0),b,b.clone().setY(0),a.clone().setY(0)]);
+        wall.computeVertexNormals(); visual.add(new T.Mesh(wall,sideMaterial));
+      }
+    }
+    ribbon(curve, 2.2, m.stone, true, true);
+    // Piezas redondas bajas sobre el mismo plano inclinado, como el pavimento de referencia.
+    for (let i = 1; i < 28; i++) {
+      const t = i / 28, p = curve.getPoint(t), tangent = curve.getTangent(t), side = v3(-tangent.z,0,tangent.x).normalize();
+      for (const offset of [-0.8,-0.4,0,0.4,0.8]) {
+        const q = p.clone().addScaledVector(side,offset);
+        const disc = pole(0.17,0.008,q.x,q.y+0.005,q.z,m.concrete);
+        disc.quaternion.setFromUnitVectors(v3(0,1,0), side.clone().cross(tangent).normalize());
+      }
+    }
+    const canopy = new T.CubicBezierCurve3(v3(41,2.8,13),v3(41,3.1,10),v3(44.6,4.1,10.3),v3(44.6,g.roof,7.4));
+    ribbon(canopy,2.6,m.canopy,false);
+    for (const t of [0,0.5,1]) {
+      const p = canopy.getPoint(t), tangent = canopy.getTangent(t), side = v3(-tangent.z,0,tangent.x).normalize();
+      for (const sign of [-1,1]) {
+        const q=p.clone().addScaledVector(side,sign*1.25), ground=0;
+        pole(0.045,p.y-ground,q.x,(p.y+ground)/2,q.z,m.steel,true);
+      }
+      beam(p.clone().addScaledVector(side,-1.3),p.clone().addScaledVector(side,1.3),0.04,m.steel);
+    }
+    // Ramal corto al piso rosado, al nivel inferior, separado de la escalerita.
+    path([[41,11],[40.4,8],[39,6]],1.6);
+  }
+
   for (const [x, z] of plan.picnic) {
     const dx = x - plan.cantina.center[0], dz = z - plan.cantina.center[1], a = plan.cantina.angle;
     const lx = dx * Math.cos(a) + dz * Math.sin(a), lz = -dx * Math.sin(a) + dz * Math.cos(a);

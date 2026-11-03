@@ -150,8 +150,8 @@ test("The toilet tower: a core from the gallery with two half-cylinders, 10 m ti
   assert.ok(close(dist(annex[0], annex[1]), dist(annex[1], annex[2])), "Square annex");
 });
 
-test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit 1.4 m up, with ways down", () => {
-  assert.ok(close(PLAZA_LEVEL, 0.8 * FLOOR_HEIGHT / 2), "20 % below half a floor");
+test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit 0.9 m up, with ways down", () => {
+  assert.ok(close(PLAZA_LEVEL, 0.03 + 5 * 0.174), "Five risers above the pink landing");
   for (const key of ["coveredPlaza", "bedelia", "cantina", "manfred"]) assert.ok(onPlatform(plan[key].center), key);
   assert.ok(onPlatform(center(plan.corridor)), "Corridor between Manfred and Bedelía");
   assert.ok(onPlatform(center(plan.openPlaza)), "Open plaza");
