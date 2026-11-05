@@ -134,7 +134,7 @@ const plazaNorth = add(plazaWest, [X, 10]);
 const accessRetreat = STEPS_RUN;
 // Ajuste visual hacia el Bloque 1, según la flecha de la referencia del usuario.
 const plazaLateralAdjustment = -0.8;
-const coveredPlaza = rectFromCorner([plazaWest[0] + accessRetreat + plazaLateralAdjustment, plazaWest[1]], [10, 20], gridAngle);
+const coveredPlaza = rectFromCorner([plazaWest[0] + accessRetreat + plazaLateralAdjustment, plazaWest[1]], [10, 15], gridAngle);
 const [, , , plazaSouth] = rectCorners(coveredPlaza);
 const galleryWest = rectCorners(coveredPlaza)[0];
 const galleryPoint = (along: number, inward: number): Vec2 =>
