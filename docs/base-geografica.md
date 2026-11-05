@@ -291,5 +291,7 @@ Corrección posterior del usuario: el toldo es **azul** y el caminero debe unirs
 
 Referencias del usuario: `5ce59583`, `1061ca46`, `e5b7f5d2`, `405896da` y `5581a0cd`. Se mantienen los cinco escalones de la esquina y sus colisiones; se diferencian piedra moteada, contrahuellas, nariz y ranuras. El banco junto al tabique triangular tiene tres asientos azules redondeados y patas de tubo, próximo al ladrillo. Se agrega el bebedero fotografiado, con gabinete, soporte abierto, bandeja y grifo, junto al segundo pilar, hacia el interior de la galería.
 
+En la revisión local del 05/11 se retiró el gabinete blanco de cuatro patas junto al segundo pilar.
+
 Cinco pilares de hormigón en la fila de la galería de 15 m: centros a 0,5; 4; 7,5; 11 y 14,5 m. Separación estimada de 3,5 m, ajustada a la proporción del acceso; no es una medida de obra. Cantero irregular a ras del terreno, fuera del piso elevado, con sansevierias de tamaños variados, hojas moteadas y plantas bajas de borde; sustituye la jardinera rectangular aislada. Sin árboles nuevos ni cambios en el eje del toldo/caminero. La ampliación se limita al entorno fotografiado; dimensiones y especies requieren validación del equipo.
 

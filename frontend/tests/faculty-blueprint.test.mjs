@@ -34,12 +34,11 @@ test("Covered walkway meets the plaza steps and follows the short side of Bloque
   assert.ok(walk[0]*direction[0]+walk[1]*direction[1] > 0, "Walkway heads out from the plaza");
 });
 
-test("The photographed gallery has five pillars, a supported water station and a garden outside the steps", () => {
+test("The photographed gallery has five pillars and a garden outside the steps", () => {
   const g = plan.plazaGallery;
   assert.equal(g.columns.length, 5);
   for (let i=1;i<g.columns.length;i++)
     assert.ok(dist(g.columns[i-1],g.columns[i])>3 && dist(g.columns[i-1],g.columns[i])<4, "Pillar bays follow the stair proportions");
-  assert.ok(plan.platform.some(outline=>insidePolygon(g.waterStation.center,outline)), "Water station stands on the plaza");
   for(const point of g.garden)
     assert.ok(!plan.platform.some(outline=>insidePolygon(point,outline)), "Garden must not cover the raised circulation");
 });

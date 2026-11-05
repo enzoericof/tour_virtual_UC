@@ -250,7 +250,6 @@ export const facultyBlueprint = {
     offset: accessRetreat,
     garden: [[40.6,6.3],[41.1,5.55],[43.65,5.8],[45.65,7.3],
       [46.5,8.9],[45,9.7],[42.8,9.1],[41.2,8.4]] as Vec2[],
-    waterStation: { center: galleryPoint(4, 1.1), size: [0.58, 0.5], angle: gridAngle + Math.PI / 2 } as Rect,
     smallSteps: { center: galleryPoint(15, 1.35), angle: gridAngle, direction: Z, width: 2.2, run: 1.8, bottom: 0.3, count: 3 },
     // Camino ascendente desde el cruce existente hasta el pie de los tres peldaños.
     approach: [[41, 11, 0.05], [44, 14, 0.1],

@@ -1028,20 +1028,6 @@ export function createFaculty() {
       }
     }
     // Banco retirado por la ampliación longitudinal de la escalera.
-    // Bebedero junto al pilar: gabinete inoxidable, bandeja, grifo y soporte abierto.
-    frame(g.waterStation,()=>{
-      for(const x of [-0.23,0.23]) for(const z of [-0.19,0.19]) box(0.025,0.53,0.025,x,0.265,z,m.steel);
-      box(0.56,0.78,0.46,0,0.91,0,m.white,true);
-      box(0.54,0.035,0.44,0,1.315,0,m.steel);
-      box(0.48,0.72,0.025,0,0.91,0.242,m.steel);
-      box(0.25,0.24,0.03,0,0.91,0.263,m.metal);
-      box(0.33,0.025,0.14,0,0.77,0.28,m.steel);
-      for(let x=-0.13;x<0.14;x+=0.035) box(0.009,0.007,0.11,x,0.787,0.28,m.metal);
-      beam(v3(0.06,1.04,0.265),v3(0.06,1.04,0.34),0.014,m.steel);
-      beam(v3(0.06,1.04,0.34),v3(0.06,1.005,0.34),0.014,m.steel);
-      sign("AGUA",0,1.17,0.263,0.3);
-    },PLAZA_LEVEL);
-
   }
 
   // ---- Plaza techada: cubierta exenta, separada de la cabecera este del Bloque 1 ----
