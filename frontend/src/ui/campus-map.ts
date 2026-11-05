@@ -24,9 +24,10 @@ export function drawCampusMap(canvas: HTMLCanvasElement) {
   layout.pitches.forEach((p) => { path(p.points); ctx.fillStyle = "#819d65"; ctx.fill(); ctx.strokeStyle = "#edf3e0"; ctx.lineWidth = 1.5; ctx.stroke(); });
   // Plataforma de la plaza techada, el cuadrado y los anexos.
   for (const outline of facultyBlueprint.platform) { path(worldPolygon(outline)); ctx.fillStyle = "#d8d3c1"; ctx.fill(); }
-  // Edificios, Sala Manfred con su frente curvo y torre de baños (núcleo, semicírculos y anexo).
+  // Edificios, Sala Manfred hexagonal y torre de baños (núcleo, semicírculos y anexo).
   const shapes = [...(["main", "block2", "bedelia", "cantina", "coveredPlaza", "electronics"] as const)
-    .map((key) => facultyBlueprint[key]), manfredOutline(), towerAnnex(), towerOutline()];
+    .map((key) => facultyBlueprint[key]), facultyBlueprint.manfredLink, facultyBlueprint.manfredGallery,
+  manfredOutline(), towerAnnex(), towerOutline()];
   for (const shape of shapes) {
     path(worldPolygon(shape)); ctx.fillStyle = "#295740"; ctx.fill();
     ctx.strokeStyle = "#f6f2e6"; ctx.lineWidth = 1.5; ctx.stroke();

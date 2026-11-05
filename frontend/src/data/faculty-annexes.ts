@@ -25,11 +25,21 @@ function office(id: string, name: string, v: number, w: number, d: number): Anne
   b.front = annexPoint(-35.7 + w / 2, v);
   return b;
 }
+// Frente de Kampus Print al fondo del pasillo, orientado hacia la plaza.
+const [printX, printZ] = plan.plazaPassage.target;
+const dx = printX - plan.cantina.center[0], dz = printZ - plan.cantina.center[1];
+const annexAngle = gridAngle + Math.PI;
+const printU = dx * Math.cos(annexAngle) + dz * Math.sin(annexAngle);
+const printV = -dx * Math.sin(annexAngle) + dz * Math.cos(annexAngle);
+const kampusPrint = annex("kampus-print", "Kampus Print", printU, printV, 13.4, 8);
+kampusPrint.rect.angle = gridAngle;
+kampusPrint.front = annexPoint(printU, printV - 4);
+kampusPrint.entrance = annexPoint(printU, printV - 4.8);
 export const facultyAnnexes: Annex[] = [
   annex("lab-ingenieria", "Laboratorio de Ingeniería", -17.4, 0, 18.4, 10.4, 4.2,
     [[-9.2,-5.2],[0,-5.2],[0,-12.2],[9.2,-12.2],[9.2,5.2],[-9.2,5.2]]),
   annex("lab-maquetas", "Laboratorio de Maquetas", -17.5, 13.8, 18.4, 10.2),
-  annex("kampus-print", "Kampus Print", 57.1, 39.6, 13.4, 8),
+  kampusPrint,
   annex("cta-dicia", "CTA–DICIA", -19.8, 35, 34, 16, 4.2,
     [[-7,-8],[17,-8],[17,8],[-17,8],[-17,3],[-7,3]]),
   annex("dei-led", "DEI–LED", -4.2, -27.8, 28.8, 12, 4.4),
@@ -41,11 +51,11 @@ export const facultyAnnexes: Annex[] = [
 /** Circuito exterior: evita atravesar los edificios y llega al sendero existente detrás de Manfred. */
 const officeIds = new Set(["led", "da-cap", "das", "dg"]);
 export const annexPaths: Vec2[][] = [
-  [[-28,-36],[-28,-18],[-28,-9],[-28,10],[-28,23],[-43,23],[-43,48],[-28,48],[30,48],[57.1,48]].map(([u,v])=>annexPoint(u,v)),
+  [[-28,-36],[-28,-18],[-28,-9],[-28,10],[-28,23],[-43,23],[-43,48],[-28,48],[30,48],[printU + 8,48],[57.1,48]].map(([u,v])=>annexPoint(u,v)),
   ...facultyAnnexes.map((b): Vec2[] => {
     const [u,v] = b.mapCenter;
     if (officeIds.has(b.id)) return [b.entrance, annexPoint(-28,v)];
-    if (b.id === "kampus-print") return [b.entrance,annexPoint(u,48)];
+    if (b.id === "kampus-print") return [plan.plazaPassage.foot, b.entrance, annexPoint(u + 8, v - 4.8), annexPoint(u + 8, 48)];
     if (b.id === "cta-dicia") return [b.entrance,annexPoint(u,48),annexPoint(-28,48)];
     return [b.entrance,annexPoint(-28,v+b.rect.size[1]/2+2.5)];
   }),

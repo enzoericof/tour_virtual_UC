@@ -90,9 +90,9 @@ const originalPlaces: Place[] = [
     id: "sala-manfred",
     name: "Sala Manfred",
     category: "Encuentros",
-    floor: "Plataforma de la plaza (+1,40 m)",
+    floor: "Plataforma de la plaza (+0,90 m)",
     description:
-      "Sala tipo auditorio con el escenario y el pizarrón al norte, el frente curvo hacia la rampa del Bloque 1 y el cerramiento de vidrio y perfilería azul hacia el pasillo que la separa de Bedelía. Interior aproximado.",
+      "Auditorio de planta hexagonal unido al Bloque 1 por el acceso cubierto. La puerta vidriada con perfilería azul se alcanza desde la plaza techada. Interior aproximado.",
     position: [27, 0, -15],
     photo: "IMG_5685",
     photos: ["IMG_5685"],
@@ -132,6 +132,18 @@ const originalPlaces: Place[] = [
     position: [27, 0, 7],
     photo: "IMG_5688",
     photos: ["IMG_5688", "IMG_5693", "IMG_5706"],
+    status: "reference",
+  },
+  {
+    id: "pasillo-plaza",
+    name: "Pasillo de la plaza techada",
+    category: "Espacios compartidos",
+    floor: "Plataforma de la plaza (+0,90 m)",
+    description:
+      "Desde la galería, la escalera y la rampa quedan a la izquierda y la plaza techada a la derecha. Más adelante se abren los accesos de Manfred y Bedelía, con Kampus Print al fondo.",
+    position: [0, 0, 0],
+    photo: "",
+    photos: [],
     status: "reference",
   },
   {
