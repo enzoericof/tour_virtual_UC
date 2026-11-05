@@ -27,16 +27,28 @@ test("Covered walkway meets the plaza steps and follows the short side of Bloque
   const [start, end] = plan.coveredWalk, steps = plan.plazaGallery.smallSteps;
   const offset = start.map((n,axis) => n-steps.center[axis]-steps.direction[axis]*steps.run);
   assert.ok(close(offset[0]*steps.direction[0]+offset[1]*steps.direction[1],0), "Starts at the foot of the stairs");
-  assert.ok(Math.hypot(...offset) < steps.width/2, "Centerline meets the bottom tread, beside the table");
+  assert.ok(close(Math.hypot(...offset), 0), "Walkway and stairs share a centerline");
+  const gallery = plan.plazaGallery;
+  const lastPair = center([gallery.columns.at(-1), gallery.plazaColumns.at(-1)]);
+  const approach = steps.center.map((value, axis) => value - lastPair[axis]);
+  assert.ok(close(Math.hypot(...approach), 0.5), "Stairs line up with the opening between the pillars");
   const corners = rectCorners(plan.block2), direction = [corners[3][0]-corners[0][0], corners[3][1]-corners[0][1]];
   const walk = [end[0]-start[0], end[1]-start[1]];
   assert.ok(close(walk[0]*direction[1]-walk[1]*direction[0], 0), "Walkway must be parallel to the short facade");
   assert.ok(walk[0]*direction[0]+walk[1]*direction[1] > 0, "Walkway heads out from the plaza");
 });
 
-test("The photographed gallery has five pillars and a garden outside the steps", () => {
+test("The photographed gallery has two rows of edge pillars and a garden outside the steps", () => {
   const g = plan.plazaGallery;
+  assert.ok(close(dist(g.outline[0], g.outline[1]), 3.35), "Wider gallery toward the plaza");
+  assert.ok(plan.platform.some(outline => insidePolygon(center(g.outline.slice(1, 3)), outline)),
+    "The widened side stays above the plaza platform");
   assert.equal(g.columns.length, 5);
+  assert.equal(g.plazaColumns.length, g.columns.length);
+  for (const [i, point] of g.plazaColumns.entries()) {
+    assert.ok(insidePolygon(point, g.outline));
+    assert.ok(close(dist(point, g.columns[i]), 2.53), "Opposite supports leave the passage clear");
+  }
   for (let i=1;i<g.columns.length;i++)
     assert.ok(dist(g.columns[i-1],g.columns[i])>3 && dist(g.columns[i-1],g.columns[i])<4, "Pillar bays follow the stair proportions");
   for(const point of g.garden)

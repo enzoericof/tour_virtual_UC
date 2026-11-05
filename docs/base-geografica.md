@@ -94,8 +94,8 @@ Una sola geometría para «Sector CyT», «Vista de planta», «Plano de CyT», 
 | Patio (área común 2) | `courtyard` | `patio` | Entre ambos bloques |
 | Área común 1 | `common1` | `jardin` | Al sur de la plaza techada |
 | Sala Manfred | `manfred`, `manfredLink`, `manfredGallery`, `corridor` | `sala-manfred` | Hexágono de 16 × 12 m unido al Bloque 1 por el acceso cubierto |
-| Pasillo de la plaza techada | `plazaPassage` | `pasillo-plaza` | Vista hacia Kampus Print, entre Manfred y Bedelía |
-| Bedelía | `bedelia` | `bedelia` | 20 × 10 m, fachada vidriada hacia el cuadrado |
+| Pasillo de la plaza techada | `plazaGallery`, `plazaPassage` | `pasillo-plaza` | Galería de 3,35 m de ancho con dos filas de pilares en los bordes. Vista hacia Kampus Print, entre Manfred y Bedelía |
+| Bedelía | `bedelia` | `bedelia` | 20 × 10 m, fachada vidriada hacia el cuadrado. Sobre el lateral del pasillo se reproducen la puerta de profesores, la vitrina del CECYT y las jardineras de la foto |
 | Plaza techada | `coveredPlaza` | `plaza`, `acceso` | 15 × 10 m, separada de la cabecera este (medidas arriba); `acceso` queda en el rellano entre ambas |
 | Plataforma | `platform`, `platformSteps` | — | Plaza techada, cuadrado, Bedelía, cantina, la explanada y el rellano de la cabecera este a 0,9 m; la Sala Manfred, anfiteatro con gradas, queda fuera del prisma y baja desde la explanada. Escalera de la galería con rellano rosado, salida norte del pasillo de Manfred y rampa |
 | Plaza abierta | `openPlaza` | `plaza-abierta` | El cuadrado descubierto, con pavimento propio |
@@ -286,6 +286,8 @@ La aclaración de Horacio sustituye la ampliación anterior: se recuperan el anc
 Referencias: fotos del usuario `fb4056a7`, `de258745`, `42edc80e`, `d705ed24` y `c39edc52`, más la satelital `e3413145` (prefijos de sus adjuntos). Dos brazos perpendiculares de cinco peldaños claros, unidos a inglete, sobre el piso rosado inferior. Se conserva la plataforma de 0,90 m y el desarrollo de 2,40 m; las fotos no aportan medidas nuevas. El piso superior sigue el borde de la escalera sin cruzar sus huellas.
 
 Corrección posterior del usuario: el toldo es **azul** y el caminero debe unirse a los **tres peldaños de la plaza techada** que señaló en el adjunto `2b0486ee`, paralelo al costado corto del Bloque G. El eje nace dentro del ancho del peldaño inferior, desplazado 0,80 m respecto de su centro para dejar la mesa existente al costado, y continúa 30 m en la dirección del eje corto del bloque. La lona remata arriba en la losa y baja sobre esos peldaños; faldones y apoyos delgados. Ancho estimado de paso 2,20 m, cubierta 2,65 m y altura baja entre 2,80 y 2,95 m. Piso desde la cota inferior de la escalera (0,30 m) hasta 0,05 m, con ajuste suave de hasta 6 cm en el centro para evitar que el terreno lo atraviese. Se conservan los enlaces con el rellano rosado y el estacionamiento. Acabados procedurales exclusivos del acceso; sin usar las fotos como texturas. Medidas estimadas, pendientes de relevamiento. Edificios, árboles y mobiliario mantienen su geometría.
+
+En la revisión local del 05/11, el caminero azul y los tres peldaños se centraron entre las filas de pilares. La lona se une a la losa de hormigón con una transición suave hasta el tramo recto. Se retiró la mesa con bancos junto a la entrada para despejar el paso.
 
 ## Detalle del acceso, cinco pilares y bebedero — revisión local 03/11/2026
 

@@ -139,8 +139,10 @@ const [, , , plazaSouth] = rectCorners(coveredPlaza);
 const galleryWest = rectCorners(coveredPlaza)[0];
 const galleryPoint = (along: number, inward: number): Vec2 =>
   add(galleryWest, [Z, along], [X, inward]);
-const galleryOutline = [galleryPoint(0, -0.25), galleryPoint(0, 2.5),
-  galleryPoint(15, 2.5), galleryPoint(15, -0.25)];
+const galleryPlazaEdge = 3.1;
+const galleryColumnStations = [0.5, 4, 7.5, 11, 14.5];
+const galleryOutline = [galleryPoint(0, -0.25), galleryPoint(0, galleryPlazaEdge),
+  galleryPoint(15, galleryPlazaEdge), galleryPoint(15, -0.25)];
 // Eje visual desde la galería hacia el fondo, con la rampa a la izquierda y la plaza a la derecha.
 const passageStartAt = -9, passageEndAt = 31.5;
 const passageStartInset = 1.125, passageEndInset = 4.3;
@@ -226,11 +228,12 @@ const manfredGallery: Vec2[] = [
   manfredRight, manfredShoulder, corridor[1], corridor[2],
   fromRect(bedelia, [bedeliaGallery.start + 3.6, bedelia.size[1] / 2 + 0.2]),
   fromRect(bedelia, [bedeliaGallery.start - 0.7, bedelia.size[1] / 2 + bedeliaGallery.depth - 0.1]),
-  galleryPoint(0.1, 2.5), galleryPoint(0.1, -0.25), manfredLink[2],
+  galleryPoint(0.1, galleryPlazaEdge), galleryPoint(0.1, -0.25), manfredLink[2],
 ];
 // El caminero arranca al pie de los tres peldaños de la plaza y sigue el eje corto del Bloque G.
-// Se une al sector izquierdo del pie, dejando libre la mesa existente al costado derecho.
-const coveredWalkStart = galleryPoint(16.8, 0.55);
+// El caminero, la escalinata y el vano entre las dos filas de pilares comparten eje.
+const coveredWalkInset = (0.25 + galleryPlazaEdge - 0.32) / 2;
+const coveredWalkStart = galleryPoint(16.8, coveredWalkInset);
 const coveredWalkEnd = add(coveredWalkStart, [Z, 30]);
 
 export const facultyBlueprint = {
@@ -246,14 +249,15 @@ export const facultyBlueprint = {
     roof: 4.65,
     metalRoofSetback: 1.1,
     // Cinco pilares en 14 m, según las fotos del frente y de la escalinata (03/11).
-    columns: [0.5, 4, 7.5, 11, 14.5].map(t => galleryPoint(t, 0.25)),
+    columns: galleryColumnStations.map(t => galleryPoint(t, 0.25)),
+    plazaColumns: galleryColumnStations.map(t => galleryPoint(t, galleryPlazaEdge - 0.32)),
     offset: accessRetreat,
     garden: [[40.6,6.3],[41.1,5.55],[43.65,5.8],[45.65,7.3],
       [46.5,8.9],[45,9.7],[42.8,9.1],[41.2,8.4]] as Vec2[],
-    smallSteps: { center: galleryPoint(15, 1.35), angle: gridAngle, direction: Z, width: 2.2, run: 1.8, bottom: 0.3, count: 3 },
+    smallSteps: { center: galleryPoint(15, coveredWalkInset), angle: gridAngle, direction: Z, width: 2.2, run: 1.8, bottom: 0.3, count: 3 },
     // Camino ascendente desde el cruce existente hasta el pie de los tres peldaños.
     approach: [[41, 11, 0.05], [44, 14, 0.1],
-      [...galleryPoint(18, 1.35), 0.24], [...galleryPoint(16.8, 1.35), 0.3]] as [number, number, number][],
+      [...galleryPoint(18, coveredWalkInset), 0.24], [...coveredWalkStart, 0.3]] as [number, number, number][],
   },
   openPlaza,
   bedelia,
@@ -366,7 +370,7 @@ export const facultyBlueprint = {
   /** Árbol 2: árbol autóctono alto en el patio oeste (foto árbol_2.HEIC, posición 2 en cómo_debe_ser.png). */
   tree2: [-20, 22] as Vec2,
   trees: [[2, 19], [50, 22], [20, 62]] as Vec2[],
-  picnic: [[-14, 15], [-8, 13.5], [-2, 13], [24, 13.5], [52.5, 13], [54, 26]] as Vec2[],
+  picnic: [[-14, 15], [-8, 13.5], [-2, 13], [24, 13.5], [54, 26]] as Vec2[],
   /** Canteros con banco del cuadrado. */
   planters: [[46.1 + plazaShift, -7.35], [54.4 + plazaShift, -10.9]] as Vec2[],
 } as const;

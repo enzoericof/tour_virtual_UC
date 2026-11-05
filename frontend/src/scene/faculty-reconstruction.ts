@@ -879,10 +879,13 @@ export function createFaculty() {
     pave(g.outline, galleryStone, PLAZA_LEVEL + 0.012);
     const galleryCentre: Vec2 = [g.outline.reduce((n, p) => n + p[0], 0) / 4,
       g.outline.reduce((n, p) => n + p[1], 0) / 4];
+    const [near, nearPlaza, , far] = g.outline;
+    const length = Math.hypot(far[0] - near[0], far[1] - near[1]);
+    const width = Math.hypot(nearPlaza[0] - near[0], nearPlaza[1] - near[1]);
     const joints = new T.MeshStandardMaterial({ color: "#969589", transparent: true, opacity: 0.35, roughness: 1 });
-    frame({ center: galleryCentre, size: [15, 2.75], angle: gridAngle + Math.PI / 2 }, () => {
-      for (let x = -7.5; x <= 7.5; x += 0.6) box(0.008, 0.002, 2.75, x, PLAZA_LEVEL + 0.014, 0, joints);
-      for (let z = -1.2; z <= 1.2; z += 0.6) box(15, 0.002, 0.008, 0, PLAZA_LEVEL + 0.014, z, joints);
+    frame({ center: galleryCentre, size: [length, width], angle: gridAngle + Math.PI / 2 }, () => {
+      for (let x = -length / 2; x < length / 2; x += 0.6) box(0.008, 0.002, width, x, PLAZA_LEVEL + 0.014, 0, joints);
+      for (let z = -1.2; z < width / 2; z += 0.6) box(length, 0.002, 0.008, 0, PLAZA_LEVEL + 0.014, z, joints);
     });
     // Pasillo macizo debajo de toda la fila de pilares; mismo nivel que la plaza.
 
@@ -899,7 +902,7 @@ export function createFaculty() {
       v3(ss.center[0], PLAZA_LEVEL, ss.center[1]), ss.width);
     // El pavimento lo define la plataforma, recortada por el borde superior de la escalera.
     // El primer apoyo aloja los servicios y se construye rectangular más abajo.
-    for (const [x, z] of g.columns.slice(1))
+    for (const [x, z] of [...g.columns.slice(1), ...g.plazaColumns])
       pole(0.23, g.roof - PLAZA_LEVEL, x, (g.roof + PLAZA_LEVEL) / 2, z, m.concrete, true);
     const [frontA, frontB] = g.front;
     const galleryAngle = -Math.atan2(frontB[1] - frontA[1], frontB[0] - frontA[0]);
@@ -977,7 +980,7 @@ export function createFaculty() {
       });
     }, PLAZA_LEVEL + 0.015);
     // Rejilla a lo largo de la unión diagonal con la cubierta metálica.
-    const a = g.outline[1], b = g.outline[2], length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const a = g.outline[1], b = g.outline[2];
     const angle = -Math.atan2(b[1] - a[1], b[0] - a[0]);
     box(length, 0.018, 0.24, (a[0] + b[0]) / 2, PLAZA_LEVEL + 0.025, (a[1] + b[1]) / 2, m.metal, false, { rotation: angle });
     for (let i = 0; i <= Math.floor(length / 0.08); i++) {
@@ -1086,17 +1089,27 @@ export function createFaculty() {
     box(3.2, 0.08, 1.4, 0, 0.41, 0, m.grass);
     bench(0, 1.5, 0.06, -1);
   }, PLAZA_LEVEL);
-  function glazedRoom(w: number, d: number, name: string) {
+  function glazedRoom(w: number, d: number, name: string, sideDoor: number) {
     box(w, 0.16, d, 0, 0.02, 0, m.stone, true);
     box(w, 3.2, 0.2, 0, 1.68, -d / 2, m.brick, true);
-    for (const x of [-w / 2, w / 2]) box(0.2, 3.2, d, x, 1.68, 0, m.brick, true);
+    box(0.2, 3.2, d, w / 2, 1.68, 0, m.brick, true);
+    const left = -w / 2, doorHalf = 0.55;
+    for (const [a, b] of [[-d / 2, sideDoor - doorHalf], [sideDoor + doorHalf, d / 2]])
+      box(0.2, 3.2, b - a, left, 1.68, (a + b) / 2, m.brick, true);
+    box(0.2, 1.02, doorHalf * 2, left, 2.77, sideDoor, m.brick, true);
+    box(0.07, 2.17, 1.03, left, 1.165, sideDoor, m.glass, true);
+    for (const offset of [-doorHalf, doorHalf])
+      box(0.22, 2.2, 0.055, left, 1.18, sideDoor + offset, m.blue);
+    box(0.22, 0.06, 1.15, left, 2.25, sideDoor, m.blue);
+    box(0.08, 0.21, 0.045, left - 0.07, 1.1, sideDoor + 0.38, m.steel);
+    sign("Acceso / Profesores", left - 0.13, 2.47, sideDoor, 1.18, -Math.PI / 2);
     box(w + 0.8, 0.2, d + 0.8, 0, 3.4, 0, m.concrete);
     glazing(w, d / 2, Math.floor(Math.ceil(w / 1.2) / 2));
     sign(name, 0, 2.65, d / 2 + 0.08, Math.min(w - 1, 4.5));
   }
   frame(plan.bedelia, () => {
     const [w, d] = plan.bedelia.size;
-    glazedRoom(w, d, "BEDELÍA");
+    glazedRoom(w, d, "BEDELÍA", 0.85);
     
     // Mostradores / Escritorios interiores
     const gold = new T.MeshStandardMaterial({ color: "#c2a65a", metalness: 0.25, roughness: 0.45 });
@@ -1125,19 +1138,50 @@ export function createFaculty() {
     }
 
     // Vitrina visible desde el acceso de Manfred, sobre el lateral de Bedelía.
-    const displayX = -w / 2 - 0.31, displayZ = 3.25;
+    const displayX = -w / 2 - 0.31, displayZ = 3.05;
     const displayFrame = new T.MeshStandardMaterial({ color: "#2f3635", roughness: 0.64 });
     box(0.06, 2.1, 2.32, displayX + 0.18, 1.05, displayZ, displayFrame, true);
     for (const z of [displayZ - 1.14, displayZ, displayZ + 1.14])
       box(0.42, 2.1, 0.05, displayX, 1.05, z, displayFrame, true);
     for (const y of [0.14, 0.79, 1.44, 2.07])
       box(0.42, 0.05, 2.32, displayX, y, displayZ, displayFrame, true);
-    for (const y of [0.79, 1.44]) for (const offset of [-0.82, -0.33, 0.33, 0.82]) {
-      pole(0.075, 0.13, displayX, y + 0.09, displayZ + offset, gold);
-      pole(0.12, 0.13, displayX, y + 0.22, displayZ + offset, gold);
+    const cup = new T.CylinderGeometry(0.10, 0.035, 1, 14);
+    for (const [row, y] of [0.14, 0.79, 1.44].entries()) {
+      for (const [i, offset] of [-0.82, -0.32, 0.25, 0.8].entries()) {
+        const z = displayZ + offset, material = (row + i) % 3 === 0 ? m.steel : gold;
+        const height = 0.16 + ((i + row * 2) % 4) * 0.055;
+        box(0.13, 0.06, 0.15, displayX, y + 0.055, z, displayFrame);
+        pole(0.025, 0.11, displayX, y + 0.14, z, material);
+        const trophy = new T.Mesh(cup, material);
+        trophy.position.set(displayX, y + 0.195 + height / 2, z);
+        trophy.scale.y = height;
+        visual.add(trophy);
+      }
     }
-    box(0.035, 1.9, 2.25, displayX - 0.21, 1.11, displayZ, m.glass, true);
-    sign("BEDELÍA", displayX - 0.22, 2.25, displayZ, 1.35, -Math.PI / 2);
+    const clearGlass = m.glass.clone();
+    clearGlass.color.set("#d7e2dd");
+    clearGlass.opacity = 0.18;
+    box(0.035, 1.9, 2.25, displayX - 0.21, 1.11, displayZ, clearGlass, true);
+    sign("CECYT", displayX - 0.23, 2.02, displayZ, 0.96, -Math.PI / 2);
+    for (const z of [-0.75, 4.65]) {
+      const x = -w / 2 - 0.78;
+      box(0.52, 0.42, 0.52, x, 0.21, z, m.plaster, true);
+      box(0.46, 0.025, 0.46, x, 0.425, z, m.bark);
+      for (let i = 0; i < 6; i++) {
+        const a = i * 2.4;
+        const tip = v3(x + Math.cos(a) * 0.24, 1.25 + (i % 3) * 0.16, z + Math.sin(a) * 0.24);
+        const base = v3(x, 0.43, z);
+        beam(base, tip, 0.012, m.leaves[0]);
+        for (const t of [0.48, 0.66, 0.83, 0.96]) {
+          const point = base.clone().lerp(tip, t);
+          const leaf = new T.Mesh(cylinder, m.leaves[(i + 1) % m.leaves.length]);
+          leaf.position.copy(point).add(v3(Math.cos(a) * 0.10, 0.035, Math.sin(a) * 0.10));
+          leaf.scale.set(0.035, 0.25, 0.012);
+          leaf.rotation.set(Math.sin(a) * 0.9, 0, -Math.cos(a) * 0.9);
+          visual.add(leaf);
+        }
+      }
+    }
   }, PLAZA_LEVEL);
   // Sala Manfred: una cara del hexágono abre al acceso cubierto y las gradas bajan hacia el fondo.
   const manfredWallTop = 3.6;
@@ -1898,9 +1942,12 @@ export function createFaculty() {
     // Remate en la plaza, sobre los tres peldaños señalados por el usuario.
     // Cubierta y piso continúan por el mismo eje, paralelo al costado corto del Bloque G.
     const [[ax, az], [bx, bz]] = plan.coveredWalk;
-    const attachment = [ax-g.smallSteps.direction[0]*g.smallSteps.run, az-g.smallSteps.direction[1]*g.smallSteps.run];
-    const canopy = new T.CubicBezierCurve3(v3(attachment[0],g.roof+0.03,attachment[1]),
-      v3(attachment[0],4.1,attachment[1]),v3(ax,3.15,az),v3(ax,2.95,az));
+    const [dx, dz] = g.smallSteps.direction;
+    const roofStart = v3(ax + dx * 3, 2.95, az + dz * 3);
+    const attachment = v3(g.smallSteps.center[0] - dx * 0.12, g.roof + 0.1, g.smallSteps.center[1] - dz * 0.12);
+    const canopy = new T.CubicBezierCurve3(attachment,
+      attachment.clone().add(v3(dx * 1.5, 0, dz * 1.5)),
+      roofStart.clone().sub(v3(dx * 1.5, 0, dz * 1.5)), roofStart);
     fabricCover(canopy, 2.65, []);
     // Rellano inferior rosado unido al camino, sin cajas cruzadas ni recortes de césped.
     const lowerPath = new T.CubicBezierCurve3(v3(39,0.034,5.9),v3(39.8,0.034,7),v3(40.3,0.05,9.6),v3(41,0.05,11));
@@ -1924,7 +1971,7 @@ export function createFaculty() {
       walkStart.clone().lerp(walkEnd,2/3).add(v3(0,0.08,0)),walkEnd);
     ribbon(walk, 2.2, m.accessStone, true, true);
     ribbon(new T.LineCurve3(v3(bx,0.05,bz),v3(55,0.05,37)), 2.2, m.accessStone, true);
-    const roof = new T.LineCurve3(v3(ax,2.95,az),v3(bx,2.8,bz));
+    const roof = new T.LineCurve3(roofStart,v3(bx,2.8,bz));
     const bays = Math.ceil(roof.getLength() / 4.5);
     fabricCover(roof, 2.65, Array.from({length:bays + 1},(_,i)=>i / bays));
   }
