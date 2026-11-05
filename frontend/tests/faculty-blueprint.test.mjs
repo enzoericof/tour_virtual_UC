@@ -34,12 +34,11 @@ test("Covered walkway meets the plaza steps and follows the short side of Bloque
   assert.ok(walk[0]*direction[0]+walk[1]*direction[1] > 0, "Walkway heads out from the plaza");
 });
 
-test("The photographed gallery has five pillars, a supported water station and a garden outside the steps", () => {
+test("The photographed gallery has five pillars and a garden outside the steps", () => {
   const g = plan.plazaGallery;
   assert.equal(g.columns.length, 5);
   for (let i=1;i<g.columns.length;i++)
     assert.ok(dist(g.columns[i-1],g.columns[i])>3 && dist(g.columns[i-1],g.columns[i])<4, "Pillar bays follow the stair proportions");
-  assert.ok(plan.platform.some(outline=>insidePolygon(g.waterStation.center,outline)), "Water station stands on the plaza");
   for(const point of g.garden)
     assert.ok(!plan.platform.some(outline=>insidePolygon(point,outline)), "Garden must not cover the raised circulation");
 });
@@ -192,9 +191,7 @@ test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit
   for (const key of ["coveredPlaza", "bedelia", "cantina"]) assert.ok(onPlatform(plan[key].center), key);
   // Sala Manfred: anfiteatro con gradas descendentes (commit 2631f6f). Queda fuera del prisma de la
   // plataforma para que el foso baje y su frente da a la explanada, a la altura de la plataforma.
-  const manfredFront = plan.manfred.center[1] + plan.manfred.size[1] / 2;
   assert.ok(!onPlatform(plan.manfred.center), "Sunken auditorium, outside the platform prism");
-  assert.ok(onPlatform([plan.manfred.center[0], manfredFront + 0.3]), "Its front opens onto the platform");
   assert.ok(onPlatform(center(plan.corridor)), "Corridor between Manfred and Bedelía");
   assert.ok(onPlatform(center(plan.openPlaza)), "Open plaza");
   for (const id of ["acceso", "plaza", "plaza-abierta", "bedelia", "sala-manfred"]) {
@@ -223,25 +220,48 @@ test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit
   assert.ok(!onPlatform(plan.elevator.center) && !onPlatform(plan.tower.center), "Bloque 1 stays at ground level");
 });
 
-test("Sala Manfred: 12 × 9 m, stage and whiteboard to the north, curved front facing the ramp, pasillo con Bedelía", () => {
-  const { manfred, bedelia, eastEnd: { ramp } } = plan;
-  assert.deepEqual(manfred.size, [12, 9]);
-  assert.equal(manfred.angle, 0, "Aligned with Bloque 1: the back wall (-z) faces north");
+test("Sala Manfred: tilted hexagonal footprint with a covered entrance joined to Bloque 1", () => {
+  const { manfred, manfredLink, manfredGallery, bedelia, eastEnd: { ramp } } = plan;
+  assert.deepEqual(manfred.size, [16, 12]);
+  assert.ok(close(manfred.angle, -Math.PI / 4), "The glazed face recedes toward Bedelía when seen from the ramp");
   const outline = manfredOutline(), b = rectCorners(bedelia);
+  assert.equal(outline.length, 6);
+  const [right, left] = outline.slice(3, 5);
+  assert.ok(close(dist(right, left), manfred.entrance.width));
+  assert.deepEqual(manfredLink.slice(0, 2), [left, right], "The roof starts on the glazed face");
+  assert.ok(manfredLink.slice(2).every((point) => insidePolygon(point, rectCorners(plan.main))),
+    "The other end of the roof meets Bloque 1");
+  assert.deepEqual([manfredGallery[0], manfredGallery.at(-1)], manfredLink.slice(1, 3),
+    "The extension shares the edge of the entrance roof");
+  assert.ok(plan.plazaPassage.lights.every(point => insidePolygon(point, manfredGallery)),
+    "The extension covers the straight passage to Bedelía");
+  assert.ok(manfredGallery.some(point => insidePolygon(point, plan.plazaGallery.outline)),
+    "The extension overlaps the covered plaza gallery");
+  const [visitX, , visitZ] = facultyVisitPoints["sala-manfred"];
+  const [doorX, , doorZ] = facultyVisitTargets["sala-manfred"];
+  assert.ok(close(distanceToSegment([doorX, doorZ], left, right), 0), "The arrival faces the door on the flat side");
+  assert.ok(doorX > ramp.west && doorX < ramp.east, "The door falls within the projected width of the ramp");
+  for (const t of [0.1, 0.4, 0.7, 0.95]) {
+    const landing = [(ramp.west + ramp.east) / 2 + t * (doorX - (ramp.west + ramp.east) / 2),
+      ramp.top + t * (doorZ - ramp.top)];
+    assert.ok(onPlatform(landing) && insidePolygon(landing, manfredLink), "The ramp leads to the door across a covered landing");
+  }
+  assert.ok(onPlatform([visitX, visitZ]) && !insidePolygon([visitX, visitZ], outline));
+  assert.ok(insidePolygon([visitX, visitZ], manfredLink), "The arrival is under the connected roof");
+  assert.ok(onPlatform([doorX + (visitX - doorX) / 10, doorZ + (visitZ - doorZ) / 10]), "The platform meets the threshold");
+  for (const corner of outline) {
+    assert.ok(!onPlatform(center([corner, manfred.center])), "The platform stays out of the auditorium");
+  }
   const gap = Math.min(...outline.flatMap((p) => b.map((q, i) => distanceToSegment(p, q, b[(i + 1) % 4]))),
     ...b.map((q) => Math.min(...outline.map((p, i) => distanceToSegment(q, p, outline[(i + 1) % outline.length])))));
-  assert.ok(close(gap, 3.4), "3,4 m de pasillo entre Manfred y Bedelía para la circulación y puerta");
-  const apex = [manfred.center[0], manfred.center[1] + manfred.size[1] / 2];
-  // The 2.1 m stair moved the ramp 0.7 m east; Manfred stays tied to Bedelía and its front still spans it.
-  assert.ok(Math.abs(apex[0] - (ramp.west + ramp.east) / 2) < 1.5 && apex[1] < ramp.top, "The curved front faces the ramp");
-  assert.ok(manfred.bulge > 0 && manfred.bulge < manfred.size[1] / 2);
-  assert.ok(outline.every(([, z]) => z < -half.z - 1), "Clear of Bloque 1");
+  assert.ok(gap >= 3.4 && gap < 5.5, "The passage stays open between the closer buildings");
+  assert.ok(outline.every(([, z]) => z < -half.z), "The larger room stays clear of Bloque 1");
 });
 
 test("Annexes and visit points stay in the faculty site, with parking south of Bloque G", () => {
   for (const key of ["main", "block2", "manfred", "bedelia", "cantina", "coveredPlaza", "electronics", "parking"])
     assert.ok(inFacultyZone(worldPolygon(plan[key])), key);
-  assert.equal(Object.keys(facultyVisitPoints).length, 16);
+  assert.equal(Object.keys(facultyVisitPoints).length, 17);
   for (const [id, p] of Object.entries(facultyVisitPoints)) {
     const w = facultyToWorld(p);
     assert.ok(inFacultyZone([[w[0], w[2]]]), id);
