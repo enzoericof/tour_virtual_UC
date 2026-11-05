@@ -92,7 +92,7 @@ const originalPlaces: Place[] = [
     category: "Encuentros",
     floor: "Plataforma de la plaza (+0,90 m)",
     description:
-      "Auditorio de planta hexagonal unido al Bloque 1 por el acceso cubierto. La puerta vidriada con perfilería azul se alcanza desde la plaza techada. Interior aproximado.",
+      "Auditorio con frente poligonal hacia el pasillo de Bedelía (Área administrativa), paños claros y perfilería azul. Puerta abierta hacia el pasillo e interior aproximado.",
     position: [27, 0, -15],
     photo: "IMG_5685",
     photos: ["IMG_5685"],
@@ -140,7 +140,7 @@ const originalPlaces: Place[] = [
     category: "Espacios compartidos",
     floor: "Plataforma de la plaza (+0,90 m)",
     description:
-      "Desde la galería, la escalera y la rampa quedan a la izquierda y la plaza techada a la derecha. Más adelante se abren los accesos de Manfred y Bedelía, con Kampus Print al fondo.",
+      "Desde la galería, la escalera y la rampa quedan a la izquierda y la plaza techada a la derecha. El pasillo continúa entre Manfred y Bedelía (Área administrativa).",
     position: [0, 0, 0],
     photo: "",
     photos: [],

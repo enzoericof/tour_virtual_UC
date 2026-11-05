@@ -226,3 +226,39 @@ Se reprodujo el error de lectura de map en prism(g.garden): Vite servia una vers
 - `campus-backend`: `mvnw -DskipTests package` correcto (Java 21). No se ejecutó su prueba de contexto ni su arranque, que requieren PostgreSQL `TP_INFO3`.
 - `backend/` ya no existe en el repositorio: no se pueden ejecutar `./mvnw verify` ni la prueba de chat, y la imagen de Docker no compila. Ver [pendientes](pendientes.md).
 - Tras integrar `849c037`: 39/39 y build correctos. Se corrigieron dos expresiones de la cara este que Git combinó sin conflicto (llegada `acceso` fuera de la plataforma) y el foso de Manfred, que quedaba bajo el césped. Los seis recorridos con el caminante se repitieron sobre el modelo integrado y llegan (el escenario de Manfred, a +0,28 m); el caminante de `main` exige el cursor capturado, que la página temporal simula. Sin errores de página.
+
+### Salida bajo toldo — 04/11/2026
+Build TypeScript/Vite correcto. Prueba de unión del caminero ampliada: los peldaños deben quedar fuera de los polígonos de la plataforma; pasa. La suite mantiene dos fallos anteriores a esta corrección: espera plaza de 15 m cuando el modelo tiene 20 m, y separación de Sala Manfred. Revisión mediante Chromium de la geometría y rayos verticales sobre la bajada, sin errores JavaScript. No equivale a recorrido manual completo.
+
+### Fachadas — 05/11/2026
+`npm --prefix frontend run build` correcto. Chromium renderizó las fachadas de Manfred y Bedelía sin errores JavaScript; capturas revisadas en `.local/references/manfred-paneles.png` y `bedelia-fachada.png`. Revisión visual de accesos abiertos; no se ejecutó recorrido manual completo.
+
+### Encuentro y ancho de galería — 05/11/2026
+Build correcto; Chromium sin errores, vistas aérea y peatonal revisadas. Pruebas: 38/39; pasa ahora la separación Manfred–administración. Persiste únicamente la expectativa antigua de plaza 15 m frente a los 20 m del modelo. No se validaron medidas extraídas del DWG ni recorrido manual completo.
+
+05/11/2026: corrección del eje Manfred–Bedelía: npm test 39/39; npm run build correcto. Capturas automatizadas desde rampa y pasillo sin errores de página. Aviso del proceso de pruebas: puerto HMR 24678 ocupado; no impidió completar las pruebas.
+
+
+Revisión de contorno y plaza 05/11: 39/39 pruebas y build correctos. Capturas automatizadas del escenario desde rampa y vista aérea sin errores de página.
+
+
+Traslación conjunta: 39/39 pruebas, build correcto y capturas del escenario sin errores de página.
+
+
+Recorte de galería/rampa y acercamiento de Manfred: npm test 39/39; npm run build correcto. Capturas automatizadas sin errores de página.
+
+
+Corrección de prolongación de pared: 39/39 pruebas y build correcto. Captura desde rampa sin errores de página.
+
+
+Prolongación de paño y traslado del contiguo: 39/39 pruebas, build correcto, captura de escenario sin errores.
+
+### Integración local de geometría y materiales — 05/11/2026
+
+Rama `fix/integrar-plaza-texturas`, sobre `ccd2ded`. Stash original conservado. `npm --prefix frontend run build`: correcto. `npm --prefix frontend test`: 39/39; aviso de puerto WebSocket 24678 ocupado durante las pruebas, sin fallos. Se comprobó que el blueprint conserva la geometría del stash (solo se agrega el punto de visita del pasillo). Revisión en Chrome con Playwright: vista general, fachada de Manfred y pasillo cargan; no equivale a verificar todos los recorridos o colisiones. El acceso de Manfred continúa pendiente, como en la versión local.
+
+### Detalles recuperados — 05/11/2026
+
+Build correcto; 40/40 pruebas correctas. Se restituye la prueba remota de visibilidad de Kampus Print desde el pasillo y se comprueba por raycasting del modelo real que el vano de Manfred tiene 0,56 m de ancho central libre a altura corporal, mientras el paño adyacente mantiene su colisión. Las rutas de anexos siguen sin atravesar edificios. La puerta deja de ser un pendiente de modelado; no se verificó todavía un recorrido manual completo por el auditorio.
+
+Tras mover la puerta al paño diagonal: build correcto y 40/40 pruebas; raycasting verifica el nuevo vano libre y el antiguo cerrado. Chrome carga sin errores JavaScript; revisión visual de Kampus Print al fondo del pasillo y puerta diagonal abierta. Vitrina recuperada del código remoto; su inspección frontal específica quedó sin completar.

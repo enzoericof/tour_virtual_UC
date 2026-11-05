@@ -5,8 +5,8 @@ import { facultyBlueprint as plan, gridAngle, type Vec2, type Rect } from "./fac
  * No modifica ni reescala los dos bloques existentes. */
 export function annexPoint(u: number, v: number): Vec2 {
   const a = gridAngle + Math.PI;
-  return [plan.cantina.center[0] + u * Math.cos(a) - v * Math.sin(a),
-    plan.cantina.center[1] + u * Math.sin(a) + v * Math.cos(a)];
+  return [plan.annexAnchor[0] + u * Math.cos(a) - v * Math.sin(a),
+    plan.annexAnchor[1] + u * Math.sin(a) + v * Math.cos(a)];
 }
 export type Annex = {
   id: string; name: string; rect: Rect; height: number; outline: Vec2[];
@@ -27,7 +27,7 @@ function office(id: string, name: string, v: number, w: number, d: number): Anne
 }
 // Frente de Kampus Print al fondo del pasillo, orientado hacia la plaza.
 const [printX, printZ] = plan.plazaPassage.target;
-const dx = printX - plan.cantina.center[0], dz = printZ - plan.cantina.center[1];
+const dx = printX - plan.annexAnchor[0], dz = printZ - plan.annexAnchor[1];
 const annexAngle = gridAngle + Math.PI;
 const printU = dx * Math.cos(annexAngle) + dz * Math.sin(annexAngle);
 const printV = -dx * Math.sin(annexAngle) + dz * Math.cos(annexAngle);

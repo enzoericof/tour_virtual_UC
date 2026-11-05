@@ -74,9 +74,22 @@ function rectFromCorner(corner: Vec2, size: Vec2, angle: number): Rect {
   return { center: add(corner, [axis(angle), size[0] / 2], [across(angle), size[1] / 2]), size, angle };
 }
 /** Punto en coordenadas locales (x, z) de un rectángulo → plano. */
-const fromRect = (r: Rect, [x, z]: Vec2): Vec2 => add(r.center, [axis(r.angle), x], [across(r.angle), z]);
+export const fromRect = (r: Rect, [x, z]: Vec2): Vec2 => add(r.center, [axis(r.angle), x], [across(r.angle), z]);
+/** Punto del segmento ab con abscisa x. */
+export function pointAtX(a: Vec2, b: Vec2, x: number): Vec2 {
+  return [x, a[1] + ((b[1] - a[1]) * (x - a[0])) / (b[0] - a[0])];
+}
 /** Punto del segmento ab con ordenada z. */
 const pointAtZ = (a: Vec2, b: Vec2, z: number): Vec2 => [a[0] + ((b[0] - a[0]) * (z - a[1])) / (b[1] - a[1]), z];
+/** Planta local de un recinto de w × d cuyo lado +z es un arco de flecha `bulge`: fondo izquierdo,
+ * fondo derecho y el arco de derecha a izquierda. */
+export function bulgedOutline(w: number, d: number, bulge: number, segments = 12): Vec2[] {
+  // Se conserva la firma para los consumidores; el cerramiento es de paños rectos.
+  void segments;
+  return [[-w/2-.8,-d/2],[w/2,-d/2],[w/2,d/2-bulge],
+    [w/4,d/2+bulge],[-w/4-.8,d/2+bulge],[-w/2-2.1,d/2-bulge-1.3]];
+
+}
 /** Aulas de un nivel entre `from` y `to` (x del marco del bloque): anchos desiguales y una puerta por
  * aula en un lugar distinto en cada piso. Variación fija (no aleatoria) según `seed`; sin relevamiento,
  * solo reproduce que las aulas no son regulares. Cada puerta, de `door` metros de vano, esquiva las
@@ -118,7 +131,7 @@ const eastStair = { x: east - 0.65 - 1.05, width: 2.1, top: half.z - block1.gall
 const stairWest = eastStair.x - eastStair.width / 2, stairEast = eastStair.x + eastStair.width / 2;
 const stairFoot = eastStair.top - eastStair.run;
 const recessColumns = stairWest - 0.3;
-const ramp = { west: recessColumns - 0.25 - 1.6, east: recessColumns - 0.25, top: -half.z - 2 };
+const ramp = { west: recessColumns - 0.25 - 1.6, east: recessColumns - 0.25, top: -half.z };
 /** Extremo este de las aulas en cada nivel (x del plano): planta baja y primer piso retraídos. */
 const roomsEnd = [ramp.west - 0.15, recessColumns, east, east];
 
@@ -129,30 +142,18 @@ const roomsEnd = [ramp.west - 0.15, recessColumns, east, east];
 const plazaShift = 6.5;
 const reach = block1.depth * -Math.sin(gridAngle);
 const plazaWest: Vec2 = [east - reach * X[0] + plazaShift, -half.z - reach * X[1]];
-const plazaNorth = add(plazaWest, [X, 10]);
+// Traslación conjunta hasta el borde de la galería administrativa (flecha verde).
+const plazaGroupShift = -4.3;
+const shiftPlaza = (p: Vec2): Vec2 => add(p, [Z, plazaGroupShift]);
+const plazaNorth = shiftPlaza(add(plazaWest, [X, 10]));
 // Retiro solicitado: una profundidad de escalera hacia la plaza (+x).
 const accessRetreat = STEPS_RUN;
 // Ajuste visual hacia el Bloque 1, según la flecha de la referencia del usuario.
 const plazaLateralAdjustment = -0.8;
-const coveredPlaza = rectFromCorner([plazaWest[0] + accessRetreat + plazaLateralAdjustment, plazaWest[1]], [10, 15], gridAngle);
+const galleryAnchor: Vec2 = [plazaWest[0] + accessRetreat + plazaLateralAdjustment, plazaWest[1]];
+// Cubierta retirada 3 m hacia administración y ensanchada hacia el patio.
+const coveredPlaza = rectFromCorner(add(galleryAnchor, [Z, -3 + plazaGroupShift]), [13, 17.3], gridAngle);
 const [, , , plazaSouth] = rectCorners(coveredPlaza);
-const galleryWest = rectCorners(coveredPlaza)[0];
-const galleryPoint = (along: number, inward: number): Vec2 =>
-  add(galleryWest, [Z, along], [X, inward]);
-const galleryPlazaEdge = 3.1;
-const galleryColumnStations = [0.5, 4, 7.5, 11, 14.5];
-const galleryOutline = [galleryPoint(0, -0.25), galleryPoint(0, galleryPlazaEdge),
-  galleryPoint(15, galleryPlazaEdge), galleryPoint(15, -0.25)];
-// Eje visual desde la galería hacia el fondo, con la rampa a la izquierda y la plaza a la derecha.
-const passageStartAt = -9, passageEndAt = 31.5;
-const passageStartInset = 1.125, passageEndInset = 4.3;
-const passageStart = galleryPoint(-passageStartAt, passageStartInset);
-const passageTarget = galleryPoint(-passageEndAt, passageEndInset);
-const passageAngle = Math.atan2(passageTarget[1] - passageStart[1], passageTarget[0] - passageStart[0]);
-const passagePoint = (ahead: number, right = 0): Vec2 => {
-  const t = (ahead - passageStartAt) / (passageEndAt - passageStartAt);
-  return galleryPoint(-ahead, passageStartInset + t * (passageEndInset - passageStartInset) + right);
-};
 /** Cuadrado descubierto entre la plaza techada (oeste), Bedelía (norte) y la cantina (este). */
 const square = { corner: plazaNorth, size: [22, 15] as Vec2 };
 const cantinaFront = add(plazaNorth, [X, square.size[0]]);
@@ -165,7 +166,7 @@ const cantina = rectFromCorner(add(cantinaFront, [Z, 3], [X, 12]), [18, 12], gri
 export const cantinaForecourt = {
   outline: [[-10, 6], [10, 6], [10, 12], [5, 12], [-4, 16], [-10, 16]] as Vec2[],
   edge: [[-10, 16], [-4, 16], [5, 12], [10, 12]] as Vec2[],
-  tree: [0, 21] as Vec2,
+  tree: [-4, 21] as Vec2,
   // Borde del cuadrado hacia el jardín; termina antes del pilar de la plaza (z ≈ 28,35).
   sideSteps: { x: 3, from: 12.9, to: 27.4 },
 };
@@ -173,43 +174,20 @@ export const cantinaForecourt = {
 // jardín queda al costado; no debe cortar el recorrido principal (corrección de Horacio).
 const openPlaza = [plazaNorth, cantinaFront, add(cantinaFront, [Z, square.size[1]]),
   add(plazaNorth, [Z, square.size[1]])];
-const bedeliaCorner = add(plazaNorth, [X, -2.6], [Z, -15]);
+// Eje continuo del pasillo: la salida norte comparte dirección con la galería de la plaza.
+const galleryWest = galleryAnchor;
+const passagePoint = (along: number, across: number): Vec2 => add(galleryWest, [Z, along], [X, across]);
+const bedeliaCorner = passagePoint(-20, 4.15);
 const bedelia = rectFromCorner(bedeliaCorner, [20, 10], gridAngle);
-const bedeliaGallery = { depth: 4.8, start: -bedelia.size[0] / 2 - 4.8, end: bedelia.size[0] / 2 - 1.2 };
-// Desde la rampa se ve el frente vidriado en diagonal, con la puerta cerca de su eje
-// y el paso a Bedelía a la derecha. El extremo más cercano deja espacio para el rellano.
-const manfredSize: Vec2 = [16, 12];
-const manfredFaceHalf = manfredSize[0] / 4, manfredDepthHalf = manfredSize[1] / 2;
-const manfredAngle = -Math.PI / 4;
-const manfredEntrance = { width: manfredFaceHalf * 2, z: manfredDepthHalf, bays: 8, doorBay: 6 };
-const manfredDoorX = manfredEntrance.width * ((manfredEntrance.doorBay + 0.5) / manfredEntrance.bays - 0.5);
-const rampCenterX = (ramp.west + ramp.east) / 2;
-const manfredDoor: Vec2 = [rampCenterX - 0.25, ramp.top - 3.7];
-const manfred = {
-  center: add(manfredDoor, [axis(manfredAngle), -manfredDoorX], [across(manfredAngle), -manfredDepthHalf]),
-  size: manfredSize,
-  angle: manfredAngle,
-  outline: [
-    [-manfredFaceHalf, -manfredDepthHalf], [manfredFaceHalf, -manfredDepthHalf],
-    [manfredSize[0] / 2, 0], [manfredFaceHalf, manfredDepthHalf],
-    [-manfredFaceHalf, manfredDepthHalf], [-manfredSize[0] / 2, 0],
-  ] as Vec2[],
-  entrance: manfredEntrance,
-};
-const manfredFace = [
-  fromRect(manfred, [-manfredFaceHalf, manfredDepthHalf]),
-  fromRect(manfred, [manfredFaceHalf, manfredDepthHalf]),
-] as const;
-const [manfredLeft, manfredRight] = manfredFace;
-const manfredShoulder = fromRect(manfred, [manfredSize[0] / 2, 0]);
-const manfredApronWest = manfredLeft[0] - 1.5;
-// La cubierta sigue desde la cara de entrada hasta el Bloque 1. El borde oeste se cierra
-// en ladrillo y el lado de la plaza queda abierto para entrar tanto a la sala como a la rampa.
-const manfredLink: Vec2[] = [manfredLeft, manfredRight, [east - 0.1, -half.z + 0.14], [manfredLeft[0], -half.z + 0.14]];
-const corridor: Vec2[] = [passagePoint(8, -1.4), passagePoint(24, -1.4),
-  passagePoint(24, 1.4), passagePoint(8, 1.4)];
-const corridorTop = passagePoint(24);
-const corridorFoot = add(corridorTop, [axis(passageAngle), STEPS_RUN]);
+const manfredSize: Vec2 = [12, 9], manfredBulge = 1.5;
+// Frente curvo hacia el costado del pasillo (+X), no atravesado delante de su salida.
+const manfredRect: Rect = {center: passagePoint(-18, -6.8), size: manfredSize, angle: gridAngle-Math.PI/2};
+const mfCorners=rectCorners(manfredRect);
+const manfredEast=Math.max(...mfCorners.map(p=>p[0])), manfredWest=Math.min(...mfCorners.map(p=>p[0]));
+const manfredFront=Math.max(...mfCorners.map(p=>p[1])), manfredBack=Math.min(...mfCorners.map(p=>p[1]));
+const corridor: Vec2[] = [passagePoint(-22,-.25),passagePoint(-22,3.9),passagePoint(0,3.9),passagePoint(0,-.25)];
+const corridorTop=passagePoint(-22,1.825);
+const corridorFoot=add(corridorTop,[Z,-STEPS_RUN]);
 // Borde sur del cuadrado, donde bajan los escalones de la cantina hacia el área común 1 (la escalinata
 // recta que había aquí se retiró con la explanada de la cantina, 02/11/2026).
 const squareSteps = fromRect(cantina, [-11, 22]);
@@ -223,17 +201,17 @@ export function elevatorStairEdge(distance: number): Vec2[] {
     [stairEast, 3.5 - distance]];
 }
 const elevatorUpperEdge = elevatorStairEdge(STEPS_RUN);
-// La losa sigue el lado oblicuo de Manfred y se mete bajo las galerías de Bedelía y la plaza.
-const manfredGallery: Vec2[] = [
-  manfredRight, manfredShoulder, corridor[1], corridor[2],
-  fromRect(bedelia, [bedeliaGallery.start + 3.6, bedelia.size[1] / 2 + 0.2]),
-  fromRect(bedelia, [bedeliaGallery.start - 0.7, bedelia.size[1] / 2 + bedeliaGallery.depth - 0.1]),
-  galleryPoint(0.1, galleryPlazaEdge), galleryPoint(0.1, -0.25), manfredLink[2],
-];
+// Galería longitudinal: mismo eje que el lado largo de la plaza.
+const galleryPoint = (along: number, inward: number): Vec2 =>
+  [galleryWest[0] + Z[0] * along + X[0] * inward,
+   galleryWest[1] + Z[1] * along + X[1] * inward];
+// La escalerita y el toldo arrancan en la última pareja conservada de pilares.
+const galleryLength = 10;
+const galleryOutline = [galleryPoint(0, -0.25), galleryPoint(0, 3.9),
+  galleryPoint(galleryLength, 3.9), galleryPoint(galleryLength, -0.25)];
 // El caminero arranca al pie de los tres peldaños de la plaza y sigue el eje corto del Bloque G.
-// El caminero, la escalinata y el vano entre las dos filas de pilares comparten eje.
-const coveredWalkInset = (0.25 + galleryPlazaEdge - 0.32) / 2;
-const coveredWalkStart = galleryPoint(16.8, coveredWalkInset);
+// Video del 04/11: salida centrada con el pasillo y los peldaños.
+const coveredWalkStart = galleryPoint(galleryLength + 1.8, 2.05);
 const coveredWalkEnd = add(coveredWalkStart, [Z, 30]);
 
 export const facultyBlueprint = {
@@ -244,47 +222,54 @@ export const facultyBlueprint = {
    * Mantiene la cubierta metálica principal independiente y el paso a las escaleras. */
   plazaGallery: {
     outline: galleryOutline,
-    front: [galleryPoint(0, 0.25), galleryPoint(15, 0.25)] as Vec2[],
-    
+    length: galleryLength,
+    width: 4.15,
+    front: [galleryPoint(0, 0.25), galleryPoint(galleryLength, 0.25)] as Vec2[],
+
     roof: 4.65,
     metalRoofSetback: 1.1,
-    // Cinco pilares en 14 m, según las fotos del frente y de la escalinata (03/11).
-    columns: galleryColumnStations.map(t => galleryPoint(t, 0.25)),
-    plazaColumns: galleryColumnStations.map(t => galleryPoint(t, galleryPlazaEdge - 0.32)),
+    // Cinco pilares repartidos hasta el extremo actual del pasillo.
+    columns: [0.5, 5.25, 9.75].map(along => galleryPoint(along, 0.25)),
     offset: accessRetreat,
     garden: [[40.6,6.3],[41.1,5.55],[43.65,5.8],[45.65,7.3],
       [46.5,8.9],[45,9.7],[42.8,9.1],[41.2,8.4]] as Vec2[],
-    smallSteps: { center: galleryPoint(15, coveredWalkInset), angle: gridAngle, direction: Z, width: 2.2, run: 1.8, bottom: 0.3, count: 3 },
+    waterStation: { center: galleryPoint(4, 1.1), size: [0.58, 0.5], angle: gridAngle + Math.PI / 2 } as Rect,
+    smallSteps: { center: galleryPoint(galleryLength, 2.05), angle: gridAngle, direction: Z, width: 2.2, run: 1.8, bottom: 0.3, count: 3 },
     // Camino ascendente desde el cruce existente hasta el pie de los tres peldaños.
     approach: [[41, 11, 0.05], [44, 14, 0.1],
-      [...galleryPoint(18, coveredWalkInset), 0.24], [...coveredWalkStart, 0.3]] as [number, number, number][],
+      [...galleryPoint(galleryLength + 3, 2.05), 0.24], [...galleryPoint(galleryLength + 1.8, 2.05), 0.3]] as [number, number, number][],
   },
   openPlaza,
+  plazaPassage: { start: passagePoint(0, 1.825), target: passagePoint(-32, 1.825), foot: corridorFoot },
   bedelia,
-  bedeliaGallery,
-  plazaPassage: {
-    start: passageStart, target: passageTarget, foot: corridorFoot, angle: passageAngle,
-    lights: [3, 7, 11, 15, 19, 23].map(n => passagePoint(n)),
-  },
   cantina,
+  annexAnchor: add(cantina.center, [Z, -plazaGroupShift]),
   // DEI–LED: posición provisional según el plano general aportado el 02/11.
-  electronics: { center: add(cantina.center, [X, 4.2], [Z, 27.8]), size: [28.8, 12], angle: gridAngle + Math.PI } as Rect,
-  manfred,
-  manfredLink,
-  manfredGallery,
+  electronics: { center: add(cantina.center, [X, 4.2], [Z, 27.8 - plazaGroupShift]), size: [28.8, 12], angle: gridAngle + Math.PI } as Rect,
+  /** Sala Manfred: auditorio de 12 × 9 m con frente hacia la rampa y entrada/marquesina orientada a la plaza techada. */
+  manfred: { ...manfredRect, bulge: manfredBulge },
+  /** Entrada y marquesina de Sala Manfred orientada hacia la plaza techada (foto zona_techada_y_manfred.HEIC). */
+  manfredCanopy: [46.58, 2.88, -5.52] as const,
   /** Puerta de entrada al edificio en la galería oeste de Bedelía (foto zona_techada_y_manfred.HEIC). */
   buildingDoor: [44.64, 1.63, -11.13] as const,
   /** Pasillo cubierto entre Manfred y Bedelía hacia el norte. */
   corridor,
-  /** Plataforma a PLAZA_LEVEL. El primer contorno reúne el acceso a Sala Manfred, su pasillo, la explanada
+  /** Plataforma a PLAZA_LEVEL. El primer contorno reúne la Sala Manfred, su pasillo, la explanada
    * hasta la cara norte del Bloque 1 (cortada por la rampa), el rellano al pie de la escalera dentro
    * de la cabecera y la franja hasta la plaza techada; los demás son la plaza, el cuadrado (con el
    * rincón entre Bedelía y la cantina), Bedelía y la cantina. */
   platform: [
-    [[manfredApronWest, manfredLeft[1]], manfredLeft, manfredRight, manfredShoulder, corridor[1], corridor[2], bedeliaCorner,
-      add(bedeliaCorner, [Z, 10]), plazaNorth, rectCorners(coveredPlaza)[0], pointAtZ(rectCorners(coveredPlaza)[0], plazaSouth, half.z),
-      ...elevatorUpperEdge, [stairEast, stairFoot], 
-      [ramp.east, stairFoot], [ramp.east, ramp.top], [ramp.west, ramp.top], [ramp.west, -half.z], [manfredApronWest, -half.z]],
+    [[25, -8.8], [37, -8.8], galleryWest,
+      pointAtZ(galleryWest, plazaSouth, half.z), ...elevatorUpperEdge,
+      [stairEast, stairFoot], [ramp.east, stairFoot], [ramp.east, ramp.top],
+      [ramp.west, ramp.top], [ramp.west, -half.z], [25, -half.z]],
+    corridor,
+    // Franja exterior al frente curvo; nunca rellena el interior del auditorio.
+    [...bulgedOutline(12, 9, manfredBulge).slice(2).map(p => fromRect(manfredRect, p)),
+      passagePoint(-9.9, -.25), passagePoint(-24, -.25)],
+    // Desembarco de la rampa y enlace con el extremo sur de Manfred.
+    [[25,-8.8], [37,-8.8], passagePoint(-9.9,-.25), fromRect(manfredRect,[-8.1,1.7]),
+      fromRect(manfredRect,[-6.8,-4.5])],
     rectCorners(coveredPlaza),
     // Unión lateral del pasillo recto con la plaza girada, sin grieta triangular.
     [plazaNorth, add(plazaNorth, [Z, -15]), add(plazaNorth, [X, 20], [Z, -15]), cantinaFront],
@@ -302,7 +287,7 @@ export const facultyBlueprint = {
     // (foto IMG_5706): ocupa todo el ancho de la galería.
     { top: [galleryStepsTop, half.z - block1.gallery / 2], width: block1.gallery, angle: Math.PI },
     // Salida norte del pasillo entre la Sala Manfred y Bedelía.
-    { top: corridorTop, width: 2.5, angle: passageAngle },
+    { top: corridorTop, width: 3.4, angle: gridAngle - Math.PI / 2 },
   ] as Steps[],
   /** Escalera de la plataforma al primer piso, de 2,10 m de ancho, frente al ascensor.
    * Corrección de Horacio: conservar eje y ancho originales, prolongando la bajada a lo
@@ -360,7 +345,7 @@ export const facultyBlueprint = {
     [[41, 11], coveredWalkStart, coveredWalkEnd, [55, 37]],
     [[55, 37], [30, 50]],
     // Del pie de la escalinata norte del pasillo de Manfred hacia el oeste, por detrás de la sala.
-    [corridorFoot, passagePoint(26.8, -8), passagePoint(26.8, -18), [12, -12], [0, -22]],
+    [corridorFoot, [manfredEast - 1.5, manfredBack - 2], [manfredWest - 2, manfredBack - 2], [12, -12], [0, -22]],
     // Subida a la plataforma por el borde sur del cuadrado, cruce de la plaza y pasillo de Manfred.
     [[41, 11], [47, 11.5], add(squareSteps, [Z, STEPS_RUN]), squareSteps, add(plazaNorth, [X, -2], [Z, 0.5]),
       corridorTop, corridorFoot],
@@ -369,10 +354,10 @@ export const facultyBlueprint = {
   tree1: [21.5, 15] as Vec2,
   /** Árbol 2: árbol autóctono alto en el patio oeste (foto árbol_2.HEIC, posición 2 en cómo_debe_ser.png). */
   tree2: [-20, 22] as Vec2,
-  trees: [[2, 19], [50, 22], [20, 62]] as Vec2[],
-  picnic: [[-14, 15], [-8, 13.5], [-2, 13], [24, 13.5], [54, 26]] as Vec2[],
+  trees: [[2, 19], shiftPlaza([62, 16]), [20, 62]] as Vec2[],
+  picnic: [[-14, 15], [-8, 13.5], [-2, 13], [24, 13.5], shiftPlaza([60, 13]), shiftPlaza([65, 19])] as Vec2[],
   /** Canteros con banco del cuadrado. */
-  planters: [[46.1 + plazaShift, -7.35], [54.4 + plazaShift, -10.9]] as Vec2[],
+  planters: [[46.1 + plazaShift, -7.35], [54.4 + plazaShift, -10.9]].map(p => add([p[0], p[1]], [Z, 3.2])),
 } as const;
 
 export const facultyCorners = { gNorthWest, gNorthEast, gSouthEast, gSouthWest, plazaWest, plazaNorth };
@@ -392,8 +377,9 @@ export function towerAnnex(): Vec2[] {
   return [[cx - size / 2, south - size], [cx + size / 2, south - size], [cx + size / 2, south], [cx - size / 2, south]];
 }
 /** Contorno de la Sala Manfred en el plano. */
-export function manfredOutline(): Vec2[] {
-  return manfred.outline.map((p) => fromRect(manfred, p));
+export function manfredOutline(segments = 12): Vec2[] {
+  const { size: [w, d], bulge } = facultyBlueprint.manfred;
+  return bulgedOutline(w, d, bulge, segments).map((p) => fromRect(facultyBlueprint.manfred, p));
 }
 
 // Centros de las fachadas que miran a las plazas, para ubicar al visitante frente a ellas.
@@ -421,11 +407,12 @@ export const facultyVisitPoints: Record<string, [number, number, number]> = {
   "aula-p3": [classroom, 10.5, -1.5],
   "cantina-cyt": at(fromRect(cantina, [-2.5, 21]), onPlatform),
   bedelia: at(add(bedeliaFacade, [Z, 1]), onPlatform),
-  "sala-manfred": at(fromRect(manfred, [manfredDoorX, manfredDepthHalf + 1.6]), onPlatform),
+  // Boca del pasillo entre Manfred y Bedelía, como en las fotos IMG_5685 e IMG_5686.
+  "sala-manfred": at(passagePoint(-14, 1.825), onPlatform),
+  "pasillo-plaza": at(passagePoint(0, 1.825), onPlatform),
   patio: [-2, 0.1, 20],
   jardin: [52, 0.1, 18],
   plaza: [42.5 + plazaShift, onPlatform, 1.5],
-  "pasillo-plaza": at(passageStart, onPlatform),
   "plaza-abierta": at(fromRect(cantina, [-11, 20]), onPlatform),
   "piso-1": [13, 3.5, 4.75],
   "piso-2": [13, 7, 4.75],
@@ -443,9 +430,9 @@ export const facultyVisitTargets: Record<string, [number, number, number]> = {
   "cantina-cyt": at(cantinaFacade, PLAZA_LEVEL + 1.8),
   "plaza-abierta": at(cantinaFacade, PLAZA_LEVEL + 1.8),
   bedelia: at(bedeliaFacade, PLAZA_LEVEL + 1.6),
-  "sala-manfred": at(fromRect(manfred, [manfredDoorX, manfredDepthHalf]), PLAZA_LEVEL + 1.5),
+  "sala-manfred": at(fromRect(manfredRect, [-3.7, 5.5]), PLAZA_LEVEL + 1.5),
+  "pasillo-plaza": at(passagePoint(-20, 1.825), PLAZA_LEVEL + 1.7),
   plaza: [53 + plazaShift, PLAZA_LEVEL + 1.6, -9],
-  "pasillo-plaza": at(passageTarget, PLAZA_LEVEL + 1.7),
   patio: [-30, 5, 10],
   jardin: [47, 2.5, 6],
   banos: [towerX, 1.4, facultyBlueprint.tower.center[1] + 4],

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   facultyBlueprint as plan, facultyCorners as corner, block1, blockG, gridAngle, FLOOR_HEIGHT, PLAZA_LEVEL, STEPS_RUN,
   cantinaForecourt, ROOMS_PER_FLOOR, rectCorners, facultyVisitPoints, facultyVisitTargets, worldPolygon, inFacultyZone, towerOutline,
-  towerAnnex, manfredOutline, structureLines, pilasters, classroomDoor, elevatorStairEdge,
+  fromRect, towerAnnex, manfredOutline, structureLines, pilasters, classroomDoor, elevatorStairEdge,
 } from "../src/data/faculty-blueprint.ts";
 import { insidePolygon, facultyToWorld } from "../src/data/campus-geometry.ts";
 
@@ -27,30 +27,23 @@ test("Covered walkway meets the plaza steps and follows the short side of Bloque
   const [start, end] = plan.coveredWalk, steps = plan.plazaGallery.smallSteps;
   const offset = start.map((n,axis) => n-steps.center[axis]-steps.direction[axis]*steps.run);
   assert.ok(close(offset[0]*steps.direction[0]+offset[1]*steps.direction[1],0), "Starts at the foot of the stairs");
-  assert.ok(close(Math.hypot(...offset), 0), "Walkway and stairs share a centerline");
-  const gallery = plan.plazaGallery;
-  const lastPair = center([gallery.columns.at(-1), gallery.plazaColumns.at(-1)]);
-  const approach = steps.center.map((value, axis) => value - lastPair[axis]);
-  assert.ok(close(Math.hypot(...approach), 0.5), "Stairs line up with the opening between the pillars");
+  assert.ok(Math.hypot(...offset) < steps.width/2, "Centerline meets the bottom tread, beside the table");
+  for (let i = 1; i < 10; i++) {
+    const p = steps.center.map((n, axis) => n + steps.direction[axis] * steps.run * i / 10);
+    assert.ok(!plan.platform.some(outline => insidePolygon(p, outline)), "Plaza floor must not bury the exit steps");
+  }
   const corners = rectCorners(plan.block2), direction = [corners[3][0]-corners[0][0], corners[3][1]-corners[0][1]];
   const walk = [end[0]-start[0], end[1]-start[1]];
   assert.ok(close(walk[0]*direction[1]-walk[1]*direction[0], 0), "Walkway must be parallel to the short facade");
   assert.ok(walk[0]*direction[0]+walk[1]*direction[1] > 0, "Walkway heads out from the plaza");
 });
 
-test("The photographed gallery has two rows of edge pillars and a garden outside the steps", () => {
+test("The photographed gallery has five pillars, a supported water station and a garden outside the steps", () => {
   const g = plan.plazaGallery;
-  assert.ok(close(dist(g.outline[0], g.outline[1]), 3.35), "Wider gallery toward the plaza");
-  assert.ok(plan.platform.some(outline => insidePolygon(center(g.outline.slice(1, 3)), outline)),
-    "The widened side stays above the plaza platform");
-  assert.equal(g.columns.length, 5);
-  assert.equal(g.plazaColumns.length, g.columns.length);
-  for (const [i, point] of g.plazaColumns.entries()) {
-    assert.ok(insidePolygon(point, g.outline));
-    assert.ok(close(dist(point, g.columns[i]), 2.53), "Opposite supports leave the passage clear");
-  }
+  assert.equal(g.columns.length, 3);
   for (let i=1;i<g.columns.length;i++)
-    assert.ok(dist(g.columns[i-1],g.columns[i])>3 && dist(g.columns[i-1],g.columns[i])<4, "Pillar bays follow the stair proportions");
+    assert.ok(dist(g.columns[i-1],g.columns[i])>3 && dist(g.columns[i-1],g.columns[i])<5, "Pillar bays follow the stair proportions");
+  assert.ok(plan.platform.some(outline=>insidePolygon(g.waterStation.center,outline)), "Water station stands on the plaza");
   for(const point of g.garden)
     assert.ok(!plan.platform.some(outline=>insidePolygon(point,outline)), "Garden must not cover the raised circulation");
 });
@@ -99,13 +92,14 @@ test("Both blocks keep the team's measurements and the oblique layout", () => {
   assert.ok(rectCorners(plan.block2).every(([, z]) => z > half.z), "Bloque G belongs south of Bloque 1");
 });
 
-test("The covered plaza is 15 × 10 m, follows Bedelía and the canteen and stands apart from Bloque 1", () => {
-  assert.deepEqual(edges(plan.coveredPlaza).map((v) => +v.toFixed(3)).sort((a, b) => a - b), [10, 15]);
+test("The covered plaza is 17.3 × 13 m, follows Bedelía and the canteen and stands apart from Bloque 1", () => {
+  assert.deepEqual(edges(plan.coveredPlaza).map((v) => +v.toFixed(3)).sort((a, b) => a - b), [13, 17.3]);
   assert.equal(plan.coveredPlaza.angle, gridAngle);
   assert.equal(plan.bedelia.angle, gridAngle);
   assert.ok(close(Math.abs(plan.cantina.angle - gridAngle), Math.PI / 2, 1e-9));
   assert.ok(Math.abs(plan.coveredPlaza.angle) > 0.2, "Not aligned with Bloque 1");
-  assert.ok(rectCorners(plan.coveredPlaza).every(([x]) => x > east + 1), "Away from the east face of Bloque 1");
+  for (const [x,z] of rectCorners(plan.coveredPlaza))
+    assert.ok(x > east + .5 || z < -block1.depth/2 - .5, "Clear of the actual Bloque 1 footprint");
   // The steps from the ground-floor gallery and the first-floor stair fit between the block and the plaza.
   const steps = plan.platformSteps[0], es = plan.eastStair;
   for (const p of [steps.top, [steps.top[0] + 0.5, steps.top[1] + steps.width / 2], [es.x + es.width / 2, es.top - es.run]])
@@ -156,7 +150,7 @@ test("East end: stair keeps its original width and axis while extending along th
   assert.ok(!onPlatform([es.x, es.top - 0.3]), "Storeroom under the stair");
   // Ramp between the ground-floor rooms and the stair, from north of the block down to the gallery.
   assert.ok(ramp.west > roomsEnd[0] && ramp.east < es.x - es.width / 2, "Between the ground-floor rooms and the stair");
-  assert.ok(ramp.top < -half.z, "It starts north of the block, facing Sala Manfred");
+  assert.ok(close(ramp.top, -half.z), "It ends at the block face without the removed extension");
   const run = es.top - ramp.top;
   assert.ok(PLAZA_LEVEL / run <= 0.125, "Slope of 12.5 % at most");
   assert.ok(FLOOR_HEIGHT - 0.24 - PLAZA_LEVEL * (es.top + half.z) / run >= 2, "Headroom under the first floor");
@@ -203,7 +197,9 @@ test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit
   for (const key of ["coveredPlaza", "bedelia", "cantina"]) assert.ok(onPlatform(plan[key].center), key);
   // Sala Manfred: anfiteatro con gradas descendentes (commit 2631f6f). Queda fuera del prisma de la
   // plataforma para que el foso baje y su frente da a la explanada, a la altura de la plataforma.
+  const manfredFront = fromRect(plan.manfred, [0, plan.manfred.size[1]/2 + plan.manfred.bulge + .3]);
   assert.ok(!onPlatform(plan.manfred.center), "Sunken auditorium, outside the platform prism");
+  assert.ok(onPlatform(manfredFront), "Its front opens onto the platform");
   assert.ok(onPlatform(center(plan.corridor)), "Corridor between Manfred and Bedelía");
   assert.ok(onPlatform(center(plan.openPlaza)), "Open plaza");
   for (const id of ["acceso", "plaza", "plaza-abierta", "bedelia", "sala-manfred"]) {
@@ -232,42 +228,24 @@ test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit
   assert.ok(!onPlatform(plan.elevator.center) && !onPlatform(plan.tower.center), "Bloque 1 stays at ground level");
 });
 
-test("Sala Manfred: tilted hexagonal footprint with a covered entrance joined to Bloque 1", () => {
-  const { manfred, manfredLink, manfredGallery, bedelia, eastEnd: { ramp } } = plan;
-  assert.deepEqual(manfred.size, [16, 12]);
-  assert.ok(close(manfred.angle, -Math.PI / 4), "The glazed face recedes toward Bedelía when seen from the ramp");
+test("Sala Manfred: rotated facade beside the clear corridor and connected ramp", () => {
+  const { manfred, bedelia, eastEnd: { ramp } } = plan;
+  assert.deepEqual(manfred.size, [12, 9]);
+  assert.ok(close(manfred.angle, gridAngle-Math.PI/2), "Curved facade follows the side of the gallery");
   const outline = manfredOutline(), b = rectCorners(bedelia);
-  assert.equal(outline.length, 6);
-  const [right, left] = outline.slice(3, 5);
-  assert.ok(close(dist(right, left), manfred.entrance.width));
-  assert.deepEqual(manfredLink.slice(0, 2), [left, right], "The roof starts on the glazed face");
-  assert.ok(manfredLink.slice(2).every((point) => insidePolygon(point, rectCorners(plan.main))),
-    "The other end of the roof meets Bloque 1");
-  assert.deepEqual([manfredGallery[0], manfredGallery.at(-1)], manfredLink.slice(1, 3),
-    "The extension shares the edge of the entrance roof");
-  assert.ok(plan.plazaPassage.lights.every(point => insidePolygon(point, manfredGallery)),
-    "The extension covers the straight passage to Bedelía");
-  assert.ok(manfredGallery.some(point => insidePolygon(point, plan.plazaGallery.outline)),
-    "The extension overlaps the covered plaza gallery");
-  const [visitX, , visitZ] = facultyVisitPoints["sala-manfred"];
-  const [doorX, , doorZ] = facultyVisitTargets["sala-manfred"];
-  assert.ok(close(distanceToSegment([doorX, doorZ], left, right), 0), "The arrival faces the door on the flat side");
-  assert.ok(doorX > ramp.west && doorX < ramp.east, "The door falls within the projected width of the ramp");
-  for (const t of [0.1, 0.4, 0.7, 0.95]) {
-    const landing = [(ramp.west + ramp.east) / 2 + t * (doorX - (ramp.west + ramp.east) / 2),
-      ramp.top + t * (doorZ - ramp.top)];
-    assert.ok(onPlatform(landing) && insidePolygon(landing, manfredLink), "The ramp leads to the door across a covered landing");
-  }
-  assert.ok(onPlatform([visitX, visitZ]) && !insidePolygon([visitX, visitZ], outline));
-  assert.ok(insidePolygon([visitX, visitZ], manfredLink), "The arrival is under the connected roof");
-  assert.ok(onPlatform([doorX + (visitX - doorX) / 10, doorZ + (visitZ - doorZ) / 10]), "The platform meets the threshold");
-  for (const corner of outline) {
-    assert.ok(!onPlatform(center([corner, manfred.center])), "The platform stays out of the auditorium");
-  }
   const gap = Math.min(...outline.flatMap((p) => b.map((q, i) => distanceToSegment(p, q, b[(i + 1) % 4]))),
     ...b.map((q) => Math.min(...outline.map((p, i) => distanceToSegment(q, p, outline[(i + 1) % outline.length])))));
-  assert.ok(gap >= 3.4 && gap < 5.5, "The passage stays open between the closer buildings");
-  assert.ok(outline.every(([, z]) => z < -half.z), "The larger room stays clear of Bloque 1");
+  assert.ok(gap >= 3.2, "Clear passage between Manfred and the administrative building");
+  const [a,cb,c,d]=plan.corridor;
+  for(let i=0;i<=20;i++) {
+    const t=i/20;
+    for(const side of [.15,.5,.85]) {
+      const p=[a[0]+(d[0]-a[0])*t+(cb[0]-a[0])*side,a[1]+(d[1]-a[1])*t+(cb[1]-a[1])*side];
+      assert.ok(!insidePolygon(p,outline) && !insidePolygon(p,rectCorners(bedelia)), "Straight exit must stay outside both rooms");
+    }
+  }
+  assert.ok(manfred.bulge > 0 && manfred.bulge < manfred.size[1] / 2);
+  assert.ok(outline.every(([, z]) => z < -half.z - .5), "Clear of Bloque 1");
 });
 
 test("Annexes and visit points stay in the faculty site, with parking south of Bloque G", () => {

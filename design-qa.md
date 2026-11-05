@@ -182,3 +182,38 @@ Referencias: `IMG_5639` y las cuatro fotos del usuario del 02/11 ([referencias](
 - Escalera de la plaza (2,1 m) y rampa: misma relación que en la foto (escalera a la izquierda, columna entre ambas, rampa con pasamanos sobre el ladrillo).
 
 Pendiente: los murales del ascensor siguen repitiendo `IMG_5727`; la foto de la cabecera desde el patio muestra en otra cara un mural de líneas grises distinto. Sin revisión en móviles.
+
+### Referencia de video — 04/11/2026
+Comparados fotogramas de la grabación del modelo y WhatsApp Video 2026-11-04 at 16.50.14.mp4. Corregidos final de galería, escalera antes enterrada por la plataforma, eje/ancho del caminero y toldo a dos aguas. Captura local: `.local/references/salida-video-corregida.png`. Medidas aproximadas.
+
+### Manfred, pilares y Bedelía — 05/11/2026
+Revisión visual de dos vistas generadas desde la geometría real con Chromium. Se ven paneles opacos claros y montantes azules en Manfred; ladrillo naranja, rejas, puertas, apoyos y macetas en Bedelía. Gabinete aislado de agua eliminado. Las fotos sirven de referencia de apariencia; no se afirma coincidencia métrica.
+
+### Unión según captura CAD — 05/11/2026
+Revisadas `.local/references/union-plano.png`, `pasillo-ancho.png` y fachada administrativa. Se amplía el paso entre columnas y se acerca administración al encuentro; retirada la losa rectangular excesiva. La revisión detectó canteros bajo la fila administrativa, apartados hacia la plaza para liberar circulación. Referencia: captura del plano y foto del pasillo, no cotas leídas del DWG.
+
+
+Revisión 05/11: capturas automatizadas del escenario real desde la rampa y el eje del pasillo. Manfred queda a la izquierda desde la rampa y el bloque administrativo a la derecha; la salida queda centrada. No equivale a un recorrido manual completo en primera persona.
+
+
+Revisión de contorno y plaza: comprobadas capturas desde rampa y aérea tras cambiar el cerramiento de Manfred a paños rectos, retirar/ensanchar cubierta y mover vegetación. Puerta de Manfred pendiente por indicación del usuario.
+
+
+Revisadas vista aérea y vista desde rampa después de trasladar el conjunto plaza/cantina: unión con administración cerrada y lateral de Manfred texturizado con ladrillo. Traslación estimada visualmente en 4,3 m.
+
+
+Revisión visual: vista aérea confirma toldo conectado al extremo recortado de la plaza; vista desde rampa confirma cerramiento de Manfred más próximo. Se revisaron capturas del escenario, no un recorrido manual completo.
+
+
+Manfred conserva su posición anterior; el paño diagonal se prolonga hacia la rampa y se retiraron apoyos delante de la fachada. Revisada captura del escenario.
+
+
+Revisada vista desde rampa tras ampliar 0,8 m el paño frontal; esquina contigua desplazada sin acortar su paño.
+
+### Integración del 05/11 — dimensiones locales y materiales remotos
+
+Vista general, Manfred y pasillo revisados en Chrome a 1440 × 900. Se observan paños mate claros y retícula azul de Manfred, y se mantiene el pasillo local frente a administración. Capturas `integracion-general.png`, `integracion-sala-manfred.png` e `integracion-pasillo-plaza.png` en la carpeta de visualizaciones de esta sesión. Sin prueba exhaustiva de navegación ni validación móvil; puerta de Manfred pendiente en la geometría conservada.
+
+### Corrección de la puerta y recuperación de detalles — 05/11/2026
+
+Kampus Print vuelve al fondo del pasillo. La puerta de Manfred se recuperó y luego se trasladó al paño diagonal izquierdo indicado por la flecha; hueco anterior cerrado, dimensiones conservadas. Capturas `recuperados-pasillo-plaza.png` y `puerta-diagonal-sala-manfred.png` revisadas en Chrome. Vitrina y doce trofeos recuperados del remoto; inspección frontal específica de la vitrina sin completar. No se realizó recorrido manual completo por el auditorio.
