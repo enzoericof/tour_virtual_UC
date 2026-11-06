@@ -1148,12 +1148,12 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
         box(length, 3.2, 0.2, (a[0] + b[0]) / 2, 1.6, (a[1] + b[1]) / 2, officeBrick, true, { rotation: angle });
       } else {
         // Zonas retranqueadas (Entradas)
-        // Tipado actualizado con 'reja'
-        let openingsInRecess: { x: number; width: number; door: boolean; reja?: boolean }[] = [];
+        let openingsInRecess: { x: number; width: number; door: boolean }[] = [];
         
-        if (i === 3) openingsInRecess = [{x: -7.9, width: 1.4, door: false, reja: true}];
-        else if (i === 7) openingsInRecess = [{x: 0, width: 4.2, door: false}];
-        else if (i === 11) openingsInRecess = [{x: 4.6, width: 1.05, door: true}, {x: 7.1, width: 2.4, door: false}];
+        // Hacemos que la ventana de la izquierda (i === 2) sea gigante y centrada en su pared
+        if (i === 2) openingsInRecess = [{x: -6.25, width: 4.2, door: false}];
+        else if (i === 6) openingsInRecess = [{x: 0, width: 4.2, door: false}];
+        else if (i === 10) openingsInRecess = [{x: 4.6, width: 1.05, door: true}, {x: 7.1, width: 2.4, door: false}];
 
         let cursor = a[0];
         const rz = a[1];
@@ -1170,30 +1170,11 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
             sign("RECEPCIÓN", o.x, 2.76, rz + 0.13, 1.05);
             box(0.035, 2.45, 0.95, right - 0.04, 1.225, rz - 0.5, m.glass, true);
           } else {
+            // El código original dibuja las barras diagonales perfectas
             box(o.width, 0.035, 0.07, o.x, 1.65, rz + 0.05, m.white);
             for (let wx = left + 0.1; wx < right; wx += 0.24)
               beam(v3(wx, 0.85, rz + 0.27), v3(Math.min(wx + 0.32, right), 2.45, rz + 0.15), 0.018, blueFrame);
             for (const wy of [0.85, 2.45]) beam(v3(left, wy, rz + 0.23), v3(right, wy, rz + 0.23), 0.022, blueFrame);
-            
-            // Lógica para dibujar la reja con barras diagonales
-            if (o.reja) {
-              const zReja = rz + 0.14; 
-              const H = top - sill; 
-              
-              for (const px of [left, right]) box(0.04, H, 0.04, px, (top + sill) / 2, zReja, blueFrame);
-              for (const py of [sill, top]) box(o.width, 0.04, 0.04, o.x, py, zReja, blueFrame);
-
-              for (let x0 = left - H; x0 <= right; x0 += 0.25) {
-                let startX = x0 < left ? left : x0;
-                let startY = x0 < left ? sill + (left - x0) : sill;
-                let endX = x0 + H > right ? right : x0 + H;
-                let endY = x0 + H > right ? sill + (right - x0) : top;
-
-                if (startX < right && startY < top && endX > left && endY > sill) {
-                  beam(v3(startX, startY, zReja), v3(endX, endY, zReja), 0.018, blueFrame);
-                }
-              }
-            }
           }
           cursor = right;
         }
@@ -1205,7 +1186,11 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     box(w+1,.2,depth,0,3.4,z+depth/2,m.concrete);
     box(w+1,.05,depth,0,.025,z+depth/2,m.stone,true);
     for(let x=-w/2+.5;x<=w/2;x+=3.1) {
-      for(const dz of [.3,depth-.2])pole(.17,3.3,x,1.65,z+dz,m.concrete,true);
+      for(const dz of [.3,depth-.2]) {
+        // Eliminamos la primera columna pegada a la pared
+        if (x === -w/2+.5 && dz === .3) continue;
+        pole(.17,3.3,x,1.65,z+dz,m.concrete,true);
+      }
       box(1.05,.065,.16,x,3.25,z+1.3,m.white);
     }
     const gold = new T.MeshStandardMaterial({ color: "#c2a65a", metalness: 0.25, roughness: 0.45 });
@@ -1237,7 +1222,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     sign("CECYT", displayX - 0.23, 2.02, displayZ, 0.96, -Math.PI / 2);
     // Macetas de madera con follaje ligero junto a las ventanas.
     const leafGeo=new T.SphereGeometry(.055,4,3);
-    for(const px of [-6,-.7,7.8]) {
+    for(const px of [-.7,7.8]) {
       for(const side of [-1,1])for(let row=0;row<3;row++) {
         box(.68,.12,.04,px,.1+row*.14,z+.65+side*.32,m.wood);
         box(.04,.12,.68,px+side*.32,.1+row*.14,z+.65,m.wood);
@@ -1253,22 +1238,27 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       }
     }
     // Estante verde en el antiguo hueco rotulado Recepción: pared cerrada detrás.
+    // Estante verde desplazado a la izquierda
+    // Estante verde y gabinete movidos bien a la izquierda (entre ventana y columna)
     const shelfGreen=new T.MeshStandardMaterial({color:"#254c3d",roughness:.72});
-    const sx=-4.9;
+    const sx = -5.4 // Acomodado justo a la izquierda de la columna
     box(.85,.52,.48,sx,.3,z+.38,shelfGreen,true);
     for(const dx of [-.38,.38])box(.045,1.65,.045,sx+dx,1.25,z+.2,shelfGreen);
     for(const y of [.85,1.25,1.65,2.05]) {
       const shelf=box(.82,.045,.4,sx,y,z+.38,shelfGreen);
       shelf.rotation.x=.22;
     }
-    box(.55,1.9,.48,sx+1,1,z+.32,shelfGreen,true);
-    // Gabinete de incendio junto al acceso, visible en las fotos.
+    // El gabinete cerrado se acomoda al lado del estante, salvando la columna
+    box(.55,1.9,.48,sx+0.75,1,z+.32,shelfGreen,true);
+    
+    // Gabinete de incendio reubicado donde estaba la primera columna
     const red=new T.MeshStandardMaterial({color:"#a92e2b",roughness:.6});
-    box(.55,.7,.18,-5.9,1.25,z+.18,red,true);
-    box(.44,.57,.02,-5.9,1.25,z+.28,m.glass);
-    pole(.105,.52,-5.45,1.55,z+.22,red);
-    box(.15,.07,.12,-5.45,1.85,z+.22,m.metal);
-    beam(v3(-5.39,1.82,z+.25),v3(-5.3,1.42,z+.25),.018,m.metal);
+    const ex = -w/2 + 0.5; // X exacto donde estaba la columna eliminada
+    box(.55,.7,.18,ex,1.25,z+.18,red,true);
+    box(.44,.57,.02,ex,1.25,z+.28,m.glass);
+    pole(.105,.52,ex+0.45,1.55,z+.22,red);
+    box(.15,.07,.12,ex+0.45,1.85,z+.22,m.metal);
+    beam(v3(ex+0.51,1.82,z+.25),v3(ex+0.6,1.42,z+.25),.018,m.metal);
   },PLAZA_LEVEL);
   // ---- Sala Manfred: anfiteatro con gradas que bajan hacia el escenario y el pizarrón al norte (fondo),
   // el frente curvo hacia la rampa del Bloque 1 y la fachada vidriada con la entrada en la curva. Sus muros
