@@ -1130,31 +1130,76 @@ export function createFaculty() {
       }
       box(.22,.13,d,side*w/2,.065,0,m.metal);
     }
-    const openings=[{x:-7.4,width:2.6,door:false},
-      {x:-2.5,width:2.4,door:false},{x:1.1,width:2.5,door:false},
-      {x:4,width:1.05,door:true},{x:6.6,width:2.5,door:false}];
-    let cursor=-w/2;
-    for(const o of openings) {
-      const left=o.x-o.width/2,right=o.x+o.width/2,sill=o.door?0:0.85,top=o.door?2.5:2.45;
-      box(left-cursor,3.2,.2,(left+cursor)/2,1.6,z,officeBrick,true);
-      if(sill)box(o.width,sill,.2,o.x,sill/2,z,officeBrick,true);
-      box(o.width,3.2-top,.2,o.x,(top+3.2)/2,z,officeBrick,true);
-      box(o.width,top-sill,.035,o.x,(top+sill)/2,z, m.glass,!o.door);
-      for(const x of [left,right])box(.055,top-sill,.08,x,(top+sill)/2,z+.04,blueFrame);
-      for(const y of [sill,top])box(o.width,.055,.08,o.x,y,z+.04,blueFrame);
-      if(o.door) {
-        sign("RECEPCIÓN",o.x,2.76,z+.13,1.05);
-        // Hoja abierta: el hueco conserva su paso libre.
-        box(.035,2.45,.95,right-.04,1.225,z-.5,m.glass,true);
+const frontWallLocal = [
+      [-10, 5], [-8.75, 5], [-8.75, 4.2], [-3.75, 4.2],
+      [-3.75, 5], [-2.5, 5], [-2.5, 4.2], [2.5, 4.2],
+      [2.5, 5], [3.75, 5], [3.75, 4.2], [8.75, 4.2],
+      [8.75, 5], [10, 5]
+    ];
+
+for (let i = 0; i < frontWallLocal.length - 1; i++) {
+      const a = frontWallLocal[i], b = frontWallLocal[i + 1];
+      const isRecess = a[1] === 4.2 && b[1] === 4.2;
+
+      if (!isRecess) {
+        // Pilares y muros laterales del retranqueo (sin aberturas)
+        const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        const angle = -Math.atan2(b[1] - a[1], b[0] - a[0]);
+        box(length, 3.2, 0.2, (a[0] + b[0]) / 2, 1.6, (a[1] + b[1]) / 2, officeBrick, true, { rotation: angle });
       } else {
-        box(o.width,.035,.07,o.x,1.65,z+.05,m.white);
-        for(let x=left+.1;x<right;x+=.24)
-          beam(v3(x,.85,z+.27),v3(Math.min(x+.32,right),2.45,z+.15),.018,blueFrame);
-        for(const y of [.85,2.45])beam(v3(left,y,z+.23),v3(right,y,z+.23),.022,blueFrame);
+        // Zonas retranqueadas (Entradas)
+        // Tipado actualizado con 'reja'
+        let openingsInRecess: { x: number; width: number; door: boolean; reja?: boolean }[] = [];
+        
+        if (i === 3) openingsInRecess = [{x: -7.9, width: 1.4, door: false, reja: true}];
+        else if (i === 7) openingsInRecess = [{x: 0, width: 4.2, door: false}];
+        else if (i === 11) openingsInRecess = [{x: 4.6, width: 1.05, door: true}, {x: 7.1, width: 2.4, door: false}];
+
+        let cursor = a[0];
+        const rz = a[1];
+        for (const o of openingsInRecess) {
+          const left = o.x - o.width / 2, right = o.x + o.width / 2, sill = o.door ? 0 : 0.85, top = o.door ? 2.5 : 2.45;
+          box(left - cursor, 3.2, 0.2, (left + cursor) / 2, 1.6, rz, officeBrick, true);
+          if (sill) box(o.width, sill, 0.2, o.x, sill / 2, rz, officeBrick, true);
+          box(o.width, 3.2 - top, 0.2, o.x, (top + 3.2) / 2, rz, officeBrick, true);
+          box(o.width, top - sill, 0.035, o.x, (top + sill) / 2, rz, m.glass, !o.door);
+          for (const px of [left, right]) box(0.055, top - sill, 0.08, px, (top + sill) / 2, rz + 0.04, blueFrame);
+          for (const py of [sill, top]) box(o.width, 0.055, 0.08, o.x, py, rz + 0.04, blueFrame);
+          
+          if (o.door) {
+            sign("RECEPCIÓN", o.x, 2.76, rz + 0.13, 1.05);
+            box(0.035, 2.45, 0.95, right - 0.04, 1.225, rz - 0.5, m.glass, true);
+          } else {
+            box(o.width, 0.035, 0.07, o.x, 1.65, rz + 0.05, m.white);
+            for (let wx = left + 0.1; wx < right; wx += 0.24)
+              beam(v3(wx, 0.85, rz + 0.27), v3(Math.min(wx + 0.32, right), 2.45, rz + 0.15), 0.018, blueFrame);
+            for (const wy of [0.85, 2.45]) beam(v3(left, wy, rz + 0.23), v3(right, wy, rz + 0.23), 0.022, blueFrame);
+            
+            // Lógica para dibujar la reja con barras diagonales
+            if (o.reja) {
+              const zReja = rz + 0.14; 
+              const H = top - sill; 
+              
+              for (const px of [left, right]) box(0.04, H, 0.04, px, (top + sill) / 2, zReja, blueFrame);
+              for (const py of [sill, top]) box(o.width, 0.04, 0.04, o.x, py, zReja, blueFrame);
+
+              for (let x0 = left - H; x0 <= right; x0 += 0.25) {
+                let startX = x0 < left ? left : x0;
+                let startY = x0 < left ? sill + (left - x0) : sill;
+                let endX = x0 + H > right ? right : x0 + H;
+                let endY = x0 + H > right ? sill + (right - x0) : top;
+
+                if (startX < right && startY < top && endX > left && endY > sill) {
+                  beam(v3(startX, startY, zReja), v3(endX, endY, zReja), 0.018, blueFrame);
+                }
+              }
+            }
+          }
+          cursor = right;
+        }
+        box(b[0] - cursor, 3.2, 0.2, (b[0] + cursor) / 2, 1.6, rz, officeBrick, true);
       }
-      cursor=right;
     }
-    box(w/2-cursor,3.2,.2,(w/2+cursor)/2,1.6,z,officeBrick,true);
     box(w,.12,.23,0,.06,z,m.metal);
     const depth=2.7;
     box(w+1,.2,depth,0,3.4,z+depth/2,m.concrete);
