@@ -217,3 +217,10 @@ Vista general, Manfred y pasillo revisados en Chrome a 1440 × 900. Se observan 
 ### Corrección de la puerta y recuperación de detalles — 05/11/2026
 
 Kampus Print vuelve al fondo del pasillo. La puerta de Manfred se recuperó y luego se trasladó al paño diagonal izquierdo indicado por la flecha; hueco anterior cerrado, dimensiones conservadas. Capturas `recuperados-pasillo-plaza.png` y `puerta-diagonal-sala-manfred.png` revisadas en Chrome. Vitrina y doce trofeos recuperados del remoto; inspección frontal específica de la vitrina sin completar. No se realizó recorrido manual completo por el auditorio.
+
+### Sendero de Bedelía — 09/11/2026
+
+Vistas de ida y vuelta revisadas en Chrome con la escena de Three.js. Desde el jardín se ve el piso continuo hasta la galería. Hacia los anexos se distinguen el cantero a la izquierda, los postes laterales y la salida al sendero. Capturas locales en `output/bedelia-ida.png` y `output/bedelia-vuelta.png`.
+La revisión posterior del tramo entre Maquetas y DICIA muestra ambas fachadas junto al pavimento y la alineación con el pasillo. Vistas locales: `output/maquetas-dicia-ida.png` y `output/maquetas-dicia-vuelta.png`.
+
+Tras el retiro de Maquetas, las vistas desde el pasillo y desde el jardín muestran el espacio libre junto a la escalera de la cantina. Capturas locales: `output/cantina-maquetas-ida.png` y `output/cantina-maquetas-vuelta.png`.

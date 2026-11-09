@@ -3,12 +3,12 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { makeMaterials } from "./materials";
 import {
   facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, STEPS_RUN, rectCorners,
-  elevatorStairEdge, bulgedOutline, cantinaForecourt, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR,
+  elevatorStairEdge, bulgedOutline, cantinaForecourt, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR, fromRect,
   type Rect, type Rooms, type Vec2,
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
-import { gardenHeight, gardenBounds } from "../data/cantina-terrain";
-import { facultyAnnexes, annexPaths, annexCoveredPaths, annexEnclosedLink } from "../data/faculty-annexes";
+import { gardenHeight, gardenBounds, inCantina } from "../data/cantina-terrain";
+import { facultyAnnexes, annexPaths, annexCoveredPaths, annexEnclosedLink, annexWalkEnd } from "../data/faculty-annexes";
 import { facultyPlaces } from "../data/places";
 
 type BoxOptions = { tile?: readonly number[]; offset?: readonly number[]; rotation?: number };
@@ -830,17 +830,62 @@ export function createFaculty() {
     prism(outline, 0, PLAZA_LEVEL, m.concrete);
     pave(outline, i === 0 ? m.tile : m.stone, PLAZA_LEVEL + (i === 0 ? 0.008 : 0.005));
   }
-  frame(plan.bedeliaLawnStep, () => {
-    const [length, depth] = plan.bedeliaLawnStep.size;
-    const platformEdge = -depth / 2, lawnEdge = depth / 2;
-    const treadHeight = 0.60;
-    box(length, treadHeight, depth, 0, treadHeight / 2, 0, m.stone);
-    // Como en las escaleras de la plaza, la cápsula sube por pendientes cortas.
-    // Entre ambas queda una superficie horizontal donde detenerse en el peldaño.
-    ramp(v3(0, 0, lawnEdge + 0.45), v3(0, treadHeight, depth / 4), length);
-    ramp(v3(0, treadHeight, depth / 4), v3(0, treadHeight, -depth / 4), length);
-    ramp(v3(0, treadHeight, -depth / 4), v3(0, PLAZA_LEVEL, platformEdge), length);
-  });
+  // La galería y el sendero comparten cota de piso terminado.
+  const bedeliaPavingTop = 0.012;
+  frame(plan.bedeliaWalk, () => {
+    const [length, width] = plan.bedeliaWalk.size, half = length / 2;
+    const paving = m.tile.clone(); paving.color.set("#cad0d1");
+    box(length, 0.08, width, 0, bedeliaPavingTop - 0.04, 0, paving, true);
+    // Rejilla transversal enrasada en el pavimento.
+    for (let i = 0; i < 6; i++)
+      box(0.014, 0.002, width - 0.08, half - 0.5 + i * 0.03, bedeliaPavingTop + 0.002, 0, m.metal);
+
+    const steel = m.metal, eave = 2.86, rise = 0.44, span = width / 2;
+    const radius = (span * span + rise * rise) / (2 * rise);
+    const halfAngle = Math.asin(span / radius), start = Math.PI / 2 - halfAngle;
+    const axisY = eave + rise - radius;
+    const sheet = new T.CylinderGeometry(radius, radius, length, 24, 1, true, start, 2 * halfAngle);
+    sheet.rotateZ(Math.PI / 2);
+    const roof = new T.Mesh(sheet, new T.MeshStandardMaterial({
+      color: "#718392", transparent: true, opacity: 0.76, side: T.DoubleSide, roughness: 0.38, depthWrite: false,
+    }));
+    roof.position.y = axisY; visual.add(roof);
+    const rib = new T.TorusGeometry(radius, 0.025, 6, 24, 2 * halfAngle);
+    rib.rotateZ(start); rib.rotateY(Math.PI / 2);
+    const bays = Math.ceil(length / 3.5);
+    for (let i = 0; i <= bays * 2; i++) {
+      const x = -half + i * length / (2 * bays);
+      const arch = new T.Mesh(rib, steel); arch.position.set(x, axisY - 0.025, 0); visual.add(arch);
+      if (i % 2 === 0) {
+        for (const side of [-1, 1])
+          box(0.075, eave, 0.075, x + (i === 0 ? 0.05 : i === bays * 2 ? -0.05 : 0),
+            eave / 2, side * (span - 0.045), steel, true);
+        box(0.045, 0.045, width, x, eave, 0, steel);
+        pole(0.11, 0.045, x, eave - 0.045, 0, m.white);
+      }
+    }
+    for (const side of [-1, 1])
+      box(length, 0.1, 0.085, 0, eave, side * (span - 0.045), steel);
+
+    // Cantero lateral de la foto de vuelta. El borde bajo termina antes del cruce.
+    const bedZ = -span - 0.57;
+    const bedX = -half + 4.8;
+    box(5, 0.18, 1, bedX, 0.08, bedZ, m.brick, true);
+    box(4.85, 0.02, 0.85, bedX, 0.17, bedZ, m.bark);
+    const leaf = new T.BufferGeometry().setFromPoints([
+      v3(0, 0, 0), v3(-0.065, 0.29, 0.09), v3(0, 0.53, 0.29),
+      v3(0, 0, 0), v3(0, 0.53, 0.29), v3(0.065, 0.29, 0.09),
+    ]);
+    leaf.computeVertexNormals();
+    const foliage = m.leaves[1].clone(); foliage.side = T.DoubleSide;
+    for (let plant = 0; plant < 8; plant++) for (let j = 0; j < 9; j++) {
+      const blade = new T.Mesh(leaf, foliage);
+      blade.position.set(bedX - 2.15 + plant * 0.61, 0.18, bedZ + Math.sin(plant) * 0.12);
+      blade.rotation.y = plant + j * 2.4;
+      blade.scale.y = 0.75 + 0.12 * ((plant + j) % 5);
+      visual.add(blade);
+    }
+  }, PLAZA_LEVEL);
   // La escalera de la galería junto al ascensor (primer elemento) tiene su propio modelado, abajo; la
   // salida norte del pasillo de Manfred conserva la escalinata recta genérica.
   for (const s of plan.platformSteps.slice(1))
@@ -1193,9 +1238,9 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       }
     }
     box(w,.12,.23,0,.06,z,m.metal);
-    const depth=2.7;
+    const depth=plan.bedeliaGalleryDepth;
     box(w+1,.2,depth,0,3.4,z+depth/2,m.concrete);
-    box(w+1,.05,depth,0,.025,z+depth/2,m.stone,true);
+    box(w+1,.05,depth,0,bedeliaPavingTop-.025,z+depth/2,m.stone,true);
     for(let x=-w/2+.5;x<=w/2;x+=3.1) {
       for(const dz of [.3,depth-.2]) {
         // Eliminamos la primera columna pegada a la pared
@@ -1398,11 +1443,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     const terrace = m.courtyardPaving;
     // Misma orientación y dibujo en explanada y enlace con la plaza, sin modificar
     // su contorno ni abrir huecos de césped en el paso existente.
-    const toLocal = ([x, z]: Vec2): Vec2 => {
-      const dx = x - plan.cantina.center[0], dz = z - plan.cantina.center[1], a = plan.cantina.angle;
-      return [dx * Math.cos(a) + dz * Math.sin(a), -dx * Math.sin(a) + dz * Math.cos(a)];
-    };
-    pave(plan.platform[2].map(toLocal), terrace, 0.461);
+    pave(plan.platform[2].map(inCantina), terrace, 0.461);
     // Terreno y relleno macizo: la terraza sobresale de la plataforma original del plano.
     // La base llega al suelo (y mundial = 0); el césped continúa por sus laterales.
     box(w + 12, 0.12, d + 18, 2, -PLAZA_LEVEL - 0.035, 5, m.grass);
@@ -1412,9 +1453,26 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     function lawnTriangle(a: Vec2, b: Vec2, c: Vec2) {
       for (const [x, z] of [a, b, c]) { lawnVertices.push(x, gardenHeight(x, z) - (PLAZA_LEVEL - 0.45), z); lawnUV.push(x / 4, z / 4); }
     }
-    for (let x = gardenBounds.minX; x < gardenBounds.maxX; x++) for (let z = gardenBounds.minZ; z < gardenBounds.maxZ; z++) {
-      lawnTriangle([x, z], [x, z + 1], [x + 1, z]);
-      lawnTriangle([x + 1, z], [x, z + 1], [x + 1, z + 1]);
+    // Ambas plantas tienen lados paralelos a esta malla. Cortarla en sus esquinas
+    // mantiene el césped y su colisión fuera de las salas, incluso donde sube el jardín.
+    const footprints = facultyAnnexes.filter(b => b.id === "lab-maquetas" || b.id === "cta-dicia")
+      .map(b => b.outline.map(p => inCantina(fromRect(b.rect, p))));
+    function lawnCuts(min: number, max: number, axis: 0 | 1) {
+      const cuts = new Set(Array.from({ length: max - min + 1 }, (_, i) => min + i));
+      for (const polygon of footprints) for (const point of polygon) {
+        const value = Math.round(point[axis] * 1e5) / 1e5;
+        if (value > min && value < max) cuts.add(value);
+      }
+      return [...cuts].sort((a, b) => a - b);
+    }
+    const xs = lawnCuts(gardenBounds.minX, gardenBounds.maxX, 0);
+    const zs = lawnCuts(gardenBounds.minZ, gardenBounds.maxZ, 1);
+    for (let i = 1; i < xs.length; i++) for (let j = 1; j < zs.length; j++) {
+      const x = xs[i - 1], z = zs[j - 1], nextX = xs[i], nextZ = zs[j];
+      const center: Vec2 = [(x + nextX) / 2, (z + nextZ) / 2];
+      if (footprints.some(outline => insidePolygon(center, outline))) continue;
+      lawnTriangle([x, z], [x, nextZ], [nextX, z]);
+      lawnTriangle([nextX, z], [x, nextZ], [nextX, nextZ]);
     }
     const lawnGeometry = new T.BufferGeometry();
     lawnGeometry.setAttribute("position", new T.Float32BufferAttribute(lawnVertices, 3));
@@ -2028,9 +2086,33 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
         sign(annex.name.toUpperCase(),cx,portal ? 3.4 : 3.25,cz+0.13,portal ? 2.6 : Math.min(annex.rect.size[0]-1,9));
       }
     }
-    box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
+    if (annex.id === "lab-maquetas")
+      box(2.1, 0.08, 0.22, 0, 0.01, maxZ + 0.11, m.stone, true);
+    else box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
   });
   annexPaths.forEach((points) => path(points, 2));
+  // Después de la cubierta, el piso acompaña al terreno hasta el sendero de Maquetas.
+  {
+    const walk = plan.bedeliaWalk;
+    const start = fromRect(walk, [walk.size[0] / 2, 0]);
+    const end = annexWalkEnd;
+    const acrossX = -Math.sin(walk.angle), acrossZ = Math.cos(walk.angle);
+    const segments = Math.ceil(Math.hypot(end[0] - start[0], end[1] - start[1]) / 0.4);
+    const strip = new T.PlaneGeometry(1, 1, segments, 2);
+    const pos = strip.attributes.position, uv = strip.attributes.uv;
+    for (let i = 0; i < pos.count; i++) {
+      const t = uv.getX(i), side = (0.5 - uv.getY(i)) * walk.size[1];
+      const x = T.MathUtils.lerp(start[0], end[0], t) + acrossX * side;
+      const z = T.MathUtils.lerp(start[1], end[1], t) + acrossZ * side;
+      const lawn = gardenHeight(...inCantina([x, z]));
+      const y = T.MathUtils.clamp(lawn + 0.035, 0.05, PLAZA_LEVEL + bedeliaPavingTop);
+      pos.setXYZ(i, x, y, z);
+      uv.setXY(i, x / 4, z / 4);
+    }
+    strip.computeVertexNormals();
+    const paving = new T.Mesh(strip, m.stone); paving.receiveShadow = true; visual.add(paving);
+    solid.add(new T.Mesh(strip));
+  }
   // Pasillo interior LED / DEI: los extremos abiertos coinciden con los vanos
   // de ambos edificios. El pavimento queda prácticamente enrasado con sus pisos.
   frame(annexEnclosedLink.rect, () => {

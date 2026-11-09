@@ -159,9 +159,6 @@ const square = { corner: plazaNorth, size: [22, 15] as Vec2 };
 const cantinaFront = add(plazaNorth, [X, square.size[0]]);
 // Borde del pasillo junto al césped, entre el lateral de Bedelía y la cantina.
 const bedeliaLawnEnd = add(plazaNorth, [X, 20], [Z, -15]);
-const stepDx = cantinaFront[0] - bedeliaLawnEnd[0], stepDz = cantinaFront[1] - bedeliaLawnEnd[1];
-const bedeliaLawnStep = rectFromCorner(cantinaFront, [Math.hypot(stepDx, stepDz), 1.1],
-  Math.atan2(-stepDz, -stepDx));
 // Fachada larga (18 m) hacia el cuadrado: el eje local x corre a lo largo de esa fachada y
 // el frente local (+z) mira al oeste, al cuadrado.
 // Retiro visual de 5 m solicitado por Horacio (02/11/2026); sin medida de campo.
@@ -184,6 +181,10 @@ const galleryWest = galleryAnchor;
 const passagePoint = (along: number, across: number): Vec2 => add(galleryWest, [Z, along], [X, across]);
 const bedeliaCorner = passagePoint(-20, 4.15);
 const bedelia = rectFromCorner(bedeliaCorner, [20, 10], gridAngle);
+// El sendero prolonga la galería por su cabecera este (vistas de ida y vuelta del 09/11).
+const bedeliaGalleryDepth = 2.7;
+const bedeliaWalk = rectFromCorner(fromRect(bedelia, [bedelia.size[0] / 2 + 0.5, bedelia.size[1] / 2]),
+  [19.6, bedeliaGalleryDepth], bedelia.angle);
 const manfredSize: Vec2 = [12, 9], manfredBulge = 1.5;
 // Frente curvo hacia el costado del pasillo (+X), no atravesado delante de su salida.
 const manfredRect: Rect = {center: passagePoint(-18, -6.8), size: manfredSize, angle: gridAngle-Math.PI/2};
@@ -247,7 +248,9 @@ export const facultyBlueprint = {
   openPlaza,
   plazaPassage: { start: passagePoint(0, 1.825), target: passagePoint(-32, 1.825), foot: corridorFoot },
   bedelia,
-  bedeliaLawnStep,
+  bedeliaWalk,
+  bedeliaGalleryDepth,
+  bedeliaLawnEdge: [bedeliaLawnEnd, cantinaFront] as const,
   cantina,
   annexAnchor: add(cantina.center, [Z, -plazaGroupShift]),
   // DEI–LED: posición provisional según el plano general aportado el 02/11.

@@ -1,4 +1,4 @@
-import { facultyBlueprint as plan, gridAngle, type Vec2, type Rect } from "./faculty-blueprint.ts";
+import { facultyBlueprint as plan, fromRect, gridAngle, type Vec2, type Rect } from "./faculty-blueprint.ts";
 
 /** Plano general aportado el 02/11/2026. Distancias estimadas, no relevamiento.
  * Origen en la cantina actual; u hacia la derecha y v hacia abajo en el plano.
@@ -26,22 +26,38 @@ function office(id: string, name: string, v: number, w: number, d: number): Anne
   return b;
 }
 // Frente de Kampus Print al fondo del pasillo, orientado hacia la plaza.
-const [printX, printZ] = plan.plazaPassage.target;
-const dx = printX - plan.annexAnchor[0], dz = printZ - plan.annexAnchor[1];
 const annexAngle = gridAngle + Math.PI;
-const printU = dx * Math.cos(annexAngle) + dz * Math.sin(annexAngle);
-const printV = -dx * Math.sin(annexAngle) + dz * Math.cos(annexAngle);
+function annexCoordinates([x, z]: Vec2): Vec2 {
+  const dx = x - plan.annexAnchor[0], dz = z - plan.annexAnchor[1];
+  return [dx * Math.cos(annexAngle) + dz * Math.sin(annexAngle),
+    -dx * Math.sin(annexAngle) + dz * Math.cos(annexAngle)];
+}
+const [printU, printV] = annexCoordinates(plan.plazaPassage.target);
 const kampusPrint = annex("kampus-print", "Kampus Print", printU, printV, 13.4, 8);
 kampusPrint.rect.angle = gridAngle;
 kampusPrint.front = annexPoint(printU, printV - 4);
 kampusPrint.entrance = annexPoint(printU, printV - 4.8);
+const walk = plan.bedeliaWalk;
+const [walkU, walkV] = annexCoordinates(fromRect(walk, [walk.size[0] / 2, 0]));
+// Las paredes tienen 20 cm de espesor: quedan 12 cm entre su cara y el pavimento.
+const wallOffset = walk.size[1] / 2 + 0.22;
+// Retiro longitudinal para ensanchar el paso junto a la escalera de la cantina.
+const maquetasSetback = 2.8;
+const maquetas = annex("lab-maquetas", "Laboratorio de Maquetas",
+  walkU - maquetasSetback - 18.4 / 2, walkV - wallOffset - 10.2 / 2, 18.4, 10.2);
+maquetas.entrance = annexPoint(maquetas.mapCenter[0], walkV);
+const dicia = annex("cta-dicia", "CTA–DICIA", walkU + 6 - 34 / 2, walkV + wallOffset + 16 / 2, 34, 16, 4.2,
+  [[-7,-8],[17,-8],[17,8],[-17,8],[-17,3],[-7,3]]);
+// El caminero de 2 m rodea la nueva esquina de Maquetas y enlaza con Ingeniería.
+const bypassU = maquetas.mapCenter[0] - maquetas.rect.size[0] / 2 - 1.12;
+const bypassV = maquetas.mapCenter[1] - maquetas.rect.size[1] / 2 - 1.45;
+export const annexWalkEnd = annexPoint(bypassU, walkV);
 export const facultyAnnexes: Annex[] = [
   annex("lab-ingenieria", "Laboratorio de Ingeniería", -17.4, 0, 18.4, 10.4, 4.2,
     [[-9.2,-5.2],[0,-5.2],[0,-12.2],[9.2,-12.2],[9.2,5.2],[-9.2,5.2]]),
-  annex("lab-maquetas", "Laboratorio de Maquetas", -17.5, 13.8, 18.4, 10.2),
+  maquetas,
   kampusPrint,
-  annex("cta-dicia", "CTA–DICIA", -19.8, 35, 34, 16, 4.2,
-    [[-7,-8],[17,-8],[17,8],[-17,8],[-17,3],[-7,3]]),
+  dicia,
   annex("dei-led", "DEI–LED", -4.2, -27.8, 28.8, 12, 4.4),
   office("led", "LED", -24.8, 9.2, 11.6),
   office("da-cap", "DA / CAP", -14.5, 9.2, 9),
@@ -78,10 +94,12 @@ export const annexEnclosedLink = {
 /** Circuito exterior: evita atravesar los edificios y llega al sendero existente detrás de Manfred. */
 const officeIds = new Set(["led", "da-cap", "das", "dg"]);
 export const annexPaths: Vec2[][] = [
-  [[-28,-36],[-28,-18],[-28,-9],[-28,10],[-28,23],[-43,23],[-43,48],[-28,48],[30,48],[printU + 8,48],[57.1,48]].map(([u,v])=>annexPoint(u,v)),
-  ...facultyAnnexes.map((b): Vec2[] => {
+  [[-28,-36],[-28,-18],[-28,-9],[-28,bypassV],[bypassU,bypassV],[bypassU,23],[-43,23],[-43,48],[-28,48],[30,48],[printU + 8,48],[57.1,48]].map(([u,v])=>annexPoint(u,v)),
+  // El tramo pavimentado desde Bedelía ya pasa por la entrada de Maquetas.
+  ...facultyAnnexes.filter(b => b !== maquetas).map((b): Vec2[] => {
     const [u,v] = b.mapCenter;
     if (officeIds.has(b.id)) return [b.entrance, annexPoint(-28,v)];
+    if (b.id === "lab-ingenieria") return [b.entrance, annexPoint(u,bypassV), annexPoint(-28,bypassV)];
     if (b.id === "kampus-print") return [plan.plazaPassage.foot, b.entrance, annexPoint(u + 8, v - 4.8), annexPoint(u + 8, 48)];
     if (b.id === "cta-dicia") return [b.entrance,annexPoint(u,48),annexPoint(-28,48)];
     return [b.entrance,annexPoint(-28,v+b.rect.size[1]/2+2.5)];

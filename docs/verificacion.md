@@ -262,3 +262,9 @@ Rama `fix/integrar-plaza-texturas`, sobre `ccd2ded`. Stash original conservado. 
 Build correcto; 40/40 pruebas correctas. Se restituye la prueba remota de visibilidad de Kampus Print desde el pasillo y se comprueba por raycasting del modelo real que el vano de Manfred tiene 0,56 m de ancho central libre a altura corporal, mientras el paño adyacente mantiene su colisión. Las rutas de anexos siguen sin atravesar edificios. La puerta deja de ser un pendiente de modelado; no se verificó todavía un recorrido manual completo por el auditorio.
 
 Tras mover la puerta al paño diagonal: build correcto y 40/40 pruebas; raycasting verifica el nuevo vano libre y el antiguo cerrado. Chrome carga sin errores JavaScript; revisión visual de Kampus Print al fondo del pasillo y puerta diagonal abierta. Vitrina recuperada del código remoto; su inspección frontal específica quedó sin completar.
+
+### Acceso a Bedelía — 09/11/2026
+
+Compilación del frontend y 40 de 40 pruebas correctas. En Chrome se simuló la marcha con el controlador de primera persona y las colisiones de la escena. En el eje central y a 0,55 m a cada lado se recorrieron 14,4 m desde el exterior hasta dentro de la galería y se regresó al punto de partida sin saltar ni cambiar de altura.
+Tras acercar Maquetas y DICIA se repitieron la compilación y las 40 pruebas. En la escena de Chrome, el controlador caminó 15,2 m de ida y vuelta entre las fachadas en tres líneas paralelas. También entró y salió de Maquetas y atravesó la entrada de DICIA.
+Con Maquetas en su nueva posición, se verificaron en Chrome el cruce de ida y vuelta del espacio junto a la cantina y la entrada y salida del laboratorio. El frontend compiló y pasaron las 40 pruebas.
