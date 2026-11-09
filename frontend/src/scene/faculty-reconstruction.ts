@@ -8,7 +8,7 @@ import {
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
 import { gardenHeight, gardenBounds } from "../data/cantina-terrain";
-import { facultyAnnexes, annexPaths, annexCoveredPaths } from "../data/faculty-annexes";
+import { facultyAnnexes, annexPaths, annexCoveredPaths, annexEnclosedLink } from "../data/faculty-annexes";
 import { facultyPlaces } from "../data/places";
 
 type BoxOptions = { tile?: readonly number[]; offset?: readonly number[]; rotation?: number };
@@ -830,6 +830,17 @@ export function createFaculty() {
     prism(outline, 0, PLAZA_LEVEL, m.concrete);
     pave(outline, i === 0 ? m.tile : m.stone, PLAZA_LEVEL + (i === 0 ? 0.008 : 0.005));
   }
+  frame(plan.bedeliaLawnStep, () => {
+    const [length, depth] = plan.bedeliaLawnStep.size;
+    const platformEdge = -depth / 2, lawnEdge = depth / 2;
+    const treadHeight = 0.60;
+    box(length, treadHeight, depth, 0, treadHeight / 2, 0, m.stone);
+    // Como en las escaleras de la plaza, la cápsula sube por pendientes cortas.
+    // Entre ambas queda una superficie horizontal donde detenerse en el peldaño.
+    ramp(v3(0, 0, lawnEdge + 0.45), v3(0, treadHeight, depth / 4), length);
+    ramp(v3(0, treadHeight, depth / 4), v3(0, treadHeight, -depth / 4), length);
+    ramp(v3(0, treadHeight, -depth / 4), v3(0, PLAZA_LEVEL, platformEdge), length);
+  });
   // La escalera de la galería junto al ascensor (primer elemento) tiene su propio modelado, abajo; la
   // salida norte del pasillo de Manfred conserva la escalinata recta genérica.
   for (const s of plan.platformSteps.slice(1))
@@ -1929,6 +1940,34 @@ export function createFaculty() {
     visual = apronVisual; solid = apronSolid;
   }, PLAZA_LEVEL - 0.45);
   // ---- Anexos del plano general: exteriores provisionales, sin interiores relevados ----
+  type AnnexOpening = { center: number; width: number; height: number };
+  // La unión y los edificios comparten ladrillo, ventanas y dinteles. Los vanos
+  // se descuentan también de las colisiones, para comunicar realmente los interiores.
+  function annexWall(a: Vec2, b: Vec2, h: number, openings: AnnexOpening[] = []) {
+    const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
+    const cx = (a[0] + b[0]) / 2, cz = (a[1] + b[1]) / 2;
+    const opts = { rotation: -angle };
+    const parts = spans(-length / 2, length / 2,
+      openings.map((opening): Range => [opening.center - opening.width / 2, opening.center + opening.width / 2]));
+    for (const [start, end] of parts) {
+      const mid = (start + end) / 2, x = cx + mid * Math.cos(angle), z = cz + mid * Math.sin(angle);
+      box(end - start, 1, 0.2, x, 0.55, z, m.brick, true, opts);
+      box(end - start, h - 2.5, 0.2, x, (h + 2.5) / 2, z, m.brick, true, opts);
+      box(end - start, 1.45, 0.08, x, 1.78, z, m.glass, true, opts);
+      const count = Math.ceil((end - start) / 2.4);
+      for (let k = 0; k <= count; k++) {
+        const t = start + (end - start) * k / count;
+        box(0.1, 1.5, 0.16, cx + t * Math.cos(angle), 1.78, cz + t * Math.sin(angle), m.metal, false, opts);
+      }
+    }
+    for (const opening of openings) {
+      box(opening.width, h - opening.height, 0.2,
+        cx + opening.center * Math.cos(angle), (h + opening.height) / 2,
+        cz + opening.center * Math.sin(angle), m.brick, true, opts);
+    }
+  }
+
   for (const annex of facultyAnnexes) frame(annex.rect, () => {
     const h = annex.height, outline = annex.outline;
     const maxZ = Math.max(...outline.map((p) => p[1]));
@@ -1941,31 +1980,39 @@ export function createFaculty() {
       const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
       const front = a[1] === maxZ && b[1] === maxZ;
       const cx = (a[0] + b[0]) / 2, cz = (a[1] + b[1]) / 2;
-      // Tramos laterales de la puerta y ventanas, con dintel, zócalo y montantes.
-      const parts: Range[] = front ? [[-length / 2,-1.05],[1.05,length / 2]] : [[-length / 2,length / 2]];
-      for (const [start,end] of parts) {
-        const mid = (start + end) / 2, x = cx + mid * Math.cos(angle), z = cz + mid * Math.sin(angle);
-        const opts = { rotation: -angle };
-        box(end-start, 1, 0.2, x, 0.55, z, m.brick, true, opts);
-        box(end-start, h-2.5, 0.2, x, (h+2.5)/2, z, m.brick, true, opts);
-        box(end-start, 1.45, 0.08, x, 1.78, z, m.glass, true, opts);
-        const count = Math.ceil((end-start)/2.4);
-        for (let k=0;k<=count;k++) {
-          const t = start + (end-start)*k/count;
-          box(0.1,1.5,0.16,cx+t*Math.cos(angle),1.78,cz+t*Math.sin(angle),m.metal,false,opts);
-        }
-      }
+      const portal = annexEnclosedLink.portals.find((p) => p.annexId === annex.id
+        && Math.abs((p.center[0] - cx) * Math.sin(angle) - (p.center[1] - cz) * Math.cos(angle)) < 0.001
+        && Math.hypot(p.center[0] - cx, p.center[1] - cz) < length / 2);
+      const openings: AnnexOpening[] = portal ? [{
+        center: (portal.center[0] - cx) * Math.cos(angle) + (portal.center[1] - cz) * Math.sin(angle),
+        width: annexEnclosedLink.clearWidth, height: annexEnclosedLink.openingHeight,
+      }] : front ? [{ center: 0, width: 2.1, height: 2.5 }] : [];
+      annexWall(a, b, h, openings);
       if (front) {
-        box(2.1,h-2.5,0.2,cx,(h+2.5)/2,cz,m.brick,true,{rotation:-angle});
-        // Acceso abierto: no colocar un vidrio de colisión en la puerta.
-        box(3.2,0.12,1.4,cx,2.9,cz+0.6,m.concrete);
-        sign(annex.name.toUpperCase(),cx,3.25,cz+0.13,Math.min(annex.rect.size[0]-1,9));
+        if (!portal) box(3.2,0.12,1.4,cx,2.9,cz+0.6,m.concrete);
+        sign(annex.name.toUpperCase(),cx,portal ? 3.4 : 3.25,cz+0.13,portal ? 2.6 : Math.min(annex.rect.size[0]-1,9));
       }
     }
     box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
   });
   annexPaths.forEach((points) => path(points, 2));
-  // Galería de unión LED / DEI, sin cerrar el paso con paredes.
+  // Pasillo interior LED / DEI: los extremos abiertos coinciden con los vanos
+  // de ambos edificios. El pavimento queda prácticamente enrasado con sus pisos.
+  frame(annexEnclosedLink.rect, () => {
+    const link = annexEnclosedLink, [length, width] = link.rect.size;
+    box(length + 0.2, 0.15, width, 0, -0.02, 0, m.concrete, true);
+    box(length + 0.2, 0.18, width + 0.2, 0, link.height + 0.09, 0, m.roof, true);
+    box(length, 0.08, width - link.wallThickness * 2, 0, link.height - 0.04, 0, m.concrete);
+    const galleryZ = (width - link.wallThickness) / 2;
+    annexWall([-length / 2, -galleryZ], [length / 2, -galleryZ], link.height);
+    annexWall([-length / 2, galleryZ], [length / 2, galleryZ], link.height,
+      [{ center: link.sideDoorX, width: link.sideDoorWidth, height: link.openingHeight }]);
+    for (const edge of [-1, 1]) box(0.07, link.openingHeight, 0.24,
+      link.sideDoorX + edge * (link.sideDoorWidth / 2 + 0.035), link.openingHeight / 2, galleryZ, m.metal);
+    box(link.sideDoorWidth + 0.14, 0.07, 0.24,
+      link.sideDoorX, link.openingHeight + 0.035, galleryZ, m.metal);
+  });
+  // La galería exterior de oficinas continúa fuera del nuevo volumen cerrado.
   for (const points of annexCoveredPaths) for (let i=1;i<points.length;i++) {
     const [ax,az]=points[i-1], [bx,bz]=points[i], length=Math.hypot(bx-ax,bz-az);
     box(2.3,0.14,length+0.2,(ax+bx)/2,3.05,(az+bz)/2,m.roof,false,{rotation:Math.atan2(bx-ax,bz-az)});

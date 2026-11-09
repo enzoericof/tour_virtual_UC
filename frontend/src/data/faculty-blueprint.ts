@@ -157,6 +157,11 @@ const [, , , plazaSouth] = rectCorners(coveredPlaza);
 /** Cuadrado descubierto entre la plaza techada (oeste), Bedelía (norte) y la cantina (este). */
 const square = { corner: plazaNorth, size: [22, 15] as Vec2 };
 const cantinaFront = add(plazaNorth, [X, square.size[0]]);
+// Borde del pasillo junto al césped, entre el lateral de Bedelía y la cantina.
+const bedeliaLawnEnd = add(plazaNorth, [X, 20], [Z, -15]);
+const stepDx = cantinaFront[0] - bedeliaLawnEnd[0], stepDz = cantinaFront[1] - bedeliaLawnEnd[1];
+const bedeliaLawnStep = rectFromCorner(cantinaFront, [Math.hypot(stepDx, stepDz), 1.1],
+  Math.atan2(-stepDz, -stepDx));
 // Fachada larga (18 m) hacia el cuadrado: el eje local x corre a lo largo de esa fachada y
 // el frente local (+z) mira al oeste, al cuadrado.
 // Retiro visual de 5 m solicitado por Horacio (02/11/2026); sin medida de campo.
@@ -242,6 +247,7 @@ export const facultyBlueprint = {
   openPlaza,
   plazaPassage: { start: passagePoint(0, 1.825), target: passagePoint(-32, 1.825), foot: corridorFoot },
   bedelia,
+  bedeliaLawnStep,
   cantina,
   annexAnchor: add(cantina.center, [Z, -plazaGroupShift]),
   // DEI–LED: posición provisional según el plano general aportado el 02/11.
@@ -272,7 +278,7 @@ export const facultyBlueprint = {
       fromRect(manfredRect,[-6.8,-4.5])],
     rectCorners(coveredPlaza),
     // Unión lateral del pasillo recto con la plaza girada, sin grieta triangular.
-    [plazaNorth, add(plazaNorth, [Z, -15]), add(plazaNorth, [X, 20], [Z, -15]), cantinaFront],
+    [plazaNorth, add(plazaNorth, [Z, -15]), bedeliaLawnEnd, cantinaFront],
     // Cierra la cuña que dejó el retiro de la plaza junto al frente de Bedelía.
     [plazaNorth, rectCorners(coveredPlaza)[1], rectCorners(coveredPlaza)[0]],
     openPlaza,

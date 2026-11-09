@@ -48,6 +48,33 @@ export const facultyAnnexes: Annex[] = [
   office("das", "DAS", -5.6, 9.2, 8.6),
   office("dg", "DG", 3.4, 9.2, 8.6),
 ];
+
+// Unión interior solicitada por el equipo: parte de la puerta de LED y llega
+// a la pared lateral de DEI–LED. Las cotas se derivan de los pabellones existentes.
+const led = facultyAnnexes.find((building) => building.id === "led")!;
+const dei = facultyAnnexes.find((building) => building.id === "dei-led")!;
+const linkStartU = led.mapCenter[0] + led.rect.size[1] / 2;
+const linkEndU = dei.mapCenter[0] - dei.rect.size[0] / 2;
+const linkCenterU = (linkStartU + linkEndU) / 2;
+const linkV = led.mapCenter[1];
+export const annexEnclosedLink = {
+  rect: {
+    center: annexPoint(linkCenterU, linkV),
+    size: [linkEndU - linkStartU, 3.4] as Vec2,
+    angle: annexAngle,
+  },
+  height: led.height,
+  wallThickness: 0.2,
+  clearWidth: 3,
+  openingHeight: 3.1,
+  // El acceso lateral da a la galería de oficinas.
+  sideDoorX: -28 - linkCenterU,
+  sideDoorWidth: 2.1,
+  portals: [
+    { annexId: led.id, center: [0, led.rect.size[1] / 2] as Vec2 },
+    { annexId: dei.id, center: [-dei.rect.size[0] / 2, linkV - dei.mapCenter[1]] as Vec2 },
+  ],
+};
 /** Circuito exterior: evita atravesar los edificios y llega al sendero existente detrás de Manfred. */
 const officeIds = new Set(["led", "da-cap", "das", "dg"]);
 export const annexPaths: Vec2[][] = [
@@ -62,8 +89,8 @@ export const annexPaths: Vec2[][] = [
   [annexPoint(57.1,48), annexPoint(70,48), [0,-22]],
 ];
 export const annexCoveredPaths: Vec2[][] = [
-  [[-28,-25.8],[-18.6,-25.8]].map(([u,v])=>annexPoint(u,v)),
-  [[-28,-25.8],[-28,-9]].map(([u,v])=>annexPoint(u,v)),
+  // Solo continúa la galería exterior del ala de oficinas, desde la puerta del corredor.
+  [[-28,linkV + annexEnclosedLink.rect.size[1] / 2],[-28,-9]].map(([u,v])=>annexPoint(u,v)),
 ];
 export const annexVisitTargets: Record<string, [number, number, number]> = Object.fromEntries(
   facultyAnnexes.map((b)=>[b.id,[b.front[0],1.7,b.front[1]]]),
