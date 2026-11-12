@@ -225,6 +225,7 @@ La revisión posterior del tramo entre Maquetas y DICIA muestra ambas fachadas j
 
 Tras el retiro de Maquetas, las vistas desde el pasillo y desde el jardín muestran el espacio libre junto a la escalera de la cantina. Capturas locales: `output/cantina-maquetas-ida.png` y `output/cantina-maquetas-vuelta.png`.
 
+<<<<<<< Updated upstream
 
 ## Seto CT del patio — 12/11/2026
 
@@ -245,3 +246,12 @@ Botonera interior verificada en la pared izquierda, centrada y debajo de la altu
 Frente del ascensor revisado en navegador con botonera e indicador en el montante derecho, marco de acero cálido y revoque azul texturizado. Captura en output/ascensor-exterior-derecha.png.
 
 Revisados ambos paneles del ascensor. Capturas en output/ascensor-indicadores.png y output/ascensor-botones-redondos.png.
+=======
+### Extremo del pasillo de DICIA — 12/11/2026
+
+En Chrome se revisó la esquina desde ambos sentidos. El último arco coincide con el final de la pared y el cartel de Maquetas sigue visible. Capturas locales en `output/cubierta-dicia-ida.png` y `output/cubierta-dicia-vuelta.png`.
+
+### Vista de los talleres desde la cantina — 12/11/2026
+
+La captura local `output/fachadas-talleres-ida.png` muestra el encuentro del frente alto con el tramo bajo, los dos portones y el espacio hasta la escalera de la cantina.
+>>>>>>> Stashed changes

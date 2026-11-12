@@ -269,4 +269,14 @@ Compilación del frontend y 40 de 40 pruebas correctas. En Chrome se simuló la 
 Tras acercar Maquetas y DICIA se repitieron la compilación y las 40 pruebas. En la escena de Chrome, el controlador caminó 15,2 m de ida y vuelta entre las fachadas en tres líneas paralelas. También entró y salió de Maquetas y atravesó la entrada de DICIA.
 Con Maquetas en su nueva posición, se verificaron en Chrome el cruce de ida y vuelta del espacio junto a la cantina y la entrada y salida del laboratorio. El frontend compiló y pasaron las 40 pruebas.
 
+<<<<<<< Updated upstream
 Ascensor del Bloque 1: prueba de integración con geometría y colisiones reales en los cuatro pisos. Verifica el resaltado del botón, el bloqueo con puertas cerradas, el paso libre al abrir y la llegada a la cabina elegida. La cabina se desplaza de forma continua con el pasajero. Se comprueba la cola de llamadas durante el viaje y el cierre automático a los diez segundos, con el visitante dentro y fuera. Se revisó el acabado exterior en navegador.
+=======
+### Extensión del pasillo de DICIA — 12/11/2026
+
+Compilación correcta y 40 pruebas aprobadas. En Chrome, el controlador caminó hasta sobrepasar la esquina de DICIA y regresó bajo la cubierta. También atravesó la puerta de Maquetas en ambos sentidos.
+
+### Fachadas detrás de la cantina — 12/11/2026
+
+Compilación y 40 pruebas del frontend correctas. En Chrome se recorrieron en ambos sentidos el pasillo, la entrada de Maquetas y el paso junto a la escalera de la cantina. También se comprobó la entrada a DICIA.
+>>>>>>> Stashed changes

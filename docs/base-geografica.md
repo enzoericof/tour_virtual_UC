@@ -26,7 +26,7 @@ Origen WGS84: latitud **−25,3251**, longitud **−57,6387**. `X` este, `Z` sur
 
 ## Estado de las medidas (03/11/2026)
 
-Aclaración del usuario: **solo el Bloque 1 tiene medidas reales**, tomadas en el lugar. El resto del escenario, incluidas las «medidas del equipo» que se tomaron sobre capturas aéreas, es aproximado: no presentarlo como relevado.
+Aclaración del usuario: al 03/11, las medidas tomadas en el lugar correspondían al Bloque 1. El 12/11 el equipo también precisó la longitud del frente de Maquetas. El resto del escenario, incluidas las «medidas del equipo» que se tomaron sobre capturas aéreas, es aproximado: no presentarlo como relevado.
 
 Medidas reales del Bloque 1 (02/11/2026): largo de 65 m; columnas del borde de la galería cada 4,5 m, con dos mamparas de lamas por módulo; ascensor de 2,5 m entre dos columnas; escalera de la plaza techada al primer piso de 2,1 m de ancho; puertas dobles de las aulas de 1,7 m en total, con la ventana cuadrada de 45 cm a 1,30 m del suelo en la hoja fija.
 
@@ -46,7 +46,7 @@ Medidas que faltan tomar en el Bloque 1:
 | Ascensor | Fondo de la caja (2,5 m, igual al frente) y altura de los murales (6,5 m) | Interpretación |
 | Cara este | Tamaño de los títulos y de las bandas de hormigón | Estimación de fotos |
 
-Sin ninguna medida real (posiciones y tamaños de capturas, fotos o estimaciones): Bloque G (65 × 12 m y su ubicación a 11 m y 11,1 m del Bloque 1), plaza techada (15 × 10 m y su corrimiento de 6,5 m), altura de la plataforma (0,9 m), cuadrado descubierto, Bedelía, cantina y su interior, Sala Manfred, DEI–LED y los demás anexos, caminos, árboles y estacionamiento.
+Sectores estimados al 03/11 (posiciones y tamaños de capturas y fotos): Bloque G (65 × 12 m y su ubicación a 11 m y 11,1 m del Bloque 1), plaza techada (15 × 10 m y su corrimiento de 6,5 m), altura de la plataforma (0,9 m), cuadrado descubierto, Bedelía, cantina y su interior, Sala Manfred, DEI–LED y los demás anexos, caminos, árboles y estacionamiento.
 
 ## Plano métrico de CyT
 
@@ -208,8 +208,7 @@ Geometría adicional en `frontend/src/data/faculty-annexes.ts`, referida al cent
 
 | Sector | Id | Representación |
 | --- | --- | --- |
-| Laboratorio de Ingeniería | `lab-ingenieria` | Contorno con prolongación posterior, junto a la cantina |
-| Laboratorio de Maquetas | `lab-maquetas` | Edificio separado debajo de Ingeniería en el plano |
+| Laboratorio de Maquetas | `lab-maquetas` | Edificio junto al pasillo cubierto detrás de la cantina |
 | Kampus Print | `kampus-print` | Edificio independiente con su fachada al fondo del pasillo de la plaza techada, reubicado según la foto del 05/11 |
 | CTA–DICIA | `cta-dicia` | Planta escalonada en L |
 | DEI–LED | `dei-led` | Pabellón separado, con conexión cubierta al ala LED |
@@ -337,6 +336,7 @@ Corrección posterior del 05/11: la flecha del usuario coloca la puerta en el pa
 
 ### Acceso exterior a la galería de Bedelía — 09/11/2026
 
+<<<<<<< Updated upstream
 Las fotos de ida y vuelta de las 13:09 muestran el sendero embaldosado a nivel con la galería, una rejilla transversal, un cantero lateral y una cubierta curva translúcida sobre postes metálicos. El modelo prolonga el eje de la galería hacia el jardín y ajusta el terreno junto al antiguo borde. La cubierta mide 19,6 m. La esquina de Maquetas empieza 2,8 m después de su extremo para dar más espacio al acceso lateral de la cantina. El caminero exterior rodea la esquina posterior del laboratorio. Desde Bedelía, CTA–DICIA queda a la izquierda y Maquetas a la derecha. Los paños enfrentados siguen los bordes del paso de 2,7 m, con 12 cm entre la cara de ladrillo y el pavimento. Las dimensiones son aproximaciones visuales. Tras la cubierta, el sendero continúa entre las fachadas hasta el cruce de los anexos.
 
 
@@ -355,3 +355,10 @@ El ascensor del Bloque 1 conserva su posición y sus murales laterales. La cara 
 La cabina del Bloque 1 recorre el hueco vertical con una sola botonera interior centrada en la pared izquierda a 1,12 m. Botoneras exteriores e indicadores en el montante derecho de acero: subida en PB, ambas direcciones en pisos 1 y 2, bajada en piso 3. Las puertas se cierran a los diez segundos de abrirse si nadie selecciona un destino antes. Las llamadas pendientes se atienden en orden; el estado de la cabina es local al navegador.
 
 El indicador superior exterior señala el sentido de marcha. La placa gris inferior reúne el visor del piso de la cabina y los pulsadores circulares. En la pared izquierda interior, los botones circulares se ordenan en una columna con PB abajo y 3 arriba.
+=======
+Las fotos de ida y vuelta de las 13:09 muestran el sendero embaldosado a nivel con la galería, una rejilla transversal, un cantero lateral y una cubierta curva translúcida sobre postes metálicos. El modelo prolonga el eje de la galería hacia el jardín y ajusta el terreno junto al antiguo borde. El tramo inicial a nivel mide 19,6 m. La esquina de Maquetas empieza 2,8 m después de ese tramo para dar más espacio al acceso lateral de la cantina. El caminero exterior rodea la esquina posterior del laboratorio. Desde Bedelía, CTA–DICIA queda a la izquierda y Maquetas a la derecha. Los paños enfrentados siguen los bordes del paso de 2,7 m, con 12 cm entre la cara de ladrillo y el pavimento. Las dimensiones son aproximaciones visuales. Desde el 12/11, la cubierta y las baldosas continúan otros 18 m hasta el quiebre de la fachada de DICIA. El piso sigue el terreno a lo largo del muro de ladrillo de Maquetas. Ese muro queda cerrado de extremo a extremo, sin cartel ni umbral. Desde el último arco sigue el caminero hasta el cruce de los anexos.
+
+### Fachadas detrás de la cantina — 12/11/2026
+
+La foto del 11/11 a las 18:26 muestra el frente de ladrillo del Área de Ensayo de Materiales, con un cuerpo alto y otro bajo, franjas oscuras y portones metálicos. Se tomó como referencia de forma para Maquetas. Las alturas, la pendiente y la distribución de los portones son aproximaciones visuales. El 12/11 se retiró del recorrido el Laboratorio de Ingeniería situado detrás de la cantina. El cuerpo bajo de Maquetas se prolonga hacia ese terreno. El equipo indicó una longitud total de 1417 cm para el frente de Maquetas hacia la cantina. De izquierda a derecha, la nave alta ocupa 9,50 m y el cuerpo bajo ocupa 4,67 m. Esta distribución entre cuerpos es aproximada.
+>>>>>>> Stashed changes

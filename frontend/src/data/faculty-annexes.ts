@@ -43,18 +43,24 @@ const [walkU, walkV] = annexCoordinates(fromRect(walk, [walk.size[0] / 2, 0]));
 const wallOffset = walk.size[1] / 2 + 0.22;
 // Retiro longitudinal para ensanchar el paso junto a la escalera de la cantina.
 const maquetasSetback = 2.8;
+// Longitud total del frente hacia la cantina, medida por el equipo en centímetros.
+const maquetasLength = 1417 / 100;
 const maquetas = annex("lab-maquetas", "Laboratorio de Maquetas",
-  walkU - maquetasSetback - 18.4 / 2, walkV - wallOffset - 10.2 / 2, 18.4, 10.2);
+  walkU - maquetasSetback - 18.4 / 2, walkV - wallOffset - maquetasLength / 2, 18.4, maquetasLength, 4.85);
 maquetas.entrance = annexPoint(maquetas.mapCenter[0], walkV);
 const dicia = annex("cta-dicia", "CTA–DICIA", walkU + 6 - 34 / 2, walkV + wallOffset + 16 / 2, 34, 16, 4.2,
   [[-7,-8],[17,-8],[17,8],[-17,8],[-17,3],[-7,3]]);
-// El caminero de 2 m rodea la nueva esquina de Maquetas y enlaza con Ingeniería.
+// El techo termina donde la fachada junto al pasillo gira hacia el interior de la L.
+const corridorWall = dicia.outline.filter(([, z]) => z === -dicia.rect.size[1] / 2);
+const cornerU = dicia.mapCenter[0] + Math.min(...corridorWall.map(([x]) => x));
+export const diciaWalkExtension = walkU - cornerU;
+// El caminero de 2 m rodea Maquetas y continúa hacia las oficinas.
 const bypassU = maquetas.mapCenter[0] - maquetas.rect.size[0] / 2 - 1.12;
 const bypassV = maquetas.mapCenter[1] - maquetas.rect.size[1] / 2 - 1.45;
+const dg = office("dg", "DG", 3.4, 9.2, 8.6);
+dg.entrance = annexPoint(bypassU, dg.mapCenter[1]);
 export const annexWalkEnd = annexPoint(bypassU, walkV);
 export const facultyAnnexes: Annex[] = [
-  annex("lab-ingenieria", "Laboratorio de Ingeniería", -17.4, 0, 18.4, 10.4, 4.2,
-    [[-9.2,-5.2],[0,-5.2],[0,-12.2],[9.2,-12.2],[9.2,5.2],[-9.2,5.2]]),
   maquetas,
   kampusPrint,
   dicia,
@@ -62,7 +68,7 @@ export const facultyAnnexes: Annex[] = [
   office("led", "LED", -24.8, 9.2, 11.6),
   office("da-cap", "DA / CAP", -14.5, 9.2, 9),
   office("das", "DAS", -5.6, 9.2, 8.6),
-  office("dg", "DG", 3.4, 9.2, 8.6),
+  dg,
 ];
 
 // Unión interior solicitada por el equipo: parte de la puerta de LED y llega
@@ -92,14 +98,13 @@ export const annexEnclosedLink = {
   ],
 };
 /** Circuito exterior: evita atravesar los edificios y llega al sendero existente detrás de Manfred. */
-const officeIds = new Set(["led", "da-cap", "das", "dg"]);
+const officeIds = new Set(["led", "da-cap", "das"]);
 export const annexPaths: Vec2[][] = [
   [[-28,-36],[-28,-18],[-28,-9],[-28,bypassV],[bypassU,bypassV],[bypassU,23],[-43,23],[-43,48],[-28,48],[30,48],[printU + 8,48],[57.1,48]].map(([u,v])=>annexPoint(u,v)),
-  // El tramo pavimentado desde Bedelía ya pasa por la entrada de Maquetas.
-  ...facultyAnnexes.filter(b => b !== maquetas).map((b): Vec2[] => {
+  // Maquetas y DG ya tienen su punto de visita sobre los caminos principales.
+  ...facultyAnnexes.filter(b => b !== maquetas && b !== dg).map((b): Vec2[] => {
     const [u,v] = b.mapCenter;
     if (officeIds.has(b.id)) return [b.entrance, annexPoint(-28,v)];
-    if (b.id === "lab-ingenieria") return [b.entrance, annexPoint(u,bypassV), annexPoint(-28,bypassV)];
     if (b.id === "kampus-print") return [plan.plazaPassage.foot, b.entrance, annexPoint(u + 8, v - 4.8), annexPoint(u + 8, 48)];
     if (b.id === "cta-dicia") return [b.entrance,annexPoint(u,48),annexPoint(-28,48)];
     return [b.entrance,annexPoint(-28,v+b.rect.size[1]/2+2.5)];

@@ -7,9 +7,9 @@ const footprints = facultyAnnexes.map((b)=>b.outline.map(([x,z])=>[
  b.rect.center[0]+x*Math.cos(b.rect.angle)-z*Math.sin(b.rect.angle),
  b.rect.center[1]+x*Math.sin(b.rect.angle)+z*Math.cos(b.rect.angle)]));
 const existing = [plan.main,plan.block2,plan.bedelia,plan.cantina].map(rectCorners).concat([manfredOutline()]);
-test("All nine added dependencies have arrivals outside every building",()=>{
- assert.equal(facultyAnnexes.length,9);
- assert.equal(new Set(facultyAnnexes.map((b)=>b.id)).size,9);
+test("The eight annexes have distinct ids and arrivals outside every building",()=>{
+ assert.deepEqual(facultyAnnexes.map(b => b.id).sort(),
+   ["cta-dicia", "da-cap", "das", "dei-led", "dg", "kampus-print", "lab-maquetas", "led"]);
  assert.equal(facultyAnnexes.find((b)=>b.id==="kampus-print").name,"Kampus Print");
  for(const b of facultyAnnexes) for(const polygon of [...footprints,...existing])
    assert.ok(!insidePolygon(b.entrance,polygon),`${b.name}: arrival inside building`);
