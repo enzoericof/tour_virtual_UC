@@ -1,11 +1,12 @@
 import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { ElevatorMotion, type ElevatorButton, type ElevatorDoor } from "./elevator";
 import { createCampus } from "./campus";
 import { Walker } from "../navigation/walker";
 import { pickDestination, pointerOnCanvas } from "../navigation/pick-destination";
 import { places, type Place } from "../data/places";
 import { campusCenter, facultyToWorld } from "../data/campus-geometry";
-import { facultyVisitTargets } from "../data/faculty-blueprint";
+import { facultyVisitTargets, FLOOR_HEIGHT } from "../data/faculty-blueprint";
 import { annexVisitTargets } from "../data/faculty-annexes";
 export class TourEngine {
   readonly scene = new T.Scene();
@@ -23,6 +24,12 @@ export class TourEngine {
   /** Punto al que mira el visitante al aparecer en `spawn`. */
   private gaze = this.lookTarget("acceso", this.spawn);
   private canvas: HTMLCanvasElement;
+  private elevatorRay = new T.Raycaster();
+  private elevatorCenter = new T.Vector2();
+  private elevatorFocus: ElevatorButton | null = null;
+  private elevator = new ElevatorMotion(FLOOR_HEIGHT);
+  private elevatorPassenger = false;
+  private cabinPoint = new T.Vector3();
   onMode = (_mode: string) => {};
   onLocation = (_place: Place | null) => {};
   onStats = (_fps: number) => {};
@@ -83,6 +90,14 @@ export class TourEngine {
     this.walker = new Walker(this.camera, this.canvas);
     this.walker.onCaptureError = (message) => this.onError(message);
     this.walker.setWorld(this.campus.colliders);
+    for (const [floor, stop] of this.campus.elevator.stops.entries()) {
+      this.walker.addBarrier(stop.barrier, () =>
+        this.elevator.moving || this.elevator.floor !== floor || this.elevator.opening < 0.97);
+      this.walker.addBarrier(stop.floor, () => !this.elevator.moving && this.elevator.floor === floor);
+    }
+    this.canvas.addEventListener("click", (event) => {
+      if (event.button === 0 && this.walker.active) this.useElevator();
+    });
     this.walker.onLockChange = (locked) => {
       this.orbit.enabled = !locked && !this.walker.enabled;
       this.onMode(
@@ -142,9 +157,11 @@ export class TourEngine {
   private animate = () => {
     requestAnimationFrame(this.animate);
     const now = performance.now();
-    const dt = Math.min((now - this.previous) / 1000, 0.05);
+    const elapsed = (now - this.previous) / 1000;
+    const dt = Math.min(elapsed, 0.05);
     this.previous = now;
-    this.walker.update(dt);
+    if (!this.elevatorPassenger) this.walker.update(dt);
+    this.updateElevator(elapsed);
     if (this.orbit.enabled) this.orbit.update();
     // Far views need depth precision for ground, paving and grass surfaces.
     const near = this.orbit.enabled && this.current === "campus"
@@ -160,6 +177,63 @@ export class TourEngine {
       if (this.walker.active) this.onLocation(this.nearest());
     }
   };
+  private insideElevator() {
+    const point = this.campus.elevator.car.worldToLocal(this.cabinPoint.copy(this.camera.position));
+    return Math.abs(point.x) < 1.05 && point.z > -1.19 && point.z < 1.11 && point.y > 0.7 && point.y < 2.33;
+  }
+  private elevatorTarget() {
+    if (!this.walker.active) return null;
+    this.camera.updateMatrixWorld();
+    this.elevatorRay.setFromCamera(this.elevatorCenter, this.camera);
+    this.elevatorRay.far = 2.6;
+    const { carButtons, stops } = this.campus.elevator;
+    const inside = this.insideElevator();
+    const floor = Math.round((this.camera.position.y - 1.5) / FLOOR_HEIGHT);
+    const buttons = inside ? carButtons : stops[floor]?.buttons;
+    if (!buttons || (inside && this.elevator.moving)) return null;
+    for (const button of buttons) {
+      const hit = this.elevatorRay.intersectObject(button.mesh, false)[0];
+      if (hit && !this.walker.obstructs(this.elevatorRay.ray, hit.distance)) return { floor, button, inside };
+    }
+    return null;
+  }
+  private useElevator() {
+    const target = this.elevatorTarget();
+    if (target) this.elevator.request(target.button.destination ?? target.floor, target.inside);
+  }
+  private updateElevator(dt: number) {
+    const { car, carDoors, stops, directionLabels, floorLabels } = this.campus.elevator;
+    const wasMoving = this.elevator.moving;
+    const previousHeight = this.elevator.height;
+    this.elevator.update(dt);
+    if (!wasMoving && this.elevator.moving) {
+      this.elevatorPassenger = this.walker.enabled && this.insideElevator();
+    }
+    if (car.position.y !== this.elevator.height) {
+      car.position.y = this.elevator.height;
+      car.updateWorldMatrix(true, true);
+    }
+    if (this.elevatorPassenger) {
+      this.walker.moveWithPlatform(this.elevator.height - previousHeight);
+      if (!this.elevator.moving) this.elevatorPassenger = false;
+    }
+    const slide = (doors: ElevatorDoor[], opening: number) => {
+      for (const door of doors) door.mesh.position.x = door.closedX + door.offset * opening;
+    };
+    slide(carDoors, this.elevator.opening);
+    const directionMaterial = directionLabels[this.elevator.direction];
+    const floorMaterial = floorLabels[this.elevator.displayedFloor];
+    for (const [floor, stop] of stops.entries()) {
+      stop.directionDisplay.material = directionMaterial;
+      stop.floorDisplay.material = floorMaterial;
+      slide(stop.doors, floor === this.elevator.floor ? this.elevator.opening : 0);
+    }
+    const next = this.elevatorTarget()?.button ?? null;
+    if (next === this.elevatorFocus) return;
+    this.elevatorFocus?.mesh.material.emissive.setHex(0);
+    next?.mesh.material.emissive.setHex(0x93702b);
+    this.elevatorFocus = next;
+  }
   nearest() {
     let best: Place | null = null;
     let distance = 5;
@@ -188,6 +262,7 @@ export class TourEngine {
     this.walker.walk();
   }
   overview() {
+    this.elevatorPassenger = false;
     this.walker.pause();
     this.walker.enabled = false;
     this.orbit.enabled = true;
@@ -204,6 +279,7 @@ export class TourEngine {
     this.walker.pause();
   }
   async go(place?: Place) {
+    this.elevatorPassenger = false;
     this.pause();
     this.walker.enabled = false;
     this.orbit.enabled = false;

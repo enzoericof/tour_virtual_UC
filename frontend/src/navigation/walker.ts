@@ -10,6 +10,7 @@ export class Walker {
     0.28,
   );
   private world = new Octree();
+  private barriers: { world: Octree; blocked: () => boolean }[] = [];
   private velocity = new T.Vector3();
   private keys = new Set<string>();
   private ground = false;
@@ -77,6 +78,23 @@ export class Walker {
     this.world.clear();
     this.world.fromGraphNode(object);
   }
+  addBarrier(mesh: T.Mesh, blocked: () => boolean) {
+    this.barriers.push({ world: new Octree().fromGraphNode(mesh), blocked });
+  }
+  obstructs(ray: T.Ray, distance: number) {
+    const hit = this.world.rayIntersect(ray);
+    return hit !== false && hit.distance < distance - 0.015;
+  }
+  private collision(body: Capsule) {
+    const collision = this.world.capsuleIntersect(body);
+    if (collision) return collision;
+    for (const barrier of this.barriers) {
+      if (!barrier.blocked()) continue;
+      const hit = barrier.world.capsuleIntersect(body);
+      if (hit) return hit;
+    }
+    return false;
+  }
   teleport(feet: T.Vector3) {
     this.spawn.copy(feet);
     this.body.start.copy(feet).add(new T.Vector3(0, 0.3, 0));
@@ -84,8 +102,15 @@ export class Walker {
     this.velocity.set(0, 0, 0);
     this.camera.position.copy(this.body.end);
   }
+  moveWithPlatform(dy: number) {
+    this.body.start.y += dy;
+    this.body.end.y += dy;
+    this.camera.position.y += dy;
+    this.spawn.y += dy;
+    this.velocity.set(0, 0, 0);
+  }
   canStandAt(feet: T.Vector3): boolean {
-    return !this.world.capsuleIntersect(new Capsule(
+    return !this.collision(new Capsule(
       feet.clone().add(new T.Vector3(0, 0.3, 0)),
       feet.clone().add(new T.Vector3(0, 1.5, 0)), this.body.radius,
     ));
@@ -173,7 +198,7 @@ export class Walker {
       this.body.translate(this.velocity.clone().multiplyScalar(delta));
       this.ground = false;
       for (let j = 0; j < 3; j++) {
-        const result = this.world.capsuleIntersect(this.body);
+        const result = this.collision(this.body);
         if (!result) break;
         this.body.translate(result.normal.clone().multiplyScalar(result.depth));
         if (result.normal.y > 0.4) {

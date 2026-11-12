@@ -111,3 +111,16 @@ Captura codex-clipboard-387d4bac-7544-4ea9-bd7b-e5c09edea4cf.png. Horacio solici
 ## Sentido de la escalera — 03/11/2026
 
 Referencia de Horacio: `C:/Users/horac/Downloads/ChatGPT Image Nov 3, 2026, 10_23_22 AM.png`, acompañada por la misma vista con línea roja sobre el tramo. Aclara que se debe conservar el ancho original y alargar la bajada hacia la derecha siguiendo el muro, sin ampliarla en profundidad hacia la plaza. Logo y ventana aprobados por el usuario.
+
+
+## Seto CT y árboles del patio — 12/11/2026
+
+Fotos de Horacio: adjuntos con prefijos 3c7a8c3c (vista a nivel del césped) y 0b2148ae (vista elevada del CT). La captura bfb1324d identifica el sector junto a la torre y los conjuntos azules que se retiran. Las imágenes guían el modelado procedural; no se usan como texturas.
+
+La foto 1134ef3b muestra la franja de hormigón, el mobiliario bajo la escalera y los grupos de sansevierias en la galería del patio.
+
+La captura a27e4b5d identifica los tres descansos de la escalera exterior. La foto 1134ef3b también muestra la silla azul de listones que se añade a la cabecera.
+
+El adjunto 9c88fb20 sirve de referencia para la textura azul, las puertas de acero y la botonera del ascensor.
+
+Las capturas 32dbd2a9 y 760a563b comparan el frente del ascensor y fijan la ubicación derecha del pulsador y el indicador exteriores.

@@ -338,3 +338,20 @@ Corrección posterior del 05/11: la flecha del usuario coloca la puerta en el pa
 ### Acceso exterior a la galería de Bedelía — 09/11/2026
 
 Las fotos de ida y vuelta de las 13:09 muestran el sendero embaldosado a nivel con la galería, una rejilla transversal, un cantero lateral y una cubierta curva translúcida sobre postes metálicos. El modelo prolonga el eje de la galería hacia el jardín y ajusta el terreno junto al antiguo borde. La cubierta mide 19,6 m. La esquina de Maquetas empieza 2,8 m después de su extremo para dar más espacio al acceso lateral de la cantina. El caminero exterior rodea la esquina posterior del laboratorio. Desde Bedelía, CTA–DICIA queda a la izquierda y Maquetas a la derecha. Los paños enfrentados siguen los bordes del paso de 2,7 m, con 12 cm entre la cara de ladrillo y el pavimento. Las dimensiones son aproximaciones visuales. Tras la cubierta, el sendero continúa entre las fachadas hasta el cruce de los anexos.
+
+
+## Vegetación y seto CT del patio — 12/11/2026
+
+Seto recortado de aproximadamente 10 × 6 m y 1,4 m de alto en el césped junto a la torre, con centro estimado en (−6, 22) del plano. Los arbustos tienen un perfil de poda más ancho, con extremos planos y esquinas redondeadas. Se retira el marcador amarillo del suelo del patio. El extremo izquierdo de la T entra en la abertura de la C, con una separación visual entre ambas. Se retiran los tres conjuntos azules del sector oeste. Los tres árboles existentes del patio conservan sus centros y reciben troncos más gruesos, copas más amplias y follaje más oscuro. Se añaden tres ejemplares en (−16, 31), (−2, 34) y (19, 23), fuera de los senderos.
+
+El tramo recto del sendero gris del patio se extiende hacia el Bloque 1 hasta la galería roja, en z=6 m, y conserva su borde del lado del césped. En el seto, la T se acorta del lado exterior y su tallo se prolonga 0,60 m aproximadamente.
+
+La franja gris contigua a la galería roja del Bloque 1 se angosta de 4,60 a 3,55 m. El hormigón gris moteado conserva el contacto con la galería y los cruces de los senderos. Una mesa metálica y dos bancos se ubican bajo el primer descanso de la escalera exterior, con grupos de sansevierias al borde del césped.
+
+La mesa del patio incorpora una silla azul en la cabecera. Se amplían las sansevierias del borde hasta aproximadamente 1,2 m de alto. Tres pilares de hormigón de 42 cm de lado, con colisión, suben desde el piso hasta el extremo exterior de los tres descansos de la escalera.
+
+El ascensor del Bloque 1 conserva su posición y sus murales laterales. La cara hacia la galería tiene revoque azul y dos hojas de acero cepillado por piso. Se abre un acceso de 1,12 m a la cabina en los cuatro niveles. La silla azul queda en la cabecera opuesta de la mesa del patio.
+
+La cabina del Bloque 1 recorre el hueco vertical con una sola botonera interior centrada en la pared izquierda a 1,12 m. Botoneras exteriores e indicadores en el montante derecho de acero: subida en PB, ambas direcciones en pisos 1 y 2, bajada en piso 3. Las puertas se cierran a los diez segundos de abrirse si nadie selecciona un destino antes. Las llamadas pendientes se atienden en orden; el estado de la cabina es local al navegador.
+
+El indicador superior exterior señala el sentido de marcha. La placa gris inferior reúne el visor del piso de la cabina y los pulsadores circulares. En la pared izquierda interior, los botones circulares se ordenan en una columna con PB abajo y 3 arriba.

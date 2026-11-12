@@ -1,6 +1,8 @@
 import * as T from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { brushedSteel, elevatorLabel, type ElevatorModel } from "./elevator";
 import { makeMaterials } from "./materials";
+import { addCourtyardVegetation } from "./courtyard-vegetation";
 import {
   facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, STEPS_RUN, rectCorners,
   elevatorStairEdge, bulgedOutline, cantinaForecourt, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR, fromRect,
@@ -44,6 +46,13 @@ type BlockSpec = {
 export function createFaculty() {
   const group = new T.Group(), colliders = new T.Group(), markers: T.Mesh[] = [];
   const m = makeMaterials();
+  const elevatorLevels = ["PB", "1", "2", "3"];
+  const displayLabel = (text: string) => elevatorLabel(text, "#ff5945", "#242522");
+  const elevator: ElevatorModel = {
+    stops: [], car: new T.Group(), carDoors: [], carButtons: [],
+    directionLabels: { idle: displayLabel(""), up: displayLabel("▲"), down: displayLabel("▼") },
+    floorLabels: elevatorLevels.map(displayLabel),
+  };
   const unit = new T.BoxGeometry(1, 1, 1);
   const cylinder = new T.CylinderGeometry(1, 1, 1, 14);
   let visual: T.Object3D = group, solid: T.Object3D = colliders;
@@ -605,6 +614,9 @@ export function createFaculty() {
       const xs = st.start - f * step, xe = xs - st.run, y0 = f * H, y1 = y0 + H, xl = xe - st.landing;
       flight(xs, y0, xe, y1, st.z, st.width);
       box(st.landing, 0.22, z1 - block1.depth / 2 + 0.05, (xe + xl) / 2, y1 - 0.11, (block1.depth / 2 - 0.05 + z1) / 2, m.stone, true);
+      // Un apoyo de hormigón bajo la esquina exterior de cada descanso.
+      const supportHeight = y1 - 0.22;
+      box(0.42, supportHeight, 0.42, xl + 0.26, supportHeight / 2, z1 - 0.27, m.concrete, true);
       rail(xl, xe, y1, z1 + 0.03);
       if (f === st.flights - 1) railZ(z0 - 0.05, z1, y1, xl + 0.05);
       for (const x of [xl + 0.15, xe, xs - 0.15]) for (const z of [z0 - 0.02, z1 + 0.02])
@@ -614,7 +626,22 @@ export function createFaculty() {
     // sur y oeste hasta la mitad superior entre el primer y el segundo piso; puertas con marco azul hacia
     // la galería (IMG_5706, IMG_5694). Por ahora las tres caras repiten el único mural fotografiado (IMG_5727).
     const shaftTop = (block1.levels - 1) * H + 4.1 + 0.9, muralHeight = plan.elevator.mural - 0.1;
-    box(ew, shaftTop, ed, ex, shaftTop / 2, ez, m.render, true);
+    const zd = ez - ed / 2;
+    const wall = 0.14, doorWidth = 1.12, doorHeight = 2.14;
+    const brushed = brushedSteel();
+    const blueFinish = m.concrete.clone();
+    blueFinish.color.set("#47689a");
+    blueFinish.bumpMap = blueFinish.map;
+    blueFinish.bumpScale = 0.014;
+    const landingSteel = brushed.clone();
+    landingSteel.color.set("#f3e5d2");
+    landingSteel.metalness = 0.28;
+    landingSteel.roughness = 0.36;
+    const notice = elevatorLabel("UC", "#29343a", "#e3e0d6");
+    box(ew, shaftTop, wall, ex, shaftTop / 2, ez + ed / 2 - wall / 2, m.render, true);
+    for (const side of [-1, 1]) {
+      box(wall, shaftTop, ed - wall, ex + side * (ew - wall) / 2, shaftTop / 2, ez + wall / 2, m.render, true);
+    }
     const mural = new T.TextureLoader().load("/assets/photos/IMG_5727.webp");
     mural.colorSpace = T.SRGBColorSpace; mural.offset.set(0.748, 0.279); mural.repeat.set(0.102, 0.497);
     const muralMat = new T.MeshStandardMaterial({ map: mural, roughness: 0.9 });
@@ -623,12 +650,105 @@ export function createFaculty() {
       panel.position.set(ex + dx * (ew / 2 + 0.01), 0.1 + muralHeight / 2, ez + dz * (ed / 2 + 0.01));
       panel.rotation.y = Math.atan2(dx, dz); visual.add(panel);
     }
-    for (let level = 0; level < block1.levels; level++) {
-      const y = level * H, zd = ez - ed / 2;
-      box(1, 2.1, 0.06, ex, y + 1.05, zd - 0.03, m.steel);
-      box(1.5, 0.14, 0.08, ex, y + 2.17, zd - 0.04, m.blue);
-      for (const s of [-1, 1]) box(0.2, 2.1, 0.08, ex + s * 0.64, y + 1.05, zd - 0.04, m.blue);
+    const roundButton = new T.CylinderGeometry(0.064, 0.064, 0.018, 24);
+    roundButton.rotateX(-Math.PI / 2);
+    const { position, normal, uv } = roundButton.attributes;
+    for (let i = 0; i < position.count; i++) {
+      if (normal.getZ(i) < -0.5) uv.setXY(i, 0.5 - position.getX(i) / 0.128, 0.5 + position.getY(i) / 0.128);
     }
+    const button = (label: string, x: number, y: number, z: number, destination: number | null) => {
+      const mesh = new T.Mesh(roundButton, elevatorLabel(label, "#eeeee7", "#353838"));
+      mesh.position.set(x, y, z);
+      mesh.userData.keep = true;
+      visual.add(mesh);
+      return { mesh, destination };
+    };
+    const callPlate = new T.MeshStandardMaterial({ color: "#838688", metalness: 0.36, roughness: 0.52 });
+    for (let level = 0; level < block1.levels; level++) {
+      const y = level * H;
+      const height = level === block1.levels - 1 ? shaftTop - y : H;
+      const jamb = (ew - doorWidth) / 2;
+      for (const side of [-1, 1]) {
+        box(jamb - 0.006, doorHeight, wall, ex + side * (doorWidth + jamb - 0.006) / 2,
+          y + doorHeight / 2, zd + wall / 2, blueFinish, true);
+        const trimWidth = side < 0 ? 0.25 : 0.36;
+        box(trimWidth, doorHeight, 0.07, ex + side * (doorWidth + trimWidth) / 2,
+          y + doorHeight / 2, zd - 0.02, landingSteel);
+      }
+      box(ew - 0.012, height - doorHeight, wall, ex, y + (height + doorHeight) / 2, zd + wall / 2, blueFinish, true);
+      box(doorWidth + 0.61, 0.19, 0.07, ex + 0.055, y + doorHeight + 0.095, zd - 0.02, landingSteel);
+      box(doorWidth + 0.61, 0.026, 0.076, ex + 0.055, y + doorHeight + 0.195, zd - 0.02, m.metal);
+      box(0.17, 0.24, 0.006, ex + doorWidth / 2 + 0.18, y + 1.74, zd - 0.059, notice);
+      const doors = [-1, 1].map(side => {
+        const closedX = ex + side * doorWidth / 4;
+        const mesh = box(doorWidth / 2 - 0.009, doorHeight - 0.035, 0.065, closedX, y + doorHeight / 2, zd + 0.055, landingSteel);
+        mesh.userData.keep = true;
+        return { mesh, closedX, offset: side * doorWidth / 2 };
+      });
+      const barrier = new T.Mesh(unit);
+      barrier.position.set(ex, y + doorHeight / 2, zd + 0.055);
+      barrier.scale.set(doorWidth, doorHeight, 0.07);
+      barrier.visible = false;
+      barrier.userData.keep = true;
+      visual.add(barrier);
+      box(doorWidth, 0.06, 0.15, ex, y, zd + 0.068, brushed, true);
+      const floor = new T.Mesh(unit);
+      floor.scale.set(ew - 0.28, 0.12, ed - 0.14);
+      floor.position.set(ex, y - 0.03, ez + 0.07);
+      floor.visible = false;
+      floor.userData.keep = true;
+      visual.add(floor);
+
+      // Desde la galería, el montante de la derecha corresponde a -X.
+      const panelX = ex - doorWidth / 2 - 0.125;
+      const arrows = level === 0 ? ["▲"] : level === elevatorLevels.length - 1 ? ["▼"] : ["▲", "▼"];
+      const plateHeight = arrows.length === 2 ? 0.56 : 0.39;
+      box(0.19, plateHeight, 0.024, panelX, y + 1.14, zd - 0.062, callPlate);
+      const buttons = arrows.map((arrow, i) =>
+        button(arrow, panelX, y + (arrows.length === 2 ? 1.13 - i * 0.16 : 1.08), zd - 0.084, null));
+      const floorDisplay = box(0.114, 0.083, 0.016, panelX,
+        y + (arrows.length === 2 ? 1.32 : 1.25), zd - 0.080, elevator.floorLabels[0]);
+      floorDisplay.userData.keep = true;
+      box(0.12, 0.29, 0.024, panelX, y + 1.91, zd - 0.062, landingSteel);
+      const directionDisplay = box(0.095, 0.146, 0.016, panelX, y + 1.93, zd - 0.079, elevator.directionLabels.idle);
+      directionDisplay.userData.keep = true;
+      elevator.stops.push({ buttons, doors, barrier, floor, floorDisplay, directionDisplay });
+    }
+
+    // Una sola cabina visual recorre el hueco. Las puertas exteriores pertenecen a cada piso.
+    const car = elevator.car;
+    visual.add(car);
+    car.position.set(ex, 0, ez);
+    const landingGroup = visual;
+    visual = car;
+    const carPanel = (w: number, h: number, d: number, x: number, y: number, z: number, mat: T.Material) => {
+      const mesh = box(w, h, d, x, y, z, mat);
+      mesh.userData.keep = true;
+      return mesh;
+    };
+    carPanel(ew - 0.28, 0.12, ed - 0.14, 0, -0.03, 0.07, m.granite);
+    carPanel(ew - 0.28, 0.12, ed - 0.18, 0, 2.41, 0.08, brushed);
+    carPanel(0.95, 0.022, 0.34, 0, 2.335, 0, m.white);
+    carPanel(ew - 0.30, 2.32, 0.07, 0, 1.19, ed / 2 - 0.20, brushed);
+    carPanel(ew - 0.45, 0.045, 0.075, 0, 0.97, ed / 2 - 0.29, brushed);
+    for (const side of [-1, 1]) {
+      const sideWidth = (ew - 0.28 - doorWidth) / 2;
+      carPanel(sideWidth, 2.32, 0.06, side * (doorWidth + sideWidth) / 2, 1.19, -ed / 2 + 0.24, brushed);
+      carPanel(0.07, 2.32, ed - 0.36, side * (ew / 2 - 0.19), 1.19, 0.03, brushed);
+      const closedX = side * doorWidth / 4;
+      const mesh = carPanel(doorWidth / 2 - 0.009, doorHeight - 0.035, 0.052,
+        closedX, doorHeight / 2, -ed / 2 + 0.175, brushed);
+      elevator.carDoors.push({ mesh, closedX, offset: side * doorWidth / 2 });
+    }
+    // Botonera centrada en la pared izquierda al entrar, a media altura.
+    const insidePanelX = ew / 2 - 0.25;
+    carPanel(0.035, 0.79, 0.24, insidePanelX, 1.12, 0.08, brushed);
+    elevatorLevels.forEach((label, destination) => {
+      const control = button(label, insidePanelX - 0.035, 0.85 + destination * 0.18, 0.08, destination);
+      control.mesh.rotation.y = Math.PI / 2;
+      elevator.carButtons.push(control);
+    });
+    visual = landingGroup;
     box(ew + 0.3, 1.1, ed + 0.3, ex, shaftTop + 0.55, ez, m.white);
 
     // ---- Cabecera este: planta baja y primer piso retraídos bajo los pisos 2 y 3 ----
@@ -2153,10 +2273,79 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
   pave(plan.courtyard, m.grass, 0.015);
   pave(plan.common1, m.grass, 0.018);
   pave(plan.parking, m.grass, 0.02);
+  const galleryEdge = block1.depth / 2;
+  const lawnEdge = 9.55;
+  const courtyardConcrete = m.accessStone.clone();
+  courtyardConcrete.color.set("#aaaeb0");
   plan.paths.forEach((p, index) => {
-    // El tramo bajo el caminero tiene su propio pavimento; los demás caminos se conservan.
-    if (index !== 3) path(p);
+    if (index === 0) {
+      // Hormigón contiguo a la galería, más angosto del lado del césped.
+      const [start, , end] = p;
+      pave([
+        [start[0] - 0.06, galleryEdge], [end[0], galleryEdge],
+        [end[0], lawnEdge], [start[0] - 0.06, lawnEdge],
+      ], courtyardConcrete, 0.049);
+      path(p.slice(2));
+    } else if (index !== 3) {
+      // El tramo bajo el caminero tiene su propio pavimento.
+      path(p);
+    }
   });
+  {
+    // Mobiliario debajo del primer descanso de la escalera exterior.
+    const tableX = st.start - st.run - 0.55;
+    const tableZ = (galleryEdge + lawnEdge) / 2;
+    const floor = 0.049;
+    const frameMetal = new T.MeshStandardMaterial({ color: "#2e302d", roughness: 0.69 });
+    const benchSeat = new T.MeshStandardMaterial({ color: "#736657", roughness: 0.89 });
+    box(2.3, 0.055, 0.82, tableX, floor + 0.77, tableZ, m.steel, true);
+    for (const dx of [-1, 1]) for (const dz of [-0.32, 0.32]) {
+      box(0.065, 0.74, 0.065, tableX + dx, floor + 0.37, tableZ + dz, frameMetal, true);
+    }
+    for (const dz of [-1.02, 1.02]) {
+      const z = tableZ + dz;
+      box(2, 0.055, 0.32, tableX, floor + 0.44, z, benchSeat, true);
+      for (const dx of [-0.86, 0.86]) for (const legZ of [-0.12, 0.12]) {
+        box(0.045, 0.42, 0.045, tableX + dx, floor + 0.21, z + legZ, frameMetal, true);
+      }
+    }
+
+    const chairX = tableX - 1.55;
+    box(0.45, 0.045, 0.46, chairX, floor + 0.44, tableZ, m.blue, true);
+    for (const dz of [-0.19, 0.19]) {
+      for (const dx of [-0.18, 0.18]) {
+        box(0.038, 0.42, 0.038, chairX + dx, floor + 0.21, tableZ + dz, frameMetal, true);
+      }
+      beam(v3(chairX - 0.20, floor + 0.43, tableZ + dz),
+        v3(chairX - 0.28, floor + 0.93, tableZ + dz), 0.021, frameMetal);
+    }
+    for (const y of [0.67, 0.76, 0.85, 0.93]) {
+      box(0.045, 0.065, 0.43, chairX - 0.20 - (y - 0.43) * 0.16, floor + y, tableZ, m.blue);
+    }
+
+    // Sansevierias agrupadas en el borde, dejando libre el cruce con el camino transversal.
+    const leaf = new T.BufferGeometry();
+    leaf.setAttribute("position", new T.Float32BufferAttribute([
+      -0.034, 0, 0, 0.034, 0, 0, -0.055, 0.39, 0.025, 0.055, 0.39, 0.025, 0.013, 1, 0.17,
+    ], 3));
+    leaf.setAttribute("uv", new T.Float32BufferAttribute([0, 0, 1, 0, 0, 0.39, 1, 0.39, 0.5, 1], 2));
+    leaf.setIndex([0, 1, 2, 1, 3, 2, 2, 3, 4]);
+    leaf.computeVertexNormals();
+    const plantRow = [[-13, 1.25, 11], [8.5, 1.1, 9], [21.5, 1.15, 10]] as const;
+    for (const [start, spacing, count] of plantRow) for (let i = 0; i < count; i++) {
+      const x = start + i * spacing;
+      const z = lawnEdge + 0.17 + (i % 3) * 0.13;
+      for (let j = 0; j < 12; j++) {
+        const angle = i * 2.4 + j * 2.4;
+        const blade = new T.Mesh(leaf, m.accessLeaf);
+        blade.position.set(x + Math.cos(angle) * 0.22, 0.015, z + Math.sin(angle) * 0.22);
+        blade.rotation.set(0.12 + (j % 3) * 0.13, angle, 0.06);
+        blade.scale.set(1.08 + (j % 3) * 0.25, 0.61 + ((i + j * 3) % 9) * 0.073, 1);
+        blade.castShadow = blade.receiveShadow = true;
+        visual.add(blade);
+      }
+    }
+  }
   // Acceso curvo con pendiente suave y toldo conectado al pasillo (fotos 16.25.45/52).
   {
     const g = plan.plazaGallery;
@@ -2266,81 +2455,11 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       for (const dx of [-0.9, 0.9]) pole(0.035, 0.75, x + dx, y + 0.38, z + dz * 0.5);
     }
   }
-  // Árbol 1: mango frondoso del patio este (foto árbol_1.HEIC, posición 1 en cómo_debe_ser.png).
-  {
-    const [x, z] = plan.tree1;
-    // Raíces tablares superficiales visibles en el suelo.
-    for (const [dx, dz] of [[0.9, 0.4], [-0.8, 0.6], [0.5, -0.8], [-0.7, -0.6]]) {
-      beam(new T.Vector3(x, 0.18, z), new T.Vector3(x + dx, 0.08, z + dz), 0.2, m.bark);
-    }
-    // Tronco grueso y robusto con colisión.
-    pole(0.55, 2.7, x, 1.35, z, m.bark, true);
-    // Ramas principales que se abren a baja altura (~2.4-2.8 m).
-    const branches = [
-      new T.Vector3(x + 1.2, 3.8, z + 0.8),
-      new T.Vector3(x - 1.3, 3.7, z + 0.9),
-      new T.Vector3(x + 1.0, 4.0, z - 1.1),
-      new T.Vector3(x - 1.1, 3.8, z - 1.0),
-    ];
-    for (const b of branches) beam(new T.Vector3(x, 2.4, z), b, 0.25, m.bark);
-    // Copa en cúpula densa y ancha, follaje verde oscuro de mango, altura total ~9 m.
-    const crownTop = new T.Mesh(new T.IcosahedronGeometry(1, 2), m.leaves[3]);
-    crownTop.scale.set(4.6, 2.8, 4.4); crownTop.position.set(x, 6.6, z); crownTop.castShadow = true; visual.add(crownTop);
-    const mangoLobes: [number, number, number, number, number, number][] = [
-      [2.2, 4.9, 1.2, 3.2, 2.2, 3.0],
-      [-2.3, 4.7, 1.4, 3.1, 2.1, 3.1],
-      [1.6, 5.0, -2.1, 3.0, 2.2, 2.8],
-      [-1.9, 4.8, -1.8, 2.9, 2.1, 2.9],
-      [0.0, 5.0, 2.4, 3.2, 2.0, 3.0],
-      [0.0, 5.1, -2.2, 3.1, 2.0, 3.0],
-    ];
-    for (const [ox, oy, oz, sx, sy, sz] of mangoLobes) {
-      const lobe = new T.Mesh(new T.IcosahedronGeometry(1, 2), m.leaves[3]);
-      lobe.scale.set(sx, sy, sz); lobe.position.set(x + ox, oy, z + oz); lobe.castShadow = true; visual.add(lobe);
-    }
-  }
-
-  // Árbol 2: árbol autóctono alto y esbelto del patio oeste (foto árbol_2.HEIC, posición 2 en cómo_debe_ser.png).
-  {
-    const [x, z] = plan.tree2;
-    // Tronco alto y despejado hasta ~5.2 m de altura con colisión.
-    pole(0.42, 5.4, x, 2.7, z, m.bark, true);
-    // Grandes ramas maestras que ascienden hacia la parte alta.
-    const boughs: [T.Vector3, T.Vector3, number][] = [
-      [new T.Vector3(x, 5.2, z), new T.Vector3(x - 2.5, 9.2, z + 1.8), 0.22],
-      [new T.Vector3(x, 5.2, z), new T.Vector3(x + 2.4, 9.8, z + 2.0), 0.22],
-      [new T.Vector3(x, 5.2, z), new T.Vector3(x - 1.8, 9.5, z - 2.4), 0.22],
-      [new T.Vector3(x, 5.2, z), new T.Vector3(x + 2.0, 10.2, z - 1.8), 0.22],
-      [new T.Vector3(x - 2.5, 9.2, z + 1.8), new T.Vector3(x - 3.8, 12.2, z + 2.4), 0.14],
-      [new T.Vector3(x + 2.4, 9.8, z + 2.0), new T.Vector3(x + 3.6, 12.6, z + 2.6), 0.14],
-      [new T.Vector3(x - 1.8, 9.5, z - 2.4), new T.Vector3(x - 2.6, 12.5, z - 3.2), 0.14],
-      [new T.Vector3(x + 2.0, 10.2, z - 1.8), new T.Vector3(x + 3.0, 13.0, z - 2.4), 0.14],
-    ];
-    for (const [from, to, r] of boughs) beam(from, to, r, m.bark);
-    // Copa majestuosa estratificada que supera los 15 m de altura (sobre el techo del Bloque 1).
-    const tallCrown: [number, number, number, number, number, number, T.Material][] = [
-      [0.0, 14.4, 0.0, 4.4, 2.3, 4.4, m.leaves[1]],
-      [0.0, 15.5, 0.0, 3.2, 1.8, 3.2, m.leaves[0]],
-      [-3.8, 12.6, 2.5, 3.8, 2.0, 3.6, m.leaves[1]],
-      [3.6, 13.0, 2.7, 3.7, 2.1, 3.6, m.leaves[0]],
-      [-2.8, 12.8, -3.2, 3.6, 2.0, 3.5, m.leaves[1]],
-      [3.2, 13.3, -2.5, 3.8, 2.1, 3.7, m.leaves[0]],
-      [-2.2, 9.6, 1.5, 3.4, 1.8, 3.2, m.leaves[0]],
-      [2.1, 10.0, 1.6, 3.3, 1.8, 3.2, m.leaves[1]],
-      [-1.5, 9.8, -2.0, 3.2, 1.7, 3.1, m.leaves[0]],
-      [1.7, 10.3, -1.5, 3.4, 1.8, 3.3, m.leaves[1]],
-    ];
-    for (const [ox, oy, oz, sx, sy, sz, mat] of tallCrown) {
-      const crownMesh = new T.Mesh(new T.IcosahedronGeometry(1, 2), mat);
-      crownMesh.scale.set(sx, sy, sz); crownMesh.position.set(x + ox, oy, z + oz); crownMesh.castShadow = true; visual.add(crownMesh);
-    }
-    // Muretes / canteros de ladrillo visto en el patio junto al árbol (foto árbol_2.HEIC).
-    box(2.8, 0.45, 0.6, x + 3.0, 0.225, z - 2.5, m.brick, true);
-    box(2.4, 0.45, 0.6, x + 3.0, 0.225, z - 5.0, m.brick, true);
-  }
-
-  // Árboles de referencia adicionales; los de la plataforma nacen en su piso.
-  for (const [x, z] of plan.trees) {
+  addCourtyardVegetation(visual, solid);
+  const [treeX, treeZ] = plan.tree2;
+  box(2.8, 0.45, 0.6, treeX + 3, 0.225, treeZ - 2.5, m.brick, true);
+  box(2.4, 0.45, 0.6, treeX + 3, 0.225, treeZ - 5, m.brick, true);
+  for (const [x, z] of plan.trees.slice(1)) {
     const y = plan.platform.some((p) => insidePolygon([x, z], p)) ? PLAZA_LEVEL : 0;
     pole(0.3, 5.5, x, y + 2.75, z, m.bark, true);
     const crown = new T.Mesh(new T.IcosahedronGeometry(1, 2), m.leaves[0]);
@@ -2348,14 +2467,14 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
   }
   // Marcadores de los puntos de visita en el suelo y sobre la plataforma (no en los pisos altos).
   for (const place of facultyPlaces) {
-    if (place.position[1] > PLAZA_LEVEL + 0.5 || place.id === "cantina-cyt") continue;
+    if (place.position[1] > PLAZA_LEVEL + 0.5 || place.id === "cantina-cyt" || place.id === "patio") continue;
     const marker = new T.Mesh(new T.CylinderGeometry(0.24, 0.24, 0.04, 16), new T.MeshBasicMaterial({ color: 0xbca36d }));
     marker.position.set(place.position[0], (place.position[1] > 1 ? PLAZA_LEVEL : 0) + 0.13, place.position[2]); marker.userData.placeId = place.id;
     marker.userData.keep = true; group.add(marker); markers.push(marker);
   }
   mergeByMaterial(group);
   group.updateMatrixWorld(true); colliders.updateMatrixWorld(true);
-  return { group, colliders, markers };
+  return { group, colliders, markers, elevator };
 }
 
 /** Invierte las caras de una geometría indexada (cielorraso visto desde abajo). */

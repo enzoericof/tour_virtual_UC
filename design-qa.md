@@ -224,3 +224,24 @@ Vistas de ida y vuelta revisadas en Chrome con la escena de Three.js. Desde el j
 La revisión posterior del tramo entre Maquetas y DICIA muestra ambas fachadas junto al pavimento y la alineación con el pasillo. Vistas locales: `output/maquetas-dicia-ida.png` y `output/maquetas-dicia-vuelta.png`.
 
 Tras el retiro de Maquetas, las vistas desde el pasillo y desde el jardín muestran el espacio libre junto a la escalera de la cantina. Capturas locales: `output/cantina-maquetas-ida.png` y `output/cantina-maquetas-vuelta.png`.
+
+
+## Seto CT del patio — 12/11/2026
+
+Vista elevada comprobada en navegador. Se distinguen ambas letras, el detalle de las hojas y la corteza, y el sector queda libre de los tres conjuntos azules. La revisión ampliada confirma la T dentro de la abertura de la C y el follaje más oscuro. Captura local en output/patio-ct-ampliado.png.
+
+Revisión de la poda del CT en navegador: letras desplazadas a la izquierda, T más baja y adentrada en la C, extremos más rectos y marcador amarillo retirado. Captura local en output/patio-ct-poda.png.
+
+Revisión en navegador de las proporciones de la T y del pavimento continuo junto a la galería roja. Captura local en output/patio-ct-pasillo.png. Compilación correcta y 40 pruebas aprobadas.
+
+Pasillo del patio revisado en navegador a nivel peatonal. Se observa el hormigón gris junto al piso rojo, la mesa con dos bancos bajo la escalera y las plantas en el borde. Captura en output/patio-galeria-gris.png. Compilación correcta y 40 pruebas aprobadas.
+
+Silla azul, plantas más altas y pilares en los tres descansos verificados en navegador. Capturas en output/patio-silla-azul.png y output/patio-pilares-silla.png. Compilación correcta y 40 pruebas aprobadas.
+
+Fachada del ascensor revisada en navegador con puertas de acero cepillado, revoque azul, indicador de piso y pulsador exterior. Captura en output/ascensor-bloque-1.png.
+
+Botonera interior verificada en la pared izquierda, centrada y debajo de la altura de los ojos. Captura en output/ascensor-panel-interior.png.
+
+Frente del ascensor revisado en navegador con botonera e indicador en el montante derecho, marco de acero cálido y revoque azul texturizado. Captura en output/ascensor-exterior-derecha.png.
+
+Revisados ambos paneles del ascensor. Capturas en output/ascensor-indicadores.png y output/ascensor-botones-redondos.png.
