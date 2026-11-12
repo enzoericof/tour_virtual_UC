@@ -15,6 +15,10 @@ const levelStrips = [
 ];
 // Fuera del sendero, el césped recupera gradualmente la altura del jardín.
 const blend = 7;
+export const coveredWalkSurface = { width: 1.65, endHeight: 0.05, controlLift: 0.08 } as const;
+const [coveredStart, coveredEnd] = plan.coveredWalk.map(inCantina);
+const coveredDX = coveredEnd[0] - coveredStart[0], coveredDZ = coveredEnd[1] - coveredStart[1];
+const coveredLengthSquared = coveredDX ** 2 + coveredDZ ** 2;
 const bounds = [...beds, ...levelStrips.map(({ a, b, margin }) => [
   Math.min(a[0], b[0]) - margin, Math.max(a[0], b[0]) + margin,
   Math.min(a[1], b[1]) - margin, Math.max(a[1], b[1]) + margin,
@@ -40,5 +44,15 @@ export function gardenHeight(x: number, z: number): number {
     const weight = 1 - Math.max(0, Math.min(1, (distance - margin) / blend));
     height = Math.max(height, (PLAZA_LEVEL - 0.01) * weight * weight * (3 - 2 * weight));
   }
-  return height;
+  // El terraplén de cantina llega hasta el caminero. Rebajarlo bajo el ancho
+  // completo, con margen para la interpolación de la malla de césped.
+  const t = Math.max(0, Math.min(1,
+    ((x - coveredStart[0]) * coveredDX + (z - coveredStart[1]) * coveredDZ) / coveredLengthSquared));
+  const distance = Math.hypot(x - coveredStart[0] - t * coveredDX, z - coveredStart[1] - t * coveredDZ);
+  const blendToLawn = Math.max(0, Math.min(1, (distance - coveredWalkSurface.width / 2 - 0.75) / 2));
+  const startHeight = plan.plazaGallery.smallSteps.bottom;
+  const pavement = startHeight * (1 - t) + coveredWalkSurface.endHeight * t
+    + 3 * coveredWalkSurface.controlLift * t * (1 - t);
+  const cut = Math.max(0, height - (pavement - 0.03));
+  return height - cut * (1 - blendToLawn * blendToLawn * (3 - 2 * blendToLawn));
 }

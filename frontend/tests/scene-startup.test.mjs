@@ -1,5 +1,6 @@
 import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from "three";
 import { facultyBlueprint as plan, fromRect, PLAZA_LEVEL, FLOOR_HEIGHT } from "../src/data/faculty-blueprint.ts";
+import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "vite";
@@ -34,6 +35,20 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     });
     assert.ok(meshes > 100, "The complete scene was built");
     assert.ok(colliders.children.length > 0, "Walkable collision geometry was built");
+    // El suelo visible y el de colisión comparten la misma malla de césped.
+    const [[ax, az], [bx, bz]] = plan.coveredWalk;
+    const length = Math.hypot(bx - ax, bz - az);
+    const { width: walkWidth, endHeight, controlLift } = coveredWalkSurface;
+    for (const t of [0.08, 0.2, 0.35, 0.45, 0.55, 0.75, 0.95]) {
+      const y = plan.plazaGallery.smallSteps.bottom * (1 - t) + endHeight * t + 3 * controlLift * t * (1 - t);
+      for (const offset of [-walkWidth / 2 + 0.02, 0, walkWidth / 2 - 0.02]) {
+        const point = new Vector3(ax + (bx - ax) * t - (bz - az) * offset / length, y + 0.5,
+          az + (bz - az) * t + (bx - ax) * offset / length);
+        const [surface] = new Raycaster(point, new Vector3(0, -1, 0), 0, 1).intersectObject(colliders, true);
+        assert.ok(surface && Math.abs(surface.point.y - y) < 0.005,
+          `Covered walkway remains exposed at t=${t}, offset=${offset}`);
+      }
+    }
     // El vano recuperado debe dejar pasar un cuerpo, no solo verse abierto.
     const width = Math.hypot(4.3,4.3), bays = 6;
     const doorX = -width/2 + width*2.5/bays;

@@ -9,7 +9,7 @@ import {
   type Rect, type Rooms, type Vec2,
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
-import { gardenHeight, gardenBounds, inCantina } from "../data/cantina-terrain";
+import { gardenHeight, gardenBounds, inCantina, coveredWalkSurface } from "../data/cantina-terrain";
 import { facultyAnnexes, annexPaths, annexCoveredPaths, annexEnclosedLink, annexWalkEnd } from "../data/faculty-annexes";
 import { facultyPlaces } from "../data/places";
 
@@ -2410,13 +2410,14 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       }
       ribbon(band, 0.055, landingBand, false);
     }
-    const walkStart = v3(ax,g.smallSteps.bottom,az), walkEnd = v3(bx,0.05,bz);
+    const { width, endHeight, controlLift } = coveredWalkSurface;
+    const walkStart = v3(ax, g.smallSteps.bottom, az), walkEnd = v3(bx, endHeight, bz);
     // Perfil apenas elevado en el centro para que el césped existente no atraviese el pavimento.
     const walk = new T.CubicBezierCurve3(walkStart,
-      walkStart.clone().lerp(walkEnd,1/3).add(v3(0,0.08,0)),
-      walkStart.clone().lerp(walkEnd,2/3).add(v3(0,0.08,0)),walkEnd);
-    ribbon(walk, 1.65, m.accessStone, true, true);
-    ribbon(new T.LineCurve3(v3(bx,0.05,bz),v3(55,0.05,37)), 1.65, m.accessStone, true);
+      walkStart.clone().lerp(walkEnd,1/3).add(v3(0,controlLift,0)),
+      walkStart.clone().lerp(walkEnd,2/3).add(v3(0,controlLift,0)),walkEnd);
+    ribbon(walk, width, m.accessStone, true, true);
+    ribbon(new T.LineCurve3(walkEnd,v3(55,endHeight,37)), width, m.accessStone, true);
     const roof = new T.LineCurve3(v3(ax,2.75,az),v3(bx,2.5,bz));
     const bays = Math.ceil(roof.getLength() / 4.5);
     fabricCover(roof, 2.25, Array.from({length:bays + 1},(_,i)=>i / bays), 0.42);
