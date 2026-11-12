@@ -9,13 +9,8 @@ import {
   type Rect, type Rooms, type Vec2,
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
-<<<<<<< Updated upstream
 import { gardenHeight, gardenBounds, inCantina, coveredWalkSurface } from "../data/cantina-terrain";
-import { facultyAnnexes, annexPaths, annexCoveredPaths, annexEnclosedLink, annexWalkEnd } from "../data/faculty-annexes";
-=======
-import { gardenHeight, gardenBounds, inCantina } from "../data/cantina-terrain";
 import { facultyAnnexes, annexPaths, annexCoveredPaths, annexEnclosedLink, annexWalkEnd, diciaWalkExtension } from "../data/faculty-annexes";
->>>>>>> Stashed changes
 import { facultyPlaces } from "../data/places";
 
 type BoxOptions = { tile?: readonly number[]; offset?: readonly number[]; rotation?: number; pitch?: number };
