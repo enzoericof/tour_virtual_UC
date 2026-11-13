@@ -363,6 +363,8 @@ export const facultyBlueprint = {
   tree1: [21.5, 15] as Vec2,
   /** Árbol 2: árbol autóctono alto en el patio oeste (foto árbol_2.HEIC, posición 2 en cómo_debe_ser.png). */
   tree2: [-20, 22] as Vec2,
+  /** Árbol frente a la cantina / pergolado de mesas */
+  cantinaTree: shiftPlaza([62, 16]) as Vec2,
   trees: [[2, 19], shiftPlaza([62, 16]), [20, 62]] as Vec2[],
   courtyardCT: [-6, 22] as Vec2,
   courtyardTrees: [[-16, 31], [-2, 34], [19, 23]] as Vec2[],

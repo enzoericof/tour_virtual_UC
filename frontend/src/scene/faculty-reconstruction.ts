@@ -3,6 +3,7 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { brushedSteel, elevatorLabel, type ElevatorModel } from "./elevator";
 import { makeMaterials } from "./materials";
 import { addCourtyardVegetation } from "./courtyard-vegetation";
+import { addCantinaTree } from "./cantina-tree";
 import {
   facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, STEPS_RUN, rectCorners,
   elevatorStairEdge, bulgedOutline, cantinaForecourt, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR, fromRect,
@@ -2943,12 +2944,15 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
   const [treeX, treeZ] = plan.tree2;
   box(2.8, 0.45, 0.6, treeX + 3, 0.225, treeZ - 2.5, m.brick, true);
   box(2.4, 0.45, 0.6, treeX + 3, 0.225, treeZ - 5, m.brick, true);
-  for (const [x, z] of plan.trees.slice(1)) {
+  // Árboles genéricos restantes (se excluye el árbol de cantina que ahora tiene módulo propio)
+  for (const [x, z] of [plan.trees[2]]) {
     const y = plan.platform.some((p) => insidePolygon([x, z], p)) ? PLAZA_LEVEL : 0;
     pole(0.3, 5.5, x, y + 2.75, z, m.bark, true);
     const crown = new T.Mesh(new T.IcosahedronGeometry(1, 2), m.leaves[0]);
     crown.scale.set(3.4, 2.1, 3.1); crown.position.set(x, y + 6, z); crown.castShadow = true; visual.add(crown);
   }
+  // Árbol personalizado de la cantina / mesas
+  addCantinaTree(visual, solid, plan.cantinaTree, plan.platform.some((p) => insidePolygon(plan.cantinaTree, p)) ? PLAZA_LEVEL : 0);
   // Marcadores de los puntos de visita en el suelo y sobre la plataforma (no en los pisos altos).
   for (const place of facultyPlaces) {
     if (place.position[1] > PLAZA_LEVEL + 0.5 || place.id === "cantina-cyt" || place.id === "patio") continue;
