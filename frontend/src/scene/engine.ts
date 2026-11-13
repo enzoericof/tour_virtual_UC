@@ -3,7 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { ElevatorMotion, type ElevatorButton, type ElevatorDoor } from "./elevator";
 import { createCampus } from "./campus";
 import { campusRockDepth } from "./campus-rock";
-import { makeCampusSky } from "./campus-sky";
+import { makeCampusSky, type CampusTheme } from "./campus-sky";
 import { Walker } from "../navigation/walker";
 import { pickDestination, pointerOnCanvas } from "../navigation/pick-destination";
 import { places, type Place } from "../data/places";
@@ -19,6 +19,7 @@ export class TourEngine {
   readonly campus = createCampus();
   private sun = new T.DirectionalLight(0xfff2d6, 2.4);
   private hemi = new T.HemisphereLight(0xdbeaf4, 0xb1ada0, 1.7);
+  private readonly skies: Partial<Record<CampusTheme, T.CanvasTexture>> = {};
   private previous = performance.now();
   private frame = 0;
   private current = "campus";
@@ -36,7 +37,7 @@ export class TourEngine {
   onLocation = (_place: Place | null) => {};
   onStats = (_fps: number) => {};
   onError = (_message: string) => {};
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, theme: CampusTheme = "light") {
     this.renderer = new T.WebGLRenderer({
       antialias: true,
       powerPreference: "high-performance",
@@ -50,8 +51,7 @@ export class TourEngine {
     this.canvas = this.renderer.domElement;
     this.canvas.setAttribute("aria-label", "Escenario 3D del campus");
     container.append(this.canvas);
-    this.scene.background = makeCampusSky();
-    this.scene.fog = new T.Fog("#c7e0ed", 450, 1900);
+    this.setTheme(theme);
     this.sun.position.set(-240, 500, 240);
     this.scene.add(this.sun, this.hemi, this.campus.group);
     this.orbit = new OrbitControls(this.camera, this.canvas);
@@ -243,9 +243,9 @@ export class TourEngine {
     this.orbit.enabled = true;
     this.campus.setDetail(true);
     this.orbit.maxDistance = 650;
-    const focus = new T.Vector3((campusBounds.minX + campusBounds.maxX) / 2, -campusRockDepth * 0.32,
+    const focus = new T.Vector3((campusBounds.minX + campusBounds.maxX) / 2, -campusRockDepth * 0.25,
       (campusBounds.minZ + campusBounds.maxZ) / 2);
-    const view = new T.Vector3(-0.37, 0.43, -1).normalize();
+    const view = new T.Vector3(-0.44, 0.73, -1).normalize();
     const vertical = T.MathUtils.degToRad(this.camera.fov / 2);
     const horizontal = Math.atan(Math.tan(vertical) * this.camera.aspect);
     // Encadra el contorno completo en el tamaño actual de la ventana.
@@ -259,7 +259,7 @@ export class TourEngine {
         Math.abs(offset.dot(up)) / Math.tan(vertical));
       distance = Math.max(distance, offset.dot(view) + extent);
     }
-    offset.set(-8, -campusRockDepth - 28 - focus.y, 5);
+    offset.set(-15, -campusRockDepth - 25 - focus.y, 7);
     distance = Math.max(distance, offset.dot(view) + Math.abs(offset.dot(up)) / Math.tan(vertical));
     this.orbit.target.copy(focus);
     this.camera.position.copy(focus).addScaledVector(view, distance * 1.13);
@@ -283,6 +283,16 @@ export class TourEngine {
       this.camera.lookAt(this.gaze);
       this.onMode("paused");
     } else this.overview();
+  }
+  setTheme(theme: CampusTheme) {
+    const dark = theme === "dark";
+    this.scene.background = this.skies[theme] ??= makeCampusSky(theme);
+    this.scene.fog = new T.Fog(dark ? "#141d36" : "#c7e0ed", 450, 1900);
+    this.sun.color.setHex(dark ? 0xdbe5ff : 0xfff2d6);
+    this.sun.intensity = dark ? 1.45 : 2.4;
+    this.hemi.color.setHex(dark ? 0xb1c6f2 : 0xdbeaf4);
+    this.hemi.groundColor.setHex(dark ? 0x868bab : 0xb1ada0);
+    this.hemi.intensity = dark ? 1.5 : 1.7;
   }
   quality(high: boolean) {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, high ? 1.8 : 1));

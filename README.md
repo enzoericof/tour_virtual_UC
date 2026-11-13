@@ -88,6 +88,7 @@ Dos modos: **vista general** al iniciar y **recorrido a pie** desde Caminar. El 
 | Pausar, liberar cursor y abrir opciones | Esc o botón ESC · Pausar |
 | Ocultar o mostrar las herramientas en vista general | M |
 | Inspeccionar el conjunto | Botón de vista general; arrastrar y rueda |
+| Alternar entre cielo y espacio | Botón de la luna en la vista general o «Modo oscuro» al pausar |
 
 Durante el recorrido solo se muestra el botón ESC · Pausar, sin mira central ni avisos con E. Al pausar aparece un único menú con las opciones existentes; Continuar recorrido conserva la posición.
 

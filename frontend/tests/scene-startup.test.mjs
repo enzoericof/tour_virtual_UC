@@ -1,4 +1,4 @@
-import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from "three";
+import { Box3, PerspectiveCamera, Raycaster, Vector2, Vector3 } from "three";
 import { facultyBlueprint as plan, fromRect, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { test } from "node:test";
@@ -40,7 +40,15 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     rock.geometry.computeBoundingBox();
     const { min, max } = rock.geometry.boundingBox;
     assert.ok(Math.abs(max.y - ground.position.y) < 1e-6, "The rock meets the terrain at its rim");
-    assert.ok(min.y < max.y - 25, "The floating base has visible depth");
+    assert.ok(min.y < max.y - 110, "The floating base extends below the rim");
+    const tip = new Box3(), vertex = new Vector3();
+    const rockPositions = rock.geometry.attributes.position;
+    for (let i = 0; i < rockPositions.count; i++) {
+      vertex.fromBufferAttribute(rockPositions, i);
+      if (vertex.y < min.y + 8) tip.expandByPoint(vertex);
+    }
+    const bottomRatio = (tip.max.x - tip.min.x) / (max.x - min.x);
+    assert.ok(bottomRatio > 0.1 && bottomRatio < 0.24, "The bottom tapers to a rounded base");
     let meshes = 0;
     let grassReceivers = 0;
     group.traverse(object => {

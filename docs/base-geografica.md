@@ -9,7 +9,7 @@ El escenario muestra **CyT y sus accesos**. El terreno recortado y su franja arb
 - `frontend/src/data/campus-geometry.ts` selecciona de `campus-layout.json` las huellas OSM `274489894` (Bloque 1, constante `FACULTY_MAIN`) y `327428698` (Bloque G). Los caminos peatonales del recorrido se definen en `faculty-blueprint.ts` y `faculty-annexes.ts`.
 - `campus-layout.json` completo (60 huellas, 32 trazados viales, 4 estacionamientos, 3 canchas) es referencia, no escenario.
 - El perímetro de presentación rodea los edificios, los anexos y sus senderos. El contorno del terreno sirve de límite para el recorrido a pie y de referencia de encuadre para el mapa y la vista general.
-- La maqueta tiene una base de roca flotante con estratos y musgo que se estrecha en una punta irregular. Una bruma ligera rodea la punta y el cielo nuboso envuelve la vista general y el recorrido a pie.
+- La maqueta tiene una base de roca flotante con estratos y musgo. El perfil se estrecha hacia un remate redondeado y asimétrico, rodeado por una bruma ligera. El cielo nuboso envuelve la vista general y el recorrido a pie.
 - La huella OSM del Bloque 1 fija la posición y la orientación del plano (`facultyPose`). La huella `FACULTY_LABS` (`327428698`) corresponde al Bloque G y determina su giro de 29,15° respecto del Bloque 1. El centro del Bloque G se ubica con las medidas del equipo.
 - El terreno continuo y las pendientes del jardín de la cantina comparten una textura suave de césped. El recorrido se dibuja sin sombras proyectadas en ambos niveles de calidad gráfica.
 

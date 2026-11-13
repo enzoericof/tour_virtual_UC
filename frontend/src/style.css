@@ -1323,3 +1323,39 @@ body.is-paused .topbar, body.is-paused .tools, body.is-paused #menu-panel { disp
 
 .place-placeholder { width: 70px; min-height: 78px; flex-shrink: 0; display: grid; place-items: center; border-radius: 6px; background: #e9ede4; color: #617563; }
 .place-placeholder svg { width: 28px; height: 28px; }
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  color: #e8edf7;
+  background: #090e1b;
+  --ink: #e8edf7;
+  --cream: #151d2e;
+  --muted: #aebbd0;
+  --dark-border: #3a475d;
+  --dark-raised: #222d43;
+}
+[data-theme="dark"] :is(.topbar, .tools, .menu-panel, .explorer, .pause-card, .toast) {
+  background: #151d2ef5;
+  border-color: var(--dark-border);
+  color: var(--ink);
+}
+[data-theme="dark"] :is(.brand small, .topbar nav button, .filters button, .search, .place-copy small,
+  .subtle, .empty, form small) { color: var(--muted); }
+[data-theme="dark"] :is(.account, .search, .filters, .place-card, .pause-options button, .secondary, dialog,
+  .info-panel, .auth-tabs, .work-card, .empty-state, .menu-panel .tools) { border-color: var(--dark-border); }
+[data-theme="dark"] :is(.topbar nav button:hover, .topbar nav button.active, .icon-btn:hover, .filters button.selected,
+  .place-card:hover, .place-card.chosen, .pause-options button:hover, .secondary:hover, .place-placeholder,
+  .messages, .chat-message, kbd, .menu-panel .restore kbd) { background: var(--dark-raised); color: var(--ink); }
+[data-theme="dark"] :is(a, .text-btn, .secondary, .pause-options button, .eyebrow, .chat-message strong) { color: #bacdf7; }
+[data-theme="dark"] :is(form input, form textarea, form select, .dialog-close) {
+  background: var(--dark-raised);
+  border-color: var(--dark-border);
+  color: var(--ink);
+}
+[data-theme="dark"] .form-error { color: #ffa99a; }
+[data-theme="dark"] dialog::backdrop,
+[data-theme="dark"] .pause-overlay { background: #080d1baa; }
+#theme[aria-pressed="true"], .pause-options [data-pause-action="theme"][aria-pressed="true"] {
+  background: #2b3c5b;
+  color: #d5e3ff;
+}

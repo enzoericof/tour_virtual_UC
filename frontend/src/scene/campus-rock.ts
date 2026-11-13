@@ -1,45 +1,80 @@
 import * as T from "three";
 
-export const campusRockDepth = 72;
+export const campusRockDepth = 133;
 
-/** Pared rocosa bajo el césped, con estratos y un remate irregular. */
+function rockNoise(x: number, y: number, z: number) {
+  const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z);
+  const tx = T.MathUtils.smoothstep(x - ix, 0, 1);
+  const ty = T.MathUtils.smoothstep(y - iy, 0, 1);
+  const tz = T.MathUtils.smoothstep(z - iz, 0, 1);
+  const lattice = (a: number, b: number, c: number) => {
+    const n = Math.imul(a, 374761393) ^ Math.imul(b, 668265263) ^ Math.imul(c, 982451653);
+    const hash = Math.imul(n ^ (n >>> 13), 1274126177);
+    return ((hash ^ (hash >>> 16)) >>> 0) / 4294967295;
+  };
+  const plane = (c: number) => T.MathUtils.lerp(
+    T.MathUtils.lerp(lattice(ix, iy, c), lattice(ix + 1, iy, c), tx),
+    T.MathUtils.lerp(lattice(ix, iy + 1, c), lattice(ix + 1, iy + 1, c), tx), ty);
+  return T.MathUtils.lerp(plane(iz), plane(iz + 1), tz);
+}
+
+/** Pared rocosa bajo el césped, con un remate redondeado y asimétrico. */
 export function createCampusRock(edge: number[][], groundLevel: number) {
   const outline = edge.flatMap(([x, z], i) => {
     const [nextX, nextZ] = edge[(i + 1) % edge.length];
-    const steps = Math.ceil(Math.hypot(nextX - x, nextZ - z) / 2.6);
+    const steps = Math.ceil(Math.hypot(nextX - x, nextZ - z) / 1.4);
     return Array.from({ length: steps }, (_, step) => [
       T.MathUtils.lerp(x, nextX, step / steps), T.MathUtils.lerp(z, nextZ, step / steps),
     ]);
   });
   const centerX = (Math.min(...edge.map(([x]) => x)) + Math.max(...edge.map(([x]) => x))) / 2;
   const centerZ = (Math.min(...edge.map(([, z]) => z)) + Math.max(...edge.map(([, z]) => z))) / 2;
-  const layers = [[0, 1], [0.9, 1.004], [3.2, 0.985], [7, 0.957], [11, 0.923],
-    [16, 0.901], [22, 0.803], [29, 0.707], [36, 0.619], [43, 0.505], [49, 0.378],
-    [55, 0.255], [61, 0.166], [67, 0.105], [campusRockDepth, 0.04]];
+  const profile = [[0, 1], [2, 0.997], [11, 0.962], [23, 0.911], [35, 0.838], [49, 0.746],
+    [65, 0.644], [80, 0.545], [94, 0.467], [108, 0.379], [118, 0.295], [126, 0.215],
+    [131, 0.136], [campusRockDepth, 0.068]];
+  const layers = profile.slice(1).flatMap(([depth, scale], i) => {
+    const [prevDepth, prevScale] = profile[i];
+    const steps = Math.ceil((depth - prevDepth) / 2.4);
+    return Array.from({ length: steps }, (_, step) => [
+      T.MathUtils.lerp(prevDepth, depth, step / steps), T.MathUtils.lerp(prevScale, scale, step / steps),
+    ]);
+  });
+  layers.push(profile.at(-1)!);
   const positions: number[] = [], colors: number[] = [], indices: number[] = [];
-  const rock = new T.Color("#8f8777"), slate = new T.Color("#605d56");
-  const moss = new T.Color("#526234"), soil = new T.Color("#646343"), color = new T.Color();
-  const mistLight = new T.Color("#779aab");
+  const limestone = new T.Color("#c8bfaa"), slate = new T.Color("#6a6860");
+  const moss = new T.Color("#617444"), soil = new T.Color("#777450"), color = new T.Color();
+  const coolStone = new T.Color("#899c9b");
   const count = outline.length;
   for (const [layer, [depth, scale]] of layers.entries()) {
     for (let i = 0; i < count; i++) {
       const [x, z] = outline[i];
-      const wave = Math.sin(x * 0.17 + z * 0.13) * Math.cos(z * 0.23 - x * 0.075);
-      const grain = Math.sin(x * 0.98 - z * 0.81 + layer * 1.4);
-      const relief = Math.min(depth / 5, 1);
+      const rx = x - centerX, rz = z - centerZ;
+      const angle = Math.atan2(rz, rx);
       const taper = depth / campusRockDepth;
-      const ridge = Math.sin(x * 0.16 + z * 0.29) * 0.033;
-      const rim = scale + (wave * 0.038 + grain * 0.012 + ridge) * relief * Math.sqrt(scale);
-      const y = groundLevel - depth + (wave * 2.1 + grain * 0.74) * relief;
-      positions.push(centerX + (x - centerX) * rim - taper * taper * 9,
-        y, centerZ + (z - centerZ) * rim + taper * taper * 6);
+      const relief = T.MathUtils.smoothstep(depth, 0, 16);
+      const bend = T.MathUtils.smoothstep(taper, 0.18, 1);
+      // Las fracturas longitudinales se curvan en torno a la roca con la profundidad.
+      const drift = (rockNoise(x * 0.024, depth * 0.015, z * 0.024) - 0.5) * 0.29;
+      const cliff = rockNoise(x * 0.041, depth * 0.026, z * 0.041) - 0.5;
+      const ribs = rockNoise(x * 0.16 + drift * 4, depth * 0.032, z * 0.16) - 0.5;
+      const chips = rockNoise(x * 0.39, depth * 0.23, z * 0.39) - 0.5;
+      const ledge = rockNoise(x * 0.071, depth * 0.17 + z * 0.04, z * 0.071) - 0.5;
+      const cleft = Math.pow(Math.max(0, Math.cos((angle + drift) * 3 + 1.1)), 7) * Math.sin(Math.PI * taper);
+      const rim = scale * (1 + relief * (cliff * 0.22 + ribs * 0.085 + ledge * 0.065 + chips * 0.022 - cleft * 0.1));
+      const y = groundLevel - depth + relief * (cliff * 4 + chips * 1.5 - bend * Math.cos(angle * 3 + 0.5) * 2);
+      const px = centerX + rx * rim - bend * 15;
+      const pz = centerZ + rz * rim + bend * 7;
+      positions.push(px, y, pz);
 
-      const stratum = 0.35 + 0.21 * Math.sin(layer * 1.7 + wave * 1.9) + 0.12 * grain;
-      color.copy(rock).lerp(slate, stratum);
-      const patch = Math.sin(x * 0.11 + z * 0.14) + Math.cos(z * 0.18 - layer * 0.52);
-      color.lerp(moss, T.MathUtils.smoothstep(patch, 0.3, 1.65) * Math.max(0, 0.94 - depth / 48));
-      color.lerp(mistLight, T.MathUtils.smoothstep(taper, 0.58, 1) * 0.38);
-      if (layer < 2) color.lerp(soil, layer === 0 ? 0.9 : 0.55);
+      const mineral = rockNoise(px * 0.34, depth * 0.24, pz * 0.34);
+      const fault = T.MathUtils.smoothstep(0.49 + cliff * 0.34 + ribs * 0.35 + ledge * 0.21 + mineral * 0.24, 0.35, 0.81);
+      color.copy(limestone).lerp(slate, 0.13 + fault * 0.73);
+      const patch = rockNoise(px * 0.055 + 25, depth * 0.059, pz * 0.055);
+      const growth = T.MathUtils.smoothstep(patch + mineral * 0.16, 0.54, 0.8)
+        * (1 - T.MathUtils.smoothstep(taper, 0.24, 0.73));
+      color.lerp(moss, growth * 0.78);
+      color.lerp(coolStone, T.MathUtils.smoothstep(taper, 0.59, 1) * 0.29);
+      if (depth < 4) color.lerp(soil, (1 - depth / 4) * 0.9);
       colors.push(color.r, color.g, color.b);
 
       if (layer === 0) continue;
@@ -48,7 +83,7 @@ export function createCampusRock(edge: number[][], groundLevel: number) {
     }
   }
 
-  // La punta termina en una cara pequeña e irregular.
+  // Cierra la cara inferior redondeada.
   const firstBottom = (layers.length - 1) * count;
   const bottom = outline.map((_, i) => {
     const at = (firstBottom + i) * 3;
@@ -65,7 +100,8 @@ export function createCampusRock(edge: number[][], groundLevel: number) {
   geometry.setAttribute("color", new T.Float32BufferAttribute(colors, 3));
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
-  const mesh = new T.Mesh(geometry, new T.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true }));
+  const mesh = new T.Mesh(geometry, new T.MeshStandardMaterial({ vertexColors: true, roughness: 1,
+    emissive: "#62645c", emissiveIntensity: 0.25 }));
   mesh.name = "Base rocosa de CyT";
   return mesh;
 }
@@ -98,7 +134,7 @@ export function createRockMist(rock: T.Mesh) {
   for (const [x, y, z, width, height, opacity] of layers) {
     const sprite = new T.Sprite(new T.SpriteMaterial({ map, color: "#dcf5ff", opacity,
       transparent: true, depthWrite: false, toneMapped: false }));
-    sprite.position.set(center.x - 8 + x, bounds.min.y + size.y * 0.06 + y, center.z + 5 + z);
+    sprite.position.set(center.x - 15 + x, bounds.min.y + size.y * 0.035 + y, center.z + 7 + z);
     sprite.scale.set(width, height, 1);
     group.add(sprite);
   }

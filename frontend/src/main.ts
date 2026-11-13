@@ -1,5 +1,6 @@
 import "./style.css";
 import { TourEngine } from "./scene/engine";
+import type { CampusTheme } from "./scene/campus-sky";
 import { places, photoUrl, statusLabel, type Place } from "./data/places";
 import { icon } from "./ui/icons";
 import {
@@ -14,6 +15,13 @@ import {
 import { CampusChat } from "./services/chat";
 const $ = <T extends HTMLElement = HTMLElement>(s: string) =>
   document.querySelector<T>(s)!;
+const themeKey = "cyt-theme";
+let theme: CampusTheme = "light";
+try {
+  if (localStorage.getItem(themeKey) === "dark") theme = "dark";
+} catch {
+  // El visor también funciona cuando el navegador bloquea el almacenamiento local.
+}
 const escape = (s: string) =>
   s.replace(
     /[&<>"']/g,
@@ -28,7 +36,7 @@ $("#app").innerHTML = `
  <header class="topbar"><button class="brand" id="home" aria-label="Volver al campus"><span class="brand-mark">UC<span>✦</span></span><span><strong>Ciencias y Tecnología</strong><small>Campus Santa Librada</small></span></button><nav aria-label="Principal"><button aria-label="Explorar" id="spaces-btn" aria-expanded="false" aria-controls="explorer">${icon("map")}<span>Explorar</span></button><button aria-label="Caminar" id="begin">${icon("walk")}<span>Caminar</span></button><button aria-label="Biblioteca" id="library-btn">${icon("book")}<span>Biblioteca</span></button><button aria-label="Comunidad" id="chat-btn">${icon("chat")}<span>Comunidad</span></button><button aria-label="Menú" id="menu-btn" class="menu-btn" aria-expanded="false" aria-controls="menu-panel">${icon("menu")}<span>Menú</span><kbd>M</kbd></button></nav><button aria-label="Cuenta" id="account-btn" class="account">${icon("user")}<span>Ingresar</span></button></header>
  <div class="menu-panel hidden" id="menu-panel" role="region" aria-label="Herramientas"><button class="secondary restore" id="restore-panels">Mostrar paneles <kbd>M</kbd></button></div>
  <aside class="explorer collapsed" id="explorer" aria-label="Espacios de la facultad"><div class="section-top"><div><h2>Espacios</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div></aside>
- <div class="tools"><button id="overview" class="icon-btn" title="Restablecer vista" aria-label="Restablecer vista">${icon("cube")}</button><button id="quality" class="icon-btn" title="Cambiar calidad gráfica" aria-label="Cambiar calidad gráfica">${icon("sun")}</button><button id="fullscreen" class="icon-btn" title="Pantalla completa" aria-label="Pantalla completa">${icon("expand")}</button><button id="help" class="icon-btn" title="Ayuda" aria-label="Ayuda">${icon("help")}</button></div>
+ <div class="tools"><button id="overview" class="icon-btn" title="Restablecer vista" aria-label="Restablecer vista">${icon("cube")}</button><button id="theme" class="icon-btn" aria-label="Modo oscuro" aria-pressed="false">${icon("moon")}</button><button id="quality" class="icon-btn" title="Cambiar calidad gráfica" aria-label="Cambiar calidad gráfica">${icon("sun")}</button><button id="fullscreen" class="icon-btn" title="Pantalla completa" aria-label="Pantalla completa">${icon("expand")}</button><button id="help" class="icon-btn" title="Ayuda" aria-label="Ayuda">${icon("help")}</button></div>
  <button id="pause-tour" class="pause-tour hidden" aria-label="ESC · Pausar recorrido"><kbd>ESC</kbd> Pausar</button>
  <section id="walk-prompt" class="pause-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
   <div class="pause-card"><span class="eyebrow">TU RECORRIDO</span><h2 id="pause-title">En pausa</h2>
@@ -39,6 +47,7 @@ $("#app").innerHTML = `
    <button data-pause-action="chat-btn">${icon("chat")} Comunidad</button>
    <button data-pause-action="account-btn">${icon("user")} Mi cuenta</button>
    <button id="pause-place">${icon("help")} Información de este lugar</button>
+   <button data-pause-action="theme" aria-pressed="false">${icon("moon")} Modo oscuro</button>
    <button data-pause-action="quality">${icon("sun")} Calidad gráfica</button>
    <button data-pause-action="fullscreen">${icon("expand")} Pantalla completa</button>
    <button data-pause-action="help">${icon("help")} Ayuda</button>
@@ -207,6 +216,14 @@ function syncPauseMenu() {
   const exploring = !$("#explorer").classList.contains("collapsed");
   $("#walk-prompt").classList.toggle("hidden", currentMode !== "paused" || dialogOpen || exploring);
 }
+function syncTheme() {
+  const dark = theme === "dark";
+  document.documentElement.dataset.theme = theme;
+  for (const button of document.querySelectorAll<HTMLButtonElement>('#theme, [data-pause-action="theme"]')) {
+    button.setAttribute("aria-pressed", String(dark));
+    button.title = dark ? "Cambiar a cielo (modo claro)" : "Cambiar a espacio (modo oscuro)";
+  }
+}
 function onMode(mode: string) {
   currentMode = mode;
   const walking = mode === "walking";
@@ -222,8 +239,9 @@ function onMode(mode: string) {
     if (!$("#walk-prompt").classList.contains("hidden")) $("#resume").focus();
   });
 }
+syncTheme();
 try {
-  engine = new TourEngine($("#viewport"));
+  engine = new TourEngine($("#viewport"), theme);
   engine.onMode = onMode;
   engine.overview();
   engine.onError = toast;
@@ -289,6 +307,17 @@ document.querySelectorAll<HTMLButtonElement>("[data-filter]").forEach(
       renderPlaces();
     }),
 );
+$("#theme").onclick = () => {
+  theme = theme === "light" ? "dark" : "light";
+  engine.setTheme(theme);
+  syncTheme();
+  try {
+    localStorage.setItem(themeKey, theme);
+  } catch {
+    // La preferencia sigue activa durante esta visita.
+  }
+  toast(theme === "dark" ? "Modo oscuro · Espacio" : "Modo claro · Cielo");
+};
 $("#quality").onclick = () => {
   highQuality = !highQuality;
   engine.quality(highQuality);

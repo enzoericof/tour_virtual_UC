@@ -1,7 +1,10 @@
 import * as T from "three";
 
-/** Textura envolvente generada una vez. Las nubes continúan al cruzar la unión del cielo. */
-export function makeCampusSky() {
+export type CampusTheme = "light" | "dark";
+
+/** Fondo envolvente con ruido continuo en la unión del panorama. */
+export function makeCampusSky(theme: CampusTheme = "light") {
+  const space = theme === "dark";
   const canvas = document.createElement("canvas");
   const width = canvas.width = 1024, height = canvas.height = 512;
   const ctx = canvas.getContext("2d")!;
@@ -20,9 +23,9 @@ export function makeCampusSky() {
     const v = y / (height - 1);
     const upper = T.MathUtils.smoothstep(v, 0, 0.52);
     const lower = T.MathUtils.smoothstep(v, 0.52, 1);
-    const red = 71 + upper * 105 + lower * 33;
-    const green = 153 + upper * 59 + lower * 20;
-    const blue = 214 + upper * 29 + lower * 7;
+    const red = space ? 7 + upper * 6 : 71 + upper * 105 + lower * 33;
+    const green = space ? 10 + upper * 9 : 153 + upper * 59 + lower * 20;
+    const blue = space ? 23 + upper * 16 : 214 + upper * 29 + lower * 7;
     const clouds = Math.max(0, 1 - Math.abs(v - 0.34) / 0.29) * 0.16 +
       Math.max(0, 1 - Math.abs(v - 0.68) / 0.21) * 0.22;
 
@@ -37,18 +40,53 @@ export function makeCampusSky() {
         density += T.MathUtils.lerp(a, b, ty) * weight;
         weight *= 0.49;
       }
-      const alpha = T.MathUtils.smoothstep(density + clouds, 0.63, 0.82)
-        * T.MathUtils.smoothstep(v, 0.06, 0.18) * (1 - T.MathUtils.smoothstep(v, 0.82, 0.96));
-      const highlight = T.MathUtils.smoothstep(density + clouds, 0.7, 0.9);
       const at = (y * width + x) * 4;
-      image.data[at] = T.MathUtils.lerp(red, 221 + 34 * highlight, alpha);
-      image.data[at + 1] = T.MathUtils.lerp(green, 235 + 20 * highlight, alpha);
-      image.data[at + 2] = T.MathUtils.lerp(blue, 244 + 11 * highlight, alpha);
+      if (space) {
+        const bandCenter = 0.49 + 0.16 * Math.sin(x / width * Math.PI * 2 - 0.8);
+        const band = 1 - T.MathUtils.smoothstep(Math.abs(v - bandCenter), 0.015, 0.23);
+        const dust = band * T.MathUtils.smoothstep(density, 0.27, 0.75);
+        image.data[at] = red + dust * 45;
+        image.data[at + 1] = green + dust * 38;
+        image.data[at + 2] = blue + dust * 78;
+      } else {
+        const alpha = T.MathUtils.smoothstep(density + clouds, 0.63, 0.82)
+          * T.MathUtils.smoothstep(v, 0.06, 0.18) * (1 - T.MathUtils.smoothstep(v, 0.82, 0.96));
+        const highlight = T.MathUtils.smoothstep(density + clouds, 0.7, 0.9);
+        image.data[at] = T.MathUtils.lerp(red, 221 + 34 * highlight, alpha);
+        image.data[at + 1] = T.MathUtils.lerp(green, 235 + 20 * highlight, alpha);
+        image.data[at + 2] = T.MathUtils.lerp(blue, 244 + 11 * highlight, alpha);
+      }
       image.data[at + 3] = 255;
     }
   }
   ctx.putImageData(image, 0, 0);
-  const sky = new T.CanvasTexture(canvas);
+  let panorama = canvas;
+  if (space) {
+    panorama = document.createElement("canvas");
+    const starWidth = panorama.width = width * 2, starHeight = panorama.height = height * 2;
+    const stars = panorama.getContext("2d")!;
+    stars.drawImage(canvas, 0, 0, starWidth, starHeight);
+    const random = () => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed / 4294967296;
+    };
+    for (let i = 0; i < 5000; i++) {
+      const x = Math.floor(random() * starWidth);
+      const y = Math.floor(Math.acos(1 - 2 * random()) / Math.PI * starHeight);
+      const bright = random();
+      const opacity = 0.22 + bright * 0.73;
+      stars.fillStyle = bright > 0.98 ? `rgba(240,226,255,${opacity})` : `rgba(200,224,255,${opacity})`;
+      stars.fillRect(x, y, 1, 1);
+      if (bright > 0.95) {
+        stars.fillStyle = "rgba(165,195,255,0.45)";
+        stars.fillRect((x + starWidth - 1) % starWidth, y, 1, 1);
+        stars.fillRect((x + 1) % starWidth, y, 1, 1);
+        stars.fillRect(x, y - 1, 1, 1);
+        stars.fillRect(x, y + 1, 1, 1);
+      }
+    }
+  }
+  const sky = new T.CanvasTexture(panorama);
   sky.colorSpace = T.SRGBColorSpace;
   sky.mapping = T.EquirectangularReflectionMapping;
   return sky;
