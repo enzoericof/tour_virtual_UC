@@ -5,7 +5,7 @@ import { makeMaterials } from "./materials";
 import { addCourtyardVegetation } from "./courtyard-vegetation";
 import { addCantinaTree } from "./cantina-tree";
 import {
-  facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, STEPS_RUN, rectCorners,
+  facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, ELEVATOR_LANDING_LEVEL, STEPS_RUN, rectCorners,
   elevatorStairEdge, bulgedOutline, cantinaForecourt, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR, fromRect,
   type Rect, type Rooms, type Vec2,
 } from "../data/faculty-blueprint";
@@ -98,13 +98,16 @@ export function createFaculty() {
   }
   const v3 = (x: number, y: number, z: number) => new T.Vector3(x, y, z);
   /** Lona azul continua con caída leve entre apoyos y faldón festoneado. */
-  function fabricCover(curve: T.Curve<T.Vector3>, width: number, supports: number[], ridge = 0) {
+  function fabricCover(curve: T.Curve<T.Vector3>, width: number, supports: number[], ridge = 0, ridgeAtStart = ridge) {
     const length = curve.getLength(), segments = Math.ceil(length / 0.12), across = 8;
     const positions: number[] = [], uv: number[] = [], indices: number[] = [];
     const at = (t: number, u: number) => {
       const p = curve.getPointAt(t), tangent = curve.getTangentAt(t);
       const side = v3(-tangent.z, 0, tangent.x).normalize();
-      return p.addScaledVector(side, u * width / 2).add(v3(0, ridge > 0 ? ridge * (1 - Math.abs(u)) : u * 0.08 - 0.06 * (1 - u * u), 0));
+      const rise = ridge > 0 ? T.MathUtils.lerp(ridgeAtStart, ridge, t) * (1 - Math.abs(u))
+        : u * 0.08 - 0.06 * (1 - u * u);
+      p.y += rise;
+      return p.addScaledVector(side, u * width / 2);
     };
     for (let i = 0; i <= segments; i++) for (let j = 0; j <= across; j++) {
       const t = i / segments, u = j / across * 2 - 1, p = at(t, u);
@@ -229,8 +232,22 @@ export function createFaculty() {
     solid.add(new T.Mesh(geo));
   }
   /** Tramo recto a lo largo de x: peldaños de 17,5 cm, losa inferior, barandas y colisiones. */
-  function flight(xs: number, ys: number, xe: number, ye: number, zc: number, width: number, sides: number[] = [-1, 1]) {
+  function flight(xs: number, ys: number, xe: number, ye: number, zc: number, width: number, continuous = false) {
     const run = Math.abs(xe - xs), rise = ye - ys, n = Math.round(rise / 0.175), dir = Math.sign(xe - xs);
+    if (continuous) {
+      const profile = [new T.Vector2(xs, ys - 0.26)];
+      for (let i = 0; i < n; i++) {
+        const top = ys + ((i + 0.5) * rise) / n;
+        profile.push(new T.Vector2(xs + dir * i * run / n, top),
+          new T.Vector2(xs + dir * (i + 1) * run / n, top));
+      }
+      profile.push(new T.Vector2(xe, ye - 0.26));
+      const geometry = new T.ExtrudeGeometry(new T.Shape(profile), { depth: width, bevelEnabled: false });
+      geometry.translate(0, 0, zc - width / 2);
+      const mesh = new T.Mesh(geometry, m.stone);
+      mesh.castShadow = mesh.receiveShadow = true;
+      visual.add(mesh);
+    } else {
     for (let i = 0; i < n; i++) {
       const xa = xs + dir * (i * run) / n, xb = xs + dir * ((i + 1) * run) / n, top = ys + ((i + 0.5) * rise) / n;
       box(Math.abs(xb - xa) + 0.02, 0.2, width, (xa + xb) / 2, top - 0.1, zc, m.stone);
@@ -239,8 +256,9 @@ export function createFaculty() {
     const under = new T.Mesh(unit, m.concrete);
     under.scale.set(length, 0.16, width); under.position.set((xs + xe) / 2, (ys + ye) / 2 - 0.26, zc);
     under.rotation.z = dir * slope; under.castShadow = true; visual.add(under);
+    }
     ramp(v3(xs, ys, zc), v3(xe, ye, zc), width);
-    for (const side of sides) {
+    for (const side of [-1, 1]) {
       const z = zc + side * (width / 2 + 0.03);
       beam(v3(xs, ys + 0.95, z), v3(xe, ye + 0.95, z), 0.035);
       beam(v3(xs, ys + 0.5, z), v3(xe, ye + 0.5, z), 0.02);
@@ -778,17 +796,18 @@ export function createFaculty() {
     // Se retiró la prolongación de baranda fuera de la cabecera.
     // Bodega bajo la escalera: laterales de ladrillo que siguen los peldaños (el oeste deja ver el paso
     // de la rampa, como en IMG_5694) y frente hacia la galería con una puerta de chapa.
-    const bodegaTop = H - 0.12, door = es.x - 0.3;
+    const bodegaTop = H - 0.26 - (H - PLAZA_LEVEL) * 0.2 / es.run, door = es.x - 0.3;
     const eastTread = (z: number) => PLAZA_LEVEL + ((H - PLAZA_LEVEL) * (z - stairFoot)) / es.run;
-    for (const x of [stairWest + 0.1, stairEast - 0.1])
-      slopedWall(x, stairFoot, es.top - 0.2, PLAZA_LEVEL, eastTread(es.top - 0.2) - 0.1);
+    // La cara exterior de la bodega coincide con el extremo del retorno de la escalinata.
+    for (const x of [stairWest + 0.13, stairEast - 0.1])
+      slopedWall(x, stairFoot, es.top - 0.2, PLAZA_LEVEL - 0.26, eastTread(es.top - 0.2) - 0.26);
     for (const [p, q] of [[stairWest, door - 0.5], [door + 0.5, stairEast]])
       box(q - p, bodegaTop, 0.2, (p + q) / 2, bodegaTop / 2, es.top - 0.1, m.brick, true);
     box(1, bodegaTop - 2.1, 0.2, door, 2.1 + (bodegaTop - 2.1) / 2, es.top - 0.1, m.brick, true);
     box(0.95, 2.1, 0.05, door, 1.05, es.top + 0.02, m.steel, true);
     // Mismo ancho y eje originales; bajada prolongada siguiendo la pared de ladrillo.
     frame({ center: [es.x, es.top - es.run / 2], size: [es.run, es.width], angle: -Math.PI / 2 },
-      () => flight(es.run / 2, PLAZA_LEVEL, -es.run / 2, H, 0, es.width));
+      () => flight(es.run / 2, PLAZA_LEVEL, -es.run / 2, H, 0, es.width, true));
     // Placa del Centro de Estudiantes en el paño de ladrillo junto a la escalera.
     // Reproducción vectorial de la referencia: cuatro enlaces, puntos azules y leyenda.
     const logoCanvas = document.createElement("canvas"); logoCanvas.width = 1024; logoCanvas.height = 1536;
@@ -939,12 +958,7 @@ export function createFaculty() {
 
   // Rellano de granito rosado al nivel del pasillo, no de la plaza elevada.
   // La base aporta una superficie transitable y tapa el césped bajo este acceso.
-  prism(plan.elevatorLanding, -0.06, 0.09, m.granite);
-  const landingBand = new T.MeshStandardMaterial({ color: "#596664", roughness: 0.85 });
-  box(STEPS_RUN, 0.004, 0.07, b1x + block1.length / 2 + STEPS_RUN / 2, 0.032, 5.95, landingBand);
-  const pavingJoint = new T.MeshStandardMaterial({color:"#6f5a51",roughness:1});
-  for(let x=37.2;x<39.9;x+=0.6) box(0.003,0.002,2.5,x,0.0315,4.75,pavingJoint);
-  for(let z=3.6;z<6;z+=0.6) box(3.05,0.002,0.003,38.375,0.0315,z,pavingJoint);
+  prism(plan.elevatorLanding, -0.06, ELEVATOR_LANDING_LEVEL + 0.06, m.granite);
 
   // ---- Plataforma a 0,90 m: plaza techada, cuadrado, Bedelía, cantina, Sala Manfred y cabecera este ----
 
@@ -1021,7 +1035,7 @@ export function createFaculty() {
   for (const s of plan.platformSteps.slice(1))
     frame({ center: s.top, size: [STEPS_RUN, s.width], angle: s.angle }, () => steps(STEPS_RUN, 0, PLAZA_LEVEL, s.width));
   {
-    const count = 5, tread = STEPS_RUN / count, base = 0.03;
+    const count = 5, tread = STEPS_RUN / count, base = ELEVATOR_LANDING_LEVEL;
     const groove = new T.MeshStandardMaterial({ color: "#8d918c", roughness: 0.9 });
     const riser = m.accessStone.clone(); riser.color.set("#bab7aa"); riser.side = T.DoubleSide;
     const nosing = m.accessStone.clone(); nosing.color.set("#e8e4d5");
@@ -1064,19 +1078,7 @@ export function createFaculty() {
   {
     const g = plan.plazaGallery;
     prism(g.outline, g.roof, 0.22, m.concrete);
-    // Granito gris y juntas finas según la foto del sector junto a la escalera.
-    const galleryStone = m.stone.clone(); galleryStone.color.set("#d4d2c6");
-    pave(g.outline, galleryStone, PLAZA_LEVEL + 0.012);
-    const galleryCentre: Vec2 = [g.outline.reduce((n, p) => n + p[0], 0) / 4,
-      g.outline.reduce((n, p) => n + p[1], 0) / 4];
-    const joints = new T.MeshStandardMaterial({ color: "#969589", transparent: true, opacity: 0.35, roughness: 1 });
-    frame({ center: galleryCentre, size: [g.length, g.width], angle: gridAngle + Math.PI / 2 }, () => {
-      for (let x = -g.length / 2; x <= g.length / 2; x += 0.6) box(0.008, 0.002, g.width, x, PLAZA_LEVEL + 0.014, 0, joints);
-      for (let z = -g.width/2+.3; z <= g.width/2; z += 0.6) box(g.length, 0.002, 0.008, 0, PLAZA_LEVEL + 0.014, z, joints);
-    });
-    // Pasillo macizo debajo de toda la fila de pilares; mismo nivel que la plaza.
-
-    // El pavimento longitudinal ya pertenece a la plataforma de la plaza.
+    // El pavimento usa el contorno recortado de la plataforma; el techo sobresale.
     const ss = g.smallSteps;
     frame({ center: ss.center, size: [ss.width, ss.run], angle: ss.angle }, () => {
       for (let i = 0; i < ss.count; i++) {
@@ -1193,7 +1195,8 @@ export function createFaculty() {
     leafGeo.setAttribute("position",new T.Float32BufferAttribute(vertices,3));
     leafGeo.setAttribute("uv",new T.Float32BufferAttribute(uvs,2));leafGeo.setIndex(faces);leafGeo.computeVertexNormals();
     let plant=0;
-    for(let x=40.65;x<46.5;x+=0.4) for(let z=5.6;z<9.7;z+=0.4) {
+    const gardenXs = g.garden.map(p => p[0]), gardenZs = g.garden.map(p => p[1]);
+    for(let x=Math.min(...gardenXs);x<Math.max(...gardenXs);x+=0.36) for(let z=Math.min(...gardenZs);z<Math.max(...gardenZs);z+=0.36) {
       const n=plant++,px=x+(noise(n)-0.5)*0.14,pz=z+(noise(n+8)-0.5)*0.14;
       if(!insidePolygon([px,pz],g.garden)||noise(n+25)<0.06) continue;
       for(let j=0;j<5;j++) {
@@ -2769,7 +2772,9 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
         [start[0] - 0.06, galleryEdge], [end[0], galleryEdge],
         [end[0], lawnEdge], [start[0] - 0.06, lawnEdge],
       ], courtyardConcrete, 0.049);
-      path(p.slice(2));
+    } else if (index === 6) {
+      // El enlace desde el toldo hasta la plaza ya tiene peldaños y piso propio.
+      path(p.slice(1));
     } else if (index !== 3) {
       // El tramo bajo el caminero tiene su propio pavimento.
       path(p);
@@ -2833,7 +2838,25 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
   // Acceso curvo con pendiente suave y toldo conectado al pasillo (fotos 16.25.45/52).
   {
     const g = plan.plazaGallery;
-    const curve = new T.CubicBezierCurve3(...g.approach.map(([x, z, y]) => v3(x, y, z)) as [T.Vector3, T.Vector3, T.Vector3, T.Vector3]);
+    const [[ax, az], [bx, bz]] = plan.coveredWalk;
+    const { width, endHeight, controlLift } = coveredWalkSurface;
+    const walkStart = v3(ax, g.smallSteps.bottom, az), walkEnd = v3(bx, endHeight, bz);
+    const walk = new T.CubicBezierCurve3(walkStart,
+      walkStart.clone().lerp(walkEnd, 1 / 3).add(v3(0, controlLift, 0)),
+      walkStart.clone().lerp(walkEnd, 2 / 3).add(v3(0, controlLift, 0)), walkEnd);
+    const direction = v3(bx - ax, 0, bz - az).normalize();
+    const [startX, startZ] = g.approach.start;
+    const start = v3(startX, ELEVATOR_LANDING_LEVEL, startZ);
+    const [bend, guide, tangent, merge] = g.approach.bend.map(([x, z]) => v3(x, 0.07, z));
+    const junctionDistance = merge.clone().sub(walkStart).dot(direction);
+    merge.y = walk.getPoint(junctionDistance / Math.hypot(bx - ax, bz - az)).y - 0.006;
+    guide.y = 0.085;
+    tangent.y = merge.y;
+    const curve = new T.CurvePath<T.Vector3>();
+    curve.add(new T.LineCurve3(start, bend));
+    const bendCurve = new T.CubicBezierCurve3(bend, guide, tangent, merge);
+    curve.add(bendCurve);
+    const approachWidth = 1.7;
     function ribbon(c: T.Curve<T.Vector3>, width: number, mat: T.Material, collide: boolean, skirt = false) {
       const positions: number[] = [], uvs: number[] = [], indices: number[] = [];
       const sideMaterial = m.stone.clone(); sideMaterial.side = T.DoubleSide;
@@ -2861,54 +2884,73 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
         wall.computeVertexNormals(); visual.add(new T.Mesh(wall,sideMaterial));
       }
     }
-    ribbon(curve, 2.2, m.accessStone, true, true);
-    // Piezas redondas bajas sobre el mismo plano inclinado, como el pavimento de referencia.
-    for (let i = 1; i < 28; i++) {
-      const t = i / 28, p = curve.getPoint(t), tangent = curve.getTangent(t), side = v3(-tangent.z,0,tangent.x).normalize();
-      for (const offset of [-0.8,-0.4,0,0.4,0.8]) {
+    // Los empalmes comparten aristas con el granito y con el resto del sendero.
+    function joinPaving(a: T.Vector3, b: T.Vector3, c: T.Vector3, d: T.Vector3, material: T.Material) {
+      const vertices = [a, b, c, d];
+      const geometry = new T.BufferGeometry().setFromPoints(vertices);
+      const [u, v] = material.userData.tile as [number, number];
+      geometry.setAttribute("uv", new T.Float32BufferAttribute(vertices.flatMap(p => [p.x / u, p.z / v]), 2));
+      geometry.setIndex([0, 1, 2, 0, 2, 3]);
+      geometry.computeVertexNormals();
+      const mesh = new T.Mesh(geometry, material);
+      mesh.receiveShadow = true;
+      visual.add(mesh);
+      solid.add(new T.Mesh(geometry));
+    }
+    const bendTangent = bendCurve.getTangent(0);
+    const bendSide = v3(bendTangent.z, 0, -bendTangent.x).normalize().multiplyScalar(approachWidth / 2);
+    const approachLeft = startX - approachWidth / 2, approachRight = startX + approachWidth / 2;
+    joinPaving(v3(approachLeft, start.y, startZ), bend.clone().sub(bendSide),
+      bend.clone().add(bendSide), v3(approachRight, start.y, startZ), m.accessStone);
+    ribbon(bendCurve, approachWidth, m.accessStone, true, true);
+    // Adoquines junto al toldo; el resto del sendero es hormigón liso.
+    const approachLength = curve.getLength();
+    const paverTones = ["#a29f94", "#c1b9a9", "#b1ad9f"].map(color => {
+      const material = m.accessStone.clone();
+      material.color.set(color);
+      return material;
+    });
+    for (let distance = approachLength - 2.45; distance < approachLength - 0.24; distance += 0.27) {
+      const t = distance / approachLength;
+      const p = curve.getPointAt(t), tangent = curve.getTangentAt(t), side = v3(-tangent.z, 0, tangent.x).normalize();
+      for (const offset of [-0.53, -0.265, 0, 0.265, 0.53]) {
         const q = p.clone().addScaledVector(side,offset);
-        const disc = pole(0.17,0.008,q.x,q.y+0.005,q.z,m.accessStone);
+        const material = paverTones[Math.round(distance / 0.27 + offset / 0.265 + 2) % paverTones.length];
+        const disc = pole(0.13, 0.012, q.x, q.y + 0.01, q.z, material);
         disc.quaternion.setFromUnitVectors(v3(0,1,0), side.clone().cross(tangent).normalize());
       }
     }
-    // Remate en la plaza, sobre los tres peldaños señalados por el usuario.
-    // Cubierta y piso continúan por el mismo eje, paralelo al costado corto del Bloque G.
-    const [[ax, az], [bx, bz]] = plan.coveredWalk;
-    const attachment = [ax-g.smallSteps.direction[0]*g.smallSteps.run, az-g.smallSteps.direction[1]*g.smallSteps.run];
-    const canopy = new T.CubicBezierCurve3(v3(attachment[0],3.65,attachment[1]),
-      v3(attachment[0]+(ax-attachment[0])/3,3.45,attachment[1]+(az-attachment[1])/3),
-      v3(attachment[0]+(ax-attachment[0])*2/3,2.95,attachment[1]+(az-attachment[1])*2/3),v3(ax,2.75,az));
-    fabricCover(canopy, 2.25, [0.95], 0.42);
-    // Rellano inferior rosado unido al camino, sin cajas cruzadas ni recortes de césped.
-    const lowerPath = new T.CubicBezierCurve3(v3(39,0.034,5.9),v3(39.8,0.034,7),v3(40.3,0.05,9.6),v3(41,0.05,11));
-    ribbon(lowerPath, 1.8, m.granite, true);
-    // Banda oscura en los bordes del piso rosado, como en las fotografías.
-    for (const offset of [-0.83, 0.83]) {
-      const band = new T.CurvePath<T.Vector3>();
-      for (let i = 0; i < 24; i++) {
-        const at = (t: number) => {
-          const p = lowerPath.getPoint(t), tangent = lowerPath.getTangent(t);
-          return p.addScaledVector(v3(-tangent.z,0,tangent.x).normalize(),offset).add(v3(0,0.002,0));
-        };
-        band.add(new T.LineCurve3(at(i / 24), at((i + 1) / 24)));
-      }
-      ribbon(band, 0.055, landingBand, false);
+    // La lona arranca plana dentro del canto de la losa y forma la cumbrera hacia el caminero.
+    const [stepX, stepZ] = g.smallSteps.center;
+    const attachment = v3(stepX, g.roof + 0.08, stepZ).addScaledVector(direction, -0.12);
+    const canopyFoot = v3(ax, 2.75, az);
+    const canopy = new T.CubicBezierCurve3(attachment,
+      attachment.clone().lerp(canopyFoot, 1 / 3).setY(g.roof - 0.12),
+      attachment.clone().lerp(canopyFoot, 2 / 3).setY(canopyFoot.y + 0.08), canopyFoot);
+    const canopyWidth = 2.25, canopyRidge = 0.42;
+    fabricCover(canopy, canopyWidth, [], canopyRidge, 0);
+    // El enlace lateral se apoya en el borde del pasillo y termina a ras del granito.
+    const [landingX, landingZ] = g.approach.courtyardLanding;
+    const [galleryX] = plan.paths[0][2];
+    const landingLeft = landingX - 0.725, landingRight = landingX + 0.725;
+    joinPaving(v3(galleryX, 0.049, lawnEdge - 1.45), v3(galleryX, 0.049, lawnEdge),
+      v3(landingRight, start.y, landingZ), v3(landingLeft, start.y, landingZ), courtyardConcrete);
+    const edgeBand = new T.MeshStandardMaterial({ color: "#596664", roughness: 0.85 });
+    const [, , , [landingEndX], [landingStartX]] = plan.elevatorLanding;
+    for (const [left, right] of [[landingStartX, landingLeft], [landingRight, approachLeft], [approachRight, landingEndX - 0.02]]) {
+      pave([[left, landingZ - 0.025], [left, landingZ], [right, landingZ], [right, landingZ - 0.025]],
+        edgeBand, ELEVATOR_LANDING_LEVEL + 0.003);
     }
-    const { width, endHeight, controlLift } = coveredWalkSurface;
-    const walkStart = v3(ax, g.smallSteps.bottom, az), walkEnd = v3(bx, endHeight, bz);
-    // Perfil apenas elevado en el centro para que el césped existente no atraviese el pavimento.
-    const walk = new T.CubicBezierCurve3(walkStart,
-      walkStart.clone().lerp(walkEnd,1/3).add(v3(0,controlLift,0)),
-      walkStart.clone().lerp(walkEnd,2/3).add(v3(0,controlLift,0)),walkEnd);
     ribbon(walk, width, m.accessStone, true, true);
     ribbon(new T.LineCurve3(walkEnd,v3(55,endHeight,37)), width, m.accessStone, true);
-    const roof = new T.LineCurve3(v3(ax,2.75,az),v3(bx,2.5,bz));
+    const roof = new T.LineCurve3(canopyFoot,v3(bx,2.5,bz));
     const bays = Math.ceil(roof.getLength() / 4.5);
-    fabricCover(roof, 2.25, Array.from({length:bays + 1},(_,i)=>i / bays), 0.42);
+    fabricCover(roof, canopyWidth, Array.from({length:bays + 1},(_,i)=>i / bays), canopyRidge);
     // Bordes del caminero y juntas transversales: pavimento angosto entre jardines.
     for (const offset of [-0.85, 0.85]) {
       const side = v3(-(bz-az),0,bx-ax).normalize().multiplyScalar(offset);
       for (let i=0; i<30; i++) {
+        if (offset > 0 && Math.abs(i + 0.5 - junctionDistance) < approachWidth / 2 + 0.5) continue;
         const a=walk.getPoint(i/30).add(side), b=walk.getPoint((i+1)/30).add(side);
         beam(a.clone().add(v3(0,0.025,0)),b.clone().add(v3(0,0.025,0)),0.035,m.stone);
       }
@@ -2919,13 +2961,91 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     leafGeo.computeVertexNormals();
     const leafMat = new T.MeshStandardMaterial({color: '#455d3c',side:T.DoubleSide,roughness:1});
     const lateral=v3(-(bz-az),0,bx-ax).normalize();
+    // Fila exterior de hojas siguiendo el giro de la foto y dejando libre el empalme.
+    for (let distance = 1; distance < approachLength - 1.1; distance += 0.31) {
+      const t = distance / approachLength;
+      const tangent = curve.getTangent(t);
+      const outside = v3(-tangent.z, 0, tangent.x).normalize();
+      const root = curve.getPoint(t).addScaledVector(outside, approachWidth / 2 + 0.19);
+      root.y = Math.max(0.02, gardenHeight(...inCantina([root.x, root.z])));
+      for (let j = 0; j < 5; j++) {
+        const leaf = new T.Mesh(leafGeo, leafMat);
+        leaf.position.copy(root);
+        leaf.rotation.y = distance * 3 + j * 2.4;
+        leaf.scale.y = 0.32 + 0.06 * ((Math.round(distance / 0.31) + j) % 5);
+        leaf.castShadow = true;
+        visual.add(leaf);
+      }
+    }
     for (const side of [-1,1]) for(let i=0;i<16;i++) {
       const at=walk.getPoint(i/180).addScaledVector(lateral,side*(1.05+(i%3)*0.13));
+      if (side > 0 && Math.abs(at.clone().sub(walkStart).dot(direction) - junctionDistance) < approachWidth / 2 + 0.3) continue;
       for(let j=0;j<3;j++) {
         const leaf=new T.Mesh(leafGeo,leafMat);leaf.position.copy(at);
         leaf.rotation.y=i*2.4+j*1.8;leaf.scale.y=0.6+((i+j)%5)*0.12;
         leaf.castShadow=true;visual.add(leaf);
       }
+    }
+  }
+
+  // Patio de las mesas rojas frente al Bloque G, junto al mural del ascensor.
+  {
+    const { terrace, gravel, tables } = plan.blockGCourtyard;
+    const floor = 0.055;
+    pave(gravel, m.courtyardGravel, 0.043);
+    prism(rectCorners(terrace), -0.03, floor + 0.03, m.tile);
+
+    const tileEdge = m.tile.clone();
+    tileEdge.color.set("#8b9eaa");
+    const [w, d] = terrace.size;
+    frame(terrace, () => {
+      for (const z of [-d / 2 + 0.16, d / 2 - 0.16]) {
+        box(w, 0.006, 0.32, 0, 0, z, tileEdge);
+      }
+      for (const x of [-w / 2 + 0.16, w / 2 - 0.16]) {
+        box(0.32, 0.006, d - 0.64, x, 0, 0, tileEdge);
+      }
+      // Murete bajo en tramos, con una salida hacia el sendero y el césped.
+      for (const z of [-2.15, -0.95, 0.25]) {
+        box(0.31, 0.32, 1.17, w / 2 - 0.14, 0.16, z, m.brick, true);
+        box(0.35, 0.045, 1.17, w / 2 - 0.14, 0.34, z, m.wood);
+      }
+    }, floor);
+
+    const redSlats = m.wood.clone(); redSlats.color.set("#9f493b");
+    const tube = new T.MeshStandardMaterial({ color: "#303536", roughness: 0.76 });
+    function seat(center: Vec2, angle: number, width: number) {
+      frame({ center, size: [width, 0.65], angle }, () => {
+        for (let i = 0; i < 4; i++) box(width, 0.032, 0.093, 0, 0.44, -0.14 + i * 0.1, redSlats);
+        for (let i = 0; i < 4; i++) box(width, 0.074, 0.035, 0, 0.54 + i * 0.082, -0.17 - i * 0.025, redSlats);
+        for (const x of [-width / 2 + 0.075, width / 2 - 0.075]) {
+          const shape = new T.CatmullRomCurve3([
+            v3(x, 0.02, 0.27), v3(x, 0.14, 0.21), v3(x, 0.39, 0.21),
+            v3(x, 0.44, 0.13), v3(x, 0.44, -0.16), v3(x, 0.78, -0.26),
+          ]);
+          const support = new T.Mesh(new T.TubeGeometry(shape, 16, 0.022, 6, false), tube);
+          support.castShadow = true; visual.add(support);
+          beam(v3(x, 0.44, -0.15), v3(x, 0.018, -0.27), 0.024, tube);
+        }
+        const body = new T.Mesh(unit);
+        body.scale.set(width, 0.8, 0.52);
+        body.position.set(0, 0.4, 0);
+        solid.add(body);
+      }, floor);
+    }
+    for (const [x, z] of tables) {
+      for (let i = 0; i < 6; i++) {
+        box(1.45, 0.045, 0.122, x, floor + 0.74, z + (i - 2.5) * 0.126, redSlats);
+      }
+      for (const dx of [-0.6, 0.6]) for (const dz of [-0.27, 0.27]) {
+        beam(v3(x + dx, floor + 0.71, z + dz), v3(x + dx * 1.13, floor + 0.02, z + dz * 1.2), 0.027, tube);
+      }
+      const body = new T.Mesh(unit);
+      body.scale.set(1.45, 0.74, 0.76); body.position.set(x, floor + 0.37, z); solid.add(body);
+      seat([x, z - 1.12], 0, 1.58);
+      seat([x, z + 1.12], Math.PI, 1.58);
+      seat([x - 1.28, z], -Math.PI / 2, 0.55);
+      seat([x + 1.28, z], Math.PI / 2, 0.55);
     }
   }
 

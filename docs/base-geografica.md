@@ -286,7 +286,7 @@ Referencias: fotos del usuario `fb4056a7`, `de258745`, `42edc80e`, `d705ed24` y 
 
 Corrección posterior del usuario: el toldo es **azul** y el caminero debe unirse a los **tres peldaños de la plaza techada** que señaló en el adjunto `2b0486ee`, paralelo al costado corto del Bloque G. El eje nace dentro del ancho del peldaño inferior, desplazado 0,80 m respecto de su centro para dejar la mesa existente al costado, y continúa 30 m en la dirección del eje corto del bloque. La lona remata arriba en la losa y baja sobre esos peldaños; faldones y apoyos delgados. Ancho estimado de paso 2,20 m, cubierta 2,65 m y altura baja entre 2,80 y 2,95 m. Piso desde la cota inferior de la escalera (0,30 m) hasta 0,05 m, con ajuste suave de hasta 6 cm en el centro para evitar que el terreno lo atraviese. Se conservan los enlaces con el rellano rosado y el estacionamiento. Acabados procedurales exclusivos del acceso; sin usar las fotos como texturas. Medidas estimadas, pendientes de relevamiento. Edificios, árboles y mobiliario mantienen su geometría.
 
-En la revisión local del 05/11, el caminero azul y los tres peldaños se centraron entre las filas de pilares. La lona se une a la losa de hormigón con una transición suave hasta el tramo recto. Se retiró la mesa con bancos junto a la entrada para despejar el paso.
+En la revisión local del 05/11, el caminero azul y los tres peldaños se centraron entre las filas de pilares. La lona arranca plana en el canto de la losa de hormigón, con la cumbrera que se forma hacia el tramo recto. Se retiró la mesa con bancos junto a la entrada para despejar el paso.
 
 ## Detalle del acceso, cinco pilares y bebedero — revisión local 03/11/2026
 
@@ -351,6 +351,14 @@ La franja gris contigua a la galería roja del Bloque 1 se angosta de 4,60 a 3,5
 La mesa del patio incorpora una silla azul en la cabecera. Se amplían las sansevierias del borde hasta aproximadamente 1,2 m de alto. Tres pilares de hormigón de 42 cm de lado, con colisión, suben desde el piso hasta el extremo exterior de los tres descansos de la escalera.
 
 El ascensor del Bloque 1 conserva su posición y sus murales laterales. La cara hacia la galería tiene revoque azul y dos hojas de acero cepillado por piso. Se abre un acceso de 1,12 m a la cabina en los cuatro niveles. La silla azul queda en la cabecera opuesta de la mesa del patio.
+
+### Patio frente al Bloque G
+
+Las capturas del panorama de Iván Rodrigo Ortiz (Google Maps, junio de 2017) guían la distribución del piso y el mobiliario. El mural del ascensor sitúa la explanada de baldosas cuadradas con borde azulado, grava junto al árbol, dos conjuntos de mesas y asientos rojos, y un murete bajo. La explanada mide aproximadamente 10,2 × 6,6 m en el modelo. La referencia histórica se aplica al patio, con el volumen del Bloque G tomado del modelo actual.
+
+La foto aérea etiquetada del 12/11 guía el enlace entre el toldo azul y el rellano rosado. El sendero pasa junto al cantero interior, más estrecho y pegado a la plaza, y cierra el giro al llegar al toldo. Los adoquines redondos se concentran en el empalme, a unos 1,45 m del pie de los peldaños del caminero. Una hilera de plantas marca el borde exterior y una franja de césped separa el camino del Bloque G. Posiciones estimadas a partir de la foto.
+
+La escalinata junto al ascensor tiene un brazo longitudinal paralelo al lado largo de la plaza techada y un retorno alineado con el Bloque 1 que llega hasta el muro de ladrillo de la bodega. El peldaño superior llega bajo la losa de la galería. Se recorta la plataforma en el encuentro con los peldaños y se deja libre el pasillo de planta baja hasta el rellano rosado.
 
 La cabina del Bloque 1 recorre el hueco vertical con una sola botonera interior centrada en la pared izquierda a 1,12 m. Botoneras exteriores e indicadores en el montante derecho de acero: subida en PB, ambas direcciones en pisos 1 y 2, bajada en piso 3. Las puertas se cierran a los diez segundos de abrirse si nadie selecciona un destino antes. Las llamadas pendientes se atienden en orden; el estado de la cabina es local al navegador.
 

@@ -12,15 +12,25 @@ const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const edges = (rect) => { const c = rectCorners(rect); return [dist(c[0], c[1]), dist(c[1], c[2])]; };
 const center = (points) => points.reduce((s, p) => [s[0] + p[0] / points.length, s[1] + p[1] / points.length], [0, 0]);
 
-test("Access stair keeps a right-angle corner and the platform does not cover its treads", () => {
-  for (let i = 1; i < 20; i++) {
-    const edge = elevatorStairEdge(STEPS_RUN * i / 20), [a, b, c] = edge;
-    assert.ok(close((a[0]-b[0])*(c[0]-b[0])+(a[1]-b[1])*(c[1]-b[1]), 0));
-    for (let side = 0; side < 2; side++) {
-      const p = center([edge[side], edge[side+1]]);
+test("Access stair follows the plaza on one side and Bloque 1 on the return", () => {
+  const [plazaStart, , , plazaEnd] = rectCorners(plan.coveredPlaza);
+  const plazaSide = plazaEnd.map((value, axis) => value - plazaStart[axis]);
+  const storeroomWall = plan.eastStair.x + plan.eastStair.width / 2;
+  for (let i = 0; i <= 20; i++) {
+    const distance = STEPS_RUN * i / 20;
+    const [sideEnd, join, returnEnd] = elevatorStairEdge(distance);
+    const side = sideEnd.map((value, axis) => value - join[axis]);
+    assert.ok(close(side[0] * plazaSide[1] - side[1] * plazaSide[0], 0, 1e-9));
+    assert.ok(close(join[1], 3.3 - distance) && close(returnEnd[1], join[1]));
+    assert.ok(close(returnEnd[0], storeroomWall), "Each tread reaches the storeroom wall");
+    if (i === 20) continue;
+    for (const end of [sideEnd, returnEnd]) {
+      const p = center([end, join]);
       assert.ok(!plan.platform.some(outline => insidePolygon(p, outline)), "Raised floor overlaps the stair");
     }
   }
+  assert.ok(insidePolygon([storeroomWall + 0.1, 3.4], plan.elevatorLanding), "Pink landing reaches the bottom tread");
+  assert.ok(onPlatform([storeroomWall + 0.1, 0.8]), "Upper landing reaches the storeroom wall");
 });
 
 test("Covered walkway meets the plaza steps and follows the short side of Bloque G", () => {
@@ -218,13 +228,20 @@ test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit
   // its far edge.
   const landingX = plan.elevatorLanding.map(([x]) => x);
   assert.ok(Math.min(...landingX) < east && Math.max(...landingX) > east, "The landing prolongs the gallery");
-  const gallery = plan.platformSteps.find(({ top, angle }) => {
-    const foot = [top[0] + Math.cos(angle) * STEPS_RUN, top[1] + Math.sin(angle) * STEPS_RUN];
-    return close(foot[0], Math.max(...landingX)) && foot[1] > half.z - block1.gallery && foot[1] < half.z;
-  });
-  assert.ok(gallery && close(gallery.width, block1.gallery), "Steps from the ground-floor gallery");
+  const galleryEdge = block1.depth / 2;
+  assert.ok(plan.elevatorLanding.every(([, z]) => z <= galleryEdge), "Granite stays inside the gallery's exterior line");
+  assert.ok(insidePolygon([east - 0.05, galleryEdge - 0.05], rectCorners(plan.main)) &&
+    !insidePolygon([east - 0.05, galleryEdge - 0.05], plan.elevatorLanding), "The landing and gallery do not overlap");
+  assert.ok(insidePolygon([east + 0.05, galleryEdge - 0.05], plan.elevatorLanding), "Granite continues on the other side of the joint");
+  const [gallery] = plan.platformSteps;
+  assert.ok(close(gallery.angle - plan.coveredPlaza.angle, Math.PI), "Main steps face out from the plaza side");
+  assert.ok(insidePolygon(gallery.top, plan.plazaGallery.outline), "The top step arrives under the gallery roof");
   const galleryFoot = [gallery.top[0] + Math.cos(gallery.angle) * STEPS_RUN, gallery.top[1] + Math.sin(gallery.angle) * STEPS_RUN];
-  assert.ok(dist(galleryFoot, plan.elevator.center) < 7, "They start next to the elevator");
+  assert.ok(insidePolygon([galleryFoot[0] + Math.cos(gallery.angle) * 0.1,
+    galleryFoot[1] + Math.sin(gallery.angle) * 0.1], plan.elevatorLanding),
+    "Steps meet the pink landing");
+  assert.ok(Math.min(...plan.elevatorLanding.map(point => dist(point, plan.elevator.center))) < 4,
+    "The landing connects back to the elevator");
   assert.ok(!onPlatform(plan.elevator.center) && !onPlatform(plan.tower.center), "Bloque 1 stays at ground level");
 });
 
@@ -278,7 +295,7 @@ test("The pedestrian paths form a single connected network from the entrance", (
       graph.get(a).add(b); graph.get(b).add(a);
     }
   }
-  const visited = new Set(), queue = ["41,11"];
+  const visited = new Set(), queue = [key(plan.plazaGallery.approach.start)];
   while (queue.length) {
     const point = queue.pop();
     if (visited.has(point)) continue;

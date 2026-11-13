@@ -1,5 +1,5 @@
 import { PerspectiveCamera, Raycaster, Vector2, Vector3 } from "three";
-import { facultyBlueprint as plan, fromRect, PLAZA_LEVEL, FLOOR_HEIGHT } from "../src/data/faculty-blueprint.ts";
+import { facultyBlueprint as plan, fromRect, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -35,6 +35,13 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     });
     assert.ok(meshes > 100, "The complete scene was built");
     assert.ok(colliders.children.length > 0, "Walkable collision geometry was built");
+    const { roof: galleryRoof, smallSteps } = plan.plazaGallery;
+    const [stepX, stepZ] = smallSteps.center, [dx, dz] = smallSteps.direction;
+    for (const side of [-1, 0, 1]) {
+      const at = new Vector3(stepX + dx * 0.015 - dz * side, galleryRoof + 0.22, stepZ + dz * 0.015 + dx * side);
+      const [cover] = new Raycaster(at, new Vector3(0, -1, 0), 0, 0.24).intersectObject(group, true);
+      assert.ok(cover, "The blue canopy meets the roof face across its width");
+    }
     // El suelo visible y el de colisión comparten la misma malla de césped.
     const [[ax, az], [bx, bz]] = plan.coveredWalk;
     const length = Math.hypot(bx - ax, bz - az);
@@ -79,6 +86,33 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       body: new Capsule(new Vector3(), new Vector3(0, 1, 0), 0.28),
     });
     walker.setWorld(colliders);
+    // Salir de la galería del Bloque 1 hacia el rellano sin chocar con el retorno lateral.
+    walker.teleport(new Vector3(35.9, 0.035, 4.75));
+    camera.lookAt(camera.position.clone().add(new Vector3(1, 0, 0)));
+    walker.keys = new Set(["KeyW"]);
+    for (let i = 0; i < 30; i++) walker.update(1 / 60);
+    assert.ok(camera.position.x > 38 && camera.position.y < 1.65, "The ground-floor passage stays open");
+    camera.lookAt(camera.position.clone().add(new Vector3(0, 0, 1)));
+    for (let i = 0; i < 27; i++) walker.update(1 / 60);
+    assert.ok(camera.position.z > 6.45, "The passage opens onto the pink landing");
+    const wallX = plan.eastStair.x + plan.eastStair.width / 2;
+    for (const z of [1.2, 1.8, 2.4, 3]) {
+      const [surface] = new Raycaster(new Vector3(wallX + 0.1, 1, z), new Vector3(0, -1, 0), 0, 1)
+        .intersectObject(colliders, true);
+      const height = 0.03 + (PLAZA_LEVEL - 0.03) * (3.3 - z) / STEPS_RUN;
+      assert.ok(surface && Math.abs(surface.point.y - height) < 0.005, "The stair surface reaches the wall");
+    }
+    const stair = plan.platformSteps[0];
+    const uphill = new Vector3(-Math.cos(stair.angle), 0, -Math.sin(stair.angle));
+    const top = new Vector3(stair.top[0], 0, stair.top[1]);
+    const foot = top.clone().addScaledVector(uphill, -STEPS_RUN);
+    walker.teleport(foot.clone().addScaledVector(uphill, -0.45).setY(0.04));
+    camera.lookAt(camera.position.clone().add(uphill));
+    walker.keys = new Set(["KeyW"]);
+    for (let i = 0; i < 48; i++) walker.update(1 / 60);
+    assert.ok(camera.position.clone().sub(top).dot(uphill) > 0.35 &&
+      camera.position.y > PLAZA_LEVEL + 1.4, "Walking from the landing reaches the covered gallery");
+    walker.keys.clear();
     const motion = new ElevatorMotion(FLOOR_HEIGHT);
     for (const [level, stop] of elevator.stops.entries()) {
       walker.addBarrier(stop.barrier, () => motion.moving || motion.floor !== level || motion.opening < 0.97);

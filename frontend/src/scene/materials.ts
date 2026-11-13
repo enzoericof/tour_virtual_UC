@@ -66,6 +66,29 @@ function courtyardPaving() {
   return tiled(map, [1.6, 1.6], { roughness: 0.98 });
 }
 
+/** Grava gris del patio, con áridos irregulares de unos pocos centímetros. */
+function courtyardGravel() {
+  const canvas = document.createElement("canvas"); canvas.width = canvas.height = 512;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#686460"; ctx.fillRect(0, 0, 512, 512);
+  const noise = (n: number) => { const value = Math.sin(n * 127.1 + 311.7) * 43758.5453; return value - Math.floor(value); };
+  for (let i = 0; i < 9000; i++) {
+    const x = noise(i * 4) * 512, y = noise(i * 4 + 1) * 512;
+    const radius = 1 + noise(i * 4 + 2) * 3.2;
+    const tone = 91 + Math.floor(noise(i * 4 + 3) * 75);
+    ctx.fillStyle = `rgb(${tone},${tone - 2},${tone - 6})`;
+    ctx.beginPath();
+    ctx.moveTo(x - radius, y);
+    ctx.lineTo(x, y - radius * 0.7);
+    ctx.lineTo(x + radius, y - radius * 0.25);
+    ctx.lineTo(x + radius * 0.5, y + radius * 0.7);
+    ctx.fill();
+  }
+  const map = new T.CanvasTexture(canvas);
+  map.wrapS = map.wrapT = T.RepeatWrapping; map.colorSpace = T.SRGBColorSpace; map.anisotropy = 8;
+  return tiled(map, [1.8, 1.8], { roughness: 1 });
+}
+
 /** Texturas derivadas del escaneo del pasillo del tercer piso (scripts/extract-scan-textures.py).
  * Cada valor es el tamaño real, en metros, que cubre una repetición; debe coincidir con
  * frontend/public/assets/textures/textures.json (lo comprueba npm test). */
@@ -146,6 +169,7 @@ function accessLeaf() {
 export function makeMaterials() {
   return {
     courtyardPaving: courtyardPaving(),
+    courtyardGravel: courtyardGravel(),
     accessStone: accessFinish(false),
     awning: accessFinish(true),
     accessLeaf: accessLeaf(),
