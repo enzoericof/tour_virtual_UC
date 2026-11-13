@@ -4,56 +4,7 @@ export { sourceLayout };
 export type Point = readonly [number, number] | readonly number[];
 export const FACULTY_MAIN = "274489894";
 export const FACULTY_LABS = "327428698";
-// Selected study area: CyT, the two neighbouring pitches and nearby parking.
-// This is a presentation crop, not a surveyed property boundary.
-export const sectorBounds = { minX: -140, maxX: 115, minZ: -205, maxZ: 95 };
-
-export function clipSegment(a: Point, b: Point, bounds = sectorBounds): number[][] | null {
-  const dx = b[0] - a[0], dz = b[1] - a[1];
-  let start = 0, end = 1;
-  const limits = [[-dx, a[0] - bounds.minX], [dx, bounds.maxX - a[0]],
-    [-dz, a[1] - bounds.minZ], [dz, bounds.maxZ - a[1]]];
-  for (const [p, q] of limits) {
-    if (p === 0) { if (q < 0) return null; continue; }
-    const t = q / p;
-    if (p < 0) start = Math.max(start, t); else end = Math.min(end, t);
-    if (start > end) return null;
-  }
-  return [[a[0] + dx * start, a[1] + dz * start], [a[0] + dx * end, a[1] + dz * end]];
-}
-
-function clipRoad(points: number[][]) {
-  const parts: number[][][] = [];
-  let current: number[][] = [];
-  for (let i = 1; i < points.length; i++) {
-    const segment = clipSegment(points[i - 1], points[i]);
-    if (!segment) { current = []; continue; }
-    if (current.length && Math.hypot(current.at(-1)![0] - segment[0][0], current.at(-1)![1] - segment[0][1]) < 0.001) current.push(segment[1]);
-    else { current = segment; parts.push(current); }
-  }
-  return parts;
-}
-
-export const layout = {
-  ...sourceLayout,
-  boundary: [[sectorBounds.minX, sectorBounds.minZ], [sectorBounds.maxX, sectorBounds.minZ],
-    [sectorBounds.maxX, sectorBounds.maxZ], [sectorBounds.minX, sectorBounds.maxZ], [sectorBounds.minX, sectorBounds.minZ]],
-  buildings: sourceLayout.buildings.filter((b) => [FACULTY_MAIN, FACULTY_LABS].includes(b.id)),
-  parking: sourceLayout.parking.filter((p) => ["274489888", "327428697"].includes(p.id)),
-  pitches: sourceLayout.pitches.filter((p) => ["793370300", "793370301"].includes(p.id)),
-  roads: sourceLayout.roads.filter((r) => ["29428768", "274489910", "594756081", "678429681", "678429682", "678429683", "1383036919"].includes(r.id))
-    .flatMap((r) => clipRoad(r.points).map((points, i) => ({ ...r, id: `${r.id}-${i}`, points }))),
-};
-export const campusBounds = {
-  minX: sectorBounds.minX - 12,
-  maxX: sectorBounds.maxX + 12,
-  minZ: sectorBounds.minZ - 12,
-  maxZ: sectorBounds.maxZ + 12,
-};
-export const campusCenter = [
-  (campusBounds.minX + campusBounds.maxX) / 2,
-  (campusBounds.minZ + campusBounds.maxZ) / 2,
-] as const;
+const sectorBuildings = sourceLayout.buildings.filter((b) => [FACULTY_MAIN, FACULTY_LABS].includes(b.id));
 
 export function insidePolygon(point: Point, polygon: readonly Point[]) {
   let inside = false;
@@ -73,7 +24,7 @@ export function distanceToSegment(point: Point, a: Point, b: Point) {
 }
 
 export function footprintPose(id: string) {
-  const p = layout.buildings.find((b) => b.id === id)!.points.slice(0, 4);
+  const p = sectorBuildings.find((b) => b.id === id)!.points.slice(0, 4);
   if (p[1][0] < p[0][0]) p.push(...p.splice(0, 2));
   const x = p.reduce((s, q) => s + q[0], 0) / 4;
   const z = p.reduce((s, q) => s + q[1], 0) / 4;
@@ -95,6 +46,34 @@ export function facultyToWorld(position: readonly number[]): [number, number, nu
   return [p.x + x * Math.cos(p.angle) - z * Math.sin(p.angle), position[1],
     p.z + x * Math.sin(p.angle) + z * Math.cos(p.angle)];
 }
+
+// Contorno de presentación en metros del plano de CyT.
+const perimeterCorners = [[-45, -12], [-36, -24], [-14, -32], [14, -53], [51, -75],
+  [94, -91], [113, -74], [134, -44], [144, -15], [145, 12], [128, 35], [94, 47],
+  [69, 57], [46, 73], [20, 83], [-19, 75], [-35, 54], [-46, 23]];
+const perimeter = perimeterCorners.flatMap(([x, z], i) => {
+  const [px, pz] = perimeterCorners.at(i - 1)!;
+  const [nx, nz] = perimeterCorners[(i + 1) % perimeterCorners.length];
+  const a = [x + (px - x) * 0.23, z + (pz - z) * 0.23];
+  const b = [x + (nx - x) * 0.23, z + (nz - z) * 0.23];
+  return Array.from({ length: 5 }, (_, step) => {
+    const t = step / 4, s = 1 - t;
+    const [worldX, , worldZ] = facultyToWorld([
+      s * s * a[0] + 2 * s * t * x + t * t * b[0], 0,
+      s * s * a[1] + 2 * s * t * z + t * t * b[1],
+    ]);
+    return [worldX, worldZ];
+  });
+});
+
+export const layout = { boundary: [...perimeter, perimeter[0]], buildings: sectorBuildings };
+const perimeterX = perimeter.map(([x]) => x), perimeterZ = perimeter.map(([, z]) => z);
+export const campusBounds = {
+  minX: Math.min(...perimeterX) - 12,
+  maxX: Math.max(...perimeterX) + 12,
+  minZ: Math.min(...perimeterZ) - 12,
+  maxZ: Math.max(...perimeterZ) + 12,
+};
 
 export function mapPercent(position: readonly number[]) {
   return {

@@ -362,13 +362,7 @@ export const facultyBlueprint = {
    * superior entre el primer y el segundo piso. */
   elevator: { center: [(lines1[lines1.length - 2] + lines1[lines1.length - 1]) / 2, half.z + 0.1 + 1.25] as Vec2,
     size: [2.5, 2.5] as Vec2, mural: 6.5 },
-  courtyard: [[west, half.z + 0.2], [east, half.z + 0.2], add(gNorthEast, [Z, -0.4]),
-    add(gNorthWest, [Z, -0.4])] as Vec2[],
-  // Al sur de la plaza techada, que ya no lo invade al correrse al este.
-  common1: [[44, 12.2], [56.5, 6], [62, 30], [49, 33.5]] as Vec2[],
-  // Cuña de césped entre el Bloque G y el estacionamiento OSM 274489888.
-  parking: [add(gSouthWest, [Z, 5]), add(gSouthEast, [Z, 4]), [46.5, 42.5], [9, 78.8]] as Vec2[],
-  /** Paso peatonal cubierto del área común 1 hacia el estacionamiento. */
+  /** Paso peatonal cubierto del área común 1. */
   coveredWalk: [coveredWalkStart, coveredWalkEnd] as Vec2[],
   paths: [
     [[-16, 9.4], [5, 9.4], courtyardGalleryEnd, courtyardLanding, pinkLandingExit],
@@ -388,7 +382,7 @@ export const facultyBlueprint = {
   tree2: [-20, 22] as Vec2,
   /** Árbol frente a la cantina / pergolado de mesas */
   cantinaTree: shiftPlaza([62, 16]) as Vec2,
-  trees: [[2, 19], shiftPlaza([62, 16]), [20, 62]] as Vec2[],
+  tree3: [2, 19] as Vec2,
   courtyardCT: [-6, 22] as Vec2,
   courtyardTrees: [[-16, 31], [-2, 34], [19, 23]] as Vec2[],
   /** Patio frente al Bloque G, situado con el mural del ascensor como referencia. */
@@ -462,7 +456,6 @@ export const facultyVisitPoints: Record<string, [number, number, number]> = {
   // Acceso de la torre desde la galería, entre las puertas de ambos baños.
   banos: [towerX, 0.15, half.z + 1],
   "bloque-g": at(add(gGallery, [Z, -3]), 0.1),
-  estacionamiento: [23.2, 0.1, 54],
 };
 
 /** Hacia dónde mira el visitante al llegar (si falta, se usa una dirección por defecto). */
@@ -483,7 +476,6 @@ export const facultyVisitTargets: Record<string, [number, number, number]> = {
   "pasillo-p3": [-20, 11.6, 4.75],
   "piso-1": [-10, 5.1, 4.75],
   "piso-2": [-10, 8.6, 4.75],
-  estacionamiento: [8, 3, 30],
 };
 
 /** Polígono del plano (rectángulo o lista de puntos) en coordenadas del mundo (X, Z). */

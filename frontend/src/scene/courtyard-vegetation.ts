@@ -120,7 +120,7 @@ export function addCourtyardVegetation(group: T.Object3D, colliders: T.Object3D)
 
   tree(plan.tree1, 0.015, 11, 6.2, 0.74, 0.29);
   tree(plan.tree2, 0.015, 17.2, 7.3, 0.65, 0.34);
-  tree(plan.trees[0], 0.015, 10.1, 4.8, 0.48, 0.39);
+  tree(plan.tree3, 0.015, 10.1, 4.8, 0.48, 0.39);
   plan.courtyardTrees.forEach((point, index) => {
     tree(point, 0.015, 10.8 + index * 1.15, 5.1 + index * 0.55, 0.56 + index * 0.06, 0.35);
   });

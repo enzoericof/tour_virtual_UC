@@ -1,126 +1,42 @@
 import * as T from "three";
-import { layout, campusBounds, insidePolygon, distanceToSegment, type Point } from "../data/campus-geometry";
-import { inFacultyZone } from "../data/faculty-blueprint";
+import { layout } from "../data/campus-geometry";
+import { createCampusRock, createRockMist } from "./campus-rock";
 
-export function createCampusContext() {
+export function createCampusContext(grass: T.MeshStandardMaterial) {
   const group = new T.Group(), colliders = new T.Group();
-  group.name = "CyT · canchas y estacionamientos";
-  const material = (color: string) => new T.MeshStandardMaterial({ color, roughness: 0.95 });
-  const ground = material("#768961");
-  const road = material("#b4b1a5"), parking = material("#b6b2a2");
-  const pitchMat = material("#6a8e4a");
-  const baseGeo = new T.BoxGeometry(1, 1, 1);
-  function polygon(points: Point[], mat: T.Material, y: number, depth = 0) {
-    const shape = new T.Shape(points.map((p) => new T.Vector2(p[0], -p[1])));
-    const geometry = depth ? new T.ExtrudeGeometry(shape, { depth, bevelEnabled: false }) : new T.ShapeGeometry(shape);
-    geometry.rotateX(-Math.PI / 2);
-    const mesh = new T.Mesh(geometry, mat);
-    mesh.position.y = y; mesh.receiveShadow = true; mesh.castShadow = depth > 0;
-    group.add(mesh); return mesh;
-  }
-  function strip(points: Point[], width: number, mat: T.Material, y = 0.035) {
-    const vertices: number[] = [], indices: number[] = [];
-    points.forEach((p, i) => {
-      const a = points[Math.max(0, i - 1)], b = points[Math.min(points.length - 1, i + 1)];
-      const d = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
-      const dx = ((b[1] - a[1]) / d) * width / 2, dz = ((b[0] - a[0]) / d) * width / 2;
-      vertices.push(p[0] + dx, y, p[1] - dz, p[0] - dx, y, p[1] + dz);
-      if (i) { const k = i * 2; indices.push(k - 2, k - 1, k, k, k - 1, k + 1); }
-    });
-    const geo = new T.BufferGeometry();
-    geo.setAttribute("position", new T.Float32BufferAttribute(vertices, 3));
-    geo.setIndex(indices); geo.computeVertexNormals();
-    const mesh = new T.Mesh(geo, mat); mesh.receiveShadow = true; group.add(mesh);
-  }
-  const w = campusBounds.maxX - campusBounds.minX + 10, d = campusBounds.maxZ - campusBounds.minZ + 10;
-  // El terreno continúa más allá del sector: no hay borde de maqueta visible.
-  const terrainGeometry = new T.PlaneGeometry(20000, 20000);
+  group.name = "CyT · terreno";
+  const edge = layout.boundary.slice(0, -1);
+  const shape = new T.Shape(edge.map(([x, z]) => new T.Vector2(x, -z)));
+  const terrainGeometry = new T.ShapeGeometry(shape);
   terrainGeometry.rotateX(-Math.PI / 2);
-  const terrain = new T.Mesh(terrainGeometry, ground);
+  const [tileX, tileZ] = grass.userData.tile as [number, number];
+  const { position, uv } = terrainGeometry.attributes;
+  for (let i = 0; i < position.count; i++) uv.setXY(i, position.getX(i) / tileX, position.getZ(i) / tileZ);
+  const terrain = new T.Mesh(terrainGeometry, grass);
   terrain.name = "Terreno continuo";
-  terrain.position.y = -0.05;
+  const groundLevel = -0.005;
+  terrain.position.y = groundLevel;
   terrain.receiveShadow = true;
   group.add(terrain);
-  const floor = new T.Mesh(baseGeo);
-  floor.scale.set(w, 0.4, d);
-  floor.position.set((campusBounds.minX + campusBounds.maxX) / 2, -0.25, (campusBounds.minZ + campusBounds.maxZ) / 2);
+  const floor = new T.Mesh(terrainGeometry);
+  floor.position.y = groundLevel;
   colliders.add(floor);
-  polygon(layout.boundary, ground, -0.025);
-  layout.parking.filter((p) => !inFacultyZone(p.points)).forEach((p) => polygon(p.points, parking, 0.008));
-  layout.roads.filter((r) => !inFacultyZone(r.points)).forEach((r) => strip(r.points, r.width, road));
 
-  const lineMat = new T.LineBasicMaterial({ color: "#e1e8ce" });
-  function line(points: T.Vector3[], closed = false) {
-    const geo = new T.BufferGeometry().setFromPoints(points);
-    group.add(closed ? new T.LineLoop(geo, lineMat) : new T.Line(geo, lineMat));
-  }
-  layout.pitches.forEach((p) => {
-    polygon(p.points, pitchMat, 0.05);
-    const pts = p.points.slice(0, 4), center = new T.Vector3(
-      pts.reduce((s, q) => s + q[0], 0) / 4, 0.085, pts.reduce((s, q) => s + q[1], 0) / 4);
-    const corners = pts.map((q) => new T.Vector3(q[0], 0.085, q[1]).lerp(center, 0.045));
-    line(corners, true);
-    const longer = corners[0].distanceTo(corners[1]) > corners[1].distanceTo(corners[2]) ? 0 : 1;
-    const a = corners[longer], b = corners[(longer + 1) % 4], c = corners[(longer + 2) % 4], e = corners[(longer + 3) % 4];
-    line([a.clone().lerp(b, 0.5), c.clone().lerp(e, 0.5)]);
-    line(Array.from({ length: 40 }, (_, i) => center.clone().add(new T.Vector3(Math.cos(i * Math.PI / 20) * 4.5, 0, Math.sin(i * Math.PI / 20) * 4.5))), true);
-    for (const [start, end, sign] of [[a, e, 1], [b, c, -1]] as const) {
-      const mid = start.clone().lerp(end, 0.5), axis = b.clone().sub(a).normalize().multiplyScalar(sign * 8);
-      const across = end.clone().sub(start).normalize().multiplyScalar(8);
-      line([mid.clone().sub(across), mid.clone().sub(across).add(axis), mid.clone().add(across).add(axis), mid.clone().add(across)]);
-    }
-  });
+  const rock = createCampusRock(edge, groundLevel);
+  group.add(rock, createRockMist(rock));
 
-  let seed = 73161;
-  const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
-  function free(x: number, z: number) {
-    const point = [x, z];
-    return insidePolygon(point, layout.boundary)
-      && !layout.buildings.some((b) => insidePolygon(point, b.points) || b.points.some((a, i) => distanceToSegment(point, a, b.points[(i + 1) % b.points.length]) < 3.2))
-      && !layout.pitches.some((p) => insidePolygon(point, p.points))
-      && !layout.parking.some((p) => insidePolygon(point, p.points))
-      && !layout.roads.some((r) => r.points.some((p, i) => i && distanceToSegment(point, r.points[i - 1], p) < r.width / 2 + 2.1));
+  const barrierPoints: T.Vector3[] = [];
+  for (let i = 1; i < layout.boundary.length; i++) {
+    const [ax, az] = layout.boundary[i - 1], [bx, bz] = layout.boundary[i];
+    const a = new T.Vector3(ax, -0.3, az), b = new T.Vector3(bx, -0.3, bz);
+    const c = new T.Vector3(ax, 3.1, az), d = new T.Vector3(bx, 3.1, bz);
+    barrierPoints.push(a, b, c, b, d, c);
   }
-  // Sparse reference trees only: keep the campus layout and paths unobstructed.
-  const treeCandidates: [number, number][] = [
-    [-125, -70], [-110, 85], [105, -35], [100, 60],
-  ];
-  const trees = treeCandidates.filter(([x, z]) => free(x, z));
-  const trunks = new T.InstancedMesh(new T.CylinderGeometry(0.25, 0.4, 1, 5), material("#655744"), trees.length);
-  const leaves = new T.InstancedMesh(new T.IcosahedronGeometry(1, 1), material("#416745"), trees.length * 2);
-  const dummy = new T.Object3D(), color = new T.Color();
-  trees.forEach(([x, z], i) => {
-    const h = 5 + random() * 2, radius = 2.2 + random() * 0.8;
-    dummy.position.set(x, h / 2, z); dummy.scale.set(1, h, 1); dummy.rotation.set(0, 0, 0); dummy.updateMatrix(); trunks.setMatrixAt(i, dummy.matrix);
-    for (let k = 0; k < 2; k++) {
-      dummy.position.set(x + k * 0.9, h - k * 1.4, z + k * 0.7);
-      dummy.scale.set(radius, radius * 0.7, radius * 0.87);
-      dummy.rotation.set(random(), random(), random()); dummy.updateMatrix(); leaves.setMatrixAt(i * 2 + k, dummy.matrix);
-      leaves.setColorAt(i * 2 + k, color.setHSL(0.25 + random() * 0.08, 0.18 + random() * 0.15, 0.35 + random() * 0.1));
-    }
-  });
-  trunks.castShadow = leaves.castShadow = true;
-  leaves.receiveShadow = true; group.add(trunks, leaves);
-
-  const carPoints: [number, number][] = [];
-  for (const area of layout.parking) {
-    const xs = area.points.map((p) => p[0]), zs = area.points.map((p) => p[1]);
-    for (let x = Math.min(...xs) + 4; x < Math.max(...xs) - 3; x += 7)
-      for (let z = Math.min(...zs) + 4; z < Math.max(...zs) - 3; z += 13)
-      if (!inFacultyZone(area.points) && random() > 0.35 && insidePolygon([x, z], area.points) && !layout.roads.some((r) => r.points.some((p, i) => i && distanceToSegment([x, z], r.points[i - 1], p) < 4.6))) carPoints.push([x, z]);
-  }
-  const cars = new T.InstancedMesh(baseGeo, material("#eee9dc"), carPoints.length);
-  const carColors = ["#e3e0d4", "#455663", "#9d5245", "#757b75"];
-  carPoints.forEach(([x, z], i) => {
-    dummy.position.set(x, 0.7, z); dummy.scale.set(1.8, 1.25, 4.1); dummy.rotation.set(0, 0.12, 0); dummy.updateMatrix(); cars.setMatrixAt(i, dummy.matrix);
-    cars.setColorAt(i, color.set(carColors[i % carColors.length]));
-  });
-  cars.castShadow = true; group.add(cars);
+  const boundary = new T.Mesh(new T.BufferGeometry().setFromPoints(barrierPoints));
+  addPerimeterTrees(group, edge, groundLevel);
 
   const labels = [
     ["CIENCIAS Y TECNOLOGÍA", -58, -160, true],
-    ["ESTACIONAMIENTO", 0, -35, false],
-    ["CANCHAS", -83, 5, false],
     ["N", -125, -190, false],
   ] as const;
   for (const [name, x, z, faculty] of labels) {
@@ -138,5 +54,75 @@ export function createCampusContext() {
     sprite.position.set(x, 25, z); sprite.scale.set(width, width * canvas.height / canvas.width, 1); sprite.renderOrder = 4;
     sprite.userData.contextLabel = true; group.add(sprite);
   }
-  return { group, colliders };
+  return { group, colliders, boundary };
+}
+
+/** Copas agrupadas y siluetas variadas con dos lotes de instancias para todo el perímetro. */
+function addPerimeterTrees(group: T.Group, edge: number[][], y: number) {
+  let seed = 5293;
+  const random = () => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  const trees: { x: number; z: number; height: number; spread: number; narrow: boolean }[] = [];
+  let remaining = 2;
+  for (let i = 0; i < edge.length; i++) {
+    const [x, z] = edge[i], [nextX, nextZ] = edge[(i + 1) % edge.length];
+    const length = Math.hypot(nextX - x, nextZ - z);
+    const dx = (nextX - x) / length, dz = (nextZ - z) / length;
+    while (remaining < length) {
+      const inset = 2.5 + random() * 2.3;
+      trees.push({ x: x + dx * remaining - dz * inset, z: z + dz * remaining + dx * inset,
+        height: 3.5 + random() * 4, spread: 1.25 + random() * 0.8, narrow: random() < 0.24 });
+      if (random() < 0.36) {
+        const secondInset = inset + 2.2;
+        trees.push({ x: x + dx * (remaining + 1.1) - dz * secondInset, z: z + dz * (remaining + 1.1) + dx * secondInset,
+          height: 2.4 + random() * 3.7, spread: 1.05 + random() * 0.72, narrow: random() < 0.18 });
+      }
+      remaining += 2.7 + random() * 2.5;
+    }
+    remaining -= length;
+  }
+
+  const trunkShape = new T.CylinderGeometry(0.11, 0.23, 1, 6);
+  const crownShape = new T.IcosahedronGeometry(1, 2);
+  const tips = crownShape.attributes.position;
+  for (let i = 0; i < tips.count; i++) {
+    const x = tips.getX(i), y = tips.getY(i), z = tips.getZ(i);
+    const relief = 1 + 0.09 * Math.sin(11 * x + 4 * z) * Math.cos(9 * y - 5 * z);
+    tips.setXYZ(i, x * relief, y * relief, z * relief);
+  }
+  crownShape.computeVertexNormals();
+  const trunks = new T.InstancedMesh(trunkShape, new T.MeshStandardMaterial({ color: "#564638", roughness: 1 }), trees.length);
+  const lobes = 7;
+  const crowns = new T.InstancedMesh(crownShape, new T.MeshStandardMaterial({ roughness: 1 }), trees.length * lobes);
+  trunks.name = "Troncos del perímetro";
+  crowns.name = "Copas del perímetro";
+  const dummy = new T.Object3D(), color = new T.Color();
+  trees.forEach(({ x, z, height, spread, narrow }, index) => {
+    dummy.rotation.set(0, 0, 0);
+    dummy.position.set(x, y + height * 0.25, z);
+    dummy.scale.set(height * 0.18, height * 0.5, height * 0.18);
+    dummy.updateMatrix();
+    trunks.setMatrixAt(index, dummy.matrix);
+
+    const hue = 0.21 + random() * 0.055, tone = 0.22 + random() * 0.11;
+    const heading = random() * 2 * Math.PI;
+    for (let i = 0; i < lobes; i++) {
+      const angle = heading + i * 2.4;
+      const radial = i === 0 ? 0 : spread * (0.45 + random() * 0.32) * (narrow ? 0.65 : 1);
+      const rise = i === 0 ? 0.79 : 0.48 + random() * 0.23;
+      const size = spread * (i === 0 ? 0.67 : 0.48 + random() * 0.26);
+      dummy.position.set(x + Math.cos(angle) * radial, y + height * rise, z + Math.sin(angle) * radial);
+      dummy.rotation.set(0, angle, 0);
+      dummy.scale.set(size, size * (narrow ? 1.55 : 0.94), size * 0.9);
+      dummy.updateMatrix();
+      const slot = index * lobes + i;
+      crowns.setMatrixAt(slot, dummy.matrix);
+      crowns.setColorAt(slot, color.setHSL(hue, 0.39, tone + (rise - 0.52) * 0.26, T.SRGBColorSpace));
+    }
+  });
+  trunks.computeBoundingSphere();
+  crowns.computeBoundingSphere();
+  group.add(trunks, crowns);
 }

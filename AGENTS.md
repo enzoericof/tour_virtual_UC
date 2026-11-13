@@ -39,7 +39,6 @@ El recorrido incluye estos ítems (ids estables de `frontend/src/data/places.ts`
 | Tercer piso | `pasillo-p3`, `aula-p3` |
 | Baños | `banos` (por validar) |
 | Bloque G | `bloque-g` |
-| Estacionamiento | `estacionamiento` |
 
 Cantina de CyT y Bedelía están ambas en el alcance. «Bloque 2» de las carpetas y de la vista aérea es el Bloque G (confirmó Horacio). Las medidas de la reconstrucción y los recintos sin captura específica siguen pendientes de validación: solo el Bloque 1 tiene medidas reales, y las que faltan tomar están en [docs/base-geografica.md](docs/base-geografica.md#estado-de-las-medidas-03112026). Issues principales: [docs/pendientes.md](docs/pendientes.md).
 
@@ -69,11 +68,11 @@ Versiones exactas: tabla del README (única fuente). Decisiones: Three.js direct
 
 Detalle y justificación: [docs/base-geografica.md](docs/base-geografica.md); consultarlo antes de mover bloques o cambiar coordenadas.
 
-- El escenario se limita a **CyT, las dos canchas vecinas y los estacionamientos cercanos**. `campus-geometry.ts` selecciona ese sector de `campus-layout.json`, que queda como referencia. No reincorporar otras facultades ni el seminario sin nueva indicación del equipo.
+- El escenario se limita a **CyT y sus accesos**. `campus-geometry.ts` toma las huellas de `campus-layout.json` y define el contorno de la maqueta. Las canchas y los estacionamientos se retiraron por solicitud del usuario. No reincorporar otras facultades ni el seminario sin nueva indicación del equipo.
 - `faculty-blueprint.ts` es la única geometría de CyT para la vista general inicial y el recorrido a pie (únicos modos de navegación). No recuperar los bloques paralelos antiguos ni duplicar anexos con volúmenes OSM. El Bloque G es oblicuo respecto del Bloque 1.
 - Secuencia: **bloque de aulas → plaza techada → plaza abierta → cantina girada**, junto al Departamento de Electrónica e Informática. La plaza abierta queda a cielo abierto y unida al pavimento de la techada. `plaza` es la techada; `plaza-abierta` es independiente. Plaza techada, cuadrado, Bedelía, cantina y Sala Manfred están sobre una plataforma a 0,90 m (corrección del 02/11: cinco peldaños), entre la planta baja y el primer piso; los bloques quedan en el nivel del suelo. La aclaración del equipo y las capturas del 31/10/2026 prevalecen sobre el rótulo «Cantina» de la imagen anotada antigua.
 - `X` este, `Z` sur, `Y` vertical, metros. Los puntos de visita pasan por `facultyToWorld`, que solo gira y traslada el plano métrico: no escalarlo ni volver a registrarlo sobre píxeles de imágenes. Las medidas del equipo están en base-geografica.md y las comprueba `npm test`.
-- Red peatonal conectada y circulaciones despejadas. Sin bosques: dos árboles principales del patio, tres referencias adicionales en CyT y el árbol con cantero frente a la cantina y pocos en el contexto, según base-geografica.md.
+- Red peatonal conectada y circulaciones despejadas. La franja arbolada solicitada por el usuario se ubica en el borde exterior de la maqueta. La vegetación interior sigue las referencias de base-geografica.md.
 - Afinar interiores, anexos y fachadas solo con referencias identificadas. Árboles, vehículos y alturas del contexto son aproximaciones, no un relevamiento.
 - Mantener la atribución de OpenStreetMap. Las capturas de Google Maps sirven para comparar, no son texturas.
 

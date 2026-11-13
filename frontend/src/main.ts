@@ -109,7 +109,7 @@ function renderPlaces() {
       (p.name + " " + p.floor).toLowerCase().includes(query) &&
       (filter === "all" ||
         (filter === "outside" &&
-          ["patio", "jardin", "estacionamiento", "plaza"].includes(p.id))),
+          ["patio", "jardin", "plaza"].includes(p.id))),
   );
   $("#place-list").innerHTML = shown.length
     ? shown
@@ -294,8 +294,8 @@ $("#quality").onclick = () => {
   engine.quality(highQuality);
   toast(
     highQuality
-      ? "Calidad alta: sombras activadas."
-      : "Modo fluido: menor resolución y sombras desactivadas.",
+      ? "Calidad alta: mayor resolución."
+      : "Modo fluido: menor resolución.",
   );
 };
 $("#fullscreen").onclick = () => {

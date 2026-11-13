@@ -6,7 +6,7 @@ Primera versión funcional del Trabajo Práctico de **Informática III 2026**, d
 
 ## Qué incluye esta versión
 
-- Sector de Ciencias y Tecnología con las medidas del equipo: Bloque 1 (65 × 12 m, planta baja y tres pisos, columnas cada 4,5 m, puertas dobles numeradas y títulos en la cara este) con su escalera tipo Pompidou, ascensor con murales, cabecera este con escalera y rampa hacia la plaza techada, media sombra y torre de baños; Bloque G (65 × 12 m); patios; plazas techada y abierta, Bedelía, cantina y Sala Manfred sobre una plataforma a 1,40 m; dos canchas vecinas y estacionamientos cercanos. Se excluyen las demás facultades y el seminario.
+- Sector de Ciencias y Tecnología con las medidas del equipo: Bloque 1 (65 × 12 m, planta baja y tres pisos, columnas cada 4,5 m, puertas dobles numeradas y títulos en la cara este) con su escalera tipo Pompidou, ascensor con murales, cabecera este con escalera y rampa hacia la plaza techada, media sombra y torre de baños; Bloque G (65 × 12 m); patios; plazas techada y abierta, Bedelía, cantina y Sala Manfred sobre una plataforma a 1,40 m. Se excluyen las demás facultades, el seminario, las canchas y los estacionamientos cercanos.
 - Paredes de ladrillo, piso de granito, hormigón, cubierta y lamas con texturas sacadas del escaneo del pasillo del tercer piso.
 - Exteriores aproximados de Maquetas, Kampus Print, CTA–DICIA, DEI–LED y dependencias LED, DA/CAP, DAS y DG; accesibles desde Explorar. [Fuente y límites](docs/base-geografica.md#dependencias-del-plano-general--revisión-local-02112026).
 - Todo el recorrido usa el modelo construido de la facultad. Los escaneos navegables de laboratorio, pasillo y aula del tercer piso fueron retirados; esos espacios conservan sus identificadores y fotografías de referencia.

@@ -2,15 +2,17 @@ import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { ElevatorMotion, type ElevatorButton, type ElevatorDoor } from "./elevator";
 import { createCampus } from "./campus";
+import { campusRockDepth } from "./campus-rock";
+import { makeCampusSky } from "./campus-sky";
 import { Walker } from "../navigation/walker";
 import { pickDestination, pointerOnCanvas } from "../navigation/pick-destination";
 import { places, type Place } from "../data/places";
-import { campusCenter, facultyToWorld } from "../data/campus-geometry";
+import { campusBounds, facultyToWorld, insidePolygon, layout } from "../data/campus-geometry";
 import { facultyVisitTargets, FLOOR_HEIGHT } from "../data/faculty-blueprint";
 import { annexVisitTargets } from "../data/faculty-annexes";
 export class TourEngine {
   readonly scene = new T.Scene();
-  readonly camera = new T.PerspectiveCamera(52, 1, 0.08, 2600);
+  readonly camera = new T.PerspectiveCamera(52, 1, 0.08, 1900);
   readonly renderer: T.WebGLRenderer;
   readonly orbit: OrbitControls;
   readonly walker: Walker;
@@ -38,45 +40,19 @@ export class TourEngine {
     this.renderer = new T.WebGLRenderer({
       antialias: true,
       powerPreference: "high-performance",
+      reversedDepthBuffer: true,
     });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = T.PCFShadowMap;
+    this.renderer.shadowMap.enabled = false;
     this.renderer.outputColorSpace = T.SRGBColorSpace;
     this.renderer.toneMapping = T.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.96;
     this.canvas = this.renderer.domElement;
     this.canvas.setAttribute("aria-label", "Escenario 3D del campus");
     container.append(this.canvas);
-    // Cielo envolvente sin descargas; el horizonte comparte color con la bruma.
-    const skyCanvas = document.createElement("canvas");
-    skyCanvas.width = 16;
-    skyCanvas.height = 256;
-    const skyContext = skyCanvas.getContext("2d")!;
-    const skyGradient = skyContext.createLinearGradient(0, 0, 0, 256);
-    skyGradient.addColorStop(0, "#68a9df");
-    skyGradient.addColorStop(0.48, "#c7e0ed");
-    skyGradient.addColorStop(1, "#c7e0ed");
-    skyContext.fillStyle = skyGradient;
-    skyContext.fillRect(0, 0, 16, 256);
-    const sky = new T.CanvasTexture(skyCanvas);
-    sky.colorSpace = T.SRGBColorSpace;
-    sky.mapping = T.EquirectangularReflectionMapping;
-    this.scene.background = sky;
+    this.scene.background = makeCampusSky();
     this.scene.fog = new T.Fog("#c7e0ed", 450, 1900);
     this.sun.position.set(-240, 500, 240);
-    this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(2048, 2048);
-    Object.assign(this.sun.shadow.camera, {
-      left: -450,
-      right: 450,
-      top: 450,
-      bottom: -450,
-      near: 0.5,
-      far: 1300,
-    });
-    this.sun.shadow.bias = -0.0005;
-    this.sun.shadow.normalBias = 0.035;
     this.scene.add(this.sun, this.hemi, this.campus.group);
     this.orbit = new OrbitControls(this.camera, this.canvas);
     this.orbit.rotateSpeed = 1.5;
@@ -84,12 +60,10 @@ export class TourEngine {
     this.orbit.maxPolarAngle = Math.PI * 0.48;
     this.orbit.minDistance = 4;
     this.orbit.maxDistance = 650;
-    this.orbit.target.set(campusCenter[0], 0, campusCenter[1]);
-    this.camera.position.set(campusCenter[0] + 480, 640, campusCenter[1] + 760);
-    this.orbit.update();
     this.walker = new Walker(this.camera, this.canvas);
     this.walker.onCaptureError = (message) => this.onError(message);
     this.walker.setWorld(this.campus.colliders);
+    this.walker.addBarrier(this.campus.boundary, () => true);
     for (const [floor, stop] of this.campus.elevator.stops.entries()) {
       this.walker.addBarrier(stop.barrier, () =>
         this.elevator.moving || this.elevator.floor !== floor || this.elevator.opening < 0.97);
@@ -131,9 +105,10 @@ export class TourEngine {
         || performance.now() - start.time > 700
         || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 6) return;
       const ray = new T.Raycaster();
-      ray.far = 2600;
+      ray.far = this.camera.far;
       ray.setFromCamera(pointerOnCanvas(event.clientX, event.clientY, this.canvas.getBoundingClientRect()), this.camera);
-      const destination = pickDestination(ray, this.campus.colliders, (feet) => this.walker.canStandAt(feet));
+      const destination = pickDestination(ray, this.campus.colliders,
+        (feet) => insidePolygon([feet.x, feet.z], layout.boundary) && this.walker.canStandAt(feet));
       if (!destination) return;
       const direction = this.camera.getWorldDirection(new T.Vector3()); direction.y = 0;
       if (direction.lengthSq() < 0.001) direction.set(0, 0, -1);
@@ -268,10 +243,26 @@ export class TourEngine {
     this.orbit.enabled = true;
     this.campus.setDetail(true);
     this.orbit.maxDistance = 650;
-    // Una sola vista general, compartida por el inicio y el regreso del recorrido.
-    const focus = new T.Vector3(...facultyToWorld([-5, 6, -1]));
+    const focus = new T.Vector3((campusBounds.minX + campusBounds.maxX) / 2, -campusRockDepth * 0.32,
+      (campusBounds.minZ + campusBounds.maxZ) / 2);
+    const view = new T.Vector3(-0.37, 0.43, -1).normalize();
+    const vertical = T.MathUtils.degToRad(this.camera.fov / 2);
+    const horizontal = Math.atan(Math.tan(vertical) * this.camera.aspect);
+    // Encadra el contorno completo en el tamaño actual de la ventana.
+    const right = new T.Vector3().crossVectors(this.camera.up, view).normalize();
+    const up = new T.Vector3().crossVectors(view, right);
+    const offset = new T.Vector3();
+    let distance = 0;
+    for (const [x, z] of layout.boundary) {
+      offset.set(x, 8, z).sub(focus);
+      const extent = Math.max(Math.abs(offset.dot(right)) / Math.tan(horizontal),
+        Math.abs(offset.dot(up)) / Math.tan(vertical));
+      distance = Math.max(distance, offset.dot(view) + extent);
+    }
+    offset.set(-8, -campusRockDepth - 28 - focus.y, 5);
+    distance = Math.max(distance, offset.dot(view) + Math.abs(offset.dot(up)) / Math.tan(vertical));
     this.orbit.target.copy(focus);
-    this.camera.position.copy(focus).add(new T.Vector3(-27, 24, -62));
+    this.camera.position.copy(focus).addScaledVector(view, distance * 1.13);
     this.orbit.update();
     this.onMode("overview");
   }
@@ -295,7 +286,6 @@ export class TourEngine {
   }
   quality(high: boolean) {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, high ? 1.8 : 1));
-    this.renderer.shadowMap.enabled = high;
     this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
   }
   get position() {

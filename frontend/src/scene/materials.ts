@@ -4,7 +4,7 @@ export function random() {
   seed = (seed * 1664525 + 1013904223) >>> 0;
   return seed / 4294967296;
 }
-function texture(kind: "tile" | "grass" | "concrete") {
+function texture(kind: "tile" | "concrete") {
   const c = document.createElement("canvas");
   c.width = c.height = 512;
   const g = c.getContext("2d")!;
@@ -23,23 +23,53 @@ function texture(kind: "tile" | "grass" | "concrete") {
       g.stroke();
     }
   } else {
-    g.fillStyle = kind === "grass" ? "#728052" : "#bab8aa";
+    g.fillStyle = "#bab8aa";
     g.fillRect(0, 0, 512, 512);
   }
   for (let i = 0; i < 18000; i++) {
     g.fillStyle = random() > 0.5 ? "#ffffff0c" : "#0000000c";
-    g.fillRect(
-      random() * 512,
-      random() * 512,
-      kind === "grass" ? 2 : 1,
-      kind === "grass" ? 5 : 1,
-    );
+    g.fillRect(random() * 512, random() * 512, 1, 1);
   }
   const t = new T.CanvasTexture(c);
   t.wrapS = t.wrapT = T.RepeatWrapping;
   t.colorSpace = T.SRGBColorSpace;
   t.anisotropy = 8;
   return t;
+}
+
+export function makeGrassMaterial() {
+  const size = 128, canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#758655";
+  ctx.fillRect(0, 0, size, size);
+  let state = 6219;
+  const sample = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+  for (let i = 0; i < 24; i++) {
+    const x = sample() * size, y = sample() * size;
+    const radius = 13 + sample() * 18;
+    const tint = i % 2 ? "148,159,104" : "81,102,62";
+    const wrapX = x < radius ? size : x > size - radius ? -size : 0;
+    const wrapY = y < radius ? size : y > size - radius ? -size : 0;
+    for (const sx of wrapX ? [0, wrapX] : [0]) for (const sy of wrapY ? [0, wrapY] : [0]) {
+      const cx = x + sx, cy = y + sy;
+      const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+      gradient.addColorStop(0, `rgba(${tint},0.16)`);
+      gradient.addColorStop(0.65, `rgba(${tint},0.05)`);
+      gradient.addColorStop(1, `rgba(${tint},0)`);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
+    }
+  }
+  const map = new T.CanvasTexture(canvas);
+  map.wrapS = map.wrapT = T.RepeatWrapping;
+  map.colorSpace = T.SRGBColorSpace;
+  map.minFilter = T.LinearMipmapLinearFilter;
+  map.anisotropy = 16;
+  return tiled(map, [6, 6], { roughness: 1 });
 }
 
 /** Adoquines de la explanada de cantina: referencia elevada aportada por Horacio.
@@ -166,7 +196,7 @@ function accessLeaf() {
   return new T.MeshStandardMaterial({map,roughness:1,side:T.DoubleSide});
 }
 
-export function makeMaterials() {
+export function makeMaterials(grass: T.MeshStandardMaterial) {
   return {
     courtyardPaving: courtyardPaving(),
     courtyardGravel: courtyardGravel(),
@@ -182,7 +212,7 @@ export function makeMaterials() {
     roofUnder: scanMaterial("chapa-cubierta", { roughness: 0.85 }),
     tile: tiled(texture("tile"), [1.6, 1.6], { roughness: 0.7 }),
     stone: tiled(texture("concrete"), [4, 4], { roughness: 0.95 }),
-    grass: tiled(texture("grass"), [4, 4], { roughness: 1 }),
+    grass,
     plaster: new T.MeshStandardMaterial({ color: "#e6e2d6", roughness: 0.92 }),
     metal: new T.MeshStandardMaterial({
       color: "#4f6370",

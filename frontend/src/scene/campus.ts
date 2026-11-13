@@ -1,10 +1,12 @@
 import * as T from "three";
 import { createFaculty } from "./faculty-reconstruction";
 import { createCampusContext } from "./campus-context";
+import { makeGrassMaterial } from "./materials";
 import { facultyPose } from "../data/campus-geometry";
 
 export function createCampus() {
-  const faculty = createFaculty(), context = createCampusContext();
+  const grass = makeGrassMaterial();
+  const faculty = createFaculty(grass), context = createCampusContext(grass);
   const group = new T.Group(), colliders = new T.Group();
   const pose = facultyPose;
   // Igual que facultyToWorld: giro y traslación, sin escala, para conservar las medidas.
@@ -25,5 +27,5 @@ export function createCampus() {
   }
   setDetail(false);
   group.updateMatrixWorld(true); colliders.updateMatrixWorld(true);
-  return { group, colliders, markers: faculty.markers, elevator: faculty.elevator, setDetail };
+  return { group, colliders, boundary: context.boundary, markers: faculty.markers, elevator: faculty.elevator, setDetail };
 }

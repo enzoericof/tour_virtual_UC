@@ -4,13 +4,14 @@ Fuente única de la distribución espacial y de las medidas. Reglas de trabajo: 
 
 ## Alcance del escenario
 
-Decisión del equipo (31/10/2026): solo **CyT, las dos canchas vecinas y los estacionamientos cercanos**. Quedan fuera otras facultades, biblioteca, seminario y la cancha sur (`793370302`).
+El escenario muestra **CyT y sus accesos**. El terreno recortado y su franja arbolada siguen la referencia visual del usuario. Quedan fuera las canchas, los estacionamientos, otras facultades, la biblioteca y el seminario.
 
-- `frontend/src/data/campus-geometry.ts` selecciona de `campus-layout.json` las huellas OSM `274489894` (Bloque 1, constante `FACULTY_MAIN`) y `327428698` («segundo bloque»), las canchas `793370300` y `793370301`, los estacionamientos `274489888` y `327428697` y siete calles recortadas.
+- `frontend/src/data/campus-geometry.ts` selecciona de `campus-layout.json` las huellas OSM `274489894` (Bloque 1, constante `FACULTY_MAIN`) y `327428698` (Bloque G). Los caminos peatonales del recorrido se definen en `faculty-blueprint.ts` y `faculty-annexes.ts`.
 - `campus-layout.json` completo (60 huellas, 32 trazados viales, 4 estacionamientos, 3 canchas) es referencia, no escenario.
-- Recorte de presentación: X −140…115 m, Z −205…95 m (no es un límite de propiedad). El mapa y la cámara general usan ese recorte más 12 m de margen.
-- Las huellas OSM no se dibujan como volúmenes: la de Bloque 1 fija la posición y la orientación del plano (`facultyPose`) y ambas evitan árboles de contexto. La constante `FACULTY_LABS` (`327428698`) tiene un nombre engañoso: no designa laboratorios. Su orientación (29,15° respecto de la de Bloque 1) da el giro del Bloque G; su centroide queda a unos 8 m del Bloque G ubicado con las medidas del equipo y no se usa.
-- Fuera de `inFacultyZone` (zona reconstruida) se dibujan como contexto los estacionamientos y calles OSM.
+- El perímetro de presentación rodea los edificios, los anexos y sus senderos. El contorno del terreno sirve de límite para el recorrido a pie y de referencia de encuadre para el mapa y la vista general.
+- La maqueta tiene una base de roca flotante con estratos y musgo que se estrecha en una punta irregular. Una bruma ligera rodea la punta y el cielo nuboso envuelve la vista general y el recorrido a pie.
+- La huella OSM del Bloque 1 fija la posición y la orientación del plano (`facultyPose`). La huella `FACULTY_LABS` (`327428698`) corresponde al Bloque G y determina su giro de 29,15° respecto del Bloque 1. El centro del Bloque G se ubica con las medidas del equipo.
+- El terreno continuo y las pendientes del jardín de la cantina comparten una textura suave de césped. El recorrido se dibuja sin sombras proyectadas en ambos niveles de calidad gráfica.
 
 ## Coordenadas y pisos
 
@@ -91,8 +92,8 @@ Una sola geometría para «Sector CyT», «Vista de planta», «Plano de CyT», 
 | Escaleras, ascensor y cabecera este | `stair`, `elevator`, `eastStair`, `eastEnd` | — | Fachada sur y cabecera este del Bloque 1: retiro de planta baja y primer piso, rampa y columnas (medidas arriba) |
 | Aulas | `rooms` | — | Seis por piso en cada bloque (medidas arriba) |
 | Bloque G («Bloque 2» de las carpetas) | `block2` | `bloque-g` | 65 × 12 m, sur del Bloque 1 y girado −29,15°; escalera de ida y vuelta sobre su galería |
-| Patio (área común 2) | `courtyard` | `patio` | Entre ambos bloques |
-| Área común 1 | `common1` | `jardin` | Al sur de la plaza techada |
+| Patio (área común 2) | Terreno continuo | `patio` | Entre ambos bloques |
+| Área común 1 | Terreno continuo | `jardin` | Al sur de la plaza techada |
 | Sala Manfred | `manfred`, `manfredLink`, `manfredGallery`, `corridor` | `sala-manfred` | Hexágono de 16 × 12 m unido al Bloque 1 por el acceso cubierto |
 | Pasillo de la plaza techada | `plazaGallery`, `plazaPassage` | `pasillo-plaza` | Galería de 3,35 m de ancho con dos filas de pilares en los bordes. Vista hacia Kampus Print, entre Manfred y Bedelía |
 | Bedelía | `bedelia` | `bedelia` | 20 × 10 m, fachada vidriada hacia el cuadrado. Sobre el lateral del pasillo se reproducen la puerta de profesores, la vitrina del CECYT y las jardineras de la foto |
@@ -101,14 +102,13 @@ Una sola geometría para «Sector CyT», «Vista de planta», «Plano de CyT», 
 | Plaza abierta | `openPlaza` | `plaza-abierta` | El cuadrado descubierto, con pavimento propio |
 | Cantina | `cantina` | `cantina-cyt` | 18 × 12 m, eje largo transversal al Bloque 1, fachada y terraza hacia el cuadrado |
 | Electrónica e Informática | `electronics` | — | 26 × 10 m, junto a la cantina; solo volumen de orientación |
-| Estacionamiento | `parking` | `estacionamiento` | Césped entre G y el estacionamiento OSM `274489888`; paso cubierto desde el área común 1 |
 | Accesos | `paths` | — | 7 caminos en una red conectada desde la plaza techada |
 
 - Secuencia obligatoria: **bloque de aulas → plaza techada → plaza abierta → cantina girada**.
 - Vegetación: 2 árboles principales identificados en el patio central según fotos in situ (`arbol_ia/árbol_1.HEIC` y `arbol_ia/árbol_2.HEIC`, ubicaciones 1 y 2 en `cómo_debe_ser.png`):
   - **Árbol 1** (`tree1` en `[21.5, 15]`): mango frondoso del patio este, ~9 m de altura, copa densa en cúpula, tronco con raíces tablares y bancos de descanso debajo.
   - **Árbol 2** (`tree2` en `[-20, 22]`): árbol autóctono alto del patio oeste, ~15,5 m de altura (supera la cubierta del Bloque 1), fuste alto despejado (~5,2 m), grandes ramas maestras y canteros de ladrillo en su base.
-  - Árboles de referencia adicionales en CyT (4 puntos) y hasta 4 en el contexto. No rellenar con bosques inventados.
+  - Árboles de referencia adicionales dentro de CyT y una franja de árboles agrupados en el borde exterior de la maqueta.
 - Cada id de `places.ts` (16) tiene punto de visita en `facultyVisitPoints`; la mayoría tiene además `facultyVisitTargets` (hacia dónde mira el visitante al llegar).
 
 ## Fuentes y prioridad
@@ -136,7 +136,7 @@ Guardar fuera del repositorio una exportación XML de OSM con el área universit
 python scripts/import-campus-map.py ruta/al/campus.osm
 ```
 
-Usa solo la biblioteca estándar de Python, descarta metadatos personales de colaboradores y **sobrescribe `frontend/src/data/campus-layout.json`**; no toca `faculty-blueprint.ts`. Después ejecutar `npm test` en `frontend/`: comprueba que siguen existiendo los ids seleccionados (2 huellas, 2 estacionamientos, 2 canchas) y que el plano conserva las medidas del equipo. Antes de cambiar el plano, contrastar medidas, fotos y escaneos; preservar ids y conectividad peatonal.
+Usa solo la biblioteca estándar de Python, descarta metadatos personales de colaboradores y **sobrescribe `frontend/src/data/campus-layout.json`**. Después ejecutar `npm test` en `frontend/` para comprobar la selección del contexto y las medidas del plano. Antes de cambiar el plano, contrastar medidas, fotos y escaneos; preservar ids y conectividad peatonal.
 
 
 ### Interior inicial de cantina — 02/11/2026

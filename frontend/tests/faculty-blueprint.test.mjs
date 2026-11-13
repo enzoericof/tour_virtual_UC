@@ -265,10 +265,10 @@ test("Sala Manfred: rotated facade beside the clear corridor and connected ramp"
   assert.ok(outline.every(([, z]) => z < -half.z - .5), "Clear of Bloque 1");
 });
 
-test("Annexes and visit points stay in the faculty site, with parking south of Bloque G", () => {
-  for (const key of ["main", "block2", "manfred", "bedelia", "cantina", "coveredPlaza", "electronics", "parking"])
+test("Annexes and visit points stay in the faculty site", () => {
+  for (const key of ["main", "block2", "manfred", "bedelia", "cantina", "coveredPlaza", "electronics"])
     assert.ok(inFacultyZone(worldPolygon(plan[key])), key);
-  assert.equal(Object.keys(facultyVisitPoints).length, 17);
+  assert.equal(Object.keys(facultyVisitPoints).length, 16);
   for (const [id, p] of Object.entries(facultyVisitPoints)) {
     const w = facultyToWorld(p);
     assert.ok(inFacultyZone([[w[0], w[2]]]), id);
@@ -279,7 +279,6 @@ test("Annexes and visit points stay in the faculty site, with parking south of B
   assert.equal(facultyVisitPoints["pasillo-p3"][1], 10.5);
   assert.equal(facultyVisitPoints["aula-p3"][1], 10.5);
   assert.ok(facultyVisitPoints["cantina-cyt"][0] > facultyVisitPoints.patio[0]);
-  assert.ok(facultyVisitPoints.estacionamiento[2] > facultyVisitPoints["bloque-g"][2]);
   assert.ok(insidePolygon([facultyVisitPoints.banos[0], facultyVisitPoints.banos[2]], towerOutline()),
     "The toilets visit point is inside the tower");
 });

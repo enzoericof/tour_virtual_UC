@@ -10,7 +10,11 @@ test("The complete faculty scene starts with the current blueprint and valid geo
   const previousDocument = globalThis.document;
   // Canvas drawing and image loading are browser services; this check builds the actual scene.
   const context = new Proxy({}, {
-    get: (target, key) => key === "measureText" ? () => ({ width: 100 }) : target[key] ?? (() => {}),
+    get: (target, key) => {
+      if (key === "createRadialGradient") return () => ({ addColorStop() {} });
+      if (key === "measureText") return () => ({ width: 100 });
+      return target[key] ?? (() => {});
+    },
     set: (target, key, value) => (target[key] = value, true),
   });
   globalThis.document = {
@@ -23,8 +27,22 @@ test("The complete faculty scene starts with the current blueprint and valid geo
   });
   try {
     const { createFaculty } = await server.ssrLoadModule("/src/scene/faculty-reconstruction.ts");
-    const { group, colliders, elevator } = createFaculty();
+    const { createCampusContext } = await server.ssrLoadModule("/src/scene/campus-context.ts");
+    const { makeGrassMaterial } = await server.ssrLoadModule("/src/scene/materials.ts");
+    const grass = makeGrassMaterial();
+    assert.ok(grass.map && !grass.bumpMap && !grass.normalMap, "Grass uses a color texture without surface relief");
+    const { group, colliders, elevator } = createFaculty(grass);
+    const { group: context } = createCampusContext(grass);
+    const ground = context.getObjectByName("Terreno continuo");
+    assert.equal(ground.material, grass, "The base terrain uses the same grass material as the garden");
+    assert.ok(ground.receiveShadow && !ground.castShadow, "The ground receives shadows without casting them");
+    const rock = context.getObjectByName("Base rocosa de CyT");
+    rock.geometry.computeBoundingBox();
+    const { min, max } = rock.geometry.boundingBox;
+    assert.ok(Math.abs(max.y - ground.position.y) < 1e-6, "The rock meets the terrain at its rim");
+    assert.ok(min.y < max.y - 25, "The floating base has visible depth");
     let meshes = 0;
+    let grassReceivers = 0;
     group.traverse(object => {
       if (!object.isMesh) return;
       meshes++;
@@ -32,8 +50,13 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       const positions = object.geometry.attributes.position;
       assert.ok(positions?.count > 0, "Every mesh has geometry");
       assert.ok(positions.array.every(Number.isFinite), "Geometry contains finite coordinates");
+      if (object.material === grass) {
+        assert.ok(object.receiveShadow && !object.castShadow, "Merged grass surfaces keep their shadow settings");
+        grassReceivers++;
+      }
     });
     assert.ok(meshes > 100, "The complete scene was built");
+    assert.ok(grassReceivers > 0, "The garden is present in the rendered scene");
     assert.ok(colliders.children.length > 0, "Walkable collision geometry was built");
     const { roof: galleryRoof, smallSteps } = plan.plazaGallery;
     const [stepX, stepZ] = smallSteps.center, [dx, dz] = smallSteps.direction;

@@ -206,18 +206,6 @@ const originalPlaces: Place[] = [
     photos: ["IMG_5668", "IMG_5667"],
     status: "reference",
   },
-  {
-    id: "estacionamiento",
-    name: "Estacionamiento",
-    category: "Accesos",
-    floor: "Exterior",
-    description:
-      "Sector arbolado al costado del segundo bloque. Posición aproximada según la vista aérea y las fotografías.",
-    position: [5, 0, 49],
-    photo: "IMG_5739",
-    photos: ["IMG_5739", "IMG_5738", "IMG_5730"],
-    status: "reference",
-  },
 ];
 originalPlaces.push(...facultyAnnexes.map((b): Place => ({
   id: b.id, name: b.name, category: "Dependencias de CyT", floor: "Planta baja · exterior",

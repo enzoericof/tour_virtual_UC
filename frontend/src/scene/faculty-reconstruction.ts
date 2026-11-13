@@ -1,7 +1,7 @@
 import * as T from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { brushedSteel, elevatorLabel, type ElevatorModel } from "./elevator";
-import { makeMaterials } from "./materials";
+import { makeGrassMaterial, makeMaterials } from "./materials";
 import { addCourtyardVegetation } from "./courtyard-vegetation";
 import { addCantinaTree } from "./cantina-tree";
 import {
@@ -9,7 +9,7 @@ import {
   elevatorStairEdge, bulgedOutline, cantinaForecourt, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR, fromRect,
   type Rect, type Rooms, type Vec2,
 } from "../data/faculty-blueprint";
-import { insidePolygon } from "../data/campus-geometry";
+import { facultyToWorld, insidePolygon } from "../data/campus-geometry";
 import { gardenHeight, gardenBounds, inCantina, coveredWalkSurface } from "../data/cantina-terrain";
 import { facultyAnnexes, annexPaths, annexCoveredPaths, annexEnclosedLink, annexWalkEnd, diciaWalkExtension } from "../data/faculty-annexes";
 import { facultyPlaces } from "../data/places";
@@ -44,9 +44,9 @@ type BlockSpec = {
 };
 
 /** CyT en metros sobre el plano del equipo (faculty-blueprint.ts), con texturas del escaneo. */
-export function createFaculty() {
+export function createFaculty(grass = makeGrassMaterial()) {
   const group = new T.Group(), colliders = new T.Group(), markers: T.Mesh[] = [];
-  const m = makeMaterials();
+  const m = makeMaterials(grass);
   const elevatorLevels = ["PB", "1", "2", "3"];
   const displayLabel = (text: string) => elevatorLabel(text, "#ff5945", "#242522");
   const elevator: ElevatorModel = {
@@ -77,7 +77,7 @@ export function createFaculty() {
     mesh.position.set(x, y, z); mesh.scale.set(w, h, d);
     if (options.rotation) mesh.rotation.y = options.rotation;
     if (options.pitch) mesh.rotation.x = options.pitch;
-    mesh.castShadow = h > 0.2; mesh.receiveShadow = true; visual.add(mesh);
+    mesh.castShadow = !mat.transparent && mat !== grass; mesh.receiveShadow = true; visual.add(mesh);
     if (collide) {
       const body = new T.Mesh(unit);
       body.position.copy(mesh.position); body.scale.copy(mesh.scale); body.rotation.copy(mesh.rotation);
@@ -176,7 +176,7 @@ export function createFaculty() {
     if (collide) solid.add(new T.Mesh(geo));
     return mesh;
   }
-  function pave(points: readonly Vec2[], mat: T.Material, y: number) {
+  function pave(points: readonly Vec2[], mat: T.Material, y: number, castShadow = false) {
     const geo = new T.ShapeGeometry(new T.Shape(points.map(([x, z]) => new T.Vector2(x, -z))));
     geo.rotateX(-Math.PI / 2);
     const tile = mat.userData.tile as number[] | undefined;
@@ -184,7 +184,8 @@ export function createFaculty() {
       const p = geo.attributes.position;
       for (let i = 0; i < p.count; i++) geo.attributes.uv.setXY(i, p.getX(i) / tile[0], p.getZ(i) / tile[1]);
     }
-    const mesh = new T.Mesh(geo, mat); mesh.position.y = y; mesh.receiveShadow = true; visual.add(mesh);
+    const mesh = new T.Mesh(geo, mat); mesh.position.y = y;
+    mesh.castShadow = castShadow; mesh.receiveShadow = true; visual.add(mesh);
     return mesh;
   }
   function path(points: readonly Vec2[], width = 2.4) {
@@ -1242,7 +1243,7 @@ export function createFaculty() {
     const [w, n, e, s] = outline;
     const height = 4.6, roofY = PLAZA_LEVEL + height;
     flipFaces(pave(outline, m.roofUnder, roofY - 0.02).geometry);
-    pave(outline, m.roof, roofY + 0.12);
+    pave(outline, m.roof, roofY + 0.12, true);
     for (let i = 0; i < outline.length; i++) {
       const a = outline[i], b = outline[(i + 1) % outline.length];
       const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
@@ -1984,14 +1985,17 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     // Misma orientación y dibujo en explanada y enlace con la plaza, sin modificar
     // su contorno ni abrir huecos de césped en el paso existente.
     pave(plan.platform[2].map(inCantina), terrace, 0.461);
-    // Terreno y relleno macizo: la terraza sobresale de la plataforma original del plano.
-    // La base llega al suelo (y mundial = 0); el césped continúa por sus laterales.
-    box(w + 12, 0.12, d + 18, 2, -PLAZA_LEVEL - 0.035, 5, m.grass);
     // Jardín continuo: reemplaza los bloques verticales por terreno que desciende
     // gradualmente al suelo. La única subida junto al acceso son 3 × 15 cm.
     const lawnVertices: number[] = [], lawnUV: number[] = [];
+    const [tileX, tileZ] = grass.userData.tile as [number, number];
     function lawnTriangle(a: Vec2, b: Vec2, c: Vec2) {
-      for (const [x, z] of [a, b, c]) { lawnVertices.push(x, gardenHeight(x, z) - (PLAZA_LEVEL - 0.45), z); lawnUV.push(x / 4, z / 4); }
+      for (const [x, z] of [a, b, c]) {
+        lawnVertices.push(x, gardenHeight(x, z) - (PLAZA_LEVEL - 0.45), z);
+        const [fx, fz] = fromRect(plan.cantina, [x, z]);
+        const [worldX, , worldZ] = facultyToWorld([fx, 0, fz]);
+        lawnUV.push(worldX / tileX, worldZ / tileZ);
+      }
     }
     // Ambas plantas tienen lados paralelos a esta malla. Cortarla en sus esquinas
     // mantiene el césped y su colisión fuera de las salas, incluso donde sube el jardín.
@@ -2756,10 +2760,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
   annexGround.position.set((minX+maxX)/2,-0.1,(minZ+maxZ)/2);
   solid.add(annexGround);
 
-  // ---- Áreas comunes, caminos y estacionamiento ----
-  pave(plan.courtyard, m.grass, 0.015);
-  pave(plan.common1, m.grass, 0.018);
-  pave(plan.parking, m.grass, 0.02);
+  // ---- Caminos entre áreas comunes ----
   const galleryEdge = block1.depth / 2;
   const lawnEdge = 9.55;
   const courtyardConcrete = m.accessStone.clone();
@@ -3064,13 +3065,6 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
   const [treeX, treeZ] = plan.tree2;
   box(2.8, 0.45, 0.6, treeX + 3, 0.225, treeZ - 2.5, m.brick, true);
   box(2.4, 0.45, 0.6, treeX + 3, 0.225, treeZ - 5, m.brick, true);
-  // Árboles genéricos restantes (se excluye el árbol de cantina que ahora tiene módulo propio)
-  for (const [x, z] of [plan.trees[2]]) {
-    const y = plan.platform.some((p) => insidePolygon([x, z], p)) ? PLAZA_LEVEL : 0;
-    pole(0.3, 5.5, x, y + 2.75, z, m.bark, true);
-    const crown = new T.Mesh(new T.IcosahedronGeometry(1, 2), m.leaves[0]);
-    crown.scale.set(3.4, 2.1, 3.1); crown.position.set(x, y + 6, z); crown.castShadow = true; visual.add(crown);
-  }
   // Árbol personalizado de la cantina / mesas
   addCantinaTree(visual, solid, plan.cantinaTree, plan.platform.some((p) => insidePolygon(plan.cantinaTree, p)) ? PLAZA_LEVEL : 0);
   // Marcadores de los puntos de visita en el suelo y sobre la plataforma (no en los pisos altos).
@@ -3097,26 +3091,31 @@ function flipFaces(geo: T.BufferGeometry) {
 function mergeByMaterial(root: T.Group) {
   root.updateMatrixWorld(true);
   const inverse = root.matrixWorld.clone().invert();
-  const buckets = new Map<T.Material, T.BufferGeometry[]>(), merged: T.Object3D[] = [];
+  const buckets = new Map<T.Material, Map<number, T.BufferGeometry[]>>(), merged: T.Object3D[] = [];
   root.traverse((o) => {
-    if (!(o instanceof T.Mesh) || o.userData.keep || Array.isArray(o.material)) return;
+    if (!(o instanceof T.Mesh) || o instanceof T.InstancedMesh || o.userData.keep || Array.isArray(o.material)
+      || o.material.transparent) return;
     let geo = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()) as T.BufferGeometry;
     for (const name of Object.keys(geo.attributes)) if (!["position", "normal", "uv"].includes(name)) geo.deleteAttribute(name);
     if (!geo.attributes.normal) geo.computeVertexNormals();
     if (!geo.attributes.uv) geo.setAttribute("uv", new T.Float32BufferAttribute(new Float32Array(geo.attributes.position.count * 2), 2));
     geo = geo.applyMatrix4(new T.Matrix4().multiplyMatrices(inverse, o.matrixWorld));
-    if (!buckets.has(o.material)) buckets.set(o.material, []);
-    buckets.get(o.material)!.push(geo); merged.push(o);
+    const flags = (o.castShadow ? 1 : 0) | (o.receiveShadow ? 2 : 0);
+    let byShadow = buckets.get(o.material);
+    if (!byShadow) buckets.set(o.material, byShadow = new Map());
+    const batch = byShadow.get(flags);
+    if (batch) batch.push(geo); else byShadow.set(flags, [geo]);
+    merged.push(o);
   });
   for (const o of merged) o.parent?.remove(o);
   const empty: T.Object3D[] = [];
   root.traverse((o) => { if (o !== root && o.type === "Group" && !o.children.length) empty.push(o); });
   for (const o of empty) o.parent?.remove(o);
-  for (const [material, geometries] of buckets) {
+  for (const [material, byShadow] of buckets) for (const [flags, geometries] of byShadow) {
     const geometry = mergeGeometries(geometries, false);
     if (!geometry) continue;
     const mesh = new T.Mesh(geometry, material);
-    mesh.castShadow = !(material as T.MeshStandardMaterial).transparent; mesh.receiveShadow = true;
+    mesh.castShadow = Boolean(flags & 1); mesh.receiveShadow = Boolean(flags & 2);
     root.add(mesh);
   }
 }
