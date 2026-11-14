@@ -24,14 +24,11 @@
   --scene-text: #fff;
   --scene-outline: #08152d;
   --scene-accent: #c4e8ff;
-  --scene-border: #fff9;
-  --scene-button: #25252c82;
-  --scene-button-active: #3b3c47cc;
+  --scene-button-highlight: #90bde532;
   --scene-panel: #17171dc4;
   --scene-panel-border: #fff3;
-  --tour-start-fill: #256589;
-  --tour-start-hover: #195674;
-  --tour-start-border: #79beda;
+  --tour-start-fill: #5aaae52b;
+  --tour-start-highlight: #5aaae554;
 }
 * {
   box-sizing: border-box;
@@ -149,8 +146,11 @@ a {
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: transparent;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--scene-panel-border);
+  border-radius: 9px;
+  background: var(--scene-panel);
   color: var(--scene-text);
 }
 .tour-toolbar button, .tour-popover button {
@@ -166,30 +166,23 @@ a {
 .tour-toolbar button {
   justify-content: center;
   white-space: nowrap;
-  min-height: 54px;
-  padding-inline: 15px;
-  border-radius: 0;
-  border: 1px solid var(--scene-border);
-  background: var(--scene-button);
-  font: 500 12px/1 "IBM Plex Mono", monospace;
-  letter-spacing: 0.13em;
+  padding-inline: 12px;
+  border-radius: 5px;
+  font: 600 11px/1 "IBM Plex Mono", monospace;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  text-shadow: 0 1px 2px var(--scene-outline), 0 0 5px var(--scene-outline);
+  transition: background-color 150ms ease;
 }
-.tour-toolbar button:is(:hover, [aria-expanded="true"], [aria-pressed="true"]) {
-  border-color: var(--scene-accent);
-  background: var(--scene-button-active);
+.tour-toolbar button:is(:hover, :focus-visible, [aria-expanded="true"]) {
+  background: var(--scene-button-highlight);
   color: var(--scene-accent);
 }
-.tour-toolbar button:focus-visible, .pause-tour:focus-visible { outline: 2px solid var(--scene-accent); outline-offset: 3px; }
+.tour-toolbar button:focus-visible, .pause-tour:focus-visible { outline: 2px solid var(--scene-accent); outline-offset: -2px; }
 .tour-toolbar .tour-start {
-  border-color: var(--tour-start-border);
   background: var(--tour-start-fill);
-  color: #fff;
-  text-shadow: none;
+  color: var(--scene-accent);
 }
-.tour-toolbar .tour-start:hover { background: var(--tour-start-hover); }
-.tour-toolbar .tour-start svg { filter: none; }
+.tour-toolbar .tour-start:is(:hover, :focus-visible) { background: var(--tour-start-highlight); }
 .tour-toolbar :is(.tour-start, .tour-menu) {
   width: clamp(104px, 14vw, 138px);
   padding-inline: 6px;
@@ -200,7 +193,6 @@ a {
   width: 18px;
   height: 18px;
 }
-.tour-toolbar svg { filter: drop-shadow(0 1px 2px var(--scene-outline)); }
 .tour-popover {
   position: fixed;
   left: var(--tour-left);
@@ -234,11 +226,11 @@ body.ui-compact :is(.campus-heading, .tour-toolbar, .tour-guidance) { display: n
   --scene-text: #102346;
   --scene-outline: #f5fbff;
   --scene-accent: #064c91;
-  --scene-border: #10234684;
-  --scene-button: #e3e6eb96;
-  --scene-button-active: #edf0f4e6;
+  --scene-button-highlight: #225b9f26;
   --scene-panel: #e3e6ebc4;
   --scene-panel-border: #10234640;
+  --tour-start-fill: #247ac82b;
+  --tour-start-highlight: #247ac84d;
 }
 .intro {
   position: fixed;
@@ -1173,17 +1165,18 @@ body.is-walking { cursor: none; }
 .pause-tour kbd { padding: 3px 5px; border: 1px solid #fff9; border-radius: 4px; background: transparent; }
 .tour-panel button:focus-visible { outline-offset: 2px; }
 @media (max-width: 500px) {
-  .tour-toolbar #overview { width: 44px; padding: 0; }
+  .tour-toolbar .tour-icon, .tour-toolbar #overview { width: 44px; padding: 0; }
+  .tour-toolbar :is(.tour-start, .tour-menu) { width: 96px; }
   #overview span { display: none; }
 }
 @media (max-width: 390px) {
-  .tour-toolbar { gap: 4px; max-width: calc(100% - var(--tour-left) - var(--tour-right)); flex-wrap: wrap; }
-  .tour-toolbar button { padding-inline: 8px; }
-  .tour-toolbar .tour-icon, .tour-toolbar #overview { width: 44px; padding: 0; }
+  .tour-toolbar { gap: 2px; }
+  .tour-toolbar :is(.tour-start, .tour-menu) { width: 92px; }
 }
 @media (max-width: 360px) {
-  .tour-toolbar :is(.tour-start, .tour-menu) { width: 92px; font-size: 11px; }
+  .tour-toolbar :is(.tour-start, .tour-menu) { width: 72px; }
   .tour-toolbar .tour-start svg { display: none; }
+  .tour-toolbar .tour-menu svg { width: 16px; height: 16px; }
 }
 @media (max-height: 480px) {
   .explorer .section-top { padding-block: 4px; }
