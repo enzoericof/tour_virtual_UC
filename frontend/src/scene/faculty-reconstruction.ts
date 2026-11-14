@@ -10,7 +10,7 @@ import {
   type Rect, type Rooms, type Vec2,
 } from "../data/faculty-blueprint";
 import { facultyToWorld, insidePolygon } from "../data/campus-geometry";
-import { gardenHeight, gardenBounds, inCantina, coveredWalkSurface } from "../data/cantina-terrain";
+import { gardenHeight, gardenBounds, inCantina, coveredWalkSurface, cantinaPatioStair } from "../data/cantina-terrain";
 import { facultyAnnexes, annexPaths, annexCoveredPaths, annexEnclosedLink, annexWalkEnd, diciaWalkExtension } from "../data/faculty-annexes";
 import { facultyPlaces } from "../data/places";
 
@@ -2051,16 +2051,17 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     // mantiene el césped y su colisión fuera de las salas, incluso donde sube el jardín.
     const footprints = facultyAnnexes.filter(b => b.id === "lab-maquetas" || b.id === "cta-dicia")
       .map(b => b.outline.map(p => inCantina(fromRect(b.rect, p))));
-    function lawnCuts(min: number, max: number, axis: 0 | 1) {
-      const cuts = new Set(Array.from({ length: max - min + 1 }, (_, i) => min + i));
+    function lawnCuts(min: number, max: number, axis: 0 | 1, extra: number[]) {
+      const cuts = new Set([...Array.from({ length: max - min + 1 }, (_, i) => min + i), ...extra]);
       for (const polygon of footprints) for (const point of polygon) {
         const value = Math.round(point[axis] * 1e5) / 1e5;
         if (value > min && value < max) cuts.add(value);
       }
       return [...cuts].sort((a, b) => a - b);
     }
-    const xs = lawnCuts(gardenBounds.minX, gardenBounds.maxX, 0);
-    const zs = lawnCuts(gardenBounds.minZ, gardenBounds.maxZ, 1);
+    const { startX, centerZ, width: stairWidth, run, count, bottom } = cantinaPatioStair;
+    const xs = lawnCuts(gardenBounds.minX, gardenBounds.maxX, 0, [startX, startX + run]);
+    const zs = lawnCuts(gardenBounds.minZ, gardenBounds.maxZ, 1, [centerZ - stairWidth / 2, centerZ + stairWidth / 2]);
     for (let i = 1; i < xs.length; i++) for (let j = 1; j < zs.length; j++) {
       const x = xs[i - 1], z = zs[j - 1], nextX = xs[i], nextZ = zs[j];
       const center: Vec2 = [(x + nextX) / 2, (z + nextZ) / 2];
@@ -2154,12 +2155,13 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     for (const x of [w / 2, w / 2 + 4.65]) box(0.1, 0.14, 13.1, x, 3.83, 0.5, dark);
     box(0.12, 0.22, 13.6, w / 2 + 5.15, 3.76, 0.5, aluminum);
     // Tres escalones por el borde exterior de la terraza, con apoyo hasta el suelo.
-    const patioGround = gardenHeight(w / 2 + 6.2, 1) - (PLAZA_LEVEL - 0.45);
-    for (let i = 0; i < 3; i++) {
-      const top = 0.45 - (i + 1) * (0.45 - patioGround) / 3;
-      box(0.4, PLAZA_LEVEL + top, 14, w / 2 + 5.2 + i * 0.4, (top - PLAZA_LEVEL) / 2, 1, stepStone);
+    const patioGround = bottom - (PLAZA_LEVEL - 0.45), tread = run / count;
+    for (let i = 0; i < count; i++) {
+      const top = 0.45 - (i + 1) * (0.45 - patioGround) / count;
+      box(tread, PLAZA_LEVEL + top, stairWidth, startX + (i + 0.5) * tread,
+        (top - PLAZA_LEVEL) / 2, centerZ, stepStone);
     }
-    ramp(v3(w / 2 + 6.2, patioGround, 1), v3(w / 2 + 5, 0.45, 1), 14);
+    ramp(v3(startX + run, patioGround, centerZ), v3(startX, 0.45, centerZ), stairWidth);
     // Acceso del personal a la cocina curva adosada; la puerta pública sigue al exterior.
     for (const [doorZ, doorWidth, doorMaterial] of [
       [exitZ, exitWidth, windowGlass], [staffExitZ, staffExitWidth, m.white],

@@ -16,6 +16,15 @@ const levelStrips = [
 // Fuera del sendero, el césped recupera gradualmente la altura del jardín.
 const blend = 7;
 export const coveredWalkSurface = { width: 1.65, endHeight: 0.05, controlLift: 0.08 } as const;
+// Escalera exterior de la terraza lateral, en coordenadas locales de la cantina.
+export const cantinaPatioStair = {
+  startX: plan.cantina.size[0] / 2 + 5,
+  centerZ: 1,
+  width: 14,
+  run: 1.2,
+  count: 3,
+  bottom: PLAZA_LEVEL - 0.45 + 0.008,
+} as const;
 const [coveredStart, coveredEnd] = plan.coveredWalk.map(inCantina);
 const coveredDX = coveredEnd[0] - coveredStart[0], coveredDZ = coveredEnd[1] - coveredStart[1];
 const coveredLengthSquared = coveredDX ** 2 + coveredDZ ** 2;
@@ -54,5 +63,12 @@ export function gardenHeight(x: number, z: number): number {
   const pavement = startHeight * (1 - t) + coveredWalkSurface.endHeight * t
     + 3 * coveredWalkSurface.controlLift * t * (1 - t);
   const cut = Math.max(0, height - (pavement - 0.03));
-  return height - cut * (1 - blendToLawn * blendToLawn * (3 - 2 * blendToLawn));
+  height -= cut * (1 - blendToLawn * blendToLawn * (3 - 2 * blendToLawn));
+
+  // El césped se mantiene por debajo del último peldaño y recupera su cota fuera de la escalera.
+  const stair = cantinaPatioStair;
+  const clearance = Math.max(x - stair.startX - stair.run, stair.startX - x,
+    Math.abs(z - stair.centerZ) - stair.width / 2);
+  const lawnBlend = Math.max(0, Math.min(1, (clearance - 0.35) / 1.6));
+  return height - Math.max(0, height - stair.bottom + 0.04) * (1 - lawnBlend * lawnBlend * (3 - 2 * lawnBlend));
 }
