@@ -1,4 +1,5 @@
 import * as T from "three";
+import { friendshipMaterial, friendshipSign } from "./friendship-materials";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { brushedSteel, elevatorLabel, type ElevatorModel } from "./elevator";
 import { makeGrassMaterial, makeMaterials } from "./materials";
@@ -11,7 +12,7 @@ import {
 } from "../data/faculty-blueprint";
 import { facultyToWorld, insidePolygon } from "../data/campus-geometry";
 import { gardenHeight, gardenBounds, inCantina, coveredWalkSurface, cantinaPatioStair } from "../data/cantina-terrain";
-import { facultyAnnexes, annexPaths, annexCoveredPaths, annexEnclosedLink, annexWalkEnd, diciaWalkExtension } from "../data/faculty-annexes";
+import { facultyAnnexes, cantinaRearPaving, annexPaths, annexCoveredPaths, annexEnclosedLink, annexWalkEnd, diciaWalkExtension } from "../data/faculty-annexes";
 import { facultyPlaces } from "../data/places";
 
 type BoxOptions = { tile?: readonly number[]; offset?: readonly number[]; rotation?: number; pitch?: number };
@@ -1017,6 +1018,10 @@ export function createFaculty(grass = makeGrassMaterial()) {
     prism(outline, 0, PLAZA_LEVEL, m.concrete);
     pave(outline, i === 0 ? m.tile : m.stone, PLAZA_LEVEL + (i === 0 ? 0.008 : 0.005));
   }
+  // Continuación del mismo piso gris por el fondo y lateral de cantina.
+  prism(cantinaRearPaving, 0, PLAZA_LEVEL, m.concrete, true);
+  pave(cantinaRearPaving, m.stone, PLAZA_LEVEL + 0.005);
+
   // La galería y el sendero comparten cota de piso terminado.
   const bedeliaPavingTop = 0.012;
   const passageTile = m.tile.clone(); passageTile.color.set("#cad0d1");
@@ -1351,13 +1356,25 @@ export function createFaculty(grass = makeGrassMaterial()) {
   frame(plan.bedelia, () => {
     const [w,d]=plan.bedelia.size, z=d/2;
     box(w,.16,d,0,.02,0,m.stone,true);
-    box(w,3.2,.2,0,1.6,-d/2,officeBrick,true);
+    for(const [a,b] of [[-w/2,7.8],[10.2,w/2]])box(b-a,3.2,.2,(a+b)/2,1.6,-d/2,officeBrick,true);
+    box(2.4,.9,.2,9,2.75,-d/2,officeBrick,true);
     box(w+.8,.2,d+.8,0,3.4,0,m.concrete);
+    // Interior diáfano solicitado: sin habitaciones, tabiques ni escritorios.
+    // Dependencia curva posterior y sus dos recintos de enlace, sin atribuirle un uso no rotulado.
+    const curved: Vec2[] = [[7.8,-5],[7.8,-7.1]];
+    // Dos lóbulos redondeados como el contorno señalado en el plano.
+    for(let i=0;i<=48;i++) {const a=Math.PI*.42+i/48*Math.PI*1.68;
+      curved.push([9+3.5*(1+.2*Math.cos(2*a))*Math.cos(a),-10+3.1*(1+.2*Math.cos(2*a))*Math.sin(a)]);}
+    curved.push([10.2,-7.1],[10.2,-5]);
+    prism(curved,-PLAZA_LEVEL,PLAZA_LEVEL+.03,m.stone,true);prism(curved,3.4,.18,m.concrete,false);
+    for(let i=1;i<curved.length;i++) {const a=curved[i-1],b=curved[i];
+      box(Math.hypot(b[0]-a[0],b[1]-a[1]),3.2,.18,(a[0]+b[0])/2,1.6,(a[1]+b[1])/2,officeBrick,true,{rotation:-Math.atan2(b[1]-a[1],b[0]-a[0])});}
+    for(const x of [6,12]) {box(2.5,.12,2,x,.02,-6,m.stone,true);box(2.5,.18,2,x,3.4,-6,m.concrete);box(.15,3.2,2,x-1.25,1.6,-6,officeBrick,true);}
     // Muros laterales: el frente hacia Manfred incluye acceso de profesores y vitrina.
     for(const side of [-1,1]) {
       if(side===1)box(.2,3.2,d,side*w/2,1.6,0,officeBrick,true);
       else {
-        const doorZ=-2.4, dw=1.05;
+        const doorZ=0, dw=1.4;
         for(const [start,end] of [[-d/2,doorZ-dw/2],[doorZ+dw/2,d/2]])
           box(.2,3.2,end-start,-w/2,1.6,(start+end)/2,officeBrick,true);
         box(.2,.7,dw,-w/2,2.85,doorZ,officeBrick,true);
@@ -1375,7 +1392,7 @@ const frontWallLocal = [
       [-3.75, 5], [-2.5, 5], [-2.5, 4.2], [2.5, 4.2],
       [2.5, 5], [3.75, 5], [3.75, 4.2], [8.75, 4.2],
       [8.75, 5], [10, 5]
-    ];
+    ].map(([x,z]) => [x * 1.5,z]);
 
 for (let i = 0; i < frontWallLocal.length - 1; i++) {
       const a = frontWallLocal[i], b = frontWallLocal[i + 1];
@@ -1395,6 +1412,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
         else if (i === 6) openingsInRecess = [{x: 0, width: 4.2, door: false}];
         else if (i === 10) openingsInRecess = [{x: 4.6, width: 1.05, door: true}, {x: 7.1, width: 2.4, door: false}];
 
+        openingsInRecess = openingsInRecess.map(o => ({...o,x:o.x*1.5,width:o.door?o.width:o.width*1.5}));
         let cursor = a[0];
         const rz = a[1];
         for (const o of openingsInRecess) {
@@ -1432,6 +1450,8 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
         pole(.17,3.3,x,1.65,z+dz,m.concrete,true);
       }
       box(1.05,.065,.16,x,3.25,z+1.3,m.white);
+      // El cantero y su planta son únicos; no repetirlos por cada columna.
+      if (x > -w / 2 + .6) continue;
       box(3.0, 0.04, 2.8, 1.3, bedeliaPavingTop, z + depth + 1.4, m.grass, true);
       // --- SANTA RITA PROCEDURAL ALTA DENSIDAD (~21k vértices en T.Mesh estándar) ---
     {
@@ -1842,7 +1862,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     }
     const gold = new T.MeshStandardMaterial({ color: "#c2a65a", metalness: 0.25, roughness: 0.45 });
     // Vitrina visible desde el acceso de Manfred, sobre el lateral de Bedelía.
-    const displayX = -w / 2 - 0.31, displayZ = 1.0;
+    const displayX = -w / 2 - 0.31, displayZ = 2.3;
     const displayFrame = new T.MeshStandardMaterial({ color: "#2f3635", roughness: 0.64 });
     box(0.06, 2.1, 2.32, displayX + 0.18, 1.05, displayZ, displayFrame, true);
     for (const z of [displayZ - 1.14, displayZ, displayZ + 1.14])
@@ -2015,7 +2035,9 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       for(const [start,end] of [[a,d],[b,c]]) {
         // Frente de Manfred libre de los apoyos señalados.
         if(start===a && t<=.52) continue;
-        const x=start[0]+(end[0]-start[0])*t,z=start[1]+(end[1]-start[1])*t;
+        // Despejar el nuevo acceso de profesores; apoyo junto al borde del vano.
+        const columnT = start===b && t===.32 ? .24 : t;
+        const x=start[0]+(end[0]-start[0])*columnT,z=start[1]+(end[1]-start[1])*columnT;
         pole(.16,3.6,x,PLAZA_LEVEL+1.8,z,m.concrete,true);
       }
       const x=(a[0]+b[0])/2+((c[0]+d[0]-a[0]-b[0])/2)*t;
@@ -2095,7 +2117,22 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       geometry.computeVertexNormals(); solid.add(new T.Mesh(geometry));
     }
     // Continuación de los tres peldaños junto al jardín, hasta antes del pilar azul.
-    const sideSteps = cantinaForecourt.sideSteps;
+    // Recorte exacto contra el pilar de la esquina de la cubierta (retirado 35 cm).
+    const corner = rectCorners(plan.coveredPlaza)[2], centre = plan.coveredPlaza.center;
+    const distance = Math.hypot(centre[0]-corner[0],centre[1]-corner[1]);
+    const pillar = [corner[0]+(centre[0]-corner[0])*.35/distance,
+      corner[1]+(centre[1]-corner[1])*.35/distance];
+    const dx = pillar[0]-plan.cantina.center[0], dz = pillar[1]-plan.cantina.center[1];
+    const pillarZ = -dx*Math.sin(plan.cantina.angle)+dz*Math.cos(plan.cantina.angle);
+    const sideSteps = {...cantinaForecourt.sideSteps, to:pillarZ};
+    // Arbustos bajos en la franja que reemplaza los peldaños, fuera del pavimento.
+    const shrubGeo = new T.IcosahedronGeometry(1,1);
+    for(let z=pillarZ+.6;z<35.7;z+=.8) for(let j=0;j<3;j++) {
+      const shrub = new T.Mesh(shrubGeo,m.leaves[j%m.leaves.length]);
+      const sx=sideSteps.x+.65+(j-1)*.22, sz=z+(j-1)*.16;
+      shrub.position.set(sx,gardenHeight(sx,sz)-PLAZA_LEVEL+.28+(j%2)*.08,sz);
+      shrub.scale.set(.4,.32+(j%2)*.08,.48);shrub.castShadow=true;visual.add(shrub);
+    }
     const sideLength = sideSteps.to - sideSteps.from, sideZ = (sideSteps.from + sideSteps.to) / 2;
     for (let k = 0; k < 3; k++) {
       const height = PLAZA_LEVEL + 0.45 - k * 0.15;
@@ -2999,6 +3036,18 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     const roof = new T.LineCurve3(canopyFoot,v3(bx,2.5,bz));
     const bays = Math.ceil(roof.getLength() / 4.5);
     fabricCover(roof, canopyWidth, Array.from({length:bays + 1},(_,i)=>i / bays), canopyRidge);
+    // El ramal se une a la lona existente y desemboca en el eje de la galería del Bloque G.
+    const { junction, end } = plan.blockGAwning;
+    const junctionPoint = v3(junction[0], 0, junction[1]);
+    const junctionT = junctionPoint.sub(walkStart).dot(direction) / Math.hypot(bx - ax, bz - az);
+    const branchStart = roof.getPoint(junctionT);
+    const branchEnd = v3(end[0], branchStart.y - 0.12, end[1]);
+    const branchRoof = new T.LineCurve3(branchStart, branchEnd);
+    const branchBays = Math.ceil(branchRoof.getLength() / 4.5);
+    fabricCover(branchRoof, canopyWidth,
+      Array.from({ length: branchBays }, (_, i) => (i + 1) / branchBays), canopyRidge);
+    // El piso arranca en el empalme real de la cubierta, cubriendo la junta.
+    path([[branchStart.x, branchStart.z], end], 2.25);
     // Bordes del caminero y juntas transversales: pavimento angosto entre jardines.
     for (const offset of [-0.85, 0.85]) {
       const side = v3(-(bz-az),0,bx-ax).normalize().multiplyScalar(offset);
@@ -3041,15 +3090,33 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     }
   }
 
-  // Patio de las mesas rojas frente al Bloque G, junto al mural del ascensor.
+  // Plaza de la Amistad frente al Bloque G, junto al mural del ascensor.
   {
     const { terrace, gravel, tables } = plan.blockGCourtyard;
     const floor = 0.055;
     pave(gravel, m.courtyardGravel, 0.043);
-    prism(rectCorners(terrace), -0.03, floor + 0.03, m.tile);
+    const paving = friendshipMaterial("tile"), soil = friendshipMaterial("soil");
+    prism(rectCorners(terrace), -0.03, floor + 0.03, paving);
+    // Sendero de piezas circulares desde el mural al área de bancos.
+    pave([[22.8,9.52],[25,9.52],[26,12.6],[23.8,12.6]], friendshipMaterial("round"), .05);
+    for (const [tx,tz] of [plan.tree1,plan.courtyardTrees[2]]) {
+      const patch: Vec2[] = Array.from({length:32},(_,i)=>{
+        const a=i*Math.PI/16,r=1.7+Math.sin(i*2.3)*.13;
+        return [tx+Math.cos(a)*r,tz+Math.sin(a)*r*.8];
+      });
+      pave(patch,soil,.046);
+    }
+    // Cartel azul sobre dos postes, al borde de acceso a la plaza.
+    frame({center:[34.1,18],size:[1.2,.1],angle:-Math.PI/2},()=>{
+      for(const x of [-.67,.67]) pole(.025,2.25,x,1.125,0,m.metal,true);
+      box(1.24,1.52,.06,0,1.42,0,m.blue,true);
+      const board=new T.Mesh(new T.PlaneGeometry(1.2,1.5),friendshipSign());
+      board.position.set(0,1.42,.035);visual.add(board);
+    });
 
     const tileEdge = m.tile.clone();
     tileEdge.color.set("#8b9eaa");
+    const lowWall = m.concrete.clone(); lowWall.color.set("#ac6554");
     const [w, d] = terrace.size;
     frame(terrace, () => {
       for (const z of [-d / 2 + 0.16, d / 2 - 0.16]) {
@@ -3060,17 +3127,17 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       }
       // Murete bajo en tramos, con una salida hacia el sendero y el césped.
       for (const z of [-2.15, -0.95, 0.25]) {
-        box(0.31, 0.32, 1.17, w / 2 - 0.14, 0.16, z, m.brick, true);
-        box(0.35, 0.045, 1.17, w / 2 - 0.14, 0.34, z, m.wood);
+        box(0.31, 0.32, 1.17, w / 2 - 0.14, 0.16, z, lowWall, true);
+        box(0.35, 0.045, 1.17, w / 2 - 0.14, 0.34, z, lowWall);
       }
     }, floor);
 
-    const redSlats = m.wood.clone(); redSlats.color.set("#9f493b");
+    const blueSlats = friendshipMaterial("blue");
     const tube = new T.MeshStandardMaterial({ color: "#303536", roughness: 0.76 });
     function seat(center: Vec2, angle: number, width: number) {
       frame({ center, size: [width, 0.65], angle }, () => {
-        for (let i = 0; i < 4; i++) box(width, 0.032, 0.093, 0, 0.44, -0.14 + i * 0.1, redSlats);
-        for (let i = 0; i < 4; i++) box(width, 0.074, 0.035, 0, 0.54 + i * 0.082, -0.17 - i * 0.025, redSlats);
+        for (let i = 0; i < 4; i++) box(width, 0.032, 0.093, 0, 0.44, -0.14 + i * 0.1, blueSlats);
+        for (let i = 0; i < 4; i++) box(width, 0.074, 0.035, 0, 0.54 + i * 0.082, -0.17 - i * 0.025, blueSlats);
         for (const x of [-width / 2 + 0.075, width / 2 - 0.075]) {
           const shape = new T.CatmullRomCurve3([
             v3(x, 0.02, 0.27), v3(x, 0.14, 0.21), v3(x, 0.39, 0.21),
@@ -3088,7 +3155,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     }
     for (const [x, z] of tables) {
       for (let i = 0; i < 6; i++) {
-        box(1.45, 0.045, 0.122, x, floor + 0.74, z + (i - 2.5) * 0.126, redSlats);
+        box(1.45, 0.045, 0.122, x, floor + 0.74, z + (i - 2.5) * 0.126, blueSlats);
       }
       for (const dx of [-0.6, 0.6]) for (const dz of [-0.27, 0.27]) {
         beam(v3(x + dx, floor + 0.71, z + dz), v3(x + dx * 1.13, floor + 0.02, z + dz * 1.2), 0.027, tube);

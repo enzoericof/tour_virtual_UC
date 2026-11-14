@@ -263,3 +263,27 @@ En Chrome se revisó la esquina desde ambos sentidos. El último arco coincide c
 
 La captura local `output/fachadas-talleres-ida.png` muestra el encuentro del frente alto con el tramo bajo, los dos portones y el espacio hasta la escalera de la cantina.
 >>>>>>> Stashed changes
+
+### Alineación del toldo — 14/11/2026
+
+Revisión visual del ramal hacia Bloque G: toldo y sendero centrados con la entrada de la galería, conservando altura. Captura local `toldo-alineado.png` de esta sesión, Chrome 1440 × 900.
+
+### Ampliación Bedelía — 14/11/2026
+
+Captura bedelia-ampliada.png revisada: volumen ampliado y dependencia posterior, anexos apartados. Interiores y detalles de fachada requieren revisión conjunta con el usuario; proporciones aproximadas de las capturas del plano.
+
+### Correcciones de acceso y jardín — 14/11/2026
+
+Revisión de las capturas profesores-acceso.png y plaza-arbustos.png: acceso conectado al corredor, escalinata recortada al pilar y arbustos en el jardín. Ajuste local, sin publicación.
+
+### Cantina alineada con Bedelía — 14/11/2026
+
+Revisión cenital en Chrome: fachada hacia la plaza en la misma línea que la cabecera de Bedelía; Maquetas y edificios circundantes permanecen en sus posiciones. Captura: `C:/Users/Elias Román/.codex/visualizations/2026/11/05/01a1ac84-d1c1-70e1-b3ad-03374e582eec/cantina-alineada.png`. Sin errores de página.
+
+### Piso gris alrededor de cantina — 14/11/2026
+
+Vista cenital revisada: ambas franjas marcadas cubiertas con el acabado gris existente, continuidad con plaza y sin cambiar posiciones de edificios. Captura: `C:/Users/Elias Román/.codex/visualizations/2026/11/05/01a1ac84-d1c1-70e1-b3ad-03374e582eec/cantina-piso-extendido.png`.
+
+### Plaza de la Amistad — 14/11/2026
+
+Revisión visual en Chrome: bancos y mesas azules, baldosas beige, grava, tierra, franja de piezas circulares y muretes rojizos. Árboles del sector con copas extendidas, raíces y nervaduras en hojas. Captura `C:/Users/Elias Román/.codex/visualizations/2026/11/05/01a1ac84-d1c1-70e1-b3ad-03374e582eec/plaza-amistad.png`.

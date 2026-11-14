@@ -161,7 +161,7 @@ const bedeliaLawnEnd = add(plazaNorth, [X, 20], [Z, -15]);
 // Fachada larga (18 m) hacia el cuadrado: el eje local x corre a lo largo de esa fachada y
 // el frente local (+z) mira al oeste, al cuadrado.
 // Retiro visual de 5 m solicitado por Horacio (02/11/2026); sin medida de campo.
-const cantina = rectFromCorner(add(cantinaFront, [Z, 3], [X, 12]), [18, 12], gridAngle + Math.PI / 2);
+const cantinaOriginal = rectFromCorner(add(cantinaFront, [Z, 3], [X, 12]), [18, 12], gridAngle + Math.PI / 2);
 /** Explanada de cantina: contorno quebrado de la foto IMG_5720, en su marco local.
  * Frente hacia +z; el tramo diagonal recorta el jardín como un hexágono invertido. */
 export const cantinaForecourt = {
@@ -179,7 +179,13 @@ const openPlaza = [plazaNorth, cantinaFront, add(cantinaFront, [Z, square.size[1
 const galleryWest = galleryAnchor;
 const passagePoint = (along: number, across: number): Vec2 => add(galleryWest, [Z, along], [X, across]);
 const bedeliaCorner = passagePoint(-20, 4.15);
-const bedelia = rectFromCorner(bedeliaCorner, [20, 10], gridAngle);
+const bedelia = rectFromCorner(bedeliaCorner, [30, 10], gridAngle);
+// Alinear la fachada hacia la plaza con la cabecera de Bedelía, sin mover anexos.
+const bedeliaEnd = fromRect(bedelia, [bedelia.size[0] / 2, 0]);
+const originalFacade = fromRect(cantinaOriginal, [0, cantinaOriginal.size[1] / 2]);
+const cantinaShift = (bedeliaEnd[0] - originalFacade[0]) * X[0]
+  + (bedeliaEnd[1] - originalFacade[1]) * X[1];
+const cantina = {...cantinaOriginal, center: add(cantinaOriginal.center, [X, cantinaShift])};
 // El sendero prolonga la galería por su cabecera este (vistas de ida y vuelta del 09/11).
 const bedeliaGalleryDepth = 2.7;
 const bedeliaWalk = rectFromCorner(fromRect(bedelia, [bedelia.size[0] / 2 + 0.5, bedelia.size[1] / 2]),
@@ -276,9 +282,9 @@ export const facultyBlueprint = {
   bedeliaGalleryDepth,
   bedeliaLawnEdge: [bedeliaLawnEnd, cantinaFront] as const,
   cantina,
-  annexAnchor: add(cantina.center, [Z, -plazaGroupShift]),
+  annexAnchor: add(cantinaOriginal.center, [Z, -plazaGroupShift]),
   // DEI–LED: posición provisional según el plano general aportado el 02/11.
-  electronics: { center: add(cantina.center, [X, 4.2], [Z, 27.8 - plazaGroupShift]), size: [28.8, 12], angle: gridAngle + Math.PI } as Rect,
+  electronics: { center: add(cantinaOriginal.center, [X, 4.2], [Z, 27.8 - plazaGroupShift]), size: [28.8, 12], angle: gridAngle + Math.PI } as Rect,
   /** Sala Manfred: auditorio de 12 × 9 m con frente hacia la rampa y entrada/marquesina orientada a la plaza techada. */
   manfred: { ...manfredRect, bulge: manfredBulge },
   /** Entrada y marquesina de Sala Manfred orientada hacia la plaza techada (foto zona_techada_y_manfred.HEIC). */
@@ -364,6 +370,12 @@ export const facultyBlueprint = {
     size: [2.5, 2.5] as Vec2, mural: 6.5 },
   /** Paso peatonal cubierto del área común 1. */
   coveredWalk: [coveredWalkStart, coveredWalkEnd] as Vec2[],
+  /** Ramal del toldo hacia la galería del Bloque G, sobre el sendero del patio. */
+  blockGAwning: {
+    // Mismo eje que la galería en todos los pisos; llega a la cabecera del bloque.
+    junction: add(gNorthEast, [X, 13.18], [Z, blockG.gallery / 2]),
+    end: add(gNorthEast, [Z, blockG.gallery / 2]),
+  },
   paths: [
     [[-16, 9.4], [5, 9.4], courtyardGalleryEnd, courtyardLanding, pinkLandingExit],
     [[5, 9.4], [11.3, 30.7]],
@@ -420,7 +432,7 @@ export function manfredOutline(segments = 12): Vec2[] {
 }
 
 // Centros de las fachadas que miran a las plazas, para ubicar al visitante frente a ellas.
-const cantinaFacade = add(cantinaFront, [Z, 12]);
+const cantinaFacade = fromRect(cantina, [0, cantina.size[1] / 2]);
 const bedeliaFacade = add(bedelia.center, [Z, bedelia.size[1] / 2]);
 const gGallery = add(gRect.center, [Z, -blockG.depth / 2]);
 const towerX = facultyBlueprint.tower.center[0];

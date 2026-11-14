@@ -50,7 +50,7 @@ export function facultyToWorld(position: readonly number[]): [number, number, nu
 // Contorno de presentación en metros del plano de CyT.
 const perimeterCorners = [[-45, -12], [-36, -24], [-14, -32], [14, -53], [51, -75],
   [94, -91], [113, -74], [134, -44], [144, -15], [145, 12], [128, 35], [94, 47],
-  [69, 57], [46, 73], [20, 83], [-19, 75], [-35, 54], [-46, 23]];
+  [69, 57], [46, 73], [20, 83], [-19, 75], [-35, 54], [-46, 23]].map(([x,z]) => [x > 90 ? x + 15 : x, z < -53 ? z - 10 : z]);
 const perimeter = perimeterCorners.flatMap(([x, z], i) => {
   const [px, pz] = perimeterCorners.at(i - 1)!;
   const [nx, nz] = perimeterCorners[(i + 1) % perimeterCorners.length];

@@ -373,3 +373,31 @@ La foto del 11/11 a las 18:26 muestra el frente de ladrillo del Área de Ensayo 
 ### Fachada trasera del Bloque 1
 
 La fachada norte del Bloque 1 tiene parasoles azul grisáceo con lamas inclinadas y montantes por módulo. La franja superior queda abierta frente a las ventanas para alojar las unidades exteriores de aire acondicionado. Los equipos tienen soportes metálicos en los pisos superiores y bases de hormigón en planta baja. La distribución se estimó a partir de la foto.
+
+### Toldo hacia el Bloque G — 14/11/2026
+
+El ramal se centra en el eje longitudinal de la galería (a media anchura de sus 2,5 m) y termina en la cabecera del Bloque G. Se corrige el desplazamiento exterior de 1,2 m que lo dejaba al costado: toldo y sendero llegan de frente al pasillo visible bajo el primer piso. La altura del toldo se conserva.
+
+### Ampliación Bedelía — 14/11/2026
+
+Ampliación aproximada de Bedelía de 20 a 30 × 10 m según capturas del plano aportadas el 14/11. Tres sectores de fachada: profesores, administración y recepción, con recintos a ambos lados de corredor central y dependencia curva posterior. Sin cotas del CAD: subdivisiones y medidas son interpretación provisional. Anexos vinculados a bedeliaWalk se desplazan automáticamente; oficinas laterales 10 m sobre el eje local y circuito exterior retirado para evitar cruces. Perímetro y arbolado exterior ampliados para mantener separación. Piso del ramal del toldo unido al empalme real de la cubierta.
+
+### Correcciones de acceso y jardín — 14/11/2026
+
+Acceso de Profesores centrado en el corredor lateral (z local 0), vano de 1,4 m; retirado tabique transversal que lo obstruía. Pilar de la galería desplazado hacia el lado opuesto a la vitrina. Escalinata del jardín recortada hasta el pilar de esquina de la plaza; arbustos bajos apoyados a la altura real del terreno en la franja marcada.
+
+### Interior de Bedelía retirado — 14/11/2026
+
+Por solicitud del usuario se eliminan las particiones, marcos interiores, rótulos interiores y escritorios añadidos: nave principal diáfana. Se conservan la envolvente exterior, puertas, vitrina y volumen curvo posterior. Compilación correcta. Desplazamiento del conjunto detrás de cantina y extensión de piso pendientes de precisar alcance y distancia de la flecha.
+
+### Alineación de cantina con Bedelía — 14/11/2026
+
+Confirmado por el usuario: desplazar únicamente la cantina hacia la izquierda de la captura hasta alinear su fachada hacia la plaza con la cabecera de Bedelía. Bedelía, Maquetas y los demás anexos conservan sus posiciones. La distancia se deriva de los bordes del plano, no de píxeles.
+
+### Piso junto a cantina — 14/11/2026
+
+Se prolonga el pavimento gris de la plaza en L: franja entre el fondo de cantina y el frente de Maquetas, y franja lateral hasta el pasillo de Bedelía. Límites derivados de las huellas actuales; sin mover edificios. Misma cota de la plataforma y acabado gris existente.
+
+### Plaza de la Amistad — 14/11/2026
+
+El usuario identifica el patio de mesas frente al Bloque G y al mural como Plaza de la Amistad. Fotos aportadas: bancos y mesas de listones azules sobre estructura negra, baldosas beige con franjas azules, grava gris, tierra con raíces expuestas, piezas circulares en el sendero, muretes rojizos y señalética azul sobre dos postes. Se conserva la implantación de edificios y se interpretan visualmente acabados y mobiliario, sin nuevas medidas de campo.

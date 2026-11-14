@@ -1,4 +1,4 @@
-import { facultyBlueprint as plan, fromRect, gridAngle, type Vec2, type Rect } from "./faculty-blueprint.ts";
+import { facultyBlueprint as plan, fromRect, rectCorners, gridAngle, type Vec2, type Rect } from "./faculty-blueprint.ts";
 
 /** Plano general aportado el 02/11/2026. Distancias estimadas, no relevamiento.
  * Origen en la cantina actual; u hacia la derecha y v hacia abajo en el plano.
@@ -19,10 +19,10 @@ function annex(id: string, name: string, u: number, v: number, w: number, d: num
     entrance: annexPoint(u, v + d / 2 + 2.5), front: annexPoint(u, v + d / 2) };
 }
 function office(id: string, name: string, v: number, w: number, d: number): Annex {
-  const b = annex(id, name, -35.7, v, d, w);
+  const b = annex(id, name, -45.7, v, d, w);
   b.rect.angle -= Math.PI / 2;
-  b.entrance = annexPoint(-35.7 + w / 2 + 2.5, v);
-  b.front = annexPoint(-35.7 + w / 2, v);
+  b.entrance = annexPoint(-45.7 + w / 2 + 2.5, v);
+  b.front = annexPoint(-45.7 + w / 2, v);
   return b;
 }
 // Frente de Kampus Print al fondo del pasillo, orientado hacia la plaza.
@@ -100,21 +100,38 @@ export const annexEnclosedLink = {
 /** Circuito exterior: evita atravesar los edificios y llega al sendero existente detrás de Manfred. */
 const officeIds = new Set(["led", "da-cap", "das"]);
 export const annexPaths: Vec2[][] = [
-  [[-28,-36],[-28,-18],[-28,-9],[-28,bypassV],[bypassU,bypassV],[bypassU,23],[-43,23],[-43,48],[-28,48],[30,48],[printU + 8,48],[57.1,48]].map(([u,v])=>annexPoint(u,v)),
+  [[-38,-36],[-38,-18],[-38,-9],[-38,bypassV],[bypassU,bypassV],[bypassU,23],[-55,23],[-55,48],[-38,48],[30,48],[printU + 8,48],[57.1,48]].map(([u,v])=>annexPoint(u,v)),
   // Maquetas y DG ya tienen su punto de visita sobre los caminos principales.
   ...facultyAnnexes.filter(b => b !== maquetas && b !== dg).map((b): Vec2[] => {
     const [u,v] = b.mapCenter;
-    if (officeIds.has(b.id)) return [b.entrance, annexPoint(-28,v)];
+    if (officeIds.has(b.id)) return [b.entrance, annexPoint(-38,v)];
     if (b.id === "kampus-print") return [plan.plazaPassage.foot, b.entrance, annexPoint(u + 8, v - 4.8), annexPoint(u + 8, 48)];
-    if (b.id === "cta-dicia") return [b.entrance,annexPoint(u,48),annexPoint(-28,48)];
-    return [b.entrance,annexPoint(-28,v+b.rect.size[1]/2+2.5)];
+    if (b.id === "cta-dicia") return [b.entrance,annexPoint(u,48),annexPoint(-38,48)];
+    return [b.entrance,annexPoint(-38,v+b.rect.size[1]/2+2.5)];
   }),
   [annexPoint(57.1,48), annexPoint(70,48), [0,-22]],
 ];
 export const annexCoveredPaths: Vec2[][] = [
   // Solo continúa la galería exterior del ala de oficinas, desde la puerta del corredor.
-  [[-28,linkV + annexEnclosedLink.rect.size[1] / 2],[-28,-9]].map(([u,v])=>annexPoint(u,v)),
+  [[-38,linkV + annexEnclosedLink.rect.size[1] / 2],[-38,-9]].map(([u,v])=>annexPoint(u,v)),
 ];
 export const annexVisitTargets: Record<string, [number, number, number]> = Object.fromEntries(
   facultyAnnexes.map((b)=>[b.id,[b.front[0],1.7,b.front[1]]]),
 );
+
+/** Extensión gris en L indicada en la captura del 14/11, alrededor de cantina. */
+export const cantinaRearPaving: Vec2[] = (() => {
+  const local = ([x, z]: Vec2): Vec2 => {
+    const dx = x - plan.cantina.center[0], dz = z - plan.cantina.center[1];
+    const a = plan.cantina.angle;
+    return [dx * Math.cos(a) + dz * Math.sin(a), -dx * Math.sin(a) + dz * Math.cos(a)];
+  };
+  const rearEdge = Math.max(...rectCorners(maquetas.rect).map(p => local(p)[1]));
+  const walkEdge = Math.max(...rectCorners(plan.bedeliaWalk).map(p => local(p)[0]));
+  const back = -plan.cantina.size[1] / 2;
+  const end = plan.cantina.size[0] / 2;
+  const plazaEdge = Math.max(...plan.bedeliaLawnEdge.map(p => local(p)[1]));
+  return ([[walkEdge, rearEdge], [end, rearEdge], [end, back],
+    [-end - 0.5, back], [-end - 0.5, plazaEdge], [walkEdge, plazaEdge]] as Vec2[])
+    .map(p => fromRect(plan.cantina, p));
+})();
