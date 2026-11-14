@@ -11,7 +11,7 @@ El recorrido multijugador usa `campus-backend/`. Los contratos históricos de bi
 - Exteriores aproximados de Maquetas, Kampus Print, CTA–DICIA, DEI–LED y dependencias LED, DA/CAP, DAS y DG. [Fuente y límites](docs/base-geografica.md#dependencias-del-plano-general--revisión-local-02112026).
 - Todo el recorrido usa el modelo construido de la facultad. Los escaneos navegables de laboratorio, pasillo y aula del tercer piso fueron retirados; esos espacios conservan sus identificadores y fotografías de referencia.
 - Primera persona, teclado y mouse, colisiones, gravedad y escaleras en el bloque principal. El recorrido captura el mouse para girar sin límites, con un punto central integrado; Esc pausa y devuelve el cursor. Requiere un navegador que permita Pointer Lock (Chrome o Edge). Si la captura falla, permanece en pausa e informa cómo continuar.
-- Vista general con cámara orbital y una barra superior con el logo de CyT, Recorrer, Vista General, Modo Noche o Modo Día, Pantalla Completa, Ayuda y Perfil. Ayuda explica los controles del recorrido.
+- Vista general con cámara orbital, escudo y ubicación en un recuadro arriba a la derecha y barra de controles abajo a la izquierda. La barra destaca Recorrer e incluye el selector de tema, Más opciones y Menú de cuenta.
 - Registro e inicio/cierre de sesión con Spring Security. El recorrido comparte avatares y posiciones en tiempo real. Podés guardar una apariencia en **Cuenta**.
 - Los servicios de biblioteca, paneles y chat del visor corresponden al contrato anterior. El backend actual cuenta con su propia API de materias y trabajos.
 
@@ -43,7 +43,7 @@ Abrir la dirección mostrada por Vite, normalmente `http://127.0.0.1:5173/`. Sin
    ```
 
 3. Arrancá el frontend como en el inicio rápido. Vite redirige `/api` y `/ws` al puerto 8080. Si usás otro puerto, configurá `CAMPUS_API_URL` antes de iniciar Vite.
-4. Entrá con **Perfil**, elegí una apariencia y usá **Recorrer**. Para probar con otra persona, abrí otra sesión en un perfil de navegador independiente o una ventana privada e ingresá al mismo lugar.
+4. Entrá desde **Menú**, elegí una apariencia y usá **Recorrer**. Para probar con otra persona, abrí otra sesión en un perfil de navegador independiente o una ventana privada e ingresá al mismo lugar.
 
 Para una prueba en la red local, iniciá Vite con `npm run dev -- --host 0.0.0.0` desde `frontend`. Los visitantes abren el frontend con la IP del equipo anfitrión. La API y el WebSocket usan ese mismo origen a través de Vite.
 
@@ -60,13 +60,13 @@ Dos modos: **vista general** al iniciar y **recorrido a pie** desde Recorrer. El
 | Mirar | Mover el mouse sin mantener clic; Esc pausa y libera el cursor |
 | Caminar más rápido | Shift izquierdo (8 m/s) |
 | Saltar pequeños desniveles | Espacio |
-| Información del espacio cercano | Menú de pausa → Información de este lugar |
 | Pausar, liberar cursor y abrir opciones | Esc o botón ESC · Pausar |
 | Ocultar o mostrar las herramientas en vista general | M |
-| Inspeccionar el conjunto | Botón de vista general; arrastrar y rueda |
-| Alternar entre cielo y espacio | Modo Noche durante el día y Modo Día durante la noche, en ambos menús |
+| Volver al conjunto o recuperar el encuadre | Vista general desde la pausa; Más opciones → Recentrar cámara desde la vista general |
+| Alternar el tema del tour | Botón con sol o luna, etiquetado como Modo claro o Modo oscuro |
+| Activar o salir de pantalla completa | Más opciones → Pantalla completa |
 
-Durante el recorrido solo se muestra el botón ESC · Pausar, sin mira central ni avisos con E. Al pausar aparece un único menú con las mismas opciones de la barra superior. Recorrer desde la pausa conserva la posición.
+Durante el recorrido se muestran la ubicación, la mirilla y Esc · Pausar. El nombre cambia al entrar a una zona del plano. Al pausar se libera el cursor y reaparece la barra inferior. Continuar recupera el control desde la misma posición y orientación. Menú abre las opciones de cuenta, apariencia, biblioteca, chat y administración según el estado de la sesión.
 
 En dispositivos táctiles se pueden inspeccionar modelos y fotos. El recorrido a pie está pensado para teclado y mouse.
 

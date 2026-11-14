@@ -13,9 +13,12 @@ const paths: Record<string, string> = {
   sun: "M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 2v2m0 16v2M2 12h2m16 0h2M5 5l1 1m12 12 1 1M5 19l1-1M18 6l1-1",
   moon: "M20.8 14.1A8.8 8.8 0 0 1 9.9 3.2 9 9 0 1 0 20.8 14.1Z",
   help: "M12 17h.01M9 8a3 3 0 0 1 6 0c0 2-3 2-3 5M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z",
+  keyboard: "M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm2 4h.01m4 0h.01m4 0h.01m4 0h.01M6 14h.01m4 0h8",
+  phone: "M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm3 16h2",
   expand: "M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5",
   layers: "m12 3 10 5-10 5L2 8l10-5ZM2 12l10 5 10-5M2 16l10 5 10-5",
   menu: "M4 7h16M4 12h16M4 17h16",
+  more: "M5 12h.01m6.99 0h.01m6.99 0h.01",
   volume: "m3 9 5 0 5-5v16l-5-5H3V9Zm14-2a8 8 0 0 1 0 10",
 };
 export const icon = (name: string) =>
