@@ -1,4 +1,16 @@
-export type User = { id: number; name: string; email: string; role: string };
+import type { Skin } from "../data/skins";
+
+export type User = { id: number; name: string; email: string; role: string; skin: Skin };
+type Account = { id: number; nombre: string; apellido: string; correo: string; rol: number; skin: Skin };
+
+function account(data: Account): User {
+  return { id: data.id, name: [data.nombre, data.apellido].join(" "), email: data.correo,
+    role: data.rol === 2 ? "ADMIN" : "USER", skin: data.skin };
+}
+
+export async function currentUser() {
+  return account(await api<Account>("/auth/me"));
+}
 export type Work = {
   id: number;
   title: string;
@@ -16,7 +28,7 @@ export type Panel = {
 };
 let csrf: { token: string; headerName: string } | null = null;
 export async function refreshCsrf() {
-  const r = await fetch("/api/v1/auth/csrf", { credentials: "same-origin" });
+  const r = await fetch("/api/auth/csrf", { credentials: "same-origin" });
   if (!r.ok) throw new Error("El servicio no está disponible.");
   csrf = await r.json();
   return csrf!;
@@ -31,7 +43,7 @@ export async function api<T>(
     if (!csrf) await refreshCsrf();
     headers.set(csrf!.headerName, csrf!.token);
   }
-  const r = await fetch("/api/v1" + url, {
+  const r = await fetch((url.startsWith("/auth/") || url === "/health" ? "/api" : "/api/v1") + url, {
     ...options,
     headers,
     credentials: "same-origin",
@@ -46,19 +58,19 @@ export async function api<T>(
           : "No se pudo completar la solicitud.";
     try {
       const data = await r.json();
-      if (data.message) message = data.message;
+      if (data.mensaje || data.message) message = data.mensaje ?? data.message;
     } catch {}
     throw new Error(message);
   }
   return r.status === 204 ? (undefined as T) : r.json();
 }
 export async function login(email: string, password: string) {
-  const user = await api<User>("/auth/login", {
+  const user = await api<Account>("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ correo: email, password }),
   });
-  await refreshCsrf();
-  return user;
+  csrf = null;
+  return account(user);
 }
 export async function logout() {
   await api("/auth/logout", { method: "POST" });

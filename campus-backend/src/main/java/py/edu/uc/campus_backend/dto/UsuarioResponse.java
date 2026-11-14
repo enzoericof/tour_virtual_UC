@@ -6,5 +6,6 @@ public record UsuarioResponse(
     String apellido,
     String correo,
     Short rol,
-    Short carrera
+    Short carrera,
+    String skin
 ) {}

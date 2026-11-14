@@ -280,3 +280,9 @@ Compilación correcta y 40 pruebas aprobadas. En Chrome, el controlador caminó 
 
 Compilación y 40 pruebas del frontend correctas. En Chrome se recorrieron en ambos sentidos el pasillo, la entrada de Maquetas y el paso junto a la escalera de la cantina. También se comprobó la entrada a DICIA.
 >>>>>>> Stashed changes
+
+## Multijugador local
+
+Verificado en una instancia aislada de PostgreSQL 17.4 y Spring Boot 4.1.2. Dos sesiones HTTP y dos WebSockets mediante Vite comprobaron el registro, la rotación del identificador de sesión, los movimientos recíprocos, la apariencia en vivo, su persistencia tras volver a iniciar sesión, la salida del recorrido, la desconexión tras el cierre de sesión y los rechazos por CSRF, sesión ausente y origen ajeno. La instalación TP_INFO3 existente solicita contraseña y quedó pendiente verificar su contenido.
+
+En el visor se verificó el alta de una cuenta de prueba, el guardado de apariencia y el contador al conectar una segunda sesión. El navegador integrado rechazó la captura del mouse, por lo que la marcha en primera persona entre dos ventanas queda por verificar en un navegador con Pointer Lock.

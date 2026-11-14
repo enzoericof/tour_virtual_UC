@@ -220,6 +220,8 @@ Un arranque correcto muestra en la consola el inicio de Tomcat en el puerto 8080
 
 Este módulo es una API REST. No sirve una página de inicio en `/` y no dispone de una ruta `/health`. Abrir únicamente la dirección raíz en el navegador no es una comprobación útil de su funcionamiento.
 
+Para probar escrituras desde Postman, primero consultá `GET /api/auth/csrf` y conservá la cookie de sesión en el mismo cliente. Enviá el valor `token` con el encabezado indicado por `headerName`. Volvé a consultar el token después de iniciar o cerrar sesión.
+
 ### Crear una cuenta desde Postman
 
 Si ya se tiene una cuenta de la aplicación, pasar directamente al login. Para crear una nueva, enviar:

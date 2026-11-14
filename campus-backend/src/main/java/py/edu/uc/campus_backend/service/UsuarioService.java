@@ -24,6 +24,13 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
+    public long cambiarSkin(String correo, String skin) {
+        var usuario = obtenerActivo(correo);
+        usuario.setSkin(skin);
+        return usuario.getId();
+    }
+
     @Transactional(readOnly = true)
     public Usuario obtenerActivo(String correo) {
         Usuario usuario = usuarioRepository.findByCorreo(correo)
@@ -69,7 +76,8 @@ public class UsuarioService {
             guardado.getApellido(),
             guardado.getCorreo(),
             guardado.getRol(),
-            guardado.getCarrera()
+            guardado.getCarrera(),
+            guardado.getSkin()
         );
     }
 }

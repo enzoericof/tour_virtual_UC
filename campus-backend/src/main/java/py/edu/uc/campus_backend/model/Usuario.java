@@ -28,6 +28,13 @@ public class Usuario {
 
     private Short carrera;
 
+    @Column(nullable = false, length = 16)
+    private String skin = "azul";
+
+    public String getSkin() { return skin; }
+
+    public void setSkin(String skin) { this.skin = skin; }
+
     @Column(name = "fecha_registro", nullable = false)
     private LocalDateTime fechaRegistro;
 

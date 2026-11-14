@@ -50,7 +50,7 @@ public class AuthService {
             usuario.getApellido(),
             usuario.getCorreo(),
             usuario.getRol(),
-            usuario.getCarrera()
+            usuario.getCarrera(), usuario.getSkin()
         );
     }
 
@@ -64,7 +64,7 @@ public class AuthService {
         usuario.getApellido(),
         usuario.getCorreo(),
         usuario.getRol(),
-        usuario.getCarrera()
+        usuario.getCarrera(), usuario.getSkin()
     );
 }
 }

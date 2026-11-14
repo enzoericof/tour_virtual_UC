@@ -1,4 +1,5 @@
 import * as T from "three";
+import { RemotePlayers } from "./remote-players";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { ElevatorMotion, type ElevatorButton, type ElevatorDoor } from "./elevator";
 import { createCampus } from "./campus";
@@ -12,6 +13,8 @@ import { facultyVisitTargets, FLOOR_HEIGHT } from "../data/faculty-blueprint";
 import { annexVisitTargets } from "../data/faculty-annexes";
 export class TourEngine {
   readonly scene = new T.Scene();
+  readonly remotePlayers = new RemotePlayers(this.scene);
+  private playerDirection = new T.Vector3();
   readonly camera = new T.PerspectiveCamera(52, 1, 0.08, 1900);
   readonly renderer: T.WebGLRenderer;
   readonly orbit: OrbitControls;
@@ -145,6 +148,7 @@ export class TourEngine {
       this.camera.near = near;
       this.camera.updateProjectionMatrix();
     }
+    this.remotePlayers.update(dt);
     this.renderer.render(this.scene, this.camera);
     this.frame++;
     if (this.frame % 45 === 0) {
@@ -297,6 +301,12 @@ export class TourEngine {
   quality(high: boolean) {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, high ? 1.8 : 1));
     this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+  }
+  playerPose() {
+    if (!this.walker.enabled) return null;
+    const { x, y, z } = this.camera.position;
+    this.camera.getWorldDirection(this.playerDirection);
+    return { x, y: y - 1.5, z, yaw: Math.atan2(-this.playerDirection.x, -this.playerDirection.z) };
   }
   get position() {
     return this.camera.position;

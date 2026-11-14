@@ -20,7 +20,7 @@ public class SecurityConfig {
             HttpSecurity http) throws Exception {
 
         http
-            .csrf(AbstractHttpConfigurer::disable)
+            .logout(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
             .sessionManagement(session ->
@@ -35,6 +35,8 @@ public class SecurityConfig {
                     response.getWriter().write("{\"mensaje\":\"Iniciá sesión para continuar.\"}");
                 },
                 new OrRequestMatcher(
+                    PathPatternRequestMatcher.withDefaults().matcher("/ws/presence"),
+                    PathPatternRequestMatcher.withDefaults().matcher("/api/auth/me"),
                     PathPatternRequestMatcher.withDefaults().matcher("/api/trabajos/**"),
                     PathPatternRequestMatcher.withDefaults().matcher("/api/materias/**")
                 )
@@ -42,6 +44,7 @@ public class SecurityConfig {
                 new Http403ForbiddenEntryPoint(), request -> true
             ))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET, "/api/auth/csrf", "/api/health").permitAll()
                 .requestMatchers(
                     HttpMethod.POST,
                     "/api/auth/registro",

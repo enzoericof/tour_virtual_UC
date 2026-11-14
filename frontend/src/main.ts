@@ -5,6 +5,7 @@ import { places, photoUrl, statusLabel, type Place } from "./data/places";
 import { icon } from "./ui/icons";
 import {
   api,
+  currentUser,
   login,
   logout,
   safeUrl,
@@ -12,6 +13,8 @@ import {
   type Work,
   type Panel,
 } from "./services/api";
+import { CampusPresence } from "./services/presence";
+import { skinIds, skins, type Skin } from "./data/skins";
 import { CampusChat } from "./services/chat";
 const $ = <T extends HTMLElement = HTMLElement>(s: string) =>
   document.querySelector<T>(s)!;
@@ -40,18 +43,14 @@ $("#app").innerHTML = `
  <button id="pause-tour" class="pause-tour hidden" aria-label="ESC · Pausar recorrido"><kbd>ESC</kbd> Pausar</button>
  <section id="walk-prompt" class="pause-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
   <div class="pause-card"><span class="eyebrow">TU RECORRIDO</span><h2 id="pause-title">En pausa</h2>
-  <button class="primary pause-resume" id="resume">${icon("walk")} Continuar recorrido</button>
   <div class="pause-options">
-   <button data-pause-action="spaces-btn">${icon("map")} Explorar espacios</button>
-   <button data-pause-action="library-btn">${icon("book")} Biblioteca</button>
-   <button data-pause-action="chat-btn">${icon("chat")} Comunidad</button>
-   <button data-pause-action="account-btn">${icon("user")} Mi cuenta</button>
-   <button id="pause-place">${icon("help")} Información de este lugar</button>
-   <button data-pause-action="theme" aria-pressed="false">${icon("moon")} Modo oscuro</button>
-   <button data-pause-action="quality">${icon("sun")} Calidad gráfica</button>
+   <button class="primary" id="resume">${icon("walk")} Continuar recorrido</button>
+   <button id="inspect">${icon("cube")} Vista general</button>
+   <button data-pause-action="theme" aria-pressed="false">${icon("moon")} Modo claro/oscuro</button>
    <button data-pause-action="fullscreen">${icon("expand")} Pantalla completa</button>
    <button data-pause-action="help">${icon("help")} Ayuda</button>
-  </div><button class="text-btn pause-overview" id="inspect">${icon("cube")} Volver a la vista general</button></div>
+   <button data-pause-action="account-btn">${icon("user")} Mi cuenta</button>
+  </div></div>
  </section>
  <dialog id="dialog"><button class="icon-btn dialog-close" aria-label="Cerrar">${icon("close")}</button><div id="dialog-content"></div></dialog>
  <div id="toast" role="status" class="toast hidden"></div>
@@ -65,6 +64,16 @@ let online = false;
 let highQuality = true;
 let toastTimer = 0;
 const chat = new CampusChat();
+let presenceStatus = "Sin sesión";
+const presence = new CampusPresence(
+  () => engine?.playerPose() ?? null,
+  players => engine?.remotePlayers.receive(players),
+  status => {
+    presenceStatus = status;
+    const label = document.querySelector("#presence-status");
+    if (label) label.textContent = status;
+  },
+);
 // M alterna las herramientas; los espacios solo se abren desde Explorar.
 const floating = [".tools"].map((selector) => {
   const element = $(selector), mark = document.createComment(selector);
@@ -232,8 +241,6 @@ function onMode(mode: string) {
   document.body.classList.toggle("is-paused", mode === "paused");
   $("#pause-tour").classList.toggle("hidden", !walking);
   if (walking) { setMenu(false); setExplorer(false); $("#toast").classList.add("hidden"); }
-  const nearby = engine?.nearest();
-  $<HTMLButtonElement>("#pause-place").disabled = !nearby;
   syncPauseMenu();
   if (mode === "paused") queueMicrotask(() => {
     if (!$("#walk-prompt").classList.contains("hidden")) $("#resume").focus();
@@ -260,7 +267,6 @@ $("#resume").onclick = () => {
   engine.startWalking();
 };
 $("#pause-tour").onclick = () => engine.pause();
-$("#pause-place").onclick = () => { const place = engine.nearest(); if (place) showPlace(place); };
 document.querySelectorAll<HTMLButtonElement>("[data-pause-action]").forEach((button) => {
   button.onclick = () => $<HTMLButtonElement>("#" + button.dataset.pauseAction!).click();
 });
@@ -343,8 +349,24 @@ $("#help").onclick = () =>
 function account() {
   if (user) {
     openDialog(
-      `<span class="eyebrow">MI CUENTA</span><h2>Hola, ${escape(user.name)}</h2><p>${escape(user.email)}</p><p class="subtle">${user.role === "ADMIN" ? "Administrador de contenidos" : "Miembro de la comunidad"}</p><button class="primary" id="my-works">Mis trabajos</button>${user.role === "ADMIN" ? '<button class="secondary" id="manage-panels">Administrar paneles</button>' : ""}<button class="text-btn" id="logout">Cerrar sesión</button>`,
+      `<span class="eyebrow">MI CUENTA</span><h2>Hola, ${escape(user.name)}</h2><p>${escape(user.email)}</p><p class="subtle">${user.role === "ADMIN" ? "Administrador de contenidos" : "Miembro de la comunidad"}</p><p class="subtle" id="presence-status">${escape(presenceStatus)}</p><form id="skin-form"><label>Apariencia<select name="skin">${skinIds.map(id => `<option value="${id}" ${id === user?.skin ? "selected" : ""}>${skins[id].name}</option>`).join("")}</select></label><button class="secondary">Guardar apariencia</button><p class="form-error" role="alert"></p></form><button class="primary" id="my-works">Mis trabajos</button>${user.role === "ADMIN" ? '<button class="secondary" id="manage-panels">Administrar paneles</button>' : ""}<button class="text-btn" id="logout">Cerrar sesión</button>`,
     );
+    $<HTMLFormElement>("#skin-form").onsubmit = async event => {
+      event.preventDefault();
+      const form = event.currentTarget as HTMLFormElement;
+      const skin = new FormData(form).get("skin") as Skin;
+      const button = form.querySelector("button")!;
+      button.disabled = true;
+      try {
+        await api("/auth/skin", { method: "PUT", body: JSON.stringify({ skin }) });
+        if (user) user.skin = skin;
+        toast("Apariencia guardada.");
+      } catch (error) {
+        form.querySelector(".form-error")!.textContent = (error as Error).message;
+      } finally {
+        button.disabled = false;
+      }
+    };
     $("#my-works").onclick = () => void library();
     if ($("#manage-panels"))
       $("#manage-panels").onclick = () => void managePanels();
@@ -352,8 +374,8 @@ function account() {
       try {
         await logout();
         user = null;
-        await chat.disconnect();
         updateAccount();
+        await chat.disconnect();
         closeDialog();
         toast("Sesión cerrada.");
       } catch (e) {
@@ -363,13 +385,16 @@ function account() {
     return;
   }
   openDialog(
-    `<span class="eyebrow">COMUNIDAD UC</span><h2>Nos encontramos acá.</h2><p class="subtle">Ingresá para compartir trabajos y conversar con otros visitantes.</p><div class="auth-tabs"><button id="login-tab" class="selected">Ingresar</button><button id="register-tab">Crear cuenta</button></div><form id="auth-form"><label id="name-label" class="hidden">Nombre<input name="name" maxlength="80" autocomplete="name"></label><label>Correo electrónico<input name="email" type="email" required autocomplete="email" maxlength="180"></label><label>Contraseña<input name="password" type="password" required minlength="10" maxlength="72" autocomplete="current-password"><small>Al menos 10 caracteres.</small></label><button class="primary" id="auth-submit">Ingresar ${icon("arrow")}</button><p class="form-error" role="alert"></p></form>`,
+    `<span class="eyebrow">COMUNIDAD UC</span><h2>Nos encontramos acá.</h2><p class="subtle">Ingresá para recorrer el campus con otros visitantes y elegir tu apariencia.</p><div class="auth-tabs"><button id="login-tab" class="selected">Ingresar</button><button id="register-tab">Crear cuenta</button></div><form id="auth-form"><fieldset id="register-fields" class="hidden" disabled><label>Nombre<input name="name" maxlength="100" autocomplete="given-name" required></label><label>Apellido<input name="surname" maxlength="100" autocomplete="family-name" required></label><label>Carrera<select name="career" required><option value="1">Ingeniería Informática</option><option value="2">Ingeniería Electrónica</option></select></label></fieldset><label>Correo electrónico<input name="email" type="email" required autocomplete="email" maxlength="150"></label><label>Contraseña<input name="password" type="password" required maxlength="72" autocomplete="current-password"></label><button class="primary" id="auth-submit">Ingresar ${icon("arrow")}</button><p class="form-error" role="alert"></p></form>`,
   );
   let register = false;
   $("#register-tab").onclick = () => {
     register = true;
-    $("#name-label").classList.remove("hidden");
-    $<HTMLInputElement>("[name=name]").required = true;
+    const fields = $<HTMLFieldSetElement>("#register-fields");
+    fields.classList.remove("hidden");
+    fields.disabled = false;
+    $<HTMLInputElement>("[name=password]").minLength = 8;
+    $<HTMLInputElement>("[name=password]").autocomplete = "new-password";
     $("#auth-submit").textContent = "Crear mi cuenta";
     $("#register-tab").classList.add("selected");
     $("#login-tab").classList.remove("selected");
@@ -386,9 +411,9 @@ function account() {
     button.disabled = true;
     try {
       if (register)
-        await api("/auth/register", {
+        await api("/auth/registro", {
           method: "POST",
-          body: JSON.stringify(data),
+          body: JSON.stringify({ nombre: data.name, apellido: data.surname, correo: data.email, password: data.password, carrera: Number(data.career) }),
         });
       user = await login(data.email, data.password);
       online = true;
@@ -404,6 +429,8 @@ function account() {
 }
 function updateAccount() {
   $("#account-btn span").textContent = user?.name ?? "Ingresar";
+  if (user) presence.start();
+  else presence.stop();
 }
 $("#account-btn").onclick = account;
 async function library() {
@@ -589,7 +616,7 @@ function panelEditor(panel?: Panel) {
 }
 if (matchMedia("(max-width:760px)").matches) $("#explorer").classList.add("collapsed");
 renderPlaces();
-void api<User>("/auth/me")
+void currentUser()
   .then((u) => {
     user = u;
     online = true;

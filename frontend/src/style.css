@@ -1303,17 +1303,16 @@ body.is-paused .topbar, body.is-paused .tools, body.is-paused #menu-panel { disp
 }
 .pause-card { width: min(460px, 100%); padding: 30px; border-radius: 18px; background: #fbfaf4; box-shadow: 0 24px 80px #132e3430; }
 .pause-card h2 { margin: 6px 0 22px; font-size: 30px; }
-.pause-resume { width: 100%; justify-content: center; }
-.pause-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 20px 0; }
+.pause-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .pause-options button {
   display: flex; align-items: center; gap: 9px; text-align: left; min-height: 52px;
   padding: 11px; border: 1px solid #dee3d8; border-radius: 8px; background: transparent;
   color: #284c3d; font-size: 12px; cursor: pointer;
 }
 .pause-options button:hover { background: #eaf0e5; }
-.pause-options button:disabled { opacity: 0.4; cursor: default; }
-.pause-options svg, .pause-overview svg { width: 18px; height: 18px; flex-shrink: 0; }
-.pause-overview { display: flex; gap: 8px; justify-content: center; width: 100%; padding: 10px 0; }
+.pause-options svg { width: 18px; height: 18px; flex-shrink: 0; }
+.pause-options #resume { background: #204a3d; border-color: #204a3d; color: #fff; }
+.pause-options #resume:hover { background: #2c604f; }
 .pause-tour:focus-visible, .pause-card button:focus-visible { outline: 3px solid #94ac79; outline-offset: 3px; }
 @media (max-width: 480px) {
   .pause-overlay { padding: 14px; }
@@ -1359,3 +1358,7 @@ body.is-paused .topbar, body.is-paused .tools, body.is-paused #menu-panel { disp
   background: #2b3c5b;
   color: #d5e3ff;
 }
+
+#register-fields { display: grid; gap: 0.75rem; padding: 0; margin: 0; border: 0; }
+#register-fields.hidden { display: none; }
+#skin-form { margin: 1rem 0; }
