@@ -336,9 +336,7 @@ Corrección posterior del 05/11: la flecha del usuario coloca la puerta en el pa
 
 ### Acceso exterior a la galería de Bedelía — 09/11/2026
 
-<<<<<<< Updated upstream
-Las fotos de ida y vuelta de las 13:09 muestran el sendero embaldosado a nivel con la galería, una rejilla transversal, un cantero lateral y una cubierta curva translúcida sobre postes metálicos. El modelo prolonga el eje de la galería hacia el jardín y ajusta el terreno junto al antiguo borde. La cubierta mide 19,6 m. La esquina de Maquetas empieza 2,8 m después de su extremo para dar más espacio al acceso lateral de la cantina. El caminero exterior rodea la esquina posterior del laboratorio. Desde Bedelía, CTA–DICIA queda a la izquierda y Maquetas a la derecha. Los paños enfrentados siguen los bordes del paso de 2,7 m, con 12 cm entre la cara de ladrillo y el pavimento. Las dimensiones son aproximaciones visuales. Tras la cubierta, el sendero continúa entre las fachadas hasta el cruce de los anexos.
-
+Las fotos de ida y vuelta de las 13:09 muestran el sendero embaldosado a nivel con la galería, una rejilla transversal, un cantero lateral y una cubierta curva translúcida sobre postes metálicos. El modelo prolonga el eje de la galería hacia el jardín y ajusta el terreno junto al antiguo borde. El tramo inicial a nivel mide 19,6 m. La esquina de Maquetas empieza 2,8 m después de ese tramo para dar más espacio al acceso lateral de la cantina. El caminero exterior rodea la esquina posterior del laboratorio. Desde Bedelía, CTA–DICIA queda a la izquierda y Maquetas a la derecha. Los paños enfrentados siguen los bordes del paso de 2,7 m, con 12 cm entre la cara de ladrillo y el pavimento. Las dimensiones son aproximaciones visuales. Desde el 12/11, la cubierta y las baldosas continúan otros 18 m hasta el quiebre de la fachada de DICIA. El piso sigue el terreno a lo largo del muro de ladrillo de Maquetas. Ese muro queda cerrado de extremo a extremo, sin cartel ni umbral. Desde el último arco sigue el caminero hasta el cruce de los anexos.
 
 ## Vegetación y seto CT del patio — 12/11/2026
 
@@ -363,16 +361,40 @@ La escalinata junto al ascensor tiene un brazo longitudinal paralelo al lado lar
 La cabina del Bloque 1 recorre el hueco vertical con una sola botonera interior centrada en la pared izquierda a 1,12 m. Botoneras exteriores e indicadores en el montante derecho de acero: subida en PB, ambas direcciones en pisos 1 y 2, bajada en piso 3. Las puertas se cierran a los diez segundos de abrirse si nadie selecciona un destino antes. Las llamadas pendientes se atienden en orden; el estado de la cabina es local al navegador.
 
 El indicador superior exterior señala el sentido de marcha. La placa gris inferior reúne el visor del piso de la cabina y los pulsadores circulares. En la pared izquierda interior, los botones circulares se ordenan en una columna con PB abajo y 3 arriba.
-=======
-Las fotos de ida y vuelta de las 13:09 muestran el sendero embaldosado a nivel con la galería, una rejilla transversal, un cantero lateral y una cubierta curva translúcida sobre postes metálicos. El modelo prolonga el eje de la galería hacia el jardín y ajusta el terreno junto al antiguo borde. El tramo inicial a nivel mide 19,6 m. La esquina de Maquetas empieza 2,8 m después de ese tramo para dar más espacio al acceso lateral de la cantina. El caminero exterior rodea la esquina posterior del laboratorio. Desde Bedelía, CTA–DICIA queda a la izquierda y Maquetas a la derecha. Los paños enfrentados siguen los bordes del paso de 2,7 m, con 12 cm entre la cara de ladrillo y el pavimento. Las dimensiones son aproximaciones visuales. Desde el 12/11, la cubierta y las baldosas continúan otros 18 m hasta el quiebre de la fachada de DICIA. El piso sigue el terreno a lo largo del muro de ladrillo de Maquetas. Ese muro queda cerrado de extremo a extremo, sin cartel ni umbral. Desde el último arco sigue el caminero hasta el cruce de los anexos.
-
 ### Fachadas detrás de la cantina — 12/11/2026
 
 La foto del 11/11 a las 18:26 muestra el frente de ladrillo del Área de Ensayo de Materiales, con un cuerpo alto y otro bajo, franjas oscuras y portones metálicos. Se tomó como referencia de forma para Maquetas. Las alturas, la pendiente y la distribución de los portones son aproximaciones visuales. El 12/11 se retiró del recorrido el Laboratorio de Ingeniería situado detrás de la cantina. El cuerpo bajo de Maquetas se prolonga hacia ese terreno. El equipo indicó una longitud total de 1417 cm para el frente de Maquetas hacia la cantina. De izquierda a derecha, la nave alta ocupa 9,50 m y el cuerpo bajo ocupa 4,67 m. Esta distribución entre cuerpos es aproximada.
->>>>>>> Stashed changes
 ### Fachada trasera del Bloque 1
 
 La fachada norte del Bloque 1 tiene parasoles azul grisáceo con lamas inclinadas y montantes por módulo. La franja superior queda abierta frente a las ventanas para alojar las unidades exteriores de aire acondicionado. Los equipos tienen soportes metálicos en los pisos superiores y bases de hormigón en planta baja. La distribución se estimó a partir de la foto.
 ### Interior de la torre de baños del Bloque 1
 
 En los cuatro niveles se entra a cada baño desde la galería por puertas retranqueadas y giradas 22,5° hacia el centro del acceso. Mirando hacia la torre, hombres queda a la derecha y mujeres a la izquierda. Entre las puertas hay un muro de ladrillo con un bebedero. En hombres, cuatro mingitorios con divisores siguen la pared curva derecha bajo la ventana alta. Dos espejos y dos lavamanos los enfrentan desde un tabique con paso por ambos extremos. Los tres cubículos comunes empiezan junto a la entrada, a la izquierda. El cubículo accesible aprovecha la esquina del fondo, con el frente y el inodoro orientados en diagonal hacia el interior. La distribución y medidas interiores son aproximadas.
+
+### Toldo hacia el Bloque G — 14/11/2026
+
+El ramal se centra en el eje longitudinal de la galería (a media anchura de sus 2,5 m) y termina en la cabecera del Bloque G. Se corrige el desplazamiento exterior de 1,2 m que lo dejaba al costado: toldo y sendero llegan de frente al pasillo visible bajo el primer piso. La altura del toldo se conserva.
+
+### Ampliación Bedelía — 14/11/2026
+
+Ampliación aproximada de Bedelía de 20 a 30 × 10 m según capturas del plano aportadas el 14/11. Tres sectores de fachada: profesores, administración y recepción, con recintos a ambos lados de corredor central y dependencia curva posterior. Sin cotas del CAD: subdivisiones y medidas son interpretación provisional. Anexos vinculados a bedeliaWalk se desplazan automáticamente; oficinas laterales 10 m sobre el eje local y circuito exterior retirado para evitar cruces. Perímetro y arbolado exterior ampliados para mantener separación. Piso del ramal del toldo unido al empalme real de la cubierta.
+
+### Correcciones de acceso y jardín — 14/11/2026
+
+Acceso de Profesores centrado en el corredor lateral (z local 0), vano de 1,4 m; retirado tabique transversal que lo obstruía. Pilar de la galería desplazado hacia el lado opuesto a la vitrina. Escalinata del jardín recortada hasta el pilar de esquina de la plaza; arbustos bajos apoyados a la altura real del terreno en la franja marcada.
+
+### Interior de Bedelía retirado — 14/11/2026
+
+Por solicitud del usuario se eliminan las particiones, marcos interiores, rótulos interiores y escritorios añadidos: nave principal diáfana. Se conservan la envolvente exterior, puertas, vitrina y volumen curvo posterior. Compilación correcta. Desplazamiento del conjunto detrás de cantina y extensión de piso pendientes de precisar alcance y distancia de la flecha.
+
+### Alineación de cantina con Bedelía — 14/11/2026
+
+Confirmado por el usuario: desplazar únicamente la cantina hacia la izquierda de la captura hasta alinear su fachada hacia la plaza con la cabecera de Bedelía. Bedelía, Maquetas y los demás anexos conservan sus posiciones. La distancia se deriva de los bordes del plano, no de píxeles.
+
+### Piso junto a cantina — 14/11/2026
+
+Se prolonga el pavimento gris de la plaza en L: franja entre el fondo de cantina y el frente de Maquetas, y franja lateral hasta el pasillo de Bedelía. Límites derivados de las huellas actuales; sin mover edificios. Misma cota de la plataforma y acabado gris existente.
+
+### Plaza de la Amistad — 14/11/2026
+
+El usuario identifica el patio de mesas frente al Bloque G y al mural como Plaza de la Amistad. Fotos aportadas: bancos y mesas de listones azules sobre estructura negra, baldosas beige con franjas azules, grava gris, tierra con raíces expuestas, piezas circulares en el sendero, muretes rojizos y señalética azul sobre dos postes. Se conserva la implantación de edificios y se interpretan visualmente acabados y mobiliario, sin nuevas medidas de campo.

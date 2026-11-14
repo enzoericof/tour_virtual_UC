@@ -134,3 +134,6 @@ La roca de la isla usa [Rock Face 03](https://polyhaven.com/a/rock_face_03), de 
 El césped usa [Leafy Grass](https://polyhaven.com/a/leafy_grass), de Charlotte Baglioni (Poly Haven, CC0). El mapa de color se ajustó a tonos verdes y el normal OpenGL se redujo a 512 px. Ambos se guardaron como WebP en `frontend/public/assets/textures/`.
 
 Las tres capturas c0bf5aaa, 34b1d5fe y e7eb9449 muestran el acceso a los baños del Bloque 1 desde la galería. Guiaron el acabado del vestíbulo, las puertas y los azulejos con franja.
+### Plaza de la Amistad: fotos del usuario, 14/11/2026
+
+Referencias aportadas en el chat: `codex-clipboard-a9c726cc-006e-4e97-814b-ceb20d564918.jpg`, `codex-clipboard-1b970d6a-b108-4232-bdc8-489a6cb1f9c3.jpg`, `codex-clipboard-ee1918e0-60d4-488f-92a0-dce2133db67b.jpg`, `codex-clipboard-f6713ff1-5166-4985-9c64-c7b59079115a.jpg` y `codex-clipboard-db9abaa4-ad82-4c77-8db4-07e34a0b4a9b.jpg`. Acabados procedurales interpretados visualmente: baldosas, piezas circulares, tierra, pintura azul, hojas nervadas y corteza. El cartel se recrea con texto legible; no es una reproducción fotográfica exacta.
