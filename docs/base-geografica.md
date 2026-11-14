@@ -370,3 +370,6 @@ Las fotos de ida y vuelta de las 13:09 muestran el sendero embaldosado a nivel c
 
 La foto del 11/11 a las 18:26 muestra el frente de ladrillo del Área de Ensayo de Materiales, con un cuerpo alto y otro bajo, franjas oscuras y portones metálicos. Se tomó como referencia de forma para Maquetas. Las alturas, la pendiente y la distribución de los portones son aproximaciones visuales. El 12/11 se retiró del recorrido el Laboratorio de Ingeniería situado detrás de la cantina. El cuerpo bajo de Maquetas se prolonga hacia ese terreno. El equipo indicó una longitud total de 1417 cm para el frente de Maquetas hacia la cantina. De izquierda a derecha, la nave alta ocupa 9,50 m y el cuerpo bajo ocupa 4,67 m. Esta distribución entre cuerpos es aproximada.
 >>>>>>> Stashed changes
+### Fachada trasera del Bloque 1
+
+La fachada norte del Bloque 1 tiene parasoles azul grisáceo con lamas inclinadas y montantes por módulo. La franja superior queda abierta frente a las ventanas para alojar las unidades exteriores de aire acondicionado. Los equipos tienen soportes metálicos en los pisos superiores y bases de hormigón en planta baja. La distribución se estimó a partir de la foto.

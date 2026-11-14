@@ -21,6 +21,7 @@ type BlockSpec = {
   /** +1: galería hacia +z del marco local; -1: hacia -z. */
   front: 1 | -1;
   topWall: number; roof: T.Material; louvers: boolean;
+  rearScreens?: boolean;
   /** Cartel de la galería en cada nivel (vacío: sin cartel). */
   label: (level: number) => string;
   /** Aulas de cada nivel; donde terminan antes del extremo del bloque solo sigue la galería. */
@@ -427,6 +428,41 @@ export function createFaculty(grass = makeGrassMaterial()) {
     mesh.position.set(x, y, z); mesh.rotation.y = Math.PI / 2; visual.add(mesh);
   }
 
+  const rearSlat = new T.MeshStandardMaterial({ color: "#59778d", roughness: 0.71, metalness: 0.25 });
+  const rearPost = new T.MeshStandardMaterial({ color: "#46657c", roughness: 0.69, metalness: 0.28 });
+  const condenserCase = new T.MeshStandardMaterial({ color: "#c9c5b8", roughness: 0.83 });
+  const fanShade = new T.MeshStandardMaterial({ color: "#30383b", roughness: 0.94 });
+  const fanGrille = new T.MeshStandardMaterial({ color: "#999f9e", roughness: 0.75 });
+  const fanRing = new T.TorusGeometry(0.155, 0.008, 5, 20);
+  const fanDisk = new T.CircleGeometry(0.164, 20);
+  fanDisk.rotateY(Math.PI);
+
+  function rearCondenser(x: number, y: number, z: number, grounded: boolean) {
+    box(0.86, 0.56, 0.33, x, y, z, condenserCase, grounded);
+    const fanX = x - 0.13, faceZ = z - 0.167;
+    const disk = new T.Mesh(fanDisk, fanShade);
+    disk.position.set(fanX, y, faceZ);
+    visual.add(disk);
+    const grille = new T.Mesh(fanRing, fanGrille);
+    grille.position.set(fanX, y, faceZ - 0.009);
+    visual.add(grille);
+    for (let i = -3; i <= 3; i++) {
+      const offset = i * 0.038;
+      const span = 2 * Math.sqrt(0.148 ** 2 - offset ** 2);
+      box(span, 0.008, 0.008, fanX, y + offset, faceZ - 0.01, fanGrille);
+    }
+    for (let i = 0; i < 4; i++) box(0.14, 0.012, 0.009, x + 0.22, y + i * 0.035 - 0.05, faceZ - 0.007, fanShade);
+    if (grounded) {
+      box(0.95, 0.09, 0.41, x, y - 0.325, z, m.concrete);
+    } else {
+      for (const dx of [-0.29, 0.29]) {
+        box(0.045, 0.045, 0.45, x + dx, y - 0.302, z + 0.035, rearPost);
+        beam(v3(x + dx, y - 0.50, z + 0.24), v3(x + dx, y - 0.30, z - 0.10), 0.016, rearPost);
+      }
+      beam(v3(x + 0.37, y - 0.12, z + 0.14), v3(x + 0.48, y - 0.31, z + 0.23), 0.013, condenserCase);
+    }
+  }
+
   /** Bloque de aulas con galería abierta (Bloque 1 y Bloque G). */
   function academicBlock(s: BlockSpec) {
     const { length: L, depth: D, levels, bay, gallery: G, front } = s;
@@ -506,6 +542,20 @@ export function createFaculty(grass = makeGrassMaterial()) {
         box(w - 1.2, 1.7, 0.05, xc, y + 1.85, zBack, m.glass, true);
         for (let k = 1; k < 4; k++) box(0.05, 1.7, 0.09, x0 + 0.6 + (k * (w - 1.2)) / 4, y + 1.85, zBack, m.metal);
         box(w - 1.2, 0.05, 0.09, xc, y + 2.1, zBack, m.metal);
+        if (s.rearScreens) {
+          // Lamas exteriores, con una franja alta libre para ventilación y equipos.
+          const screenZ = zBack - 0.26;
+          for (let row = 0; row < 10; row++) {
+            const slat = box(w - 0.14, 0.083, 0.20, xc, y + 0.48 + row * 0.167, screenZ, rearSlat);
+            slat.rotation.x = -0.24;
+          }
+          for (const px of [x0 + 0.055, x1 - 0.055]) {
+            box(0.06, hw, 0.075, px, y + hw / 2, screenZ - 0.03, rearPost);
+          }
+          if (w > 2.2 && (level ? (i + level) % 4 !== 0 : i % 3 === 1)) {
+            rearCondenser(x0 + w * 0.71, y + (level ? 2.36 : 0.37), zBack - (level ? 0.37 : 0.52), level === 0);
+          }
+        }
       }
       // Borde de la galería: viga transversal en cada línea de módulo con columna; baranda entre
       // columnas (y en los voladizos de los extremos) y, encima, dos paños de lamas por módulo.
@@ -577,7 +627,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
   const b1x = plan.main.center[0], local = ([a, b]: Range): Range => [a - b1x, b - b1x];
   frame(plan.main, () => {
     academicBlock({
-      ...block1, front: 1, topWall: 4.1, roof: m.roof, louvers: true,
+      ...block1, front: 1, topWall: 4.1, roof: m.roof, louvers: true, rearScreens: true,
       label: (level) => level ? "" : "LABORATORIOS",
       rooms: (level) => plan.rooms.main[level],
       endWindow: { level: 1, z: -2.8, width: 2.4, sill: 0.9, height: 1.5 },

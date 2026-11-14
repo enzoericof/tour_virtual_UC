@@ -156,7 +156,7 @@ export class Walker {
     if (request !== this.captureRequest || !this.capturePending) return;
     this.capturePending = false;
     this.onLockChange(false);
-    this.onCaptureError("No se pudo capturar el mouse. Volvé a pulsar Continuar; si esta vista no lo permite, abrí el proyecto en Chrome o Edge para girar sin límites.");
+    this.onCaptureError("No se pudo capturar el mouse. Volvé a pulsar Recorrer. Si el problema sigue, abrí el proyecto en Chrome o Edge para girar sin límites.");
   }
   pause() {
     ++this.captureRequest;

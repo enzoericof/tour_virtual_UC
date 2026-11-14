@@ -8,10 +8,10 @@ El recorrido multijugador usa `campus-backend/`. Los contratos históricos de bi
 
 - Sector de Ciencias y Tecnología con las medidas del equipo: Bloque 1 (65 × 12 m, planta baja y tres pisos, columnas cada 4,5 m, puertas dobles numeradas y títulos en la cara este) con su escalera tipo Pompidou, ascensor con murales, cabecera este con escalera y rampa hacia la plaza techada, media sombra y torre de baños; Bloque G (65 × 12 m); patios; plazas techada y abierta, Bedelía, cantina y Sala Manfred sobre una plataforma a 1,40 m. Se excluyen las demás facultades, el seminario, las canchas y los estacionamientos cercanos.
 - Paredes de ladrillo, piso de granito, hormigón, cubierta y lamas con texturas sacadas del escaneo del pasillo del tercer piso.
-- Exteriores aproximados de Maquetas, Kampus Print, CTA–DICIA, DEI–LED y dependencias LED, DA/CAP, DAS y DG; accesibles desde Explorar. [Fuente y límites](docs/base-geografica.md#dependencias-del-plano-general--revisión-local-02112026).
+- Exteriores aproximados de Maquetas, Kampus Print, CTA–DICIA, DEI–LED y dependencias LED, DA/CAP, DAS y DG. [Fuente y límites](docs/base-geografica.md#dependencias-del-plano-general--revisión-local-02112026).
 - Todo el recorrido usa el modelo construido de la facultad. Los escaneos navegables de laboratorio, pasillo y aula del tercer piso fueron retirados; esos espacios conservan sus identificadores y fotografías de referencia.
 - Primera persona, teclado y mouse, colisiones, gravedad y escaleras en el bloque principal. El recorrido captura el mouse para girar sin límites, con un punto central integrado; Esc pausa y devuelve el cursor. Requiere un navegador que permita Pointer Lock (Chrome o Edge). Si la captura falla, permanece en pausa e informa cómo continuar.
-- Vista general con cámara orbital, búsqueda de espacios, filtros y fotografías ampliables. El inicio muestra el modelo a pantalla completa. Los espacios se abren desde Explorar; M recoge las herramientas.
+- Vista general con cámara orbital y una barra superior con el logo de CyT, Recorrer, Vista General, Modo Noche o Modo Día, Pantalla Completa, Ayuda y Perfil. Ayuda explica los controles del recorrido.
 - Registro e inicio/cierre de sesión con Spring Security. El recorrido comparte avatares y posiciones en tiempo real. Podés guardar una apariencia en **Cuenta**.
 - Los servicios de biblioteca, paneles y chat del visor corresponden al contrato anterior. El backend actual cuenta con su propia API de materias y trabajos.
 
@@ -43,7 +43,7 @@ Abrir la dirección mostrada por Vite, normalmente `http://127.0.0.1:5173/`. Sin
    ```
 
 3. Arrancá el frontend como en el inicio rápido. Vite redirige `/api` y `/ws` al puerto 8080. Si usás otro puerto, configurá `CAMPUS_API_URL` antes de iniciar Vite.
-4. Entrá con **Cuenta**, elegí una apariencia y usá **Caminar**. Para probar con otra persona, abrí otra sesión en un perfil de navegador independiente o una ventana privada e ingresá al mismo lugar.
+4. Entrá con **Perfil**, elegí una apariencia y usá **Recorrer**. Para probar con otra persona, abrí otra sesión en un perfil de navegador independiente o una ventana privada e ingresá al mismo lugar.
 
 Para una prueba en la red local, iniciá Vite con `npm run dev -- --host 0.0.0.0` desde `frontend`. Los visitantes abren el frontend con la IP del equipo anfitrión. La API y el WebSocket usan ese mismo origen a través de Vite.
 
@@ -51,7 +51,7 @@ Las cuentas y apariencias quedan guardadas en PostgreSQL. Las sesiones de acceso
 
 ## Controles
 
-Dos modos: **vista general** al iniciar y **recorrido a pie** desde Caminar. El botón de restablecer vista permite regresar al encuadre inicial. Ambos comparten una sola distribución ([ids, fuentes, coordenadas y límites](docs/base-geografica.md)).
+Dos modos: **vista general** al iniciar y **recorrido a pie** desde Recorrer. El botón de restablecer vista permite regresar al encuadre inicial. Ambos comparten una sola distribución ([ids, fuentes, coordenadas y límites](docs/base-geografica.md)).
 
 | Acción | Control |
 | --- | --- |
@@ -64,9 +64,9 @@ Dos modos: **vista general** al iniciar y **recorrido a pie** desde Caminar. El 
 | Pausar, liberar cursor y abrir opciones | Esc o botón ESC · Pausar |
 | Ocultar o mostrar las herramientas en vista general | M |
 | Inspeccionar el conjunto | Botón de vista general; arrastrar y rueda |
-| Alternar entre cielo y espacio | Botón de la luna en la vista general o «Modo oscuro» al pausar |
+| Alternar entre cielo y espacio | Modo Noche durante el día y Modo Día durante la noche, en ambos menús |
 
-Durante el recorrido solo se muestra el botón ESC · Pausar, sin mira central ni avisos con E. Al pausar aparece un único menú con las opciones existentes; Continuar recorrido conserva la posición.
+Durante el recorrido solo se muestra el botón ESC · Pausar, sin mira central ni avisos con E. Al pausar aparece un único menú con las mismas opciones de la barra superior. Recorrer desde la pausa conserva la posición.
 
 En dispositivos táctiles se pueden inspeccionar modelos y fotos. El recorrido a pie está pensado para teclado y mouse.
 

@@ -33,26 +33,38 @@ const escape = (s: string) =>
         c
       ]!,
   );
+const campusBrand = `<div class="brand"><img class="brand-mark" src="/assets/logo-uc-sapientia.png" width="40" height="40" alt="Universidad Católica"><span><strong>Ciencias y Tecnología</strong><small>Campus Santa Librada</small></span></div>`;
 $("#app").innerHTML = `
  <main id="viewport"></main>
  <div class="game-pointer" aria-hidden="true"></div>
- <header class="topbar"><button class="brand" id="home" aria-label="Volver al campus"><span class="brand-mark">UC<span>✦</span></span><span><strong>Ciencias y Tecnología</strong><small>Campus Santa Librada</small></span></button><nav aria-label="Principal"><button aria-label="Explorar" id="spaces-btn" aria-expanded="false" aria-controls="explorer">${icon("map")}<span>Explorar</span></button><button aria-label="Caminar" id="begin">${icon("walk")}<span>Caminar</span></button><button aria-label="Biblioteca" id="library-btn">${icon("book")}<span>Biblioteca</span></button><button aria-label="Comunidad" id="chat-btn">${icon("chat")}<span>Comunidad</span></button><button aria-label="Menú" id="menu-btn" class="menu-btn" aria-expanded="false" aria-controls="menu-panel">${icon("menu")}<span>Menú</span><kbd>M</kbd></button></nav><button aria-label="Cuenta" id="account-btn" class="account">${icon("user")}<span>Ingresar</span></button></header>
- <div class="menu-panel hidden" id="menu-panel" role="region" aria-label="Herramientas"><button class="secondary restore" id="restore-panels">Mostrar paneles <kbd>M</kbd></button></div>
- <aside class="explorer collapsed" id="explorer" aria-label="Espacios de la facultad"><div class="section-top"><div><h2>Espacios</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div></aside>
- <div class="tools"><button id="overview" class="icon-btn" title="Restablecer vista" aria-label="Restablecer vista">${icon("cube")}</button><button id="theme" class="icon-btn" aria-label="Modo oscuro" aria-pressed="false">${icon("moon")}</button><button id="quality" class="icon-btn" title="Cambiar calidad gráfica" aria-label="Cambiar calidad gráfica">${icon("sun")}</button><button id="fullscreen" class="icon-btn" title="Pantalla completa" aria-label="Pantalla completa">${icon("expand")}</button><button id="help" class="icon-btn" title="Ayuda" aria-label="Ayuda">${icon("help")}</button></div>
+ <header class="topbar tour-panel">
+  ${campusBrand}
+  <nav class="tools tour-actions" aria-label="Controles de la vista general">
+   <button id="begin" title="Recorrer" aria-label="Recorrer">${icon("walk")}<span>Recorrer</span></button>
+   <button id="overview" title="Vista General" aria-label="Vista General">${icon("cube")}<span>Vista General</span></button>
+   <button id="theme">${icon("moon")}<span>Modo Noche</span></button>
+   <button id="fullscreen" title="Pantalla Completa" aria-label="Pantalla Completa" aria-pressed="false">${icon("expand")}<span>Pantalla Completa</span></button>
+   <button id="help" title="Ayuda" aria-label="Ayuda">${icon("help")}<span>Ayuda</span></button>
+  </nav>
+  <button id="account-btn" class="account" title="Perfil" aria-label="Perfil">${icon("user")}<span>Perfil</span></button>
+ </header>
+ <aside class="explorer tour-panel collapsed" id="explorer" aria-label="Espacios de la facultad"><div class="section-top"><div><h2>Espacios</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div></aside>
  <button id="pause-tour" class="pause-tour hidden" aria-label="ESC · Pausar recorrido"><kbd>ESC</kbd> Pausar</button>
  <section id="walk-prompt" class="pause-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
-  <div class="pause-card"><span class="eyebrow">TU RECORRIDO</span><h2 id="pause-title">En pausa</h2>
-  <div class="pause-options">
-   <button class="primary" id="resume">${icon("walk")} Continuar recorrido</button>
-   <button id="inspect">${icon("cube")} Vista general</button>
-   <button data-pause-action="theme" aria-pressed="false">${icon("moon")} Modo claro/oscuro</button>
-   <button data-pause-action="fullscreen">${icon("expand")} Pantalla completa</button>
-   <button data-pause-action="help">${icon("help")} Ayuda</button>
-   <button data-pause-action="account-btn">${icon("user")} Mi cuenta</button>
-  </div></div>
+  <div class="pause-card tour-panel">
+   ${campusBrand}
+   <h2 id="pause-title">En pausa</h2>
+   <div class="pause-options tour-actions">
+    <button id="resume">${icon("walk")} Recorrer</button>
+    <button id="inspect">${icon("cube")} Vista General</button>
+    <button data-pause-action="theme">${icon("moon")}<span>Modo Noche</span></button>
+    <button data-pause-action="fullscreen" aria-pressed="false">${icon("expand")} Pantalla Completa</button>
+    <button data-pause-action="help">${icon("help")} Ayuda</button>
+    <button data-pause-action="account-btn">${icon("user")} Perfil</button>
+   </div>
+  </div>
  </section>
- <dialog id="dialog"><button class="icon-btn dialog-close" aria-label="Cerrar">${icon("close")}</button><div id="dialog-content"></div></dialog>
+ <dialog id="dialog" class="tour-panel"><button class="icon-btn dialog-close" aria-label="Cerrar">${icon("close")}</button><div id="dialog-content"></div></dialog>
  <div id="toast" role="status" class="toast hidden"></div>
 `;
 let engine: TourEngine;
@@ -61,7 +73,6 @@ let user: User | null = null;
 let selected: Place | null = null;
 let filter = "all";
 let online = false;
-let highQuality = true;
 let toastTimer = 0;
 const chat = new CampusChat();
 let presenceStatus = "Sin sesión";
@@ -74,27 +85,6 @@ const presence = new CampusPresence(
     if (label) label.textContent = status;
   },
 );
-// M alterna las herramientas; los espacios solo se abren desde Explorar.
-const floating = [".tools"].map((selector) => {
-  const element = $(selector), mark = document.createComment(selector);
-  element.before(mark);
-  return { element, mark };
-});
-function setMenu(open: boolean) {
-  $("#menu-panel").classList.toggle("hidden", !open);
-  $("#menu-btn").setAttribute("aria-expanded", String(open));
-}
-function setCompact(compact: boolean) {
-  document.body.classList.toggle("ui-compact", compact);
-  if (compact) {
-    setExplorer(false);
-    for (const { element } of floating) $("#menu-panel").insertBefore(element, $("#restore-panels"));
-  } else {
-    for (const { element, mark } of floating) mark.after(element);
-    setMenu(false);
-  }
-}
-const compact = () => document.body.classList.contains("ui-compact");
 function toast(message: string) {
   $("#toast").textContent = message;
   $("#toast").classList.remove("hidden");
@@ -104,11 +94,12 @@ function toast(message: string) {
     6500,
   );
 }
-function openDialog(html: string) {
+function openDialog(html: string, titleId?: string) {
   engine?.pause();
-  setMenu(false);
   $("#dialog-content").innerHTML = html;
   const d = $<HTMLDialogElement>("#dialog");
+  if (titleId) d.setAttribute("aria-labelledby", titleId);
+  else d.removeAttribute("aria-labelledby");
   if (!d.open) d.showModal();
   syncPauseMenu();
 }
@@ -227,10 +218,15 @@ function syncPauseMenu() {
 }
 function syncTheme() {
   const dark = theme === "dark";
+  const label = dark ? "Modo Día" : "Modo Noche";
   document.documentElement.dataset.theme = theme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#102346" : "#f8fbff");
   for (const button of document.querySelectorAll<HTMLButtonElement>('#theme, [data-pause-action="theme"]')) {
-    button.setAttribute("aria-pressed", String(dark));
-    button.title = dark ? "Cambiar a cielo (modo claro)" : "Cambiar a espacio (modo oscuro)";
+    button.setAttribute("aria-label", label);
+    button.title = label;
+    button.querySelector("span")!.textContent = label;
+    const glyph = button.querySelector("svg");
+    if (glyph) glyph.outerHTML = icon(dark ? "sun" : "moon");
   }
 }
 function onMode(mode: string) {
@@ -240,7 +236,7 @@ function onMode(mode: string) {
   document.body.classList.toggle("is-walking", walking);
   document.body.classList.toggle("is-paused", mode === "paused");
   $("#pause-tour").classList.toggle("hidden", !walking);
-  if (walking) { setMenu(false); setExplorer(false); $("#toast").classList.add("hidden"); }
+  if (walking) { setExplorer(false); $("#toast").classList.add("hidden"); }
   syncPauseMenu();
   if (mode === "paused") queueMicrotask(() => {
     if (!$("#walk-prompt").classList.contains("hidden")) $("#resume").focus();
@@ -278,29 +274,20 @@ function resetOverview() {
   renderPlaces();
   setExplorer(false);
 }
-$("#menu-btn").onclick = () => setMenu($("#menu-panel").classList.contains("hidden"));
-$("#restore-panels").onclick = () => setCompact(false);
 window.addEventListener("keydown", (e) => {
   if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
   const target = e.target instanceof Element ? e.target : null;
   if (target?.closest("input, textarea, select, [contenteditable]") || $<HTMLDialogElement>("#dialog").open) return;
-  if (e.code === "Escape") { setMenu(false); setExplorer(false); }
-  if (e.code === "KeyM" && currentMode === "overview") setCompact(!compact());
-});
-document.addEventListener("pointerdown", (e) => {
-  if (!(e.target instanceof Element && e.target.closest("#menu-panel, #menu-btn"))) setMenu(false);
+  if (e.code === "Escape") setExplorer(false);
+  if (e.code === "KeyM" && currentMode === "overview") {
+    const hidden = document.body.classList.toggle("ui-compact");
+    if (hidden) setExplorer(false);
+  }
 });
 function setExplorer(open: boolean) {
   $("#explorer").classList.toggle("collapsed", !open);
-  $("#spaces-btn").classList.toggle("active", open);
-  $("#spaces-btn").setAttribute("aria-expanded", String(open));
   syncPauseMenu();
 }
-$("#home").onclick = () => { setCompact(false); setExplorer(false); resetOverview(); };
-$("#spaces-btn").onclick = () => {
-  engine.pause();
-  setExplorer($("#explorer").classList.contains("collapsed"));
-};
 $("#close-explorer").onclick = () => setExplorer(false);
 $<HTMLInputElement>("#search").oninput = renderPlaces;
 document.querySelectorAll<HTMLButtonElement>("[data-filter]").forEach(
@@ -322,16 +309,6 @@ $("#theme").onclick = () => {
   } catch {
     // La preferencia sigue activa durante esta visita.
   }
-  toast(theme === "dark" ? "Modo oscuro · Espacio" : "Modo claro · Cielo");
-};
-$("#quality").onclick = () => {
-  highQuality = !highQuality;
-  engine.quality(highQuality);
-  toast(
-    highQuality
-      ? "Calidad alta: mayor resolución."
-      : "Modo fluido: menor resolución.",
-  );
 };
 $("#fullscreen").onclick = () => {
   void (
@@ -342,14 +319,42 @@ $("#fullscreen").onclick = () => {
     toast("La pantalla completa no está disponible en esta vista."),
   );
 };
+document.addEventListener("fullscreenchange", () => {
+  const active = Boolean(document.fullscreenElement);
+  for (const button of document.querySelectorAll<HTMLButtonElement>('#fullscreen, [data-pause-action="fullscreen"]')) {
+    button.setAttribute("aria-pressed", String(active));
+    button.title = active ? "Salir de pantalla completa" : "Pantalla Completa";
+  }
+});
 $("#help").onclick = () =>
   openDialog(
-    `<span class="eyebrow">TU VISITA, A TU RITMO</span><h2>Cómo recorrer el campus</h2><div class="help-grid"><kbd>W A S D</kbd><p>Caminar. También podés usar las flechas.</p><kbd>Mouse</kbd><p>Mirar alrededor. En vista general, arrastrar y acercar con la rueda.</p><kbd>Shift</kbd><p>Caminar más rápido.</p><kbd>Espacio</kbd><p>Saltar para superar pequeños desniveles.</p><kbd>Esc</kbd><p>Pausar y abrir las opciones del recorrido.</p><kbd>M</kbd><p>Ocultar o mostrar las herramientas en la vista general.</p></div><p class="subtle">El sector de CyT es una reconstrucción aproximada. Se recomienda teclado y mouse para caminar; en pantallas táctiles podés inspeccionar modelos y fotografías.</p><p class="subtle">Base geográfica: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>.</p>`,
+    `<div class="tour-help">
+      <header><h2 id="help-title">${icon("help")} Ayuda del recorrido</h2></header>
+      <div class="tour-help-body">
+        <section>
+          <h3>Vista General</h3>
+          <p>Hacé clic en un punto del campus para empezar ahí. Arrastrá para girar y usá la rueda para acercarte o alejarte.</p>
+        </section>
+        <section>
+          <h3>Durante el recorrido</h3>
+          <dl class="help-grid">
+            <dt>Moverte</dt><dd><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> o las flechas</dd>
+            <dt>Mirar alrededor</dt><dd>Mové el mouse</dd>
+            <dt>Ir más rápido</dt><dd>Mantené <kbd>Shift izq.</kbd></dd>
+            <dt>Saltar</dt><dd><kbd>Espacio</kbd></dd>
+            <dt>Pausar</dt><dd><kbd>Esc</kbd></dd>
+          </dl>
+          <p>Para usar el ascensor, apuntá al botón y hacé clic cuando se resalte.</p>
+        </section>
+        <footer><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></footer>
+      </div>
+    </div>`,
+    "help-title",
   );
 function account() {
   if (user) {
     openDialog(
-      `<span class="eyebrow">MI CUENTA</span><h2>Hola, ${escape(user.name)}</h2><p>${escape(user.email)}</p><p class="subtle">${user.role === "ADMIN" ? "Administrador de contenidos" : "Miembro de la comunidad"}</p><p class="subtle" id="presence-status">${escape(presenceStatus)}</p><form id="skin-form"><label>Apariencia<select name="skin">${skinIds.map(id => `<option value="${id}" ${id === user?.skin ? "selected" : ""}>${skins[id].name}</option>`).join("")}</select></label><button class="secondary">Guardar apariencia</button><p class="form-error" role="alert"></p></form><button class="primary" id="my-works">Mis trabajos</button>${user.role === "ADMIN" ? '<button class="secondary" id="manage-panels">Administrar paneles</button>' : ""}<button class="text-btn" id="logout">Cerrar sesión</button>`,
+      `<span class="eyebrow">MI CUENTA</span><h2>Hola, ${escape(user.name)}</h2><p>${escape(user.email)}</p><p class="subtle">${user.role === "ADMIN" ? "Administrador de contenidos" : "Miembro de la comunidad"}</p><p class="subtle" id="presence-status">${escape(presenceStatus)}</p><form id="skin-form"><label>Apariencia<select name="skin">${skinIds.map(id => `<option value="${id}" ${id === user?.skin ? "selected" : ""}>${skins[id].name}</option>`).join("")}</select></label><button class="secondary">Guardar apariencia</button><p class="form-error" role="alert"></p></form><button class="primary" id="my-works">Mis trabajos</button><button class="secondary" id="community-chat">Chat del campus</button>${user.role === "ADMIN" ? '<button class="secondary" id="manage-panels">Administrar paneles</button>' : ""}<button class="text-btn" id="logout">Cerrar sesión</button>`,
     );
     $<HTMLFormElement>("#skin-form").onsubmit = async event => {
       event.preventDefault();
@@ -368,6 +373,7 @@ function account() {
       }
     };
     $("#my-works").onclick = () => void library();
+    $("#community-chat").onclick = openChat;
     if ($("#manage-panels"))
       $("#manage-panels").onclick = () => void managePanels();
     $("#logout").onclick = async () => {
@@ -385,8 +391,9 @@ function account() {
     return;
   }
   openDialog(
-    `<span class="eyebrow">COMUNIDAD UC</span><h2>Nos encontramos acá.</h2><p class="subtle">Ingresá para recorrer el campus con otros visitantes y elegir tu apariencia.</p><div class="auth-tabs"><button id="login-tab" class="selected">Ingresar</button><button id="register-tab">Crear cuenta</button></div><form id="auth-form"><fieldset id="register-fields" class="hidden" disabled><label>Nombre<input name="name" maxlength="100" autocomplete="given-name" required></label><label>Apellido<input name="surname" maxlength="100" autocomplete="family-name" required></label><label>Carrera<select name="career" required><option value="1">Ingeniería Informática</option><option value="2">Ingeniería Electrónica</option></select></label></fieldset><label>Correo electrónico<input name="email" type="email" required autocomplete="email" maxlength="150"></label><label>Contraseña<input name="password" type="password" required maxlength="72" autocomplete="current-password"></label><button class="primary" id="auth-submit">Ingresar ${icon("arrow")}</button><p class="form-error" role="alert"></p></form>`,
+    `<span class="eyebrow">COMUNIDAD UC</span><h2>Nos encontramos acá.</h2><p class="subtle">Ingresá para recorrer el campus con otros visitantes y elegir tu apariencia.</p><div class="auth-tabs"><button id="login-tab" class="selected">Ingresar</button><button id="register-tab">Crear cuenta</button></div><form id="auth-form"><fieldset id="register-fields" class="hidden" disabled><label>Nombre<input name="name" maxlength="100" autocomplete="given-name" required></label><label>Apellido<input name="surname" maxlength="100" autocomplete="family-name" required></label><label>Carrera<select name="career" required><option value="1">Ingeniería Informática</option><option value="2">Ingeniería Electrónica</option></select></label></fieldset><label>Correo electrónico<input name="email" type="email" required autocomplete="email" maxlength="150"></label><label>Contraseña<input name="password" type="password" required maxlength="72" autocomplete="current-password"></label><button class="primary" id="auth-submit">Ingresar ${icon("arrow")}</button><p class="form-error" role="alert"></p></form><button class="text-btn" id="account-library">Biblioteca de trabajos</button>`,
   );
+  $("#account-library").onclick = () => void library();
   let register = false;
   $("#register-tab").onclick = () => {
     register = true;
@@ -428,7 +435,6 @@ function account() {
   };
 }
 function updateAccount() {
-  $("#account-btn span").textContent = user?.name ?? "Ingresar";
   if (user) presence.start();
   else presence.stop();
 }
@@ -493,12 +499,7 @@ async function library() {
       '<div class="empty-state"><h3>La biblioteca no está conectada.</h3><p>Iniciá el servicio de contenidos para consultar y publicar trabajos. El recorrido 3D sigue disponible.</p></div>';
   }
 }
-$("#library-btn").onclick = () => void library();
-$("#chat-btn").onclick = () => {
-  if (!user) {
-    account();
-    return;
-  }
+function openChat() {
   openDialog(
     `<span class="eyebrow">COMUNIDAD EN VIVO</span><h2>Una charla en el campus</h2><p id="chat-status" class="subtle">Conectando…</p><div id="messages" class="messages" role="log" aria-live="polite"><p class="subtle">Los mensajes se comparten con quienes están conectados. No se guarda historial.</p></div><form id="chat-form" class="chat-form"><input name="message" aria-label="Mensaje" placeholder="Escribí un mensaje…" maxlength="500" required autocomplete="off"><button class="primary" aria-label="Enviar mensaje">${icon("arrow")}</button></form>`,
   );
@@ -536,7 +537,7 @@ $("#chat-btn").onclick = () => {
       toast((e as Error).message);
     }
   };
-};
+}
 function editWork(work: Work) {
   openDialog(
     `<span class="eyebrow">MI TRABAJO</span><h2>Actualizar publicación</h2><form id="edit-work-form"><label>Título<input name="title" required maxlength="140" value="${escape(work.title)}"></label><label>Descripción<textarea name="description" required maxlength="2000">${escape(work.description)}</textarea></label><label>Enlace<input name="url" type="url" required maxlength="2048" value="${escape(work.url)}"></label><button class="primary">Guardar cambios</button><p class="form-error" role="alert"></p></form>`,

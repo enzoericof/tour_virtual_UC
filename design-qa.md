@@ -1,3 +1,11 @@
+# Vista general, pausa y cambio de tema
+
+La vista general reúne el logo circular de UC y las seis acciones en una barra superior. La pausa comparte el logo y la tipografía. Los menús y los diálogos usan los colores del portal Sapientia como referencia: blanco y celeste de día, azul marino de noche. El botón de tema indica el modo de destino. En ventanas estrechas los seis botones de la barra pasan juntos a iconos con nombres accesibles. Ayuda describe la cámara, los controles a pie y el ascensor. La biblioteca y el chat se abren desde Perfil.
+
+En el navegador integrado se revisó la barra en ambos temas a 1050 px, la pausa en modo noche, los diálogos de Ayuda y Perfil y la barra con seis iconos a 322 px. El logo cargó y los controles quedaron dentro del ancho disponible. Capturas locales: `output/barra-sapientia-dia.png` y `output/barra-sapientia-noche.png`. Compilación correcta y 39 pruebas aprobadas.
+
+La nueva ventana de Ayuda se comprobó a 780 px en modo día y a 322 px en modo noche. Al cerrarla durante el recorrido vuelve a aparecer el menú de pausa. Captura local: `output/ayuda-sapientia.png`.
+
 # Revisión local del inicio — 02/11/2026
 
 Referencia: quinta captura del usuario, codex-clipboard-ad562cf1-19d0-4966-8c9f-88228ef718d5.png (1222 × 916). Implementación: .local/references/inicio-limpio.png (1220 × 920 CSS/píxeles). Se compara el modelo dominante y los controles, sin exigir igualdad de encuadre de la geometría.

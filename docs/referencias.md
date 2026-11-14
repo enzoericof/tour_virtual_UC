@@ -124,3 +124,7 @@ La captura a27e4b5d identifica los tres descansos de la escalera exterior. La fo
 El adjunto 9c88fb20 sirve de referencia para la textura azul, las puertas de acero y la botonera del ascensor.
 
 Las capturas 32dbd2a9 y 760a563b comparan el frente del ascensor y fijan la ubicación derecha del pulsador y el indicador exteriores.
+
+El adjunto c9c60052 muestra las lamas, los montantes y los equipos de aire acondicionado de la fachada trasera del Bloque 1. La foto sirvió de referencia para el modelado.
+
+El logo del visor proviene del [Portal de Alumnos Sapientia](https://alumnos.sapientia.uc.edu.py/). El [archivo circular de la UC](https://alumnos.sapientia.uc.edu.py/assets/assets/images/sapientia_uc.png) se recortó al borde transparente y se redujo a 160 px para la barra, la pausa y el icono de pestaña. Las capturas del portal que compartió el equipo sirvieron de referencia para la paleta de día y de noche.
