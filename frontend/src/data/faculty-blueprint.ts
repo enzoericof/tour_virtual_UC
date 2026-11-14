@@ -343,12 +343,14 @@ export const facultyBlueprint = {
     block2: Array.from({ length: blockG.levels }).reduce<Rooms[]>((floors, _, level) =>
       [...floors, classrooms(pilasters(blockG), -blockG.length / 2, blockG.length / 2, level + 7, 1, floors[level - 1]?.doors)], []),
   },
-  /** Torre de baños en el extremo oeste: núcleo de 2 m de ancho que sale de la galería hacia el sur
-   * y dos semicírculos de 4 m de radio a sus costados (10 m de punta a punta). `center`: eje del
-   * núcleo y centro de los semicírculos, 2 m al sur del acceso. Entrando desde la galería, a la
+  /** Torre de baños en el extremo oeste: núcleo de 2 m entre dos alas curvas de 4 m de fondo radial.
+   * El frente conecta cada baño con la galería. Mirando desde la galería, a la
    * derecha (oeste, `menSide`) hombres y a la izquierda mujeres, en todos los pisos. En planta baja
    * un anexo cuadrado sobresale 2 m al sur de la torre. */
-  tower: { center: [west + 5, half.z + 2 + 4] as Vec2, radius: 4, core: 2, menSide: -1, annex: { size: 8, beyond: 2 } },
+  tower: { center: [west + 5.6, half.z + 2 + 4] as Vec2, radius: 4, radiusX: 4.6, core: 2, menSide: -1,
+    entry: { halfWidth: 2.72, doorOffset: 1.36, doorWidth: 1.18, recess: 1.72, angle: Math.PI / 8,
+      shoulderStart: 0.88, curveJoin: 0.94 },
+    annex: { size: 8, beyond: 2 } },
   /** Escalera tipo Pompidou fuera de la galería: arranca a 18 m de la esquina SE (el 01/11/2026 el
    * equipo la corrió 2 m al este y la ensanchó a 2,4 m) y sube un piso por tramo hacia la torre. Tramo
    * (6 m, veinte peldaños de 30 cm) y descanso (3 m) suman 9 m, dos módulos de 4,5 m: cada descanso se
@@ -399,14 +401,35 @@ export const facultyBlueprint = {
 
 export const facultyCorners = { gNorthWest, gNorthEast, gSouthEast, gSouthWest, plazaWest, plazaNorth };
 
-/** Contorno de la torre de baños: núcleo desde la galería y los dos semicírculos. */
-export function towerOutline(segments = 12): Vec2[] {
-  const { center: [cx, cz], radius: r, core } = facultyBlueprint.tower, c = core / 2;
-  const arc = (side: number) => Array.from({ length: segments + 1 }, (_, i): Vec2 => {
-    const a = -Math.PI / 2 + (Math.PI * i) / segments;
-    return [cx + side * (c + r * Math.cos(a)), cz + r * Math.sin(a)];
+/** Cada baño ocupa un ala curva y su mitad del núcleo hasta la puerta. */
+export function towerRoomOutline(side: number, segments = 48): Vec2[] {
+  const { center: [cx, cz], radius: r, radiusX, core, entry } = facultyBlueprint.tower, c = core / 2;
+  const start = -entry.curveJoin;
+  const arc = Array.from({ length: segments + 1 }, (_, i): Vec2 => {
+    // Se incluye explícitamente la punta de cada ala para conservar su ancho en planta.
+    const a = i <= segments / 2 ? start * (1 - 2 * i / segments) : Math.PI * (i / segments - 0.5);
+    return [cx + side * (c + radiusX * Math.cos(a)), cz + r * Math.sin(a)];
   });
-  return [[cx - c, half.z], [cx + c, half.z], ...arc(1), ...arc(-1).reverse()];
+  return [...towerEntryFront(side), [cx + side * entry.halfWidth, half.z + entry.shoulderStart], ...arc, [cx, cz + r]];
+}
+
+export function towerEntryFront(side: number): [Vec2, Vec2] {
+  const { center: [cx], entry } = facultyBlueprint.tower;
+  const recess = half.z + entry.recess;
+  return [[cx, recess], [cx + side * entry.halfWidth, recess - entry.halfWidth * Math.tan(entry.angle)]];
+}
+
+export function towerEntrance(side: number): Rect {
+  const { center: [cx], entry } = facultyBlueprint.tower;
+  return { center: [cx + side * entry.doorOffset, half.z + entry.recess - entry.doorOffset * Math.tan(entry.angle)],
+    size: [entry.doorWidth, 0.24], angle: -side * entry.angle };
+}
+
+/** Contorno de la torre de baños, con un frente que une ambos baños a la galería. */
+export function towerOutline(segments = 48): Vec2[] {
+  const { center: [cx], entry } = facultyBlueprint.tower;
+  return [[cx - entry.halfWidth, half.z], [cx + entry.halfWidth, half.z],
+    ...towerRoomOutline(1, segments).slice(2, -1), ...towerRoomOutline(-1, segments).slice(2, -1).reverse()];
 }
 /** Anexo cuadrado de planta baja de la torre, que sobresale `beyond` metros al sur. */
 export function towerAnnex(): Vec2[] {
@@ -423,7 +446,6 @@ export function manfredOutline(segments = 12): Vec2[] {
 const cantinaFacade = add(cantinaFront, [Z, 12]);
 const bedeliaFacade = add(bedelia.center, [Z, bedelia.size[1] / 2]);
 const gGallery = add(gRect.center, [Z, -blockG.depth / 2]);
-const towerX = facultyBlueprint.tower.center[0];
 const at = (p: Vec2, y: number): [number, number, number] => [p[0], y, p[1]];
 /** Altura de llegada de los puntos sobre la plataforma. */
 const onPlatform = PLAZA_LEVEL + 0.15;
@@ -453,8 +475,7 @@ export const facultyVisitPoints: Record<string, [number, number, number]> = {
   "plaza-abierta": at(fromRect(cantina, [-11, 20]), onPlatform),
   "piso-1": [13, 3.5, 4.75],
   "piso-2": [13, 7, 4.75],
-  // Acceso de la torre desde la galería, entre las puertas de ambos baños.
-  banos: [towerX, 0.15, half.z + 1],
+  banos: at(fromRect(towerEntrance(-1), [0, -0.68]), 0.15),
   "bloque-g": at(add(gGallery, [Z, -3]), 0.1),
 };
 
@@ -471,7 +492,7 @@ export const facultyVisitTargets: Record<string, [number, number, number]> = {
   plaza: [53 + plazaShift, PLAZA_LEVEL + 1.6, -9],
   patio: [-30, 5, 10],
   jardin: [47, 2.5, 6],
-  banos: [towerX, 1.4, facultyBlueprint.tower.center[1] + 4],
+  banos: at(fromRect(towerEntrance(-1), [0, 1.4]), 1.4),
   "bloque-g": at(add(gGallery, [X, -14], [Z, 2]), 3),
   "pasillo-p3": [-20, 11.6, 4.75],
   "piso-1": [-10, 5.1, 4.75],

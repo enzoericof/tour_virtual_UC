@@ -38,38 +38,28 @@ function texture(kind: "tile" | "concrete") {
 }
 
 export function makeGrassMaterial() {
-  const size = 128, canvas = document.createElement("canvas");
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext("2d")!;
-  ctx.fillStyle = "#758655";
-  ctx.fillRect(0, 0, size, size);
-  let state = 6219;
-  const sample = () => {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 4294967296;
-  };
-  for (let i = 0; i < 24; i++) {
-    const x = sample() * size, y = sample() * size;
-    const radius = 13 + sample() * 18;
-    const tint = i % 2 ? "148,159,104" : "81,102,62";
-    const wrapX = x < radius ? size : x > size - radius ? -size : 0;
-    const wrapY = y < radius ? size : y > size - radius ? -size : 0;
-    for (const sx of wrapX ? [0, wrapX] : [0]) for (const sy of wrapY ? [0, wrapY] : [0]) {
-      const cx = x + sx, cy = y + sy;
-      const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-      gradient.addColorStop(0, `rgba(${tint},0.16)`);
-      gradient.addColorStop(0.65, `rgba(${tint},0.05)`);
-      gradient.addColorStop(1, `rgba(${tint},0)`);
-      ctx.fillStyle = gradient;
-      ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
-    }
-  }
-  const map = new T.CanvasTexture(canvas);
-  map.wrapS = map.wrapT = T.RepeatWrapping;
+  const map = loader.load("/assets/textures/campus-grass-color.webp");
+  const normalMap = loader.load("/assets/textures/campus-grass-normal.webp");
   map.colorSpace = T.SRGBColorSpace;
-  map.minFilter = T.LinearMipmapLinearFilter;
-  map.anisotropy = 16;
-  return tiled(map, [6, 6], { roughness: 1 });
+  for (const texture of [map, normalMap]) {
+    texture.wrapS = texture.wrapT = T.RepeatWrapping;
+    texture.anisotropy = 12;
+  }
+  const grass = tiled(map, [3.2, 3.2], { color: "#c0cdab", normalMap, normalScale: new T.Vector2(0.43, 0.43), roughness: 0.97 });
+  grass.onBeforeCompile = shader => {
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec2 grassPosition;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\ngrassPosition = (modelMatrix * vec4(position, 1.0)).xz;");
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", "#include <common>\nvarying vec2 grassPosition;")
+      .replace("#include <map_fragment>", `#include <map_fragment>
+        float grassTone = sin(grassPosition.x * 0.31 + cos(grassPosition.y * 0.22))
+                        * cos(grassPosition.y * 0.25 + sin(grassPosition.x * 0.18));
+        float grassPatch = sin(dot(grassPosition, vec2(0.78, -0.52))) * cos(dot(grassPosition, vec2(0.42, 0.83)));
+        diffuseColor.rgb *= mix(vec3(0.77, 0.84, 0.73), vec3(1.13, 1.11, 1.04),
+          0.5 + grassTone * 0.38 + grassPatch * 0.12);`);
+  };
+  return grass;
 }
 
 /** Adoquines de la explanada de cantina: referencia elevada aportada por Horacio.

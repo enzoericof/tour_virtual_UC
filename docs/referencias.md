@@ -128,3 +128,9 @@ Las capturas 32dbd2a9 y 760a563b comparan el frente del ascensor y fijan la ubic
 El adjunto c9c60052 muestra las lamas, los montantes y los equipos de aire acondicionado de la fachada trasera del Bloque 1. La foto sirvió de referencia para el modelado.
 
 El logo del visor proviene del [Portal de Alumnos Sapientia](https://alumnos.sapientia.uc.edu.py/). El [archivo circular de la UC](https://alumnos.sapientia.uc.edu.py/assets/assets/images/sapientia_uc.png) se recortó al borde transparente y se redujo a 160 px para la barra, la pausa y el icono de pestaña. Las capturas del portal que compartió el equipo sirvieron de referencia para la paleta de día y de noche.
+
+La roca de la isla usa [Rock Face 03](https://polyhaven.com/a/rock_face_03), de Dario Barresi y Rico Cilliers (Poly Haven, CC0). Los mapas de color y normal OpenGL de 1K se guardaron como WebP en `frontend/public/assets/textures/`. Se ajustaron el brillo y la saturación del mapa de color.
+
+El césped usa [Leafy Grass](https://polyhaven.com/a/leafy_grass), de Charlotte Baglioni (Poly Haven, CC0). El mapa de color se ajustó a tonos verdes y el normal OpenGL se redujo a 512 px. Ambos se guardaron como WebP en `frontend/public/assets/textures/`.
+
+Las tres capturas c0bf5aaa, 34b1d5fe y e7eb9449 muestran el acceso a los baños del Bloque 1 desde la galería. Guiaron el acabado del vestíbulo, las puertas y los azulejos con franja.

@@ -1,3 +1,17 @@
+# Torre de baños del Bloque 1
+
+Se revisaron en navegador las entradas sin carteles, el piso del campus sin marcadores, la ventana alta y los mingitorios más bajos. La prueba de escena comprobó en los cuatro niveles el paso por los cubículos comunes, la entrada y salida en diagonal del cubículo accesible y la colisión contra su tabique. Capturas locales: `output/banos-ajuste-entrada.png`, `output/banos-ajuste-mingitorios.png` y `output/banos-ajuste-accesible.png`. Compilación correcta y 39 pruebas aprobadas.
+
+Se verificó que las franjas de granito coinciden al cruzar de la galería al acceso. Las pruebas comprueban la altura, la alineación del patrón y la colisión del tramo diagonal en ambos baños y en los cuatro niveles. Captura local: `output/banos-union-piso.png`.
+
+Se revisaron las puertas abiertas hacia la galería y los retornos exteriores de ladrillo. La prueba de escena confirma que las hojas exteriores tienen colisión y permiten entrar y salir de ambos baños en los cuatro niveles. Captura local: `output/banos-puertas-galeria.png`.
+
+Se revisó el encuentro entre el tramo diagonal y el muro curvo de la torre. El ladrillo exterior quedó sin franjas blancas y la trama del azulejo y su franja interior continúan sobre la curva. El césped se inspeccionó desde el jardín y desde la vista general. Capturas locales: `output/acabados-campus-exterior.png`, `output/acabados-campus-interior.png` y `output/acabados-campus-pasto.png`.
+
+# Base rocosa de la isla
+
+El perfil baja 154 m desde el césped en el modelo, con salientes, grietas y estratos irregulares. La textura fotográfica aporta color y relieve. Se revisó la silueta completa a 850 × 880 en modo día y noche. Capturas locales: `output/isla-rocosa-dia.png` y `output/isla-rocosa-noche.png`. Compilación correcta y 39 pruebas aprobadas.
+
 # Vista general, pausa y cambio de tema
 
 La vista general reúne el logo circular de UC y las seis acciones en una barra superior. La pausa comparte el logo y la tipografía. Los menús y los diálogos usan los colores del portal Sapientia como referencia: blanco y celeste de día, azul marino de noche. El botón de tema indica el modo de destino. En ventanas estrechas los seis botones de la barra pasan juntos a iconos con nombres accesibles. Ayuda describe la cámara, los controles a pie y el ascensor. La biblioteca y el chat se abren desde Perfil.
