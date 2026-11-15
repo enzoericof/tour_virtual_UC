@@ -66,7 +66,7 @@ Dos modos: **vista general** al iniciar y **recorrido a pie** desde Recorrer. El
 | Alternar el tema del tour | Botón con sol o luna, etiquetado como Modo claro o Modo oscuro |
 | Activar o salir de pantalla completa | Más opciones → Pantalla completa |
 
-Durante el recorrido se muestran la ubicación, la mirilla y Esc · Pausar. El nombre cambia al entrar a una zona del plano. Al pausar se libera el cursor y reaparece la barra inferior. Continuar recupera el control desde la misma posición y orientación. Menú abre las opciones de cuenta, apariencia, biblioteca, chat y administración según el estado de la sesión.
+La ubicación aparece cuatro segundos al cargar el tour y al cambiar de zona. Durante el recorrido se muestran la mirilla y Esc · Pausar. Al pausar se libera el cursor y reaparece la barra inferior. Continuar recupera el control desde la misma posición y orientación. Menú abre las opciones de cuenta, apariencia, biblioteca, chat y administración según el estado de la sesión.
 
 En dispositivos táctiles se pueden inspeccionar modelos y fotos. El recorrido a pie está pensado para teclado y mouse.
 

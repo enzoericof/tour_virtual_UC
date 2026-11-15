@@ -37,12 +37,12 @@ const escape = (s: string) =>
 $("#app").innerHTML = `
  <main id="viewport"></main>
  <div class="game-pointer" aria-hidden="true"></div>
- <header class="campus-heading">
+ <header id="campus-heading" class="campus-heading">
+  <img class="campus-shield" src="/assets/logo-uc-sapientia.png" width="44" height="44" alt="Universidad Católica">
   <div id="campus-location" class="campus-location" aria-live="polite" aria-atomic="true">
-   <small id="campus-zone-detail">Campus Santa Librada</small>
    <h1 id="campus-zone">${campusName}</h1>
+   <small id="campus-zone-detail">Campus Santa Librada</small>
   </div>
-  <img src="/assets/logo-uc-sapientia.png" width="44" height="44" alt="Universidad Católica">
  </header>
  <div class="tour-guidance">
   <button id="pause-tour" class="pause-tour hidden" aria-label="Pausar recorrido"><kbd>Esc</kbd> Pausar</button>
@@ -51,8 +51,10 @@ $("#app").innerHTML = `
  <nav id="tour-toolbar" class="tour-toolbar" aria-label="Controles del recorrido">
   <button id="begin" class="tour-start">${icon("walk")}<span>Recorrer</span></button>
   <button id="overview" class="hidden" title="Vista general" aria-label="Vista general">${icon("cube")}<span>Vista general</span></button>
-  <button id="theme-btn" class="tour-icon" type="button" title="Modo oscuro" aria-label="Modo oscuro">${icon("moon")}</button>
-  <button id="more-btn" class="tour-icon" title="Más opciones" aria-label="Más opciones" aria-controls="tour-options" aria-expanded="false">${icon("menu")}</button>
+  <div class="tour-utilities">
+   <button id="theme-btn" class="tour-icon" type="button" title="Modo oscuro" aria-label="Modo oscuro">${icon("moon")}</button>
+   <button id="more-btn" class="tour-icon" title="Más opciones" aria-label="Más opciones" aria-controls="tour-options" aria-expanded="false">${icon("menu")}</button>
+  </div>
   <button id="account-btn" class="tour-menu" title="Menú de cuenta" aria-controls="tour-account" aria-expanded="false">${icon("user")}<span>Menú</span></button>
  </nav>
  <aside class="explorer tour-panel collapsed" id="explorer" aria-label="Espacios de la facultad"><div class="section-top"><div><h2>Espacios</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div></aside>
@@ -77,6 +79,7 @@ type HudPanel = keyof typeof hudPanels;
 let activeHudPanel: HudPanel | null = null;
 let zoneCandidate = "";
 let zoneCandidateSince = 0;
+let locationTimer = 0;
 let user: User | null = null;
 let selected: Place | null = null;
 let filter = "all";
@@ -229,14 +232,17 @@ function setHudPanel(panel: HudPanel | null, restoreFocus = false) {
   if (panel) Array.from($("#" + panel).querySelectorAll("button")).find(button => button.getClientRects().length)?.focus();
   else if (restoreFocus && previous) $("#" + hudPanels[previous]).focus();
 }
+function showLocation() {
+  const heading = $("#campus-heading");
+  heading.classList.add("is-visible");
+  window.clearTimeout(locationTimer);
+  locationTimer = window.setTimeout(() => heading.classList.remove("is-visible"), 4000);
+}
 function setLocation(name: string, detail = "Campus Santa Librada") {
   if ($("#campus-zone").textContent === name && $("#campus-zone-detail").textContent === detail) return;
   $("#campus-zone").textContent = name;
   $("#campus-zone-detail").textContent = detail;
-  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    $("#campus-location").getAnimations().forEach(animation => animation.cancel());
-    $("#campus-location").animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 240 });
-  }
+  showLocation();
 }
 function syncLocation(now: number, immediate = false) {
   const { x, y, z } = engine.position;
@@ -285,6 +291,7 @@ try {
   engine.onMode = onMode;
   engine.onVisitPosition = syncLocation;
   engine.overview();
+  showLocation();
   engine.onError = toast;
 } catch (e) {
   console.error("No se pudo iniciar la vista 3D", e);
