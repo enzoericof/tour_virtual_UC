@@ -2,6 +2,7 @@ import "./style.css";
 import { TourEngine } from "./scene/engine";
 import type { CampusTheme } from "./scene/campus-sky";
 import { places, photoUrl, statusLabel, type Place } from "./data/places";
+import { campusName, campusZoneAt } from "./data/campus-zones";
 import { icon } from "./ui/icons";
 import {
   api,
@@ -33,42 +34,52 @@ const escape = (s: string) =>
         c
       ]!,
   );
-const campusBrand = `<div class="brand"><img class="brand-mark" src="/assets/logo-uc-sapientia.png" width="40" height="40" alt="Universidad Católica"><span><strong>Ciencias y Tecnología</strong><small>Campus Santa Librada</small></span></div>`;
 $("#app").innerHTML = `
  <main id="viewport"></main>
  <div class="game-pointer" aria-hidden="true"></div>
- <header class="topbar tour-panel">
-  ${campusBrand}
-  <nav class="tools tour-actions" aria-label="Controles de la vista general">
-   <button id="begin" title="Recorrer" aria-label="Recorrer">${icon("walk")}<span>Recorrer</span></button>
-   <button id="overview" title="Vista General" aria-label="Vista General">${icon("cube")}<span>Vista General</span></button>
-   <button id="theme">${icon("moon")}<span>Modo Noche</span></button>
-   <button id="fullscreen" title="Pantalla Completa" aria-label="Pantalla Completa" aria-pressed="false">${icon("expand")}<span>Pantalla Completa</span></button>
-   <button id="help" title="Ayuda" aria-label="Ayuda">${icon("help")}<span>Ayuda</span></button>
-  </nav>
-  <button id="account-btn" class="account" title="Perfil" aria-label="Perfil">${icon("user")}<span>Perfil</span></button>
- </header>
- <aside class="explorer tour-panel collapsed" id="explorer" aria-label="Espacios de la facultad"><div class="section-top"><div><h2>Espacios</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div></aside>
- <button id="pause-tour" class="pause-tour hidden" aria-label="ESC · Pausar recorrido"><kbd>ESC</kbd> Pausar</button>
- <section id="walk-prompt" class="pause-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
-  <div class="pause-card tour-panel">
-   ${campusBrand}
-   <h2 id="pause-title">En pausa</h2>
-   <div class="pause-options tour-actions">
-    <button id="resume">${icon("walk")} Recorrer</button>
-    <button id="inspect">${icon("cube")} Vista General</button>
-    <button data-pause-action="theme">${icon("moon")}<span>Modo Noche</span></button>
-    <button data-pause-action="fullscreen" aria-pressed="false">${icon("expand")} Pantalla Completa</button>
-    <button data-pause-action="help">${icon("help")} Ayuda</button>
-    <button data-pause-action="account-btn">${icon("user")} Perfil</button>
-   </div>
+ <header id="campus-heading" class="campus-heading">
+  <img class="campus-shield" src="/assets/logo-uc-sapientia.png" width="44" height="44" alt="Universidad Católica">
+  <div id="campus-location" class="campus-location" aria-live="polite" aria-atomic="true">
+   <h1 id="campus-zone">${campusName}</h1>
+   <small id="campus-zone-detail">Campus Santa Librada</small>
   </div>
+ </header>
+ <div class="tour-guidance">
+  <button id="pause-tour" class="pause-tour hidden" aria-label="Pausar recorrido"><kbd>Esc</kbd> Pausar</button>
+  <p id="pause-label" class="hidden">En pausa</p>
+ </div>
+ <nav id="tour-toolbar" class="tour-toolbar" aria-label="Controles del recorrido">
+  <button id="begin" class="tour-start">${icon("walk")}<span>Recorrer</span></button>
+  <button id="overview" class="hidden" title="Vista general" aria-label="Vista general">${icon("cube")}<span>Vista general</span></button>
+  <div class="tour-utilities">
+   <button id="theme-btn" class="tour-icon" type="button" title="Modo oscuro" aria-label="Modo oscuro">${icon("moon")}</button>
+   <button id="more-btn" class="tour-icon" title="Más opciones" aria-label="Más opciones" aria-controls="tour-options" aria-expanded="false">${icon("menu")}</button>
+  </div>
+  <button id="account-btn" class="tour-menu" title="Menú de cuenta" aria-controls="tour-account" aria-expanded="false">${icon("user")}<span>Menú</span></button>
+ </nav>
+ <aside class="explorer tour-panel collapsed" id="explorer" aria-label="Espacios de la facultad"><div class="section-top"><div><h2>Espacios</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div></aside>
+ <section id="tour-options" class="tour-popover tour-panel hidden" aria-label="Más opciones">
+  <button id="recenter">${icon("cube")} Recentrar cámara</button>
+  <button type="button" id="fullscreen-btn" aria-pressed="false">${icon("expand")}<span>Pantalla completa</span></button>
+  <button id="help">${icon("help")} Ayuda</button>
+ </section>
+ <section id="tour-account" class="tour-popover tour-panel hidden" aria-label="Menú de cuenta">
+  <button id="account-details">${icon("user")} <span>Ingresar o crear cuenta</span></button>
+  <button id="account-works">${icon("book")} <span>Biblioteca de trabajos</span></button>
+  <button id="account-chat" class="hidden">${icon("chat")} Chat del campus</button>
+  <button id="account-panels" class="hidden">${icon("layers")} Administrar paneles</button>
  </section>
  <dialog id="dialog" class="tour-panel"><button class="icon-btn dialog-close" aria-label="Cerrar">${icon("close")}</button><div id="dialog-content"></div></dialog>
  <div id="toast" role="status" class="toast hidden"></div>
 `;
 let engine: TourEngine;
 let currentMode = "overview";
+const hudPanels = { "tour-options": "more-btn", "tour-account": "account-btn" } as const;
+type HudPanel = keyof typeof hudPanels;
+let activeHudPanel: HudPanel | null = null;
+let zoneCandidate = "";
+let zoneCandidateSince = 0;
+let locationTimer = 0;
 let user: User | null = null;
 let selected: Place | null = null;
 let filter = "all";
@@ -101,24 +112,23 @@ function openDialog(html: string, titleId?: string) {
   if (titleId) d.setAttribute("aria-labelledby", titleId);
   else d.removeAttribute("aria-labelledby");
   if (!d.open) d.showModal();
-  syncPauseMenu();
 }
 function closeDialog() {
   $<HTMLDialogElement>("#dialog").close();
 }
-$("#dialog").addEventListener("close", syncPauseMenu);
 $(".dialog-close").onclick = closeDialog;
 $<HTMLDialogElement>("#dialog").addEventListener("click", (e) => {
   if (e.target === $("#dialog")) closeDialog();
 });
 function renderPlaces() {
-  const query = $<HTMLInputElement>("#search").value.toLowerCase();
+  const searchable = (value: string) => value.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
+  const query = searchable($<HTMLInputElement>("#search").value.trim());
   const shown = places.filter(
     (p) =>
-      (p.name + " " + p.floor).toLowerCase().includes(query) &&
+      searchable(p.name + " " + p.floor).includes(query) &&
       (filter === "all" ||
         (filter === "outside" &&
-          ["patio", "jardin", "plaza"].includes(p.id))),
+          ["patio", "jardin", "plaza", "plaza-abierta"].includes(p.id))),
   );
   $("#place-list").innerHTML = shown.length
     ? shown
@@ -140,7 +150,7 @@ function showPlace(p: Place) {
   selected = p;
   renderPlaces();
   openDialog(
-    `<div class="place-detail">${p.photo ? `<img class="detail-hero" src="${photoUrl(p.photo)}" alt="${escape(p.name)}">` : ""}<div class="detail-body"><span class="eyebrow">${escape(p.category)} · ${statusLabel[p.status]}</span><h2>${escape(p.name)}</h2><p class="subtle">${escape(p.floor)}</p><p>${escape(p.description)}</p><div class="actions"><button class="primary" id="visit-place">Ir a este espacio ${icon("arrow")}</button></div><div class="photo-strip">${p.photos.map((id) => `<button data-photo="${id}" aria-label="Ampliar fotografía ${id}"><img src="${photoUrl(id)}" alt="Referencia de ${escape(p.name)}" loading="lazy"></button>`).join("")}</div><div id="info-panels"><p class="subtle">Cargando panel informativo…</p></div></div></div>`,
+    `<div class="place-detail">${p.photo ? `<img class="detail-hero" src="${photoUrl(p.photo)}" alt="${escape(p.name)}">` : ""}<div class="detail-body"><span class="eyebrow">${escape(p.category)} · ${statusLabel[p.status]}</span><h2>${escape(p.name)}</h2><p class="subtle">${escape(p.floor)}</p><p>${escape(p.description)}</p><div class="actions"><button class="primary" id="visit-place">Ir a ${escape(p.name)} ${icon("arrow")}</button></div><div class="photo-strip">${p.photos.map((id) => `<button data-photo="${id}" aria-label="Ampliar fotografía ${id}"><img src="${photoUrl(id)}" alt="Referencia de ${escape(p.name)}" loading="lazy"></button>`).join("")}</div><div id="info-panels"><p class="subtle">Cargando panel informativo…</p></div></div></div>`,
   );
   $("#visit-place").onclick = () => visit(p);
   document.querySelectorAll<HTMLButtonElement>("[data-photo]").forEach(
@@ -204,49 +214,84 @@ function editPanel(p: Place, panel: Panel) {
     }
   };
 }
-async function visit(p?: Place) {
+function visit(p: Place) {
   closeDialog();
-  setExplorer(false);
-  selected = p ?? null;
-  await engine.go(p);
+  setHudPanel(null);
+  selected = p;
+  engine.go(p);
   renderPlaces();
+  $("#begin").focus();
 }
-function syncPauseMenu() {
-  const dialogOpen = $<HTMLDialogElement>("#dialog").open;
-  const exploring = !$("#explorer").classList.contains("collapsed");
-  $("#walk-prompt").classList.toggle("hidden", currentMode !== "paused" || dialogOpen || exploring);
+function setHudPanel(panel: HudPanel | null, restoreFocus = false) {
+  const previous = activeHudPanel;
+  activeHudPanel = panel;
+  for (const id of Object.keys(hudPanels) as HudPanel[]) {
+    $("#" + id).classList.toggle("hidden", panel !== id);
+    $("#" + hudPanels[id]).setAttribute("aria-expanded", String(panel === id));
+  }
+  if (panel) Array.from($("#" + panel).querySelectorAll("button")).find(button => button.getClientRects().length)?.focus();
+  else if (restoreFocus && previous) $("#" + hudPanels[previous]).focus();
+}
+function showLocation() {
+  const heading = $("#campus-heading");
+  heading.classList.add("is-visible");
+  window.clearTimeout(locationTimer);
+  locationTimer = window.setTimeout(() => heading.classList.remove("is-visible"), 4000);
+}
+function setLocation(name: string, detail = "Campus Santa Librada") {
+  if ($("#campus-zone").textContent === name && $("#campus-zone-detail").textContent === detail) return;
+  $("#campus-zone").textContent = name;
+  $("#campus-zone-detail").textContent = detail;
+  showLocation();
+}
+function syncLocation(now: number, immediate = false) {
+  const { x, y, z } = engine.position;
+  const { name, detail } = campusZoneAt(x, y - 1.5, z);
+  const candidate = `${name}\n${detail}`;
+  if (candidate !== zoneCandidate) {
+    zoneCandidate = candidate;
+    zoneCandidateSince = now;
+  }
+  if (immediate || now - zoneCandidateSince >= 300) setLocation(name, detail);
 }
 function syncTheme() {
   const dark = theme === "dark";
-  const label = dark ? "Modo Día" : "Modo Noche";
+  const label = dark ? "Modo claro" : "Modo oscuro";
   document.documentElement.dataset.theme = theme;
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#102346" : "#f8fbff");
-  for (const button of document.querySelectorAll<HTMLButtonElement>('#theme, [data-pause-action="theme"]')) {
-    button.setAttribute("aria-label", label);
-    button.title = label;
-    button.querySelector("span")!.textContent = label;
-    const glyph = button.querySelector("svg");
-    if (glyph) glyph.outerHTML = icon(dark ? "sun" : "moon");
-  }
+  const button = $<HTMLButtonElement>("#theme-btn");
+  button.setAttribute("aria-label", label);
+  button.title = label;
+  button.innerHTML = icon(dark ? "sun" : "moon");
 }
 function onMode(mode: string) {
+  const changed = mode !== currentMode;
   currentMode = mode;
   const walking = mode === "walking";
-  document.body.classList.toggle("in-tour", walking || mode === "paused");
+  const paused = mode === "paused";
+  if (walking || paused) document.body.classList.remove("ui-compact");
+  document.body.classList.toggle("in-tour", walking || paused);
   document.body.classList.toggle("is-walking", walking);
-  document.body.classList.toggle("is-paused", mode === "paused");
   $("#pause-tour").classList.toggle("hidden", !walking);
-  if (walking) { setExplorer(false); $("#toast").classList.add("hidden"); }
-  syncPauseMenu();
-  if (mode === "paused") queueMicrotask(() => {
-    if (!$("#walk-prompt").classList.contains("hidden")) $("#resume").focus();
+  $("#pause-label").classList.toggle("hidden", !paused);
+  $("#tour-toolbar").classList.toggle("hidden", walking);
+  $("#overview").classList.toggle("hidden", !paused);
+  $("#recenter").classList.toggle("hidden", mode !== "overview");
+  $("#begin span").textContent = paused ? "Continuar" : "Recorrer";
+  if (mode === "overview") setLocation(campusName);
+  else syncLocation(performance.now(), true);
+  if (walking) { setHudPanel(null); $("#toast").classList.add("hidden"); }
+  if (paused && changed) queueMicrotask(() => {
+    if (currentMode === "paused" && !activeHudPanel && !$<HTMLDialogElement>("#dialog").open) $("#begin").focus();
   });
 }
 syncTheme();
 try {
   engine = new TourEngine($("#viewport"), theme);
   engine.onMode = onMode;
+  engine.onVisitPosition = syncLocation;
   engine.overview();
+  showLocation();
   engine.onError = toast;
 } catch (e) {
   console.error("No se pudo iniciar la vista 3D", e);
@@ -254,41 +299,44 @@ try {
     `<h2>No se pudo iniciar la vista 3D</h2><p>Recargá la página. Si el problema continúa, revisá el detalle del error y la consola del navegador.</p><p>${escape((e as Error).message)}</p>`,
   );
 }
-$("#begin").onclick = async () => {
-  await visit(places[0]);
-  engine.startWalking();
-};
-$("#resume").onclick = () => {
-  closeDialog();
+$("#begin").onclick = () => {
+  if (currentMode === "overview") visit(places[0]);
+  else setHudPanel(null);
   engine.startWalking();
 };
 $("#pause-tour").onclick = () => engine.pause();
-document.querySelectorAll<HTMLButtonElement>("[data-pause-action]").forEach((button) => {
-  button.onclick = () => $<HTMLButtonElement>("#" + button.dataset.pauseAction!).click();
-});
-$("#inspect").onclick = resetOverview;
-$("#overview").onclick = resetOverview;
+$("#overview").onclick = $("#recenter").onclick = resetOverview;
 function resetOverview() {
   engine.overview();
   selected = null;
   renderPlaces();
-  setExplorer(false);
+  setHudPanel(null);
+  $("#begin").focus();
 }
+for (const [id, button] of Object.entries(hudPanels)) {
+  $("#" + button).onclick = () => setHudPanel(activeHudPanel === id ? null : id as HudPanel);
+}
+document.addEventListener("pointerdown", event => {
+  if (!activeHudPanel || !(event.target instanceof Element) || $<HTMLDialogElement>("#dialog").open) return;
+  if (event.target.closest(`#${activeHudPanel}, #tour-toolbar`)) return;
+  setHudPanel(null);
+  if (event.target.closest("#viewport")) event.stopPropagation();
+}, { capture: true });
 window.addEventListener("keydown", (e) => {
   if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+  if ($<HTMLDialogElement>("#dialog").open || currentMode === "walking") return;
+  if (e.code === "Escape" && activeHudPanel) {
+    setHudPanel(null, true);
+    return;
+  }
   const target = e.target instanceof Element ? e.target : null;
-  if (target?.closest("input, textarea, select, [contenteditable]") || $<HTMLDialogElement>("#dialog").open) return;
-  if (e.code === "Escape") setExplorer(false);
+  if (target?.closest("input, textarea, select, [contenteditable]")) return;
   if (e.code === "KeyM" && currentMode === "overview") {
     const hidden = document.body.classList.toggle("ui-compact");
-    if (hidden) setExplorer(false);
+    if (hidden) setHudPanel(null);
   }
 });
-function setExplorer(open: boolean) {
-  $("#explorer").classList.toggle("collapsed", !open);
-  syncPauseMenu();
-}
-$("#close-explorer").onclick = () => setExplorer(false);
+$("#close-explorer").onclick = () => $("#explorer").classList.add("collapsed");
 $<HTMLInputElement>("#search").oninput = renderPlaces;
 document.querySelectorAll<HTMLButtonElement>("[data-filter]").forEach(
   (b) =>
@@ -300,7 +348,7 @@ document.querySelectorAll<HTMLButtonElement>("[data-filter]").forEach(
       renderPlaces();
     }),
 );
-$("#theme").onclick = () => {
+$("#theme-btn").onclick = () => {
   theme = theme === "light" ? "dark" : "light";
   engine.setTheme(theme);
   syncTheme();
@@ -310,7 +358,8 @@ $("#theme").onclick = () => {
     // La preferencia sigue activa durante esta visita.
   }
 };
-$("#fullscreen").onclick = () => {
+const fullscreenButton = $<HTMLButtonElement>("#fullscreen-btn");
+fullscreenButton.onclick = () => {
   void (
     document.fullscreenElement
       ? document.exitFullscreen()
@@ -321,36 +370,71 @@ $("#fullscreen").onclick = () => {
 };
 document.addEventListener("fullscreenchange", () => {
   const active = Boolean(document.fullscreenElement);
-  for (const button of document.querySelectorAll<HTMLButtonElement>('#fullscreen, [data-pause-action="fullscreen"]')) {
-    button.setAttribute("aria-pressed", String(active));
-    button.title = active ? "Salir de pantalla completa" : "Pantalla Completa";
-  }
+  const label = active ? "Salir de pantalla completa" : "Pantalla completa";
+  fullscreenButton.setAttribute("aria-pressed", String(active));
+  fullscreenButton.querySelector("span")!.textContent = label;
 });
-$("#help").onclick = () =>
+$("#help").onclick = () => {
+  const touch = matchMedia("(pointer: coarse)").matches;
+  setHudPanel(null, true);
   openDialog(
     `<div class="tour-help">
-      <header><h2 id="help-title">${icon("help")} Ayuda del recorrido</h2></header>
-      <div class="tour-help-body">
-        <section>
-          <h3>Vista General</h3>
-          <p>Hacé clic en un punto del campus para empezar ahí. Arrastrá para girar y usá la rueda para acercarte o alejarte.</p>
-        </section>
-        <section>
-          <h3>Durante el recorrido</h3>
-          <dl class="help-grid">
-            <dt>Moverte</dt><dd><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> o las flechas</dd>
-            <dt>Mirar alrededor</dt><dd>Mové el mouse</dd>
-            <dt>Ir más rápido</dt><dd>Mantené <kbd>Shift izq.</kbd></dd>
-            <dt>Saltar</dt><dd><kbd>Espacio</kbd></dd>
-            <dt>Pausar</dt><dd><kbd>Esc</kbd></dd>
-          </dl>
-          <p>Para usar el ascensor, apuntá al botón y hacé clic cuando se resalte.</p>
-        </section>
-        <footer><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></footer>
+      <h2 id="help-title">Controles</h2>
+      <div class="help-tabs" role="tablist" aria-label="Dispositivo">
+        <button type="button" id="help-desktop-tab" role="tab" aria-selected="${!touch}" aria-controls="help-desktop" tabindex="${touch ? -1 : 0}">${icon("keyboard")}<span>Teclado y mouse</span></button>
+        <button type="button" id="help-touch-tab" role="tab" aria-selected="${touch}" aria-controls="help-touch" tabindex="${touch ? 0 : -1}">${icon("phone")}<span>Celular y tablet</span></button>
       </div>
+      <section id="help-desktop" class="help-controls" role="tabpanel" aria-labelledby="help-desktop-tab" tabindex="0" ${touch ? "hidden" : ""}>
+        <h3>Durante el recorrido</h3>
+        <dl class="help-grid">
+          <dt><kbd>WASD</kbd> o <kbd>Flechas</kbd></dt><dd>Moverte</dd>
+          <dt><kbd>Mouse</kbd></dt><dd>Mirar alrededor</dd>
+          <dt><kbd>Shift izq.</kbd></dt><dd>Caminar más rápido</dd>
+          <dt><kbd>Espacio</kbd></dt><dd>Saltar</dd>
+          <dt><kbd>Clic</kbd></dt><dd>Pulsar el botón resaltado del ascensor</dd>
+          <dt><kbd>Esc</kbd></dt><dd>Pausar y liberar el cursor</dd>
+        </dl>
+        <h3>Vista general</h3>
+        <dl class="help-grid">
+          <dt><kbd>Arrastrar</kbd></dt><dd>Girar la cámara</dd>
+          <dt><kbd>Rueda</kbd></dt><dd>Acercar o alejar</dd>
+          <dt><kbd>Clic</kbd></dt><dd>Empezar en ese punto del campus</dd>
+          <dt><kbd>M</kbd></dt><dd>Ocultar o mostrar la interfaz</dd>
+        </dl>
+      </section>
+      <section id="help-touch" class="help-controls" role="tabpanel" aria-labelledby="help-touch-tab" tabindex="0" ${touch ? "" : "hidden"}>
+        <h3>Vista general</h3>
+        <dl class="help-grid">
+          <dt><kbd>Arrastrar</kbd></dt><dd>Girar la cámara</dd>
+          <dt><kbd>Pellizcar</kbd></dt><dd>Acercar o alejar</dd>
+        </dl>
+        <p>Para recorrer a pie, usá teclado y mouse.</p>
+      </section>
+      <footer><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></footer>
     </div>`,
     "help-title",
   );
+  const tabs = Array.from($(".help-tabs").querySelectorAll<HTMLButtonElement>("[role=tab]"));
+  function selectHelpTab(active: HTMLButtonElement) {
+    for (const tab of tabs) {
+      const selected = tab === active;
+      tab.setAttribute("aria-selected", String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      $("#" + tab.getAttribute("aria-controls")).hidden = !selected;
+    }
+    active.focus();
+  }
+  tabs.forEach((tab, i) => {
+    tab.onclick = () => selectHelpTab(tab);
+    tab.onkeydown = event => {
+      const next = event.key === "Home" ? tabs[0] : event.key === "End" ? tabs.at(-1)
+        : ["ArrowLeft", "ArrowRight"].includes(event.key) ? tabs[1 - i] : undefined;
+      if (!next) return;
+      event.preventDefault();
+      selectHelpTab(next);
+    };
+  });
+};
 function account() {
   if (user) {
     openDialog(
@@ -437,8 +521,15 @@ function account() {
 function updateAccount() {
   if (user) presence.start();
   else presence.stop();
+  $("#account-details span").textContent = user ? "Mi cuenta y apariencia" : "Ingresar o crear cuenta";
+  $("#account-works span").textContent = user ? "Mis trabajos" : "Biblioteca de trabajos";
+  $("#account-chat").classList.toggle("hidden", !user);
+  $("#account-panels").classList.toggle("hidden", user?.role !== "ADMIN");
 }
-$("#account-btn").onclick = account;
+$("#account-details").onclick = account;
+$("#account-works").onclick = () => void library();
+$("#account-chat").onclick = openChat;
+$("#account-panels").onclick = () => void managePanels();
 async function library() {
   openDialog(
     `<span class="eyebrow">HECHO EN LA FACULTAD</span><h2>Biblioteca de trabajos</h2><p class="subtle">Ideas, proyectos y conocimiento compartido por la comunidad.</p><div id="works-list"><p>Cargando trabajos…</p></div><div id="work-form-wrap"></div>`,
@@ -615,7 +706,6 @@ function panelEditor(panel?: Panel) {
     }
   };
 }
-if (matchMedia("(max-width:760px)").matches) $("#explorer").classList.add("collapsed");
 renderPlaces();
 void currentUser()
   .then((u) => {

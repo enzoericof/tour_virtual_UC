@@ -28,6 +28,7 @@ export class TourEngine {
   private readonly skies: Partial<Record<CampusTheme, T.CanvasTexture>> = {};
   private previous = performance.now();
   private frame = 0;
+  private nextVisitPosition = 0;
   private current = "campus";
   private spawn = new T.Vector3(...places.find((p) => p.id === "acceso")!.position);
   /** Punto al que mira el visitante al aparecer en `spawn`. */
@@ -41,6 +42,7 @@ export class TourEngine {
   private cabinPoint = new T.Vector3();
   onMode = (_mode: string) => {};
   onLocation = (_place: Place | null) => {};
+  onVisitPosition = (_now: number) => {};
   onStats = (_fps: number) => {};
   onError = (_message: string) => {};
   constructor(container: HTMLElement, theme: CampusTheme = "light") {
@@ -155,6 +157,10 @@ export class TourEngine {
     }
     this.remotePlayers.update(dt);
     this.renderer.render(this.scene, this.camera);
+    if (this.walker.enabled && now >= this.nextVisitPosition) {
+      this.nextVisitPosition = now + 100;
+      this.onVisitPosition(now);
+    }
     this.frame++;
     if (this.frame % 45 === 0) {
       this.onStats(Math.round(1 / Math.max(0.001, dt)));
@@ -278,7 +284,7 @@ export class TourEngine {
   pause() {
     this.walker.pause();
   }
-  async go(place?: Place) {
+  go(place?: Place) {
     this.elevatorPassenger = false;
     this.pause();
     this.walker.enabled = false;
