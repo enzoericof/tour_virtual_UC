@@ -1,5 +1,9 @@
 # Correcciones documentales
 
+## Limpieza de archivos versionados
+
+`IMG_5659.HEIC` y `Pasillo - Piso 3.glb` salen de la versión actual. Se conservan las fotos y texturas usadas por el visor y las referencias de procedencia. El extractor recibe ahora la ruta al escaneo local. Los archivos de Docker y Compose retirados pertenecían a `backend/`, que dejó de existir en `9c5d019`. La guía vigente está en [campus-backend/setup.md](../campus-backend/setup.md).
+
 ## GitGuardian — 01/11/2026
 
 El check del PR #1 registró dos apariciones del mismo incidente (39336961), ambas en `compose.yaml`: interpretó el texto de ayuda del operador de variable obligatoria como una contraseña. Las dos asignaciones tomaban `DATABASE_PASSWORD` del entorno; no contenían una credencial literal.

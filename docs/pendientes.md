@@ -18,7 +18,7 @@ Prioridades indicadas por el usuario, en este orden.
 
 | Tarea | Criterio de terminado |
 | --- | --- |
-| **Servidor del frontend (03/11/2026):** `backend/` fue retirado en `9c5d019` y `campus-backend/` no ofrece `/api/v1`, `/ws`, paneles ni chat; el `Dockerfile` copia la carpeta retirada. Decidir entre restaurar `backend/` (está en `fd95f87`) o adaptar frontend, Docker y documentación a `campus-backend` (rutas, CSRF, lectura pública de la biblioteca, paneles y chat) | Un único servidor acordado, consumido por el frontend y Compose, con pruebas de PostgreSQL y permisos, y AGENTS.md, README y arquitectura.md actualizados |
+| **Servidor del frontend:** integrar la biblioteca, los paneles y el chat con `campus-backend/`. Los contratos anteriores están en [arquitectura](arquitectura.md#aporte-campus-backend) | Biblioteca, paneles y chat operativos en el visor con pruebas de PostgreSQL y permisos |
 | Medidas: tomar en el lugar las que faltan del Bloque 1 y las de los demás edificios ([estado de las medidas](base-geografica.md#estado-de-las-medidas-03112026)) y confirmar las interpretaciones de los [límites de fidelidad](base-geografica.md#límites-de-fidelidad) | Medidas registradas en base-geografica.md e incorporadas a `faculty-blueprint.ts`, con `npm test` actualizado |
 | Murales del ascensor: hoy las tres caras repiten el mural de `IMG_5727` | Fotos de las caras sur y oeste incorporadas como texturas propias, con su procedencia en `sources.json` |
 | Cantina: fachada, forma de cubierta e interior; interior de Electrónica e Informática | Referencias recibidas e incorporadas a `faculty-blueprint.ts` / `faculty-reconstruction.ts` |
@@ -27,7 +27,7 @@ Prioridades indicadas por el usuario, en este orden.
 | En pantallas angostas, el logo («Inicio») abre el panel Explorar encima de la portada y tapa «Comenzar recorrido» (comportamiento anterior a esta rama) | El botón queda visible y utilizable en 390 px de ancho |
 | Rendimiento en móviles y sesión con seis usuarios simultáneos | Medición registrada en verificacion.md |
 | Avatares compartidos | Decisión del equipo sobre si el alcance lo requiere; hoy no es requisito asumido |
-| Docker + PostgreSQL, configuración de producción y HTTPS | `docker compose up --build` funcionando con datos persistentes tras reiniciar |
+| Empaquetado de la aplicación actual con Docker y PostgreSQL, configuración de producción y HTTPS | `docker compose up --build` funcionando con `campus-backend/` y datos persistentes tras reiniciar |
 | Pruebas visuales de cuentas y biblioteca | Resultado registrado en verificacion.md (el backend ya tiene cobertura automática) |
 | Registrar los seis integrantes, sus roles y fechas | Nómina aportada por el equipo, sin asignaciones supuestas |
-| Higiene del repositorio | Decidir entre corregir el `.gitignore` o documentar `git add -f` como práctica; decidir qué hacer con los originales versionados en la raíz desde el commit `0017185` (`IMG_5659.HEIC`, `Pasillo - Piso 3.glb`, unos 25 MB), que AGENTS.md prohíbe subir: quitarlos deja el peso en el historial; revisar el nombre `FACULTY_LABS`. `IMG_5694.HEIC` (01/11) e `IMG_5639.HEIC` (02/11) están en la raíz sin seguimiento; desde el 03/11 `.gitignore` excluye los HEIC de la raíz (el ya versionado no se ve afectado) |
+| Nomenclatura del plano | Revisar el nombre `FACULTY_LABS` según el edificio que representa |

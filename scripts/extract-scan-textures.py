@@ -1,10 +1,9 @@
 """Deriva texturas repetibles del escaneo del pasillo del tercer piso (Bloque 1).
 
 Uso, desde la raíz del repositorio:
-    python scripts/extract-scan-textures.py ["ruta/a/Pasillo - Piso 3.glb"] [--preview carpeta]
+    python scripts/extract-scan-textures.py "ruta/a/Pasillo - Piso 3.glb" [--preview carpeta]
 
-Sin ruta usa la copia optimizada del repositorio (frontend/public/assets/scans/pasillo-p3.glb,
-textura de 4096 px). El original de Drive (textura de 8192 px) da más detalle; es el que se usó.
+Se usó el original de Drive (textura de 8192 px). Indicá la ruta a tu copia local.
 Solo lee el escaneo. Escribe frontend/public/assets/textures/*.webp, su descripción
 textures.json y las entradas correspondientes de frontend/public/assets/sources.json.
 Con --preview solo guarda ortofotos amplias en la carpeta indicada para elegir regiones.
@@ -264,7 +263,7 @@ def sha256(path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("scan", nargs="?", type=Path, default=ASSETS / "scans/pasillo-p3.glb")
+    parser.add_argument("scan", type=Path, help="ruta al escaneo GLB local")
     parser.add_argument("--preview", type=Path, help="guardar ortofotos amplias para elegir regiones")
     args = parser.parse_args()
     positions, uvs, triangles, texture = read_glb(args.scan)

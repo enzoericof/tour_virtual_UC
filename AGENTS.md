@@ -48,7 +48,7 @@ Equipo: **seis integrantes** (nómina pendiente de registrar). La consigna exige
 
 ## Stack acordado
 
-Versiones exactas: tabla del README (única fuente). Decisiones: Three.js directo; TypeScript estricto + Vite + HTML/CSS; Node.js 24 LTS y npm (solo herramientas del frontend); Java 25 LTS + Spring Boot con Maven Wrapper; PostgreSQL 18 con Spring Data JPA/Hibernate y migraciones Flyway; Spring Security con sesiones de servidor y cookies `HttpOnly`; WebSocket + STOMP; Docker y Compose v2; Git/GitHub con ramas y pull requests.
+Versiones exactas: tabla del README (única fuente). Decisiones: Three.js directo; TypeScript estricto + Vite + HTML/CSS; Node.js 24 LTS y npm (solo herramientas del frontend); Spring Boot con Maven Wrapper; PostgreSQL 18 con Spring Data JPA/Hibernate y migraciones Flyway; Spring Security con sesiones de servidor y cookies `HttpOnly`; WebSocket + STOMP; Git/GitHub con ramas y pull requests.
 
 - Fijar versiones exactas del frontend y conservar `package-lock.json`. Dejar que Spring Boot gestione sus dependencias; versionar Maven Wrapper.
 - Mantener las versiones coherentes entre documentación, manifiestos y contenedores. Sin imágenes `latest`.
@@ -57,10 +57,10 @@ Versiones exactas: tabla del README (única fuente). Decisiones: Three.js direct
 
 ## Componentes
 
-- `frontend/`: escenario, navegación, interacción, interfaz y clientes de API/chat. `backend/`: usuarios, autenticación, trabajos, paneles y chat. `docs/`: documentación. `compose.yaml`: ejecución conjunta.
+- `frontend/`: escenario, navegación, interacción, interfaz y clientes de API/chat. `campus-backend/`: autenticación, trabajos y presencia multijugador. `docs/`: documentación.
 - El navegador consume REST bajo `/api/v1` y WebSocket bajo `/ws`; solo el backend accede a PostgreSQL. Actualizar [docs/arquitectura.md](docs/arquitectura.md) en el mismo cambio que modifique un contrato y coordinar con los componentes afectados.
 - Separar la geometría 3D de los contenidos administrables. Paneles y biblioteca salen del backend en la versión integrada.
-- `campus-backend/` conserva un aporte independiente integrado el 01/11; no lo consume el frontend ni Compose. No reemplazar `backend/` ni arrancar ambos en 8080. Sus diferencias y pendientes están en docs/arquitectura.md.
+- Para ejecutar `campus-backend/`, seguí `campus-backend/setup.md`. Los contratos vigentes y los pendientes de integración están en docs/arquitectura.md.
 
 ## Three.js
 
@@ -123,7 +123,7 @@ Una tarea termina cuando cumple sus criterios de aceptación, se verificó de fo
 
 ## Estado
 
-Versión 0.1.0: frontend ejecutable sin escaneos navegables, reconstrucción aproximada del sector CyT, backend de usuarios, contenidos y chat, pruebas, Maven Wrapper y Compose. Qué se probó y qué falta: [docs/verificacion.md](docs/verificacion.md) y [docs/pendientes.md](docs/pendientes.md). PostgreSQL 18 es la base de entrega; el perfil `local` con H2 es solo para desarrollo. Sin despliegue público ni avatares sincronizados. Desde el 03/11/2026 `backend/` no está en el repositorio (retirado en `9c5d019` a favor de `campus-backend/`); hasta que el equipo resuelva la unificación, ver [docs/arquitectura.md](docs/arquitectura.md#aporte-campus-backend).
+Versión 0.1.0: frontend ejecutable sin escaneos navegables, reconstrucción aproximada del sector CyT y multijugador con `campus-backend/`. Qué se probó y qué falta: [docs/verificacion.md](docs/verificacion.md) y [docs/pendientes.md](docs/pendientes.md). El backend anterior se retiró en `9c5d019`; su historial figura en [docs/arquitectura.md](docs/arquitectura.md#aporte-campus-backend).
 
 ## Simplificación del inicio — 02/11/2026
 

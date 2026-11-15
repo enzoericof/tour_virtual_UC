@@ -305,7 +305,7 @@ Tras reiniciar el backend, iniciar sesión nuevamente. Las cuentas y trabajos pe
 
 El arranque descrito corresponde a usuarios, sesiones, materias y trabajos del backend actual. La subida de imágenes y video, el alta controlada de administradores y la adaptación del frontend Three.js todavía están pendientes. Tener la tabla de archivos no significa que exista una API de subida.
 
-El frontend conserva contratos del servidor anterior y no queda conectado automáticamente al iniciar `campus-backend`. Paneles y chat tampoco están implementados en este módulo. No utilizar los archivos históricos de Docker como alternativa a estos pasos.
+Para probar las cuentas y la presencia multijugador, iniciá también el frontend según el [README](../README.md#inicio-con-multijugador). La biblioteca del visor, los paneles y el chat todavía usan los contratos del servidor anterior.
 
 La configuración actual mantiene CSRF deshabilitado y está orientada al desarrollo local; el arranque de esta guía no equivale a una configuración de despliegue público.
 
