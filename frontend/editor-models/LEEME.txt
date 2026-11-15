@@ -1,0 +1,12 @@
+Modelos del editor de mapa 3D
+=============================
+
+Dejá en esta carpeta los modelos que quieras arrastrar sobre el campus. El
+editor descubre automáticamente los archivos `.glb` y `.gltf` al arrancar.
+
+- Exportá desde Blender con File > Export > glTF 2.0 (.glb) y aplicá escala.
+- Mantené los archivos livianos (idealmente menos de unos pocos MB cada uno).
+- `planta.glb` es un modelo de ejemplo para probar el flujo.
+
+Los nombres de archivo son los que aparecen como tarjetas en el widget
+«Modelos». Para usar el editor, ver la sección «Editor de mapa 3D» del README.

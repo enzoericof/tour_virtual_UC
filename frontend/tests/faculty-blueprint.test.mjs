@@ -188,10 +188,10 @@ test("Six classrooms per floor in both blocks, irregular and with doors that do 
   }
 });
 
-test("The toilet tower: a core from the gallery with two half-cylinders, 10 m tip to tip, and a ground-floor annex", () => {
+test("The toilet tower has wider curved wings and a ground-floor annex", () => {
   const { tower } = plan, outline = towerOutline(), xs = outline.map(([x]) => x), zs = outline.map(([, z]) => z);
-  assert.equal(tower.core + 2 * tower.radius, 10);
-  assert.ok(close(Math.max(...xs) - Math.min(...xs), 10), "10 m tip to tip, east to west");
+  assert.ok(tower.radiusX > tower.radius);
+  assert.ok(close(Math.max(...xs) - Math.min(...xs), 11.2), "11.2 m tip to tip, east to west");
   assert.ok(Math.min(...xs) >= west - 0.01, "Within the length of Bloque 1");
   assert.ok(tower.center[0] < west + 10, "At the west end");
   assert.ok(close(Math.min(...zs), half.z), "The core starts at the gallery edge");

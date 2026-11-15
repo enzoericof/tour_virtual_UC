@@ -1,5 +1,5 @@
-import { Box3, PerspectiveCamera, Raycaster, Vector2, Vector3 } from "three";
-import { facultyBlueprint as plan, fromRect, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
+import { Box3, PerspectiveCamera, Ray, Raycaster, Vector2, Vector3 } from "three";
+import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -30,7 +30,7 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const { createCampusContext } = await server.ssrLoadModule("/src/scene/campus-context.ts");
     const { makeGrassMaterial } = await server.ssrLoadModule("/src/scene/materials.ts");
     const grass = makeGrassMaterial();
-    assert.ok(grass.map && !grass.bumpMap && !grass.normalMap, "Grass uses a color texture without surface relief");
+    assert.ok(grass.map && grass.normalMap && !grass.displacementMap, "Grass has color and fine relief on the existing terrain");
     const { group, colliders, elevator } = createFaculty(grass);
     const { group: context } = createCampusContext(grass);
     const ground = context.getObjectByName("Terreno continuo");
@@ -40,7 +40,8 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     rock.geometry.computeBoundingBox();
     const { min, max } = rock.geometry.boundingBox;
     assert.ok(Math.abs(max.y - ground.position.y) < 1e-6, "The rock meets the terrain at its rim");
-    assert.ok(min.y < max.y - 110, "The floating base extends below the rim");
+    assert.ok(max.y - min.y >= 150 && max.y - min.y <= 160, "The floating base has the intended depth");
+    assert.ok(rock.material.map && rock.material.normalMap, "The rock uses color and relief textures");
     const tip = new Box3(), vertex = new Vector3();
     const rockPositions = rock.geometry.attributes.position;
     for (let i = 0; i < rockPositions.count; i++) {
@@ -117,6 +118,108 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       body: new Capsule(new Vector3(), new Vector3(0, 1, 0), 0.28),
     });
     walker.setWorld(colliders);
+    const { center: [towerX, towerZ], radius, radiusX, core, entry: entrance, menSide } = plan.tower;
+    const galleryEdge = block1.depth / 2;
+    const south = new Vector3(0, 0, 1);
+    function walkFrom(start, direction, frames) {
+      walker.teleport(start);
+      camera.lookAt(camera.position.clone().add(direction));
+      walker.keys = new Set(["KeyW"]);
+      for (let i = 0; i < frames; i++) walker.update(1 / 60);
+      walker.keys.clear();
+      return camera.position.clone();
+    }
+    for (let level = 0; level < block1.levels; level++) {
+      const feetY = level * FLOOR_HEIGHT + 0.06;
+      const center = walkFrom(new Vector3(towerX, feetY, galleryEdge - 1), south, 32);
+      assert.ok(center.z < galleryEdge + entrance.recess - 0.57, `No middle entrance on level ${level}`);
+      for (const side of [-1, 1]) {
+        const roomX = towerX + side * core / 2;
+        const door = towerEntrance(side);
+        const [doorX, doorZ] = door.center;
+        assert.ok(doorZ > galleryEdge + 1 && Math.sign(door.angle) === -side);
+        const through = new Vector3(-Math.sin(door.angle), 0, Math.cos(door.angle));
+        const threshold = new Vector3(doorX, feetY, doorZ);
+        const towardHinge = new Vector3(Math.cos(door.angle) * side, 0, Math.sin(door.angle) * side);
+        const [leafX, leafZ] = fromRect(door, [(door.size[0] / 2 - 0.31) * side, -0.63]);
+        assert.ok(walker.obstructs(new Ray(new Vector3(leafX, feetY + 1.35, leafZ), towardHinge), 0.29),
+          `The open door leaf is outside the restroom on level ${level}, side ${side}`);
+        const step = new Vector3(side, 0, 0);
+        const entry = walkFrom(threshold.clone().addScaledVector(through, -1.5), through, 40);
+        assert.ok(entry.z > doorZ + 1.12 && entry.y > feetY + 1.3,
+          `Restroom entry ${side} stays open on level ${level}`);
+        const exit = walkFrom(threshold.clone().addScaledVector(through, 1.1), through.clone().negate(), 37);
+        assert.ok(exit.z < galleryEdge - 0.25, `Restroom exit ${side} stays open on level ${level}`);
+        const partition = walkFrom(new Vector3(towerX + side * 0.66, feetY, galleryEdge + 1.92),
+          step.clone().negate(), 20);
+        assert.ok((partition.x - towerX) * side > 0.26, `The wall separates the two rooms on level ${level}`);
+        const [, , shoulder, arcStart] = towerRoomOutline(side);
+        assert.ok((arcStart[0] - shoulder[0]) * side > 0.7, "The inner entrance flares into the room");
+        const wallNormal = new Vector3(side * (arcStart[1] - shoulder[1]), 0, -side * (arcStart[0] - shoulder[0])).normalize();
+        const diagonalWall = new Vector3((shoulder[0] + arcStart[0]) / 2 - side * 0.035, feetY + 1.35,
+          (shoulder[1] + arcStart[1]) / 2);
+        for (const direction of [wallNormal, wallNormal.clone().negate()])
+          assert.ok(walker.obstructs(new Ray(diagonalWall.clone().addScaledVector(direction, -0.42), direction), 0.85),
+            `The diagonal entry wall is solid on level ${level}`);
+        const floorAt = z => new Raycaster(new Vector3(doorX, feetY + 0.24, z), new Vector3(0, -1, 0), 0, 0.4)
+          .intersectObject(group, true)[0];
+        const galleryFloor = floorAt(galleryEdge - 0.05);
+        const porchFloor = floorAt(galleryEdge + 0.05);
+        assert.ok(galleryFloor?.uv && porchFloor?.uv && Math.abs(galleryFloor.point.y - porchFloor.point.y) < 1e-5,
+          `The gallery and restroom approach are level on level ${level}, side ${side} (${galleryFloor?.point.y}, ${porchFloor?.point.y})`);
+        assert.ok(Math.abs(galleryFloor.uv.x - porchFloor.uv.x) < 1e-4 &&
+          Math.abs(porchFloor.uv.y - galleryFloor.uv.y - 0.08) < 1e-4,
+          `Gallery tiles align across the seam on level ${level}`);
+        for (const angle of [-plan.tower.entry.curveJoin + 0.035, -0.67, -0.26, 0, 0.26, 1.2, Math.PI / 2 - 0.035]) {
+          const normal = new Vector3(side * Math.cos(angle) / radiusX, 0, Math.sin(angle) / radius).normalize();
+          const wall = new Vector3(roomX + side * (radiusX - 0.1) * Math.cos(angle), feetY,
+            towerZ + (radius - 0.1) * Math.sin(angle));
+          for (const offset of [-0.22, 0.22])
+            assert.equal(walker.canStandAt(wall.clone().addScaledVector(normal, offset)), false,
+              `Solid arc from both sides at ${angle} on level ${level}`);
+          for (const y of [feetY + 0.8, feetY + 1.54, feetY + 2.4, feetY + 2.73]) {
+            const face = wall.clone().setY(y);
+            assert.ok(walker.obstructs(new Ray(face.clone().addScaledVector(normal, -0.34), normal), 0.7),
+              `Inner wall or glazing blocks from its room at ${angle}, level ${level}`);
+            assert.ok(walker.obstructs(new Ray(face.clone().addScaledVector(normal, 0.34), normal.clone().negate()), 0.7),
+              `Outer wall or glazing blocks from outside at ${angle}, level ${level}`);
+          }
+        }
+        const windowPath = walkFrom(new Vector3(roomX + side * (radiusX - 0.75), feetY, towerZ + 0.45), step, 24);
+        assert.ok((windowPath.x - roomX) * side < radiusX - 0.25, `The curved window blocks walking on level ${level}`);
+        const men = side === menSide;
+        const dividerZ = towerZ + (men ? -2.69 : -2.18);
+        const stallPath = walkFrom(new Vector3(towerX + side * 1.05, feetY, dividerZ - 0.63), south, 22);
+        assert.ok(stallPath.z < dividerZ - 0.24, `Cubicle divider blocks walking on level ${level}`);
+        const stalls = men ? [[1.5, -3.36], [1.5, -2.02], [1.5, -0.68]]
+          : [[3.14, -1.49], [2.55, 0.25], [2.55, 1.39], [2.55, 2.53]];
+        for (const [front, center] of stalls) {
+          const cubicle = walkFrom(new Vector3(towerX + side * (front + 0.48), feetY, towerZ + center),
+            step.clone().negate(), 14);
+          assert.ok((cubicle.x - towerX) * side < front - 0.34 && cubicle.y > feetY + 1.3,
+            `Each cubicle can be entered on level ${level}, side ${side}`);
+        }
+        if (men) {
+          const diagonal = new Vector3(1.02, 0, 2.64).normalize();
+          const accessibleDoor = new Vector3(towerX - 1.6048, feetY, towerZ + 1.7314);
+          const accessible = walkFrom(accessibleDoor.clone().addScaledVector(diagonal, -0.85), diagonal, 27);
+          assert.ok(accessible.z > towerZ + 2.65 && accessible.x > accessibleDoor.x + 0.33 && accessible.y > feetY + 1.3,
+            `The accessible cubicle can be entered diagonally on level ${level}`);
+          const accessibleExit = walkFrom(accessibleDoor.clone().addScaledVector(diagonal, 0.8), diagonal.clone().negate(), 23);
+          assert.ok(accessibleExit.z < towerZ + 1.25 && accessibleExit.x < accessibleDoor.x - 0.22,
+            `The accessible cubicle can be exited diagonally on level ${level}`);
+          const face = accessibleDoor.clone().addScaledVector(new Vector3(diagonal.z, 0, -diagonal.x), 0.9);
+          const blocked = walkFrom(face.clone().addScaledVector(diagonal, -0.67), diagonal, 21);
+          assert.ok(blocked.sub(face).dot(diagonal) < -0.25, `The diagonal partition blocks walking on level ${level}`);
+          const divider = walkFrom(new Vector3(towerX + side * 2, feetY, towerZ - 0.85), step, 27);
+          assert.ok((divider.x - towerX) * side < 2.45, `Sink wall blocks walking on level ${level}`);
+          const frontPassage = walkFrom(new Vector3(towerX + side * 1.7, feetY, towerZ - 2.68), step, 25);
+          assert.ok((frontPassage.x - towerX) * side > 3, `Passage around the sink wall on level ${level}`);
+          const backPassage = walkFrom(new Vector3(towerX + side * 2.04, feetY, towerZ + 0.62), step, 19);
+          assert.ok((backPassage.x - towerX) * side > 3.1, `Passage behind the sink wall on level ${level}`);
+        }
+      }
+    }
     // Salir de la galería del Bloque 1 hacia el rellano sin chocar con el retorno lateral.
     walker.teleport(new Vector3(35.9, 0.035, 4.75));
     camera.lookAt(camera.position.clone().add(new Vector3(1, 0, 0)));

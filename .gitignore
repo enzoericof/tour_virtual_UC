@@ -18,6 +18,9 @@ frontend/src/replica.ts
 frontend/src/replica.css
 arbol_ia
 
+# Respuestas del agente para leer cuando la interfaz se corta (uso local).
+respuestas-agente.txt
+
 # Java / Spring Boot
 build/
 *.class

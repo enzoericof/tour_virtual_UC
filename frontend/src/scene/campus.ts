@@ -27,5 +27,5 @@ export function createCampus() {
   }
   setDetail(false);
   group.updateMatrixWorld(true); colliders.updateMatrixWorld(true);
-  return { group, colliders, boundary: context.boundary, markers: faculty.markers, elevator: faculty.elevator, setDetail };
+  return { group, colliders, boundary: context.boundary, elevator: faculty.elevator, setDetail };
 }

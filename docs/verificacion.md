@@ -269,9 +269,7 @@ Compilación del frontend y 40 de 40 pruebas correctas. En Chrome se simuló la 
 Tras acercar Maquetas y DICIA se repitieron la compilación y las 40 pruebas. En la escena de Chrome, el controlador caminó 15,2 m de ida y vuelta entre las fachadas en tres líneas paralelas. También entró y salió de Maquetas y atravesó la entrada de DICIA.
 Con Maquetas en su nueva posición, se verificaron en Chrome el cruce de ida y vuelta del espacio junto a la cantina y la entrada y salida del laboratorio. El frontend compiló y pasaron las 40 pruebas.
 
-<<<<<<< Updated upstream
 Ascensor del Bloque 1: prueba de integración con geometría y colisiones reales en los cuatro pisos. Verifica el resaltado del botón, el bloqueo con puertas cerradas, el paso libre al abrir y la llegada a la cabina elegida. La cabina se desplaza de forma continua con el pasajero. Se comprueba la cola de llamadas durante el viaje y el cierre automático a los diez segundos, con el visitante dentro y fuera. Se revisó el acabado exterior en navegador.
-=======
 ### Extensión del pasillo de DICIA — 12/11/2026
 
 Compilación correcta y 40 pruebas aprobadas. En Chrome, el controlador caminó hasta sobrepasar la esquina de DICIA y regresó bajo la cubierta. También atravesó la puerta de Maquetas en ambos sentidos.
@@ -279,10 +277,37 @@ Compilación correcta y 40 pruebas aprobadas. En Chrome, el controlador caminó 
 ### Fachadas detrás de la cantina — 12/11/2026
 
 Compilación y 40 pruebas del frontend correctas. En Chrome se recorrieron en ambos sentidos el pasillo, la entrada de Maquetas y el paso junto a la escalera de la cantina. También se comprobó la entrada a DICIA.
->>>>>>> Stashed changes
 
 ## Multijugador local
 
 Verificado en una instancia aislada de PostgreSQL 17.4 y Spring Boot 4.1.2. Dos sesiones HTTP y dos WebSockets mediante Vite comprobaron el registro, la rotación del identificador de sesión, los movimientos recíprocos, la apariencia en vivo, su persistencia tras volver a iniciar sesión, la salida del recorrido, la desconexión tras el cierre de sesión y los rechazos por CSRF, sesión ausente y origen ajeno. La instalación TP_INFO3 existente solicita contraseña y quedó pendiente verificar su contenido.
 
 En el visor se verificó el alta de una cuenta de prueba, el guardado de apariencia y el contador al conectar una segunda sesión. El navegador integrado rechazó la captura del mouse, por lo que la marcha en primera persona entre dos ventanas queda por verificar en un navegador con Pointer Lock.
+
+### Alineación del toldo — 14/11/2026
+
+Build correcto y 40/40 pruebas. Revisión en Chrome con Playwright desde el empalme del toldo: el eje desemboca en el centro de la galería del Bloque G; sin errores JavaScript. Sin recorrido manual completo.
+
+### Ampliación Bedelía — 14/11/2026
+
+Build correcto y 40/40 pruebas antes del ajuste final de contorno curvo. Rutas y llegadas de anexos verificadas por las pruebas existentes; esto no valida todas las colisiones interiores. Vista general de la ampliación revisada en Chrome sin errores JavaScript. Pendiente recorrido interior completo y comparación habitación por habitación con el CAD. Se corrigió duplicación del cantero de Santa Rita dentro del bucle de columnas, que agotaba memoria al ampliar la fachada.
+
+### Correcciones de acceso y jardín — 14/11/2026
+
+Build y 40/40 pruebas correctas en la revisión de acceso y escalinata. Chrome: nuevo acceso visible al corredor y arbustos visibles en la franja retirada. No se realizó recorrido manual completo por las habitaciones.
+
+### Interior de Bedelía retirado — 14/11/2026
+
+Por solicitud del usuario se eliminan las particiones, marcos interiores, rótulos interiores y escritorios añadidos: nave principal diáfana. Se conservan la envolvente exterior, puertas, vitrina y volumen curvo posterior. Compilación correcta. Desplazamiento del conjunto detrás de cantina y extensión de piso pendientes de precisar alcance y distancia de la flecha.
+
+### Alineación de cantina — 14/11/2026
+
+Fachada de cantina alineada por proyección sobre el eje de Bedelía. Anclajes de anexos y Electrónica conservados en la posición anterior. `npm --prefix frontend test`: 40/40; `npm --prefix frontend run build`: correcto. Chrome mediante Playwright: vista cenital revisada, sin errores de página. No se verificó un recorrido manual completo.
+
+### Extensión de piso gris — 14/11/2026
+
+Compilación correcta y 40/40 pruebas. Chrome/Playwright sin errores de página; revisión cenital del pavimento continuo en L entre Maquetas, cantina y el pasillo de Bedelía. Superficie añadida con colisión a cota de plaza. No se realizó recorrido manual completo.
+
+### Plaza de la Amistad — 14/11/2026
+
+Build correcto y 40/40 pruebas. Chrome con Playwright: carga sin errores de página y revisión de bancos azules, pavimentos y árboles. No se realizó recorrido manual completo.

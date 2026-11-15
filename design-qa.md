@@ -1,3 +1,17 @@
+# Torre de baños del Bloque 1
+
+Se revisaron en navegador las entradas sin carteles, el piso del campus sin marcadores, la ventana alta y los mingitorios más bajos. La prueba de escena comprobó en los cuatro niveles el paso por los cubículos comunes, la entrada y salida en diagonal del cubículo accesible y la colisión contra su tabique. Capturas locales: `output/banos-ajuste-entrada.png`, `output/banos-ajuste-mingitorios.png` y `output/banos-ajuste-accesible.png`. Compilación correcta y 39 pruebas aprobadas.
+
+Se verificó que las franjas de granito coinciden al cruzar de la galería al acceso. Las pruebas comprueban la altura, la alineación del patrón y la colisión del tramo diagonal en ambos baños y en los cuatro niveles. Captura local: `output/banos-union-piso.png`.
+
+Se revisaron las puertas abiertas hacia la galería y los retornos exteriores de ladrillo. La prueba de escena confirma que las hojas exteriores tienen colisión y permiten entrar y salir de ambos baños en los cuatro niveles. Captura local: `output/banos-puertas-galeria.png`.
+
+Se revisó el encuentro entre el tramo diagonal y el muro curvo de la torre. El ladrillo exterior quedó sin franjas blancas y la trama del azulejo y su franja interior continúan sobre la curva. El césped se inspeccionó desde el jardín y desde la vista general. Capturas locales: `output/acabados-campus-exterior.png`, `output/acabados-campus-interior.png` y `output/acabados-campus-pasto.png`.
+
+# Base rocosa de la isla
+
+El perfil baja 154 m desde el césped en el modelo, con salientes, grietas y estratos irregulares. La textura fotográfica aporta color y relieve. Se revisó la silueta completa a 850 × 880 en modo día y noche. Capturas locales: `output/isla-rocosa-dia.png` y `output/isla-rocosa-noche.png`. Compilación correcta y 39 pruebas aprobadas.
+
 # Vista general, pausa y cambio de tema
 
 La vista general reúne el logo circular de UC y las seis acciones en una barra superior. La pausa comparte el logo y la tipografía. Los menús y los diálogos usan los colores del portal Sapientia como referencia: blanco y celeste de día, azul marino de noche. El botón de tema indica el modo de destino. En ventanas estrechas los seis botones de la barra pasan juntos a iconos con nombres accesibles. Ayuda describe la cámara, los controles a pie y el ascensor. La biblioteca y el chat se abren desde Perfil.
@@ -233,7 +247,6 @@ La revisión posterior del tramo entre Maquetas y DICIA muestra ambas fachadas j
 
 Tras el retiro de Maquetas, las vistas desde el pasillo y desde el jardín muestran el espacio libre junto a la escalera de la cantina. Capturas locales: `output/cantina-maquetas-ida.png` y `output/cantina-maquetas-vuelta.png`.
 
-<<<<<<< Updated upstream
 
 ## Seto CT del patio — 12/11/2026
 
@@ -254,7 +267,6 @@ Botonera interior verificada en la pared izquierda, centrada y debajo de la altu
 Frente del ascensor revisado en navegador con botonera e indicador en el montante derecho, marco de acero cálido y revoque azul texturizado. Captura en output/ascensor-exterior-derecha.png.
 
 Revisados ambos paneles del ascensor. Capturas en output/ascensor-indicadores.png y output/ascensor-botones-redondos.png.
-=======
 ### Extremo del pasillo de DICIA — 12/11/2026
 
 En Chrome se revisó la esquina desde ambos sentidos. El último arco coincide con el final de la pared y el cartel de Maquetas sigue visible. Capturas locales en `output/cubierta-dicia-ida.png` y `output/cubierta-dicia-vuelta.png`.
@@ -262,4 +274,27 @@ En Chrome se revisó la esquina desde ambos sentidos. El último arco coincide c
 ### Vista de los talleres desde la cantina — 12/11/2026
 
 La captura local `output/fachadas-talleres-ida.png` muestra el encuentro del frente alto con el tramo bajo, los dos portones y el espacio hasta la escalera de la cantina.
->>>>>>> Stashed changes
+
+### Alineación del toldo — 14/11/2026
+
+Revisión visual del ramal hacia Bloque G: toldo y sendero centrados con la entrada de la galería, conservando altura. Captura local `toldo-alineado.png` de esta sesión, Chrome 1440 × 900.
+
+### Ampliación Bedelía — 14/11/2026
+
+Captura bedelia-ampliada.png revisada: volumen ampliado y dependencia posterior, anexos apartados. Interiores y detalles de fachada requieren revisión conjunta con el usuario; proporciones aproximadas de las capturas del plano.
+
+### Correcciones de acceso y jardín — 14/11/2026
+
+Revisión de las capturas profesores-acceso.png y plaza-arbustos.png: acceso conectado al corredor, escalinata recortada al pilar y arbustos en el jardín. Ajuste local, sin publicación.
+
+### Cantina alineada con Bedelía — 14/11/2026
+
+Revisión cenital en Chrome: fachada hacia la plaza en la misma línea que la cabecera de Bedelía; Maquetas y edificios circundantes permanecen en sus posiciones. Captura: `C:/Users/Elias Román/.codex/visualizations/2026/11/05/01a1ac84-d1c1-70e1-b3ad-03374e582eec/cantina-alineada.png`. Sin errores de página.
+
+### Piso gris alrededor de cantina — 14/11/2026
+
+Vista cenital revisada: ambas franjas marcadas cubiertas con el acabado gris existente, continuidad con plaza y sin cambiar posiciones de edificios. Captura: `C:/Users/Elias Román/.codex/visualizations/2026/11/05/01a1ac84-d1c1-70e1-b3ad-03374e582eec/cantina-piso-extendido.png`.
+
+### Plaza de la Amistad — 14/11/2026
+
+Revisión visual en Chrome: bancos y mesas azules, baldosas beige, grava, tierra, franja de piezas circulares y muretes rojizos. Árboles del sector con copas extendidas, raíces y nervaduras en hojas. Captura `C:/Users/Elias Román/.codex/visualizations/2026/11/05/01a1ac84-d1c1-70e1-b3ad-03374e582eec/plaza-amistad.png`.
