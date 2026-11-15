@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import bpy
 import math
 
@@ -63,9 +63,9 @@ for i, altura in enumerate(estante_alturas):
         add_box(f"Estante_{i+1}", (0.63, 0.40, 0.025), (-0.315, -0.01, altura), green_mat)
 
 # 5. Exportar a formato GLB relativo a la ubicación de este script
-script_dir = os.path.dirname(os.path.abspath(__file__))
-output_path = os.path.normpath(os.path.join(script_dir, "..", "frontend", "editor-models", "estante_verde.glb"))
-os.makedirs(os.path.dirname(output_path), exist_ok=True)
+repo_root = Path(__file__).resolve().parents[2]
+output_path = repo_root / "frontend" / "editor-models" / "estante_verde.glb"
+output_path.parent.mkdir(parents=True, exist_ok=True)
 
 for obj in bpy.context.scene.objects:
     obj.select_set(False)
@@ -74,7 +74,7 @@ for child in base_container.children:
     child.select_set(True)
 
 bpy.ops.export_scene.gltf(
-    filepath=output_path,
+    filepath=str(output_path),
     export_format='GLB',
     use_selection=True
 )

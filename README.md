@@ -116,6 +116,7 @@ campus-backend/src/main/resources/db/migration/       migraciones de PostgreSQL
 docs/             arquitectura y contratos de API, base geográfica, referencias, verificación, pendientes
 design-qa.md      última revisión visual
 scripts/          preparación de recursos, texturas del escaneo e importación del mapa OSM
+  blender/        scripts de modelado que exportan a frontend/editor-models/
 ```
 
 ## Verificación
