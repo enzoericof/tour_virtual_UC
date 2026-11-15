@@ -3,6 +3,7 @@ import { RemotePlayers } from "./remote-players";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { ElevatorMotion, type ElevatorButton, type ElevatorDoor } from "./elevator";
 import { createCampus } from "./campus";
+import { loadPlacementsInto } from "./editor-placements";
 import { campusRockDepth } from "./campus-rock";
 import { makeCampusSky, type CampusTheme } from "./campus-sky";
 import { Walker } from "../navigation/walker";
@@ -20,6 +21,8 @@ export class TourEngine {
   readonly orbit: OrbitControls;
   readonly walker: Walker;
   readonly campus = createCampus();
+  /** Modelos colocados con el editor 3D (solo lectura para el visitante normal). */
+  readonly editorPlacements = new T.Group();
   private sun = new T.DirectionalLight(0xfff2d6, 2.4);
   private hemi = new T.HemisphereLight(0xdbeaf4, 0xb1ada0, 1.7);
   private readonly skies: Partial<Record<CampusTheme, T.CanvasTexture>> = {};
@@ -56,7 +59,9 @@ export class TourEngine {
     container.append(this.canvas);
     this.setTheme(theme);
     this.sun.position.set(-240, 500, 240);
-    this.scene.add(this.sun, this.hemi, this.campus.group);
+    this.editorPlacements.name = "Colocaciones del editor 3D";
+    this.scene.add(this.sun, this.hemi, this.campus.group, this.editorPlacements);
+    void loadPlacementsInto(this.editorPlacements);
     this.orbit = new OrbitControls(this.camera, this.canvas);
     this.orbit.rotateSpeed = 1.5;
     this.orbit.enableDamping = true;

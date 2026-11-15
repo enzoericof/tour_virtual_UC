@@ -70,6 +70,19 @@ Durante el recorrido solo se muestra el botón ESC · Pausar, sin mira central n
 
 En dispositivos táctiles se pueden inspeccionar modelos y fotos. El recorrido a pie está pensado para teclado y mouse.
 
+## Editor de mapa 3D
+
+El visor incluye un editor experimental para acomodar modelos 3D sobre el campus. Está pensado para administradores: un usuario normal no ve herramientas de edición, solo puede recorrer el mapa.
+
+- **Modelos**: dejá archivos `.glb` o `.gltf` (exportados desde Blender con `File > Export > glTF 2.0`) en `frontend/editor-models/`. El editor los descubre automáticamente al arrancar; se incluye `planta.glb` como ejemplo.
+- **Abrir el editor**: con el frontend en marcha, entrá a `http://127.0.0.1:5173/editor.html`. Requiere una sesión con rol `ADMIN`; si el backend no está disponible, podés probar localmente con `http://127.0.0.1:5173/editor.html?local=1`.
+- **Colocar un modelo**: arrastrá una tarjeta desde la columna **Modelos** y soltala sobre el mapa. El modelo se apoya sobre la superficie que apuntes.
+- **Editar un modelo**: en **Colocados** cambiá la posición (X, Y, Z) o la rotación (X°, Y°, Z°) y el cambio se aplica al instante.
+- **Persistencia**: la disposición queda guardada en `localStorage` del navegador (vuelve a aparecer al abrir en la misma máquina y navegador). Usá **Exportar JSON** / **Importar JSON** para respaldarla o moverla a otra máquina.
+- El visor principal (`/`) muestra los modelos colocados en ese navegador; no permite editarlos.
+
+Al entrar en primera persona dentro del editor, apretá **Esc** para liberar el mouse y usá el botón **Vista General** (abajo a la derecha) para volver a la cámara orbital sin recargar la página.
+
 ## Stack
 
 | Componente | Versión / decisión |
@@ -92,8 +105,11 @@ frontend/src/
   navigation/     controles, cápsula de colisión y gravedad
   services/       REST y STOMP
   ui/             iconos de interfaz
+  editor/         editor de mapa 3D (arrastrar y soltar, solo administradores)
   main.ts         interacción de la interfaz
 frontend/public/assets/  fotos, escaneos y texturas optimizados, y su procedencia
+frontend/editor-models/  modelos .glb/.gltf que lista el editor de mapa 3D
+frontend/editor.html     página del editor de mapa 3D
 backend/src/main/java/py/edu/uc/tour/
   users/          registro y autenticación
   security/       sesiones, permisos y alta inicial de administrador
