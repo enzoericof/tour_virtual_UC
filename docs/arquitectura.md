@@ -1,27 +1,20 @@
 # Arquitectura y contratos
 
-Monolito: el backend Spring Boot sirve la API, el WebSocket y, en Docker, el frontend compilado (mismo origen). Solo el backend accede a la base. Versiones: [README](../README.md#stack).
+El frontend corre en Vite y `campus-backend/` sirve la API y el WebSocket de presencia. Vite redirige `/api` y `/ws` al backend para mantener un mismo origen en el navegador. Solo Spring Boot accede a PostgreSQL. [Inicio y versiones](../README.md#inicio-con-multijugador).
 
 ## Componentes
 
 | Capa | Contenido |
 | --- | --- |
 | Frontend `frontend/src` | Three.js directo, TypeScript estricto, Vite. `data/` (catálogo `places.ts`, geografía), `scene/`, `navigation/` (cápsula, colisiones, gravedad), `services/` (`api.ts` REST, `chat.ts` STOMP), `ui/`. Un único modelo de CyT para todas las visitas; sin cargador de escenas GLB. |
-| Backend `py.edu.uc.tour` | `users` (registro, login), `security` (sesiones, CSRF, alta de ADMIN), `content` (trabajos y paneles), `chat`. |
-| Datos | JPA + Flyway (`V1__initial_schema.sql`: `campus_user`, `work`, `panel`; `ddl-auto=validate`). PostgreSQL 18 en entrega; H2 en modo PostgreSQL solo con el perfil `local`. |
-| Despliegue | `Dockerfile` en 3 etapas (build del frontend → copia a `static/` del JAR → JRE). `compose.yaml`: `app` (8080, solo en 127.0.0.1) y `database` (sin puerto publicado, volumen `campus-data`). |
+| Backend `campus-backend/` | Autenticación y sesiones, materias, trabajos y presencia multijugador. |
+| Datos | PostgreSQL con JPA y Flyway (`ddl-auto=validate`). |
 
 ## Aporte campus-backend
 
-**Estado al 03/11/2026:** el commit `9c5d019` (CRUD de trabajos por materia en `campus-backend`) retiró la carpeta `backend/` del repositorio; su guía `campus-backend/setup.md` la llama «carpeta retirada». No se adaptaron el frontend, el `Dockerfile` ni `compose.yaml`: el frontend sigue llamando a `/api/v1` y a `/ws`, que `campus-backend` no ofrece, y la imagen de Docker no compila porque copia `backend/`. Hasta que el equipo decida cómo seguir, los contratos de esta página describen el servidor retirado (recuperable desde `fd95f87`) y no hay un servidor compatible con el frontend en `main`. Tarea en [pendientes](pendientes.md).
+El commit `9c5d019` retiró `backend/`. Sus contratos históricos de contenido y chat se conservan más abajo y su código sigue en `fd95f87`. Los archivos de Docker y Compose de ese módulo también quedaron en el historial. La ejecución actual se describe en [la guía del backend](../campus-backend/setup.md).
 
-`campus-backend` compila con su propio Maven Wrapper (03/11/2026). Expone `/api/auth/registro`, `/api/auth/login`, `/api/auth/me`, `/api/auth/logout`, `/api/materias` y `/api/trabajos` (listado paginado y por materia, alta, edición y baja del propietario o de un administrador). Lectura de trabajos solo con sesión, errores con la clave `mensaje` y CSRF desactivado: tres diferencias con lo que exige AGENTS.md para el servidor integrado.
-
-Integrado desde `feature/campus-backend` el 01/11/2026 para conservar el trabajo del equipo. Es un proyecto separado con usuarios, autenticación y modelos de trabajos/archivos; no está conectado al frontend ni al Dockerfile. El servidor activo continúa en `backend/`.
-
-En su estado inicial, el aporte usaba Java 21 en su POM y rutas `/api/auth/registro`, `/api/auth/login` y `/api/auth/logout`, distintas de `/api/v1`. Apunta a PostgreSQL local `TP_INFO3`, con variables `DB_USER` y `DB_PASSWORD`; su prueba de contexto requiere esa base. La configuración actual desactiva CSRF y necesita adecuarse a la política del proyecto antes de usarla como sustituto del servidor. Ambos proyectos configuran el puerto 8080 y no deben arrancarse juntos con esa configuración.
-
-Su incorporación conserva código e historial; no unifica los contratos, las migraciones ni las funciones de seguridad. La compilación se verificó con Java 25 usando el Maven Wrapper de `backend/` y `-DskipTests`; no se declara verificado el arranque del aporte con PostgreSQL.
+`campus-backend` compila con su propio Maven Wrapper y apunta a PostgreSQL local `TP_INFO3` con `DB_USER` y `DB_PASSWORD`. Expone `/api/materias` y `/api/trabajos` con listado paginado por materia y operaciones para el propietario o un administrador. La biblioteca, los paneles y el chat del visor siguen usando los contratos anteriores. [Tareas pendientes](pendientes.md).
 
 ## Usuarios, sesiones y multijugador en campus-backend
 

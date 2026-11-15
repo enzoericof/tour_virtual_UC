@@ -47,7 +47,7 @@ Abrir la dirección mostrada por Vite, normalmente `http://127.0.0.1:5173/`. Sin
 
 Para una prueba en la red local, iniciá Vite con `npm run dev -- --host 0.0.0.0` desde `frontend`. Los visitantes abren el frontend con la IP del equipo anfitrión. La API y el WebSocket usan ese mismo origen a través de Vite.
 
-Las cuentas y apariencias quedan guardadas en PostgreSQL. Las sesiones de acceso y las posiciones se mantienen en el servidor mientras está en ejecución. El ascensor conserva su simulación local. El [archivo Compose anterior](compose.yaml) todavía corresponde al módulo retirado.
+Las cuentas y apariencias quedan guardadas en PostgreSQL. Las sesiones de acceso y las posiciones se mantienen en el servidor mientras está en ejecución. El ascensor conserva su simulación local.
 
 ## Controles
 
@@ -90,11 +90,11 @@ Al entrar en primera persona dentro del editor, apretá **Esc** para liberar el 
 | Gráficos | Three.js 0.187.0 directo |
 | Frontend | TypeScript 5.9.3 estricto, Vite 8.3.5, HTML/CSS |
 | Herramientas | Node.js 24 LTS, npm y package-lock.json |
-| Backend | Java 25 LTS, Spring Boot 4.1.2, Maven 3.9.11 (vía Maven Wrapper 3.3.4) |
+| Backend | Java 21, Spring Boot 4.1.2, Maven 3.10.0 (vía Maven Wrapper 3.3.4) |
 | Persistencia de entrega | PostgreSQL 18, JPA/Hibernate, Flyway |
 | Sesiones | Spring Security, cookies HttpOnly y CSRF |
 | Chat | WebSocket + STOMP, cliente @stomp/stompjs 7.5.0 |
-| Integración | Docker y Compose v2 |
+| Ejecución local | Vite, Maven Wrapper y PostgreSQL |
 
 ## Organización
 
@@ -110,12 +110,8 @@ frontend/src/
 frontend/public/assets/  fotos, escaneos y texturas optimizados, y su procedencia
 frontend/editor-models/  modelos .glb/.gltf que lista el editor de mapa 3D
 frontend/editor.html     página del editor de mapa 3D
-backend/src/main/java/py/edu/uc/tour/
-  users/          registro y autenticación
-  security/       sesiones, permisos y alta inicial de administrador
-  content/        trabajos y paneles
-  chat/           WebSocket y mensajería
-backend/src/main/resources/db/migration/  esquema y paneles iniciales
+campus-backend/src/main/java/py/edu/uc/campus_backend/  cuentas, trabajos y presencia
+campus-backend/src/main/resources/db/migration/       migraciones de PostgreSQL
 docs/             arquitectura y contratos de API, base geográfica, referencias, verificación, pendientes
 design-qa.md      última revisión visual
 scripts/          preparación de recursos, texturas del escaneo e importación del mapa OSM
@@ -130,23 +126,11 @@ npm test
 npm run build
 ```
 
-```sh
-cd backend
-./mvnw verify
-```
-
-En Windows usar `mvnw.cmd`. La prueba de chat se ejecuta con el backend local encendido:
-
-```sh
-cd frontend
-node tests/chat.integration.mjs
-```
-
-Esa prueba crea dos cuentas sintéticas `@example.test` en la base apuntada. Usarla únicamente sobre una instancia de desarrollo desechable, nunca producción. Ver [resultados y límites](docs/verificacion.md).
+Para verificar el backend actual, configurá PostgreSQL siguiendo [la guía del backend](campus-backend/setup.md) y ejecutá `./mvnw verify` desde `campus-backend/` (`.\mvnw.cmd verify` en PowerShell). Ver [resultados y límites](docs/verificacion.md).
 
 ## Referencias y trabajo del equipo
 
-El Drive compartido se consultó **solo para lectura**. Se seleccionaron 37 fotografías y tres modelos para la aplicación (aproximadamente 38 MB en total); del escaneo del pasillo se derivaron seis texturas (unos 48 KB). Para regenerarlas, con Python 3 y `scripts/requirements-assets.txt` instalados, desde la raíz: `python scripts/extract-scan-textures.py "ruta/a/Pasillo - Piso 3.glb"` (sin ruta usa la copia optimizada del repositorio). Los originales, el escaneo de persona no utilizado, datos de pruebas, herramientas locales y credenciales no se incorporan a Git.
+El Drive compartido se consultó **solo para lectura**. Los recursos listos para usar y sus fuentes están documentados en [Referencias y recursos](docs/referencias.md). Para regenerar las texturas del pasillo, usá una copia local de su escaneo, Python 3 y las dependencias de `scripts/requirements-assets.txt`. Desde la raíz ejecutá `python scripts/extract-scan-textures.py "ruta/a/Pasillo - Piso 3.glb"`.
 
 Ver [preparación y procedencia](docs/referencias.md), [arquitectura y API](docs/arquitectura.md) y [siguientes tareas](docs/pendientes.md). La nómina, roles individuales y fechas de entrega siguen pendientes de registrar; no se asignaron responsabilidades en nombre del grupo.
 
