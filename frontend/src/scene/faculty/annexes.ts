@@ -1,0 +1,196 @@
+import * as T from "three";
+import { annexCoveredPaths, annexEnclosedLink, annexPaths, annexWalkEnd, diciaWalkExtension, facultyAnnexes } from "../../data/faculty-annexes";
+import { facultyBlueprint as plan, fromRect, rectCorners, type Vec2 } from "../../data/faculty-blueprint";
+import type { FacultyBuilder, Range } from "./builder";
+
+// ---- Anexos del plano general: exteriores provisionales, sin interiores relevados ----
+export function addAnnexes(
+  builder: FacultyBuilder,
+  officeBrick: T.MeshStandardMaterial,
+  passageTile: T.MeshStandardMaterial,
+  annexPavingHeight: (point: Vec2) => number,
+) {
+  const { layers, m, unit, box, pole, beam, v3, sign, frame, prism, path, spans, slopedWall } = builder;
+  type AnnexOpening = { center: number; width: number; height: number };
+  const workshopBrick = officeBrick.clone();
+  workshopBrick.color.set("#ffb4a0");
+  const workshopMetal = new T.MeshStandardMaterial({ color: "#353a41", roughness: 0.78 });
+
+  function workshopRoof(width: number, start: number, end: number, eave: number) {
+    const half = (end - start) / 2, ridge = start + half, rise = 1.15;
+    for (const side of [-1, 1]) {
+      const x = side * width / 2;
+      slopedWall(x, start, ridge, eave, eave + rise, eave, workshopBrick);
+      slopedWall(x, ridge, end, eave + rise, eave, eave, workshopBrick);
+      box(width - 0.2, 0.10, Math.hypot(half, rise) + 0.06, 0, eave + rise / 2,
+        ridge + side * half / 2, workshopMetal, true, { pitch: side * Math.atan2(rise, half) });
+    }
+  }
+
+  // Frente de los portones hacia la cantina.
+  function workshopFront(x: number, z0: number, z1: number, h: number, tall: boolean, sharedEnd = false) {
+    const z = (z0 + z1) / 2, width = tall ? 3.0 : 2.4, gateH = tall ? 3.15 : 2.75;
+    // Los pilares de los extremos quedan dentro de la longitud total del frente.
+    for (const end of sharedEnd ? [z0 + 0.165] : [z0, z1 - 0.165])
+      box(0.30, h + 0.13, 0.33, x, (h + 0.13) / 2, end, workshopBrick);
+    box(0.035, 0.26, z1 - z0, x + 0.108, gateH + 0.12, z, workshopMetal);
+    if (tall) box(0.035, 0.22, z1 - z0, x + 0.108, h - 0.20, z, workshopMetal);
+    box(0.065, gateH, width, x + 0.14, gateH / 2 + 0.05, z, workshopMetal);
+    const ribs = Math.round(width / 0.14);
+    for (let i = 0; i <= ribs; i++)
+      box(0.045, gateH, 0.029, x + 0.18, gateH / 2 + 0.05, z - width / 2 + i * width / ribs, workshopMetal);
+    box(0.075, gateH, 0.06, x + 0.19, gateH / 2 + 0.05, z, m.metal);
+    box(0.06, 0.065, width, x + 0.19, gateH * 0.49, z, workshopMetal);
+    for (const side of [-1, 1])
+      box(0.065, 0.20, 0.035, x + 0.23, 1.23, z + side * 0.085, m.metal);
+    box(0.57, 0.075, width + 0.48, x + 0.35, gateH + 0.24, z, workshopMetal);
+    if (tall) {
+      beam(v3(x + 0.10, h - 1.0, z), v3(x + 0.52, h - 0.73, z), 0.027, workshopMetal);
+      pole(0.15, 0.075, x + 0.52, h - 0.77, z, workshopMetal);
+      pole(0.11, 0.11, x + 0.52, h - 0.86, z, m.white);
+    }
+    const plaqueOffset = (width / 2 + (z1 - z) - 0.15) / 2;
+    const plaqueZ = tall ? z + plaqueOffset : z - plaqueOffset;
+    const plaqueWidth = Math.min(0.52, z1 - z - width / 2 - 0.25);
+    box(0.033, 0.75, plaqueWidth, x + 0.115, 1.72, plaqueZ, m.blue);
+    sign("CyT", x + 0.137, 1.94, plaqueZ, plaqueWidth, Math.PI / 2);
+  }
+  // La unión y los edificios comparten ladrillo, ventanas y dinteles. Los vanos
+  // se descuentan también de las colisiones, para comunicar realmente los interiores.
+  function annexWall(a: Vec2, b: Vec2, h: number, openings: AnnexOpening[] = [], masonry = false) {
+    const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
+    const cx = (a[0] + b[0]) / 2, cz = (a[1] + b[1]) / 2;
+    const opts = { rotation: -angle };
+    const parts = spans(-length / 2, length / 2,
+      openings.map((opening): Range => [opening.center - opening.width / 2, opening.center + opening.width / 2]));
+    for (const [start, end] of parts) {
+      const mid = (start + end) / 2, x = cx + mid * Math.cos(angle), z = cz + mid * Math.sin(angle);
+      if (masonry) {
+        box(end - start, h, 0.2, x, h / 2, z, workshopBrick, true, opts);
+        continue;
+      }
+      box(end - start, 1, 0.2, x, 0.55, z, m.brick, true, opts);
+      box(end - start, h - 2.5, 0.2, x, (h + 2.5) / 2, z, m.brick, true, opts);
+      box(end - start, 1.45, 0.08, x, 1.78, z, m.glass, true, opts);
+      const count = Math.ceil((end - start) / 2.4);
+      for (let k = 0; k <= count; k++) {
+        const t = start + (end - start) * k / count;
+        box(0.1, 1.5, 0.16, cx + t * Math.cos(angle), 1.78, cz + t * Math.sin(angle), m.metal, false, opts);
+      }
+    }
+    for (const opening of openings) {
+      box(opening.width, h - opening.height, 0.2,
+        cx + opening.center * Math.cos(angle), (h + opening.height) / 2,
+        cz + opening.center * Math.sin(angle), masonry ? workshopBrick : m.brick, true, opts);
+    }
+  }
+
+  for (const annex of facultyAnnexes) frame(annex.rect, () => {
+    const h = annex.height, outline = annex.outline;
+    const isMaquetas = annex.id === "lab-maquetas";
+    const maxZ = Math.max(...outline.map((p) => p[1]));
+    // Desde el extremo del pasillo, los primeros 9,50 m corresponden a la nave alta.
+    const roofBreakZ = maxZ - 9.50, lowEave = 3.55;
+    prism(outline, -0.1, 0.15, m.concrete);
+    if (isMaquetas) {
+      workshopRoof(annex.rect.size[0], roofBreakZ, maxZ, h);
+      box(annex.rect.size[0], 0.12, roofBreakZ + maxZ, 0, lowEave + 0.06, (roofBreakZ - maxZ) / 2, workshopMetal, true);
+      box(annex.rect.size[0], h - lowEave, 0.2, 0, (h + lowEave) / 2, roofBreakZ, workshopBrick, true);
+    }
+    else prism(outline, h, 0.18, m.roof);
+    for (let i = 0; i < outline.length; i++) {
+      const a = outline[i], b = outline[(i + 1) % outline.length];
+      const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
+      const front = a[1] === maxZ && b[1] === maxZ;
+      if (isMaquetas && front) {
+        // Muro continuo de Maquetas junto al pasillo de Bedelía.
+        annexWall([a[0], maxZ - 0.1], [b[0], maxZ - 0.1], h, [], true);
+        continue;
+      }
+      const cx = (a[0] + b[0]) / 2, cz = (a[1] + b[1]) / 2;
+      const portal = annexEnclosedLink.portals.find((p) => p.annexId === annex.id
+        && Math.abs((p.center[0] - cx) * Math.sin(angle) - (p.center[1] - cz) * Math.cos(angle)) < 0.001
+        && Math.hypot(p.center[0] - cx, p.center[1] - cz) < length / 2);
+      const openings: AnnexOpening[] = portal ? [{
+        center: (portal.center[0] - cx) * Math.cos(angle) + (portal.center[1] - cz) * Math.sin(angle),
+        width: annexEnclosedLink.clearWidth, height: annexEnclosedLink.openingHeight,
+      }] : front ? [{ center: 0, width: 2.1, height: 2.5 }] : [];
+      if (isMaquetas && a[0] === b[0]) {
+        annexWall([a[0], -maxZ], [a[0], roofBreakZ], lowEave, [], true);
+        annexWall([a[0], roofBreakZ], [a[0], maxZ], h, [], true);
+        if (a[0] > 0) {
+          workshopFront(a[0], roofBreakZ, maxZ, h, true);
+          workshopFront(a[0], -maxZ, roofBreakZ, lowEave, false, true);
+        }
+      } else if (isMaquetas) {
+        annexWall([a[0], -maxZ + 0.1], [b[0], -maxZ + 0.1], lowEave, [], true);
+      } else {
+        annexWall(a, b, h, openings);
+      }
+      if (front) {
+        if (!portal) box(3.2,0.12,1.4,cx,2.9,cz+0.6,m.concrete);
+        sign(annex.name.toUpperCase(),cx,portal ? 3.4 : 3.25,cz+0.13,portal ? 2.6 : Math.min(annex.rect.size[0]-1,9));
+      }
+    }
+    if (!isMaquetas) box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
+  });
+  annexPaths.forEach((points) => path(points, 2));
+  // Baldosas hasta la esquina de DICIA; desde allí sigue el caminero exterior.
+  {
+    const walk = plan.bedeliaWalk;
+    const levelEnd = walk.size[0] / 2, roofEnd = levelEnd + diciaWalkExtension;
+    const pathEnd = (annexWalkEnd[0] - walk.center[0]) * Math.cos(walk.angle)
+      + (annexWalkEnd[1] - walk.center[1]) * Math.sin(walk.angle);
+    for (const [from, to, material] of [[levelEnd, roofEnd, passageTile], [roofEnd, pathEnd, m.stone]] as const) {
+      const strip = new T.PlaneGeometry(1, 1, Math.ceil((to - from) / 0.4), 2);
+      const pos = strip.attributes.position, uv = strip.attributes.uv;
+      const [tileX, tileZ] = material.userData.tile;
+      for (let i = 0; i < pos.count; i++) {
+        const along = T.MathUtils.lerp(from, to, uv.getX(i)), side = (0.5 - uv.getY(i)) * walk.size[1];
+        const point = fromRect(walk, [along, side]);
+        pos.setXYZ(i, point[0], annexPavingHeight(point), point[1]);
+        uv.setXY(i, along / tileX, side / tileZ);
+      }
+      strip.computeVertexNormals();
+      const paving = new T.Mesh(strip, material); paving.receiveShadow = true; layers.visual.add(paving);
+      layers.solid.add(new T.Mesh(strip));
+    }
+  }
+  // Pasillo interior LED / DEI: los extremos abiertos coinciden con los vanos
+  // de ambos edificios. El pavimento queda prácticamente enrasado con sus pisos.
+  frame(annexEnclosedLink.rect, () => {
+    const link = annexEnclosedLink, [length, width] = link.rect.size;
+    box(length + 0.2, 0.15, width, 0, -0.02, 0, m.concrete, true);
+    box(length + 0.2, 0.18, width + 0.2, 0, link.height + 0.09, 0, m.roof, true);
+    box(length, 0.08, width - link.wallThickness * 2, 0, link.height - 0.04, 0, m.concrete);
+    const galleryZ = (width - link.wallThickness) / 2;
+    annexWall([-length / 2, -galleryZ], [length / 2, -galleryZ], link.height);
+    annexWall([-length / 2, galleryZ], [length / 2, galleryZ], link.height,
+      [{ center: link.sideDoorX, width: link.sideDoorWidth, height: link.openingHeight }]);
+    for (const edge of [-1, 1]) box(0.07, link.openingHeight, 0.24,
+      link.sideDoorX + edge * (link.sideDoorWidth / 2 + 0.035), link.openingHeight / 2, galleryZ, m.metal);
+    box(link.sideDoorWidth + 0.14, 0.07, 0.24,
+      link.sideDoorX, link.openingHeight + 0.035, galleryZ, m.metal);
+  });
+  // La galería exterior de oficinas continúa fuera del nuevo volumen cerrado.
+  for (const points of annexCoveredPaths) for (let i=1;i<points.length;i++) {
+    const [ax,az]=points[i-1], [bx,bz]=points[i], length=Math.hypot(bx-ax,bz-az);
+    box(2.3,0.14,length+0.2,(ax+bx)/2,3.05,(az+bz)/2,m.roof,false,{rotation:Math.atan2(bx-ax,bz-az)});
+    path([points[i-1],points[i]],2.3);
+    const count=Math.ceil(length/4);
+    for(let k=0;k<=count;k++) {
+      const t=k/count;
+      pole(0.09,3,ax+(bx-ax)*t+(bz-az)/length*1.05,1.5,az+(bz-az)*t-(bx-ax)/length*1.05,m.concrete,true);
+    }
+  }
+  // Suelo de colisión del sector añadido; el césped continuo ya pertenece al contexto.
+  const annexCorners=facultyAnnexes.flatMap((a)=>rectCorners(a.rect));
+  const xs=annexCorners.map((p)=>p[0]), zs=annexCorners.map((p)=>p[1]);
+  const minX=Math.min(...xs)-15,maxX=Math.max(...xs)+15,minZ=Math.min(...zs)-20,maxZ=Math.max(...zs)+15;
+  const annexGround=new T.Mesh(unit);
+  annexGround.scale.set(maxX-minX,0.1,maxZ-minZ);
+  annexGround.position.set((minX+maxX)/2,-0.1,(minZ+maxZ)/2);
+  layers.solid.add(annexGround);
+}

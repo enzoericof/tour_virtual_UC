@@ -4,9 +4,9 @@ package py.edu.uc.campus_backend.service;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
 import py.edu.uc.campus_backend.dto.LoginRequest;
 import py.edu.uc.campus_backend.dto.UsuarioResponse;
@@ -36,35 +36,16 @@ public class AuthService {
                 )
             );
 
-    SecurityContext context = SecurityContextHolder.createEmptyContext();
-    context.setAuthentication(authentication);
-    SecurityContextHolder.setContext(context);
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
 
-        var usuario = usuarioRepository.findByCorreo(
-            authentication.getName()
-        ).orElseThrow();
-
-        return new UsuarioResponse(
-            usuario.getId(),
-            usuario.getNombre(),
-            usuario.getApellido(),
-            usuario.getCorreo(),
-            usuario.getRol(),
-            usuario.getCarrera(), usuario.getSkin()
-        );
+        return obtenerUsuario(authentication.getName());
     }
 
     public UsuarioResponse obtenerUsuario(String correo) {
-    var usuario = usuarioRepository.findByCorreo(correo)
-        .orElseThrow();
-
-    return new UsuarioResponse(
-        usuario.getId(),
-        usuario.getNombre(),
-        usuario.getApellido(),
-        usuario.getCorreo(),
-        usuario.getRol(),
-        usuario.getCarrera(), usuario.getSkin()
-    );
-}
+        return usuarioRepository.findByCorreo(correo)
+            .map(UsuarioResponse::desde)
+            .orElseThrow();
+    }
 }

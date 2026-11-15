@@ -1,9 +1,9 @@
 package py.edu.uc.campus_backend.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import py.edu.uc.campus_backend.dto.RegistroRequest;
@@ -68,16 +68,6 @@ public class UsuarioService {
         usuario.setRol((short) 1);
         usuario.setCarrera(request.carrera());
 
-        Usuario guardado = usuarioRepository.save(usuario);
-
-        return new UsuarioResponse(
-            guardado.getId(),
-            guardado.getNombre(),
-            guardado.getApellido(),
-            guardado.getCorreo(),
-            guardado.getRol(),
-            guardado.getCarrera(),
-            guardado.getSkin()
-        );
+        return UsuarioResponse.desde(usuarioRepository.save(usuario));
     }
 }

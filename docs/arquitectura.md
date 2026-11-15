@@ -10,6 +10,10 @@ El frontend corre en Vite y `campus-backend/` sirve la API y el WebSocket de pre
 | Backend `campus-backend/` | Autenticación y sesiones, materias, trabajos y presencia multijugador. |
 | Datos | PostgreSQL con JPA y Flyway (`ddl-auto=validate`). |
 
+`main.ts` monta la interfaz, el motor del recorrido y la comunidad. En `ui/`, `tour-shell.ts` monta la barra y administra el diálogo compartido, `tour-controls.ts` maneja la cámara y los modos del visor, y `community.ts` dirige la sesión y la presencia. La biblioteca y los paneles se implementan en `library.ts` y `campus-content.ts`.
+
+`scene/faculty-reconstruction.ts` arma el modelo a partir de las medidas de `data/`. En `scene/faculty/` están los constructores de la torre de baños, la Sala Manfred, la cantina y los anexos. Usan las mismas primitivas para añadir geometría visible y colisiones al marco de cada sector.
+
 ## Aporte campus-backend
 
 El commit `9c5d019` retiró `backend/`. Sus contratos históricos de contenido y chat se conservan más abajo y su código sigue en `fd95f87`. Los archivos de Docker y Compose de ese módulo también quedaron en el historial. La ejecución actual se describe en [la guía del backend](../campus-backend/setup.md).
@@ -62,4 +66,4 @@ Broker en memoria: una sola instancia de backend, sin historial.
 
 ## No incluido en esta versión
 
-Avatares sincronizados, historial de chat, subida de archivos, agente IA y despliegue público.
+Historial de chat, subida de archivos, agente IA y despliegue público.

@@ -12,6 +12,9 @@ import { places, type Place } from "../data/places";
 import { campusBounds, facultyToWorld, insidePolygon, layout } from "../data/campus-geometry";
 import { facultyVisitTargets, FLOOR_HEIGHT } from "../data/faculty-blueprint";
 import { annexVisitTargets } from "../data/faculty-annexes";
+
+export type TourMode = "overview" | "walking" | "paused";
+
 export class TourEngine {
   readonly scene = new T.Scene();
   readonly remotePlayers = new RemotePlayers(this.scene);
@@ -40,7 +43,7 @@ export class TourEngine {
   private elevator = new ElevatorMotion(FLOOR_HEIGHT);
   private elevatorPassenger = false;
   private cabinPoint = new T.Vector3();
-  onMode = (_mode: string) => {};
+  onMode = (_mode: TourMode) => {};
   onLocation = (_place: Place | null) => {};
   onVisitPosition = (_now: number) => {};
   onStats = (_fps: number) => {};

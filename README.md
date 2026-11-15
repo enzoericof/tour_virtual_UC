@@ -101,12 +101,13 @@ Al entrar en primera persona dentro del editor, apretá **Esc** para liberar el 
 ```text
 frontend/src/
   data/           espacios, estado de relevamiento y referencias
-  scene/          campus, materiales, carga y liberación de escaneos
+  scene/          motor 3D, materiales y modelos del campus
+    faculty/      constructores por sector y primitivas de la escena
   navigation/     controles, cápsula de colisión y gravedad
-  services/       REST y STOMP
-  ui/             iconos de interfaz
+  services/       REST, presencia WebSocket y chat STOMP
+  ui/             controles del tour, diálogos, cuenta, contenidos y estilos
   editor/         editor de mapa 3D (arrastrar y soltar, solo administradores)
-  main.ts         interacción de la interfaz
+  main.ts         arranque del visor
 frontend/public/assets/  fotos, escaneos y texturas optimizados, y su procedencia
 frontend/editor-models/  modelos .glb/.gltf que lista el editor de mapa 3D
 frontend/editor.html     página del editor de mapa 3D
