@@ -70,7 +70,10 @@ function renderGate() {
 function renderApp(localMode: boolean) {
   $("#editor-app").innerHTML = `
     <div id="editor-viewport"></div>
-    <button id="editor-overview" class="editor-overview hidden" title="Vista General" aria-label="Vista General">Vista General</button>
+    <div id="editor-tour-tools" class="hidden">
+      <button id="editor-resume" title="Recorrer" aria-label="Recorrer">Recorrer</button>
+      <button id="editor-overview" title="Vista General" aria-label="Vista General">Vista General</button>
+    </div>
     <aside id="editor-panel" aria-label="Editor de mapa 3D">
       <header class="editor-header">
         <h1>Editor de mapa 3D</h1>
@@ -120,10 +123,14 @@ function toast(message: string) {
 function initEditor() {
   const viewport = $("#editor-viewport");
   const engine = new TourEngine(viewport, "light");
+  const tourTools = $("#editor-tour-tools");
+  const resumeButton = $("#editor-resume");
   const overviewButton = $("#editor-overview");
+  resumeButton.onclick = () => engine.startWalking();
   overviewButton.onclick = () => engine.overview();
   engine.onMode = (mode) => {
-    overviewButton.classList.toggle("hidden", mode === "overview");
+    tourTools.classList.toggle("hidden", mode === "overview");
+    resumeButton.classList.toggle("hidden", mode !== "paused");
   };
   engine.overview();
 

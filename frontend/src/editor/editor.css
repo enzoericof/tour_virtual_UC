@@ -154,11 +154,15 @@ body { overflow: hidden; background: #102346; color: var(--ink); }
   padding: 6px 7px;
   font-size: 11px;
 }
-#editor-overview {
+#editor-tour-tools {
   position: fixed;
   right: 20px;
   bottom: 20px;
   z-index: 12;
+  display: flex;
+  gap: 9px;
+}
+#editor-tour-tools button {
   padding: 12px 16px;
   border: 1px solid var(--surface-border);
   border-radius: 9px;
@@ -168,7 +172,7 @@ body { overflow: hidden; background: #102346; color: var(--ink); }
   cursor: pointer;
   box-shadow: 0 10px 30px #04101f55;
 }
-#editor-overview:hover { background: var(--surface-tint); }
+#editor-tour-tools button:hover { background: var(--surface-tint); }
 .delete-btn {
   border: 0;
   background: none;
