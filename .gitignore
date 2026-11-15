@@ -5,6 +5,9 @@ target/
 .references/
 .tools/
 .local/
+/.harness/
+/.zenagent/
+/imagnes_para_deepseek/
 *.log
 .DS_Store
 frontend/public/assets/scans/*.glb
@@ -40,5 +43,7 @@ hs_err_pid*
 # Logs adicionales
 spring.log
 
-# Originales HEIC de la raíz (fotos del equipo): no se suben (AGENTS.md).
+# Originales de fotos y escaneos de la raíz. Los modelos del editor están en frontend/editor-models/.
 /*.HEIC
+/*.heic
+/*.glb

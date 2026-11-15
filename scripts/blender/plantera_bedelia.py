@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import math
 import random
 import bpy
@@ -203,9 +203,9 @@ for idx_c, cfg in enumerate(canas_cfg):
                 hoja_obj.parent = container
 
 # 6. Exportar GLB a frontend/editor-models/
-script_dir = os.path.dirname(os.path.abspath(__file__))
-output_path = os.path.normpath(os.path.join(script_dir, "..", "frontend", "editor-models", "plantera_galeria.glb"))
-os.makedirs(os.path.dirname(output_path), exist_ok=True)
+repo_root = Path(__file__).resolve().parents[2]
+output_path = repo_root / "frontend" / "editor-models" / "plantera_galeria.glb"
+output_path.parent.mkdir(parents=True, exist_ok=True)
 
 for obj in bpy.context.scene.objects:
     obj.select_set(False)
@@ -214,7 +214,7 @@ for child in container.children:
     child.select_set(True)
 
 bpy.ops.export_scene.gltf(
-    filepath=output_path,
+    filepath=str(output_path),
     export_format="GLB",
     use_selection=True,
 )

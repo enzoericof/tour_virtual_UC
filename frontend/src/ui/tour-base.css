@@ -1,0 +1,88 @@
+:root {
+  font-family: "DM Sans", sans-serif;
+  color: var(--ink);
+  background: #e9f3fc;
+  font-synthesis: none;
+  font-size: 14px;
+  --ink: #102b63;
+  --muted: #4c6383;
+  --accent: #1268c4;
+  --focus: #1678d9;
+  --surface: #fcfdff;
+  --surface-tint: #eef6ff;
+  --surface-border: #cfdeef;
+  --overlay: #102b6359;
+  --action-fill: #146ac6;
+  --action-hover: #0e559f;
+  --action-ink: #fff;
+  --shadow: #19385d29;
+  --tour-edge: clamp(12px, 2.3vw, 34px);
+  --tour-bottom: calc(var(--tour-edge) + env(safe-area-inset-bottom, 0px));
+  --tour-left: calc(var(--tour-edge) + env(safe-area-inset-left, 0px));
+  --tour-right: calc(var(--tour-edge) + env(safe-area-inset-right, 0px));
+  --scene-text: #fff;
+  --scene-outline: #08152d;
+  --scene-accent: #c4e8ff;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+}
+button,
+input,
+textarea {
+  font: inherit;
+}
+button,
+a,
+input,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+  color: inherit;
+}
+button {
+  border: 0;
+  background: none;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+a {
+  color: var(--accent);
+  text-underline-offset: 4px;
+}
+#viewport {
+  position: fixed;
+  inset: 0;
+}
+#viewport canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.tour-panel {
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 20px;
+  box-shadow: 0 12px 34px var(--shadow);
+}

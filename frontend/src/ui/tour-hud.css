@@ -1,0 +1,151 @@
+.campus-heading, .tour-toolbar {
+  --hud-surface: linear-gradient(155deg, #2c2e34f2, #191b21f2 75%);
+  --hud-border: #dce2ed33;
+  --hud-shadow: #08090e70;
+  --hud-text: #f4f5f8;
+  --hud-muted: #b6bbc7;
+  border: 1px solid var(--hud-border);
+  border-radius: 19px;
+  background: var(--hud-surface);
+  backdrop-filter: blur(12px) saturate(1.15);
+  box-shadow: 0 7px 20px var(--hud-shadow), inset 0 1px 0 #fff1;
+  color: var(--hud-text);
+}
+.campus-heading {
+  position: fixed;
+  top: calc(var(--tour-edge) + env(safe-area-inset-top, 0px));
+  right: var(--tour-right);
+  max-width: min(420px, calc(100% - var(--tour-right) - var(--tour-left)));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px 10px 11px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 230ms ease, transform 230ms ease;
+  z-index: 10;
+}
+.campus-heading.is-visible {
+  opacity: 1;
+  transform: none;
+}
+.campus-shield {
+  flex: none;
+  width: 38px;
+  height: auto;
+}
+.campus-location {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 3px;
+}
+.campus-location h1 {
+  margin: 0;
+  color: inherit;
+  font: 750 clamp(15px, 1.35vw, 18px)/1.25 "Manrope", sans-serif;
+  letter-spacing: -0.02em;
+}
+.campus-location small {
+  color: var(--hud-muted);
+  font: 550 12px/1.3 "Manrope", sans-serif;
+}
+.tour-toolbar {
+  --toolbar-divider: #fff2;
+  --toolbar-hover: #9fc7fd27;
+  position: fixed;
+  left: var(--tour-left);
+  bottom: var(--tour-bottom);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px;
+}
+.tour-utilities {
+  display: flex;
+  gap: 1px;
+  padding-inline: 3px;
+  border-inline: 1px solid var(--toolbar-divider);
+}
+.tour-toolbar button, .tour-popover button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 11px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.tour-toolbar button {
+  justify-content: center;
+  white-space: nowrap;
+  padding-inline: 12px;
+  border-radius: 12px;
+  font: 750 13px/1 "Manrope", sans-serif;
+  transition: background-color 160ms ease, color 160ms ease, transform 120ms ease;
+}
+@media (hover: hover) {
+  .tour-toolbar button:hover {
+    background-color: var(--toolbar-hover);
+    color: var(--scene-accent);
+  }
+}
+.tour-toolbar button:active { transform: translateY(1px); }
+.tour-toolbar button:focus-visible, .pause-tour:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+.tour-toolbar :is(.tour-start, .tour-menu) {
+  width: clamp(104px, 14vw, 138px);
+  padding-inline: 6px;
+}
+.tour-toolbar .tour-icon { width: 44px; padding: 0; }
+.tour-toolbar svg, .tour-popover svg {
+  width: 18px;
+  height: 18px;
+}
+.tour-popover {
+  position: fixed;
+  left: var(--tour-left);
+  bottom: calc(var(--tour-bottom) + 68px);
+  z-index: 9;
+  width: min(240px, calc(100% - var(--tour-left) - var(--tour-right)));
+  max-height: calc(100dvh - var(--tour-bottom) - 126px);
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: 12px;
+}
+.tour-popover button { width: 100%; text-align: left; }
+.tour-popover button:hover { background: var(--surface-tint); }
+.tour-popover button svg { color: var(--accent); }
+.tour-popover button:focus-visible { outline-offset: -2px; }
+.tour-guidance {
+  position: fixed;
+  left: var(--tour-left);
+  bottom: calc(var(--tour-bottom) + 68px);
+  z-index: 7;
+  color: var(--scene-text);
+  text-shadow: 0 1px 2px var(--scene-outline), 0 0 5px var(--scene-outline);
+  font-size: 13px;
+  font-weight: 650;
+}
+body.is-walking .tour-guidance { bottom: var(--tour-bottom); }
+body:has(.tour-popover:not(.hidden)) #pause-label { visibility: hidden; }
+.tour-guidance p { margin: 0; }
+body.ui-compact :is(.campus-heading, .tour-toolbar, .tour-guidance) { display: none; }
+[data-theme="light"] body:not(.in-tour) {
+  --scene-text: #102346;
+  --scene-outline: #f5fbff;
+  --scene-accent: #064c91;
+}
+[data-theme="light"] body:not(.in-tour) :is(.campus-heading, .tour-toolbar) {
+  --hud-surface: linear-gradient(150deg, #fcfcfdfa, #edeff2e8);
+  --hud-border: #464d5b38;
+  --hud-shadow: #30364030;
+  --hud-text: #20252e;
+  --hud-muted: #535b69;
+}
+[data-theme="light"] body:not(.in-tour) .tour-toolbar {
+  --toolbar-divider: #464d5b26;
+  --toolbar-hover: #245c9c1c;
+}
