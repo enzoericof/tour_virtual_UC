@@ -9,7 +9,7 @@ El escenario muestra **CyT y sus accesos**. El terreno recortado y su franja arb
 - `frontend/src/data/campus-geometry.ts` selecciona de `campus-layout.json` las huellas OSM `274489894` (Bloque 1, constante `FACULTY_MAIN`) y `327428698` (Bloque G). Los caminos peatonales del recorrido se definen en `faculty-blueprint.ts` y `faculty-annexes.ts`.
 - `campus-layout.json` completo (60 huellas, 32 trazados viales, 4 estacionamientos, 3 canchas) es referencia, no escenario.
 - El perímetro de presentación rodea los edificios, los anexos y sus senderos. El contorno del terreno sirve de límite para el recorrido a pie y de referencia de encuadre para el mapa y la vista general.
-- La maqueta tiene una base de roca flotante con estratos y musgo. El perfil se estrecha hacia un remate redondeado y asimétrico, rodeado por una bruma ligera. El cielo nuboso envuelve la vista general y el recorrido a pie.
+- La maqueta tiene una base de roca flotante con estratos y musgo. En el modelo, la roca desciende 154 m desde el césped y termina en un remate redondeado y asimétrico, rodeado por una bruma ligera. El cielo nuboso envuelve la vista general y el recorrido a pie.
 - La huella OSM del Bloque 1 fija la posición y la orientación del plano (`facultyPose`). La huella `FACULTY_LABS` (`327428698`) corresponde al Bloque G y determina su giro de 29,15° respecto del Bloque 1. El centro del Bloque G se ubica con las medidas del equipo.
 - El terreno continuo y las pendientes del jardín de la cantina comparten una textura suave de césped. El recorrido se dibuja sin sombras proyectadas en ambos niveles de calidad gráfica.
 
@@ -51,7 +51,7 @@ Sectores estimados al 03/11 (posiciones y tamaños de capturas y fotos): Bloque 
 
 ## Plano métrico de CyT
 
-`frontend/src/data/faculty-blueprint.ts` describe CyT en metros, en un marco propio: origen en el centro de la huella OSM del Bloque 1 (75 m), `x` a lo largo del bloque (hacia la plaza techada), `z` hacia el área común 2 (sur). `facultyToWorld` **solo gira y traslada** ese marco sobre el centro y la orientación de la huella OSM del Bloque 1: no escala, de modo que las medidas del plano son las del escenario. Desde el 02/11/2026 el Bloque 1 mide 65 m y conserva la cabecera este donde terminaba la huella: su centro queda 5 m al este del origen (`facultyBlueprint.main`). Edificios, colisiones, mapa y puntos de visita usan la misma transformación. Los escaneos siguen siendo escenas independientes.
+`frontend/src/data/faculty-blueprint.ts` describe CyT en metros, en un marco propio: origen en el centro de la huella OSM del Bloque 1 (75 m), `x` a lo largo del bloque (hacia la plaza techada), `z` hacia el área común 2 (sur). `facultyToWorld` **solo gira y traslada** ese marco sobre el centro y la orientación de la huella OSM del Bloque 1: no escala, de modo que las medidas del plano son las del escenario. Desde el 02/11/2026 el Bloque 1 mide 65 m y conserva la cabecera este donde terminaba la huella: su centro queda 5 m al este del origen (`facultyBlueprint.main`). Edificios, colisiones, mapa y puntos de visita usan la misma transformación. Los escaneos sirven de referencia y de fuente de texturas.
 
 Hasta el 31/10/2026 el plano se registraba sobre la imagen aérea anotada con `photoPoint` y una escala distinta por eje (×1,17 a lo largo y ×1,03 a lo ancho), lo que deformaba las proporciones; ese registro se eliminó.
 

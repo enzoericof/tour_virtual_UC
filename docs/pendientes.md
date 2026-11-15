@@ -2,6 +2,10 @@
 
 Responsables y fechas: **sin asignar** (no se registran por suposición). Estado de las pruebas: [verificacion.md](verificacion.md).
 
+## Alcance de la entrega
+
+La consigna incluye el recorrido libre en primera persona, el acceso a los recintos, los paneles informativos, la biblioteca de trabajos, el registro y el inicio de sesión, la publicación de trabajos propios y la administración de contenidos. El equipo tiene seis integrantes. Según la consigna, el chat en tiempo real corresponde a equipos de más de cuatro personas y el agente de IA se exige a partir de siete.
+
 ## Issues principales (03/11/2026)
 
 Prioridades indicadas por el usuario, en este orden.
@@ -23,7 +27,7 @@ Prioridades indicadas por el usuario, en este orden.
 | Murales del ascensor: hoy las tres caras repiten el mural de `IMG_5727` | Fotos de las caras sur y oeste incorporadas como texturas propias, con su procedencia en `sources.json` |
 | Cantina: fachada, forma de cubierta e interior; interior de Electrónica e Informática | Referencias recibidas e incorporadas a `faculty-blueprint.ts` / `faculty-reconstruction.ts` |
 | Referencias de segundo piso y baños (distribución interior de la torre; ya se conocen su forma y qué lado es de cada baño) | `piso-2` y `banos` pasan de `pending` a `reference` en `places.ts` |
-| Escaneos: huecos y alineación con el campus; recorrido por dentro de aulas, cantina y Bedelía | Recorrido sin atascos hasta todos los recintos de [AGENTS.md](../AGENTS.md); las escaleras de ambos bloques ya se recorrieron |
+| Escaneos: huecos y alineación con el campus; recorrido por dentro de aulas, cantina y Bedelía | Recorrido sin atascos hasta los recintos del [catálogo de espacios](../frontend/src/data/places.ts); las escaleras de ambos bloques ya se recorrieron |
 | En pantallas angostas, el logo («Inicio») abre el panel Explorar encima de la portada y tapa «Comenzar recorrido» (comportamiento anterior a esta rama) | El botón queda visible y utilizable en 390 px de ancho |
 | Rendimiento en móviles y sesión con seis usuarios simultáneos | Medición registrada en verificacion.md |
 | Avatares compartidos | Decisión del equipo sobre si el alcance lo requiere; hoy no es requisito asumido |

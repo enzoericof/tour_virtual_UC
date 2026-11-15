@@ -1,139 +1,50 @@
-# Tour virtual UC · Ciencias y Tecnología
+# Tour virtual UC
 
-Primera versión funcional del Trabajo Práctico de **Informática III 2026**, desarrollada para un equipo de seis integrantes. Representa la Facultad de Ciencias y Tecnología de la Universidad Católica con Three.js y una base de usuarios, contenidos y chat en Spring Boot.
+Recorrido interactivo por la Facultad de Ciencias y Tecnología de la Universidad Católica, en el campus Santa Librada. El proyecto se desarrolla para Informática III y reúne una vista general del campus, un recorrido a pie y un modo multijugador con cuentas y avatares.
 
-El recorrido multijugador usa `campus-backend/`. Los contratos históricos de biblioteca, paneles, chat y Compose se documentan en [arquitectura](docs/arquitectura.md#aporte-campus-backend).
+El visor usa Three.js y TypeScript. El servidor utiliza Spring Boot y PostgreSQL.
 
-## Qué incluye esta versión
+El modelo se apoya en fotografías, planos y mediciones del equipo. Las medidas, las estimaciones y los sectores pendientes de relevamiento están en [Geografía y reconstrucción](docs/base-geografica.md#estado-de-las-medidas-03112026).
 
-- Sector de Ciencias y Tecnología con las medidas del equipo: Bloque 1 (65 × 12 m, planta baja y tres pisos, columnas cada 4,5 m, puertas dobles numeradas y títulos en la cara este) con su escalera tipo Pompidou, ascensor con murales, cabecera este con escalera y rampa hacia la plaza techada, media sombra y torre de baños; Bloque G (65 × 12 m); patios; plazas techada y abierta, Bedelía, cantina y Sala Manfred sobre una plataforma a 1,40 m. Se excluyen las demás facultades, el seminario, las canchas y los estacionamientos cercanos.
-- Paredes de ladrillo, piso de granito, hormigón, cubierta y lamas con texturas sacadas del escaneo del pasillo del tercer piso.
-- Exteriores aproximados de Maquetas, Kampus Print, CTA–DICIA, DEI–LED y dependencias LED, DA/CAP, DAS y DG. [Fuente y límites](docs/base-geografica.md#dependencias-del-plano-general--revisión-local-02112026).
-- Todo el recorrido usa el modelo construido de la facultad. Los escaneos navegables de laboratorio, pasillo y aula del tercer piso fueron retirados; esos espacios conservan sus identificadores y fotografías de referencia.
-- Primera persona, teclado y mouse, colisiones, gravedad y escaleras en el bloque principal. El recorrido captura el mouse para girar sin límites, con un punto central integrado; Esc pausa y devuelve el cursor. Requiere un navegador que permita Pointer Lock (Chrome o Edge). Si la captura falla, permanece en pausa e informa cómo continuar.
-- Vista general con cámara orbital, escudo y ubicación en un recuadro arriba a la derecha y barra de controles abajo a la izquierda. La barra destaca Recorrer e incluye el selector de tema, Más opciones y Menú de cuenta.
-- Registro e inicio/cierre de sesión con Spring Security. El recorrido comparte avatares y posiciones en tiempo real. Podés guardar una apariencia en **Cuenta**.
-- Los servicios de biblioteca, paneles y chat del visor corresponden al contrato anterior. El backend actual cuenta con su propia API de materias y trabajos.
+## Inicio rápido
 
-**Es un prototipo inicial, no una réplica terminada.** Los edificios con medida del equipo respetan esas medidas; el resto de las proporciones, la vegetación y los recintos sin escaneo son aproximados. Segundo piso y baños están señalados como pendientes de validación. Los interiores son reconstrucciones aproximadas, no capturas navegables.
-
-El **Bloque G corresponde al “Bloque 2” de las carpetas y de la vista aérea**, confirmado por Horacio. Cantina y Bedelía están ambas en el alcance ampliado. Los avatares del multijugador son modelos estilizados con animación al caminar y cuatro apariencias. La subida de archivos desde el visor, el agente IA y el despliegue público quedan pendientes. El escaneo de persona fue inspeccionado y preparado localmente; requiere recorte, retopología y rigging antes de servir como avatar.
-
-## Inicio rápido: recorrido 3D
-
-Requisitos: **Node.js 24 LTS** y npm. Las fotografías y texturas utilizadas están incluidas; no hace falta conectar Drive para ejecutar la aplicación.
-
-```sh
-git clone https://github.com/enzoericof/tour_virtual_UC.git
-cd tour_virtual_UC/frontend
-npm ci
-npm run dev
-```
-
-Abrir la dirección mostrada por Vite, normalmente `http://127.0.0.1:5173/`. Sin backend se pueden recorrer los espacios y ver las fotografías; biblioteca, cuentas y chat indican que el servicio no está disponible.
-
-## Inicio con multijugador
-
-1. Prepará PostgreSQL y las variables `DB_USER` y `DB_PASSWORD` según [la guía del backend](campus-backend/setup.md).
-2. En otra terminal, ejecutá el backend con Java 21.
-
-   ```powershell
-   cd campus-backend
-   .\mvnw.cmd spring-boot:run
-   ```
-
-3. Arrancá el frontend como en el inicio rápido. Vite redirige `/api` y `/ws` al puerto 8080. Si usás otro puerto, configurá `CAMPUS_API_URL` antes de iniciar Vite.
-4. Entrá desde **Menú**, elegí una apariencia y usá **Recorrer**. Para probar con otra persona, abrí otra sesión en un perfil de navegador independiente o una ventana privada e ingresá al mismo lugar.
-
-Para una prueba en la red local, iniciá Vite con `npm run dev -- --host 0.0.0.0` desde `frontend`. Los visitantes abren el frontend con la IP del equipo anfitrión. La API y el WebSocket usan ese mismo origen a través de Vite.
-
-Las cuentas y apariencias quedan guardadas en PostgreSQL. Las sesiones de acceso y las posiciones se mantienen en el servidor mientras está en ejecución. El ascensor conserva su simulación local.
-
-## Controles
-
-Dos modos: **vista general** al iniciar y **recorrido a pie** desde Recorrer. El botón de restablecer vista permite regresar al encuadre inicial. Ambos comparten una sola distribución ([ids, fuentes, coordenadas y límites](docs/base-geografica.md)).
-
-| Acción | Control |
-| --- | --- |
-| Ir al punto elegido desde la vista general | Un clic sobre el modelo; inicia el recorrido en ese punto o en un apoyo libre cercano |
-| Caminar | W A S D o flechas (4,5 m/s) |
-| Mirar | Mover el mouse sin mantener clic; Esc pausa y libera el cursor |
-| Caminar más rápido | Shift izquierdo (8 m/s) |
-| Saltar pequeños desniveles | Espacio |
-| Pausar, liberar cursor y abrir opciones | Esc o botón ESC · Pausar |
-| Ocultar o mostrar las herramientas en vista general | M |
-| Volver al conjunto o recuperar el encuadre | Vista general desde la pausa; Más opciones → Recentrar cámara desde la vista general |
-| Alternar el tema del tour | Botón con sol o luna, etiquetado como Modo claro o Modo oscuro |
-| Activar o salir de pantalla completa | Más opciones → Pantalla completa |
-
-La ubicación aparece cuatro segundos al cargar el tour y al cambiar de zona. Durante el recorrido se muestran la mirilla y Esc · Pausar. Al pausar se libera el cursor y reaparece la barra inferior. Continuar recupera el control desde la misma posición y orientación. Menú abre las opciones de cuenta, apariencia, biblioteca, chat y administración según el estado de la sesión.
-
-En dispositivos táctiles se pueden inspeccionar modelos y fotos. El recorrido a pie está pensado para teclado y mouse.
-
-## Editor de mapa 3D
-
-El visor incluye un editor experimental para acomodar modelos 3D sobre el campus. Está pensado para administradores: un usuario normal no ve herramientas de edición, solo puede recorrer el mapa.
-
-- **Modelos**: dejá archivos `.glb` o `.gltf` (exportados desde Blender con `File > Export > glTF 2.0`) en `frontend/editor-models/`. El editor los descubre automáticamente al arrancar; se incluye `planta.glb` como ejemplo.
-- **Abrir el editor**: con el frontend en marcha, entrá a `http://127.0.0.1:5173/editor.html`. Requiere una sesión con rol `ADMIN`; si el backend no está disponible, podés probar localmente con `http://127.0.0.1:5173/editor.html?local=1`.
-- **Colocar un modelo**: arrastrá una tarjeta desde la columna **Modelos** y soltala sobre el mapa. El modelo se apoya sobre la superficie que apuntes.
-- **Editar un modelo**: en **Colocados** cambiá la posición (X, Y, Z) o la rotación (X°, Y°, Z°) y el cambio se aplica al instante.
-- **Persistencia**: la disposición queda guardada en `localStorage` del navegador (vuelve a aparecer al abrir en la misma máquina y navegador). Usá **Exportar JSON** / **Importar JSON** para respaldarla o moverla a otra máquina.
-- El visor principal (`/`) muestra los modelos colocados en ese navegador; no permite editarlos.
-
-Al entrar en primera persona dentro del editor, apretá **Esc** para liberar el mouse y usá el botón **Vista General** (abajo a la derecha) para volver a la cámara orbital sin recargar la página.
-
-## Stack
-
-| Componente | Versión / decisión |
-| --- | --- |
-| Gráficos | Three.js 0.187.0 directo |
-| Frontend | TypeScript 5.9.3 estricto, Vite 8.3.5, HTML/CSS |
-| Herramientas | Node.js 24 LTS, npm y package-lock.json |
-| Backend | Java 21, Spring Boot 4.1.2, Maven 3.10.0 (vía Maven Wrapper 3.3.4) |
-| Persistencia de entrega | PostgreSQL 18, JPA/Hibernate, Flyway |
-| Sesiones | Spring Security, cookies HttpOnly y CSRF |
-| Chat | WebSocket + STOMP, cliente @stomp/stompjs 7.5.0 |
-| Ejecución local | Vite, Maven Wrapper y PostgreSQL |
-
-## Organización
-
-```text
-frontend/src/
-  data/           espacios, estado de relevamiento y referencias
-  scene/          motor 3D, materiales y modelos del campus
-    faculty/      constructores por sector y primitivas de la escena
-  navigation/     controles, cápsula de colisión y gravedad
-  services/       REST, presencia WebSocket y chat STOMP
-  ui/             controles del tour, diálogos, cuenta, contenidos y estilos
-  editor/         editor de mapa 3D (arrastrar y soltar, solo administradores)
-  main.ts         arranque del visor
-frontend/public/assets/  fotos, escaneos y texturas optimizados, y su procedencia
-frontend/editor-models/  modelos .glb/.gltf que lista el editor de mapa 3D
-frontend/editor.html     página del editor de mapa 3D
-campus-backend/src/main/java/py/edu/uc/campus_backend/  cuentas, trabajos y presencia
-campus-backend/src/main/resources/db/migration/       migraciones de PostgreSQL
-docs/             arquitectura y contratos de API, base geográfica, referencias, verificación, pendientes
-design-qa.md      última revisión visual
-scripts/          preparación de recursos, texturas del escaneo e importación del mapa OSM
-  blender/        scripts de modelado que exportan a frontend/editor-models/
-```
-
-## Verificación
+Con **Node.js 24 LTS** y npm, ejecutá estos comandos desde la raíz del repositorio.
 
 ```sh
 cd frontend
 npm ci
-npm test
-npm run build
+npm run dev
 ```
 
-Para verificar el backend actual, configurá PostgreSQL siguiendo [la guía del backend](campus-backend/setup.md) y ejecutá `./mvnw verify` desde `campus-backend/` (`.\mvnw.cmd verify` en PowerShell). Ver [resultados y límites](docs/verificacion.md).
+Abrí la dirección que indica Vite, normalmente `http://127.0.0.1:5173/`. Podés explorar el modelo y recorrer el campus sin iniciar el servidor.
 
-## Referencias y trabajo del equipo
+Para caminar, elegí **Recorrer** o hacé clic en un punto del modelo. Usá **WASD** o las **flechas** para moverte, el **mouse** para mirar y **Esc** para pausar y liberar el cursor. **Más opciones → Ayuda** muestra los demás controles. En pantallas táctiles está disponible la vista general.
 
-El Drive compartido se consultó **solo para lectura**. Los recursos listos para usar y sus fuentes están documentados en [Referencias y recursos](docs/referencias.md). Para regenerar las texturas del pasillo, usá una copia local de su escaneo, Python 3 y las dependencias de `scripts/requirements-assets.txt`. Desde la raíz ejecutá `python scripts/extract-scan-textures.py "ruta/a/Pasillo - Piso 3.glb"`.
+## Inicio con multijugador
 
-Ver [preparación y procedencia](docs/referencias.md), [arquitectura y API](docs/arquitectura.md) y [siguientes tareas](docs/pendientes.md). La nómina, roles individuales y fechas de entrega siguen pendientes de registrar; no se asignaron responsabilidades en nombre del grupo.
+Configurá PostgreSQL y las variables de entorno siguiendo la [guía del backend](campus-backend/setup.md). Con **Java 21**, iniciá el servidor en otra terminal desde la raíz del repositorio.
 
-Trabajar mediante ramas y pull requests. La versión inicial se integró en `main`; las mejoras posteriores se preparan en ramas para su revisión.
+```powershell
+cd campus-backend
+.\mvnw.cmd spring-boot:run
+```
+
+En Linux o macOS, usá `sh ./mvnw spring-boot:run` desde el mismo directorio.
+
+Mantené Vite en ejecución. Por defecto, redirige la API y el WebSocket al puerto `8080`. Abrí **Menú** para iniciar sesión. Podés probar la presencia con dos sesiones de navegador independientes.
+
+La biblioteca, los paneles informativos y el chat del visor están pendientes de integración con el backend actual. [Arquitectura y contratos](docs/arquitectura.md#aporte-campus-backend).
+
+## Editor de mapa 3D
+
+Con el frontend en marcha, abrí `/editor.html` con una cuenta administradora. Para una prueba local sin backend, usá `/editor.html?local=1`. El editor guarda las colocaciones en el navegador y permite exportarlas o importarlas en JSON. [Modelos del editor](frontend/editor-models/LEEME.txt).
+
+## Verificación
+
+Desde `frontend/`, ejecutá `npm test` y `npm run build`. Para verificar el backend, configurá PostgreSQL y ejecutá `.\mvnw.cmd verify` desde `campus-backend/` en PowerShell, o `sh ./mvnw verify` en Linux o macOS. [Registro de verificación](docs/verificacion.md).
+
+## Documentación
+
+- [Arquitectura y API](docs/arquitectura.md)
+- [Referencias y recursos del modelo](docs/referencias.md)
+- [Pendientes del proyecto](docs/pendientes.md)

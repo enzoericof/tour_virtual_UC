@@ -107,3 +107,9 @@ Incoherencias halladas al contrastar los documentos con el código y las pruebas
 | `base-geografica.md` | Plataforma a 1,4 m en la tabla de niveles, en la fila de la plataforma y en la distribución | 0,9 m desde el 02/11, como `PLAZA_LEVEL` y AGENTS.md | `faculty-blueprint.ts` |
 | `base-geografica.md`, `AGENTS.md` | Las «medidas del equipo» de todos los edificios se presentaban por igual como medidas | Solo el Bloque 1 tiene medidas reales; el resto sale de capturas o estimaciones. Lista de medidas faltantes en «Estado de las medidas» | Aclaración del usuario (03/11/2026) |
 | `faculty-reconstruction.ts` | Foso de la Sala Manfred fijo a 1,25 m bajo la plataforma: con la plataforma a 0,9 m quedó 0,35 m bajo el terreno y el césped tapaba el escenario | Foso 0,15 m sobre el terreno, como en el diseño original, con la bajada repartida entre las cinco gradas | Recorrido con el caminante y revisión visual |
+
+## 15/11/2026 — documentación de entrada
+
+- El README citaba un desnivel de 1,40 m para la plataforma. La cota del modelo es de 0,90 m, indicada en `PLAZA_LEVEL` y en [Coordenadas y pisos](base-geografica.md#coordenadas-y-pisos).
+- La guía geográfica indicaba que los escaneos todavía eran escenas independientes. El recorrido se construye con el modelo común y usa las texturas derivadas de los escaneos.
+- La [revisión visual](../design-qa.md) resume las comprobaciones por sector. La bitácora desplegable conserva el detalle de las revisiones anteriores.

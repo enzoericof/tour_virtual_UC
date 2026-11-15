@@ -1,6 +1,8 @@
 # Arquitectura y contratos
 
-El frontend corre en Vite y `campus-backend/` sirve la API y el WebSocket de presencia. Vite redirige `/api` y `/ws` al backend para mantener un mismo origen en el navegador. Solo Spring Boot accede a PostgreSQL. [Inicio y versiones](../README.md#inicio-con-multijugador).
+El frontend corre en Vite y `campus-backend/` sirve la API y el WebSocket de presencia. Vite redirige `/api` y `/ws` al backend para mantener un mismo origen en el navegador. Solo Spring Boot accede a PostgreSQL. [Inicio con multijugador](../README.md#inicio-con-multijugador).
+
+Vite apunta al backend en `http://127.0.0.1:8080` por defecto. Para usar otra dirección, configurá `CAMPUS_API_URL` antes de iniciar Vite. Para probar el recorrido en la red local, ejecutá `npm run dev -- --host 0.0.0.0` desde `frontend/` y abrí el visor con la IP del equipo anfitrión.
 
 ## Componentes
 

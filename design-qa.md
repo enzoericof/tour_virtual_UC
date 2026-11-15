@@ -1,3 +1,26 @@
+# Revisión visual del recorrido
+
+Este registro reúne comprobaciones visuales por sector. Las cotas y referencias de modelado están en [Geografía y reconstrucción](docs/base-geografica.md). Las pruebas de movimiento, colisiones e integración figuran en [Verificación](docs/verificacion.md).
+
+## Visor y navegación
+
+En la revisión del 15 de noviembre de 2026 se comprobó en Chrome el cambio de tema, la ayuda, el menú de cuenta y el retorno a vista general desde la pausa. Chrome rechazó la captura del mouse en esa sesión automatizada. La captura, la pausa y la recuperación tras un rechazo pasaron en las pruebas del frontend.
+
+La revisión anterior de la isla comprobó la silueta en ambos temas desde la vista general. Incluyó el encuentro del césped con la base rocosa y el aspecto del césped desde el jardín.
+
+## Edificios y espacios comunes
+
+| Sector | Qué se revisó |
+| --- | --- |
+| Bloque 1 y torre de baños | Encuentro del granito entre la galería y los accesos, retornos de ladrillo, azulejos, ventanas y paso por los cubículos en los cuatro niveles. |
+| Cantina y Bedelía | Fachadas, acceso vidriado, continuidad de la explanada y alineación entre ambos edificios. Se revisaron la ampliación de Bedelía y la conexión con el acceso a la sala de profesores el 14 de noviembre. |
+| Sala Manfred y plaza techada | Encuentro de la marquesina con la galería, continuidad del pavimento y acceso desde el pasillo. |
+| Pasillos hacia Bloque G y DICIA | Alineación del toldo de Bloque G y remate del sendero hacia DICIA. |
+| Plaza de la Amistad y jardines | Distribución de bancos, pisos, grava, muretes y vegetación, revisada el 14 de noviembre. |
+
+<details>
+<summary>Bitácora de revisiones anteriores</summary>
+
 # Torre de baños del Bloque 1
 
 Se revisaron en navegador las entradas sin carteles, el piso del campus sin marcadores, la ventana alta y los mingitorios más bajos. La prueba de escena comprobó en los cuatro niveles el paso por los cubículos comunes, la entrada y salida en diagonal del cubículo accesible y la colisión contra su tabique. Capturas locales: `output/banos-ajuste-entrada.png`, `output/banos-ajuste-mingitorios.png` y `output/banos-ajuste-accesible.png`. Compilación correcta y 39 pruebas aprobadas.
@@ -298,3 +321,5 @@ Vista cenital revisada: ambas franjas marcadas cubiertas con el acabado gris exi
 ### Plaza de la Amistad — 14/11/2026
 
 Revisión visual en Chrome: bancos y mesas azules, baldosas beige, grava, tierra, franja de piezas circulares y muretes rojizos. Árboles del sector con copas extendidas, raíces y nervaduras en hojas. Captura `C:/Users/Elias Román/.codex/visualizations/2026/11/05/01a1ac84-d1c1-70e1-b3ad-03374e582eec/plaza-amistad.png`.
+
+</details>

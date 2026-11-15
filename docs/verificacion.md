@@ -1,5 +1,9 @@
 # Verificación (versión 0.1.0)
 
+## Refactor del visor y del servidor — 15/11/2026
+
+Pasaron las 40 pruebas del frontend y la compilación de producción. La comparación de la escena antes y después del refactor confirmó la equivalencia de las mallas y las colisiones. El backend pasó `mvn verify` con Java 21 y PostgreSQL 17.4 en una base temporal sobre la que se aplicaron las ocho migraciones. La prueba de contexto verifica el arranque de Spring Boot. [Revisión en navegador](../design-qa.md).
+
 ## Integración de todas las ramas — 01/11/2026
 
 - Incorporados `feat/arboles-patio` y `feature/campus-backend`. Las ramas de medidas/texturas, plataforma/ascensor/torre, cabecera este/rampa y `desarrollo-horacio` ya estaban contenidas en `main`.
@@ -11,9 +15,9 @@
 
 ## Registro anterior
 
-Distingue lo ejecutado de lo pendiente. Comandos: [README](../README.md#verificación). Revisión visual más reciente: [design-qa.md](../design-qa.md).
+Distingue lo ejecutado de lo pendiente. Los comandos están en el [README](../README.md#verificación). Para el registro por sector, consultá la [revisión visual](../design-qa.md).
 
-## Estado vigente
+## Resultados de la revisión inicial
 
 | Área | Estado | Detalle |
 | --- | --- | --- |
@@ -144,7 +148,7 @@ Build y TypeScript correctos. Revisión visual de sillones y mostrador diagonal.
 
 ## Vitrina, divisoria y salida del personal — 02/11/2026
 
-Build y TypeScript correctos. Comprobación temporal sobre el Octree real: 738 muestras libres con esfera de radio 0,28 m a tres alturas, en el recorrido de la puerta pública y el paso de atención hacia la salida del personal. Revisión visual registrada en design-qa.md. Instrumentación temporal retirada. No se repitió la suite de datos para este cambio visual; último estado 28/29, fallo previo de Manfred.
+Build y TypeScript correctos. Comprobación temporal sobre el Octree real: 738 muestras libres con esfera de radio 0,28 m a tres alturas, en el recorrido de la puerta pública y el paso de atención hacia la salida del personal. Revisión visual registrada en la [bitácora histórica](../design-qa.md). Instrumentación temporal retirada. No se repitió la suite de datos para este cambio visual; último estado 28/29, fallo previo de Manfred.
 
 ## Cocina semicircular — 02/11/2026
 
