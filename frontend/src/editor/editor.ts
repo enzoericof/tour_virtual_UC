@@ -219,6 +219,7 @@ function initEditor() {
         }
       });
       engine.editorPlacements.add(object);
+      engine.refreshPlacementCollisions();
       placements.push({
         id: object.userData.editorPlacementId as string,
         name: model.name,
@@ -324,6 +325,7 @@ function initEditor() {
         engine.editorPlacements.remove(child);
       }
     }
+    engine.refreshPlacementCollisions();
     renderPlaced();
     toast("Modelo quitado.");
   }
@@ -380,7 +382,9 @@ function initEditor() {
         const valid = sanitizePlacements(JSON.parse(text));
         placements = valid;
         save();
-        void loadPlacementsInto(engine.editorPlacements);
+        void loadPlacementsInto(engine.editorPlacements).then(() =>
+          engine.refreshPlacementCollisions(),
+        );
         renderPlaced();
         toast(`Importados ${valid.length} modelos.`);
       } catch (error) {
@@ -397,6 +401,7 @@ function initEditor() {
     clearPlacements();
     placements = [];
     engine.editorPlacements.clear();
+    engine.refreshPlacementCollisions();
     renderPlaced();
     toast("Mapa limpio.");
   };

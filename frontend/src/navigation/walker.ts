@@ -10,6 +10,7 @@ export class Walker {
     0.28,
   );
   private world = new Octree();
+  private editorWorld = new Octree();
   private barriers: { world: Octree; blocked: () => boolean }[] = [];
   private velocity = new T.Vector3();
   private keys = new Set<string>();
@@ -78,6 +79,11 @@ export class Walker {
     this.world.clear();
     this.world.fromGraphNode(object);
   }
+  /** Sólidos colocados desde el editor 3D: se reconstruyen cuando cambian. */
+  setEditorWorld(object: T.Object3D | null) {
+    this.editorWorld.clear();
+    if (object) this.editorWorld.fromGraphNode(object);
+  }
   addBarrier(mesh: T.Mesh, blocked: () => boolean) {
     this.barriers.push({ world: new Octree().fromGraphNode(mesh), blocked });
   }
@@ -88,6 +94,8 @@ export class Walker {
   private collision(body: Capsule) {
     const collision = this.world.capsuleIntersect(body);
     if (collision) return collision;
+    const edition = this.editorWorld?.capsuleIntersect(body);
+    if (edition) return edition;
     for (const barrier of this.barriers) {
       if (!barrier.blocked()) continue;
       const hit = barrier.world.capsuleIntersect(body);

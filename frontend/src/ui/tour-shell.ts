@@ -29,6 +29,7 @@ export function mountTourShell(pauseTour: () => void) {
    <aside class="explorer tour-panel collapsed" id="explorer" aria-label="Espacios de la facultad"><div class="section-top"><div><h2>Espacios</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div></aside>
    <section id="tour-options" class="tour-popover tour-panel hidden" aria-label="Más opciones">
     <button id="recenter">${icon("cube")} Recentrar cámara</button>
+    <button type="button" id="graphics-btn" aria-pressed="false">${icon("sparkles")}<span>Mejorar gráficos</span></button>
     <button type="button" id="fullscreen-btn" aria-pressed="false">${icon("expand")}<span>Pantalla completa</span></button>
     <button id="help">${icon("help")} Ayuda</button>
    </section>

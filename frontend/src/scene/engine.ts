@@ -28,6 +28,12 @@ export class TourEngine {
   readonly editorPlacements = new T.Group();
   private sun = new T.DirectionalLight(0xfff2d6, 2.4);
   private hemi = new T.HemisphereLight(0xdbeaf4, 0xb1ada0, 1.7);
+  private fill = new T.DirectionalLight(0x9fc2ff, 0);
+  private ambient = new T.AmbientLight(0x33465c, 0);
+  private readonly sunSprite: T.Sprite;
+  private readonly moonSprite: T.Sprite;
+  private enhancedLighting = false;
+  private lightingTheme: CampusTheme = "light";
   private readonly skies: Partial<Record<CampusTheme, T.CanvasTexture>> = {};
   private previous = performance.now();
   private frame = 0;
@@ -62,11 +68,16 @@ export class TourEngine {
     this.canvas = this.renderer.domElement;
     this.canvas.setAttribute("aria-label", "Escenario 3D del campus");
     container.append(this.canvas);
-    this.setTheme(theme);
     this.sun.position.set(-240, 500, 240);
+    this.fill.position.set(240, 240, -240);
+    const celestialDirection = this.sun.position.clone().normalize();
+    this.sunSprite = this.makeCelestialSprite("#fffbe8", "#ffe08a", "#ff9b3d", 180);
+    this.moonSprite = this.makeCelestialSprite("#ffffff", "#e6f0ff", "#7fa8e0", 140);
+    this.sunSprite.position.copy(celestialDirection).multiplyScalar(1600);
+    this.moonSprite.position.copy(celestialDirection).multiplyScalar(1600);
+    this.setTheme(theme);
     this.editorPlacements.name = "Colocaciones del editor 3D";
-    this.scene.add(this.sun, this.hemi, this.campus.group, this.editorPlacements);
-    void loadPlacementsInto(this.editorPlacements);
+    this.scene.add(this.sun, this.hemi, this.fill, this.ambient, this.sunSprite, this.moonSprite, this.campus.group, this.editorPlacements);
     this.orbit = new OrbitControls(this.camera, this.canvas);
     this.orbit.rotateSpeed = 1.5;
     this.orbit.enableDamping = true;
@@ -95,6 +106,9 @@ export class TourEngine {
       const p = this.nearest();
       if (p) this.onLocation(p);
     };
+    void loadPlacementsInto(this.editorPlacements).then(() => {
+      this.walker.setEditorWorld(this.editorPlacements);
+    });
     window.addEventListener("resize", () => this.resize(container));
     this.resize(container);
     this.canvas.addEventListener("webglcontextlost", (e) => {
@@ -303,18 +317,98 @@ export class TourEngine {
     } else this.overview();
   }
   setTheme(theme: CampusTheme) {
+    this.lightingTheme = theme;
     const dark = theme === "dark";
     this.scene.background = this.skies[theme] ??= makeCampusSky(theme);
     this.scene.fog = new T.Fog(dark ? "#141d36" : "#c7e0ed", 450, 1900);
+    this.sunSprite.visible = !dark;
+    this.moonSprite.visible = dark;
+    this.applyLighting();
+  }
+  /** Luz cálida de alto rango con sombras suaves, relleno frío y exposición de cine. */
+  setEnhancedLighting(enabled: boolean) {
+    this.enhancedLighting = enabled;
+    this.renderer.shadowMap.enabled = enabled;
+    if (enabled) {
+      this.renderer.shadowMap.type = T.PCFSoftShadowMap;
+      this.sun.castShadow = true;
+      this.sun.shadow.mapSize.set(2048, 2048);
+      // La luz mira al origen; un cuadrado generoso cubre todo el sector sin
+      // depender de la orientación de la cámara de sombras.
+      const corners = [
+        [campusBounds.minX, campusBounds.minZ],
+        [campusBounds.minX, campusBounds.maxZ],
+        [campusBounds.maxX, campusBounds.minZ],
+        [campusBounds.maxX, campusBounds.maxZ],
+      ] as const;
+      const half = Math.max(...corners.map(([x, z]) => Math.hypot(x, z))) + 12;
+      this.sun.shadow.camera.left = -half;
+      this.sun.shadow.camera.right = half;
+      this.sun.shadow.camera.top = half;
+      this.sun.shadow.camera.bottom = -half;
+      this.sun.shadow.camera.near = 100;
+      this.sun.shadow.camera.far = 1300;
+      this.sun.shadow.bias = -0.0004;
+      this.sun.shadow.normalBias = 0.02;
+      this.sun.shadow.camera.updateProjectionMatrix();
+      this.renderer.toneMappingExposure = 1.05;
+    } else {
+      this.sun.castShadow = false;
+      this.renderer.toneMappingExposure = 0.96;
+    }
+    this.applyLighting();
+  }
+  private applyLighting() {
+    const dark = this.lightingTheme === "dark";
     this.sun.color.setHex(dark ? 0xdbe5ff : 0xfff2d6);
-    this.sun.intensity = dark ? 1.45 : 2.4;
     this.hemi.color.setHex(dark ? 0xb1c6f2 : 0xdbeaf4);
     this.hemi.groundColor.setHex(dark ? 0x868bab : 0xb1ada0);
-    this.hemi.intensity = dark ? 1.5 : 1.7;
+    this.sun.intensity = this.enhancedLighting
+      ? (dark ? 1.9 : 3.0)
+      : (dark ? 1.45 : 2.4);
+    this.hemi.intensity = this.enhancedLighting
+      ? (dark ? 1.8 : 2.1)
+      : (dark ? 1.5 : 1.7);
+    this.fill.intensity = this.enhancedLighting ? (dark ? 0.7 : 0.85) : 0;
+    this.ambient.intensity = this.enhancedLighting ? (dark ? 0.3 : 0.35) : 0;
+  }
+  private celestialTexture(inner: string, middle: string, halo: string) {
+    const size = 256;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext("2d")!;
+    const gradient = ctx.createRadialGradient(
+      size / 2, size / 2, 0,
+      size / 2, size / 2, size / 2,
+    );
+    gradient.addColorStop(0, inner);
+    gradient.addColorStop(0.18, middle);
+    gradient.addColorStop(0.42, halo);
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+    const texture = new T.CanvasTexture(canvas);
+    texture.colorSpace = T.SRGBColorSpace;
+    return texture;
+  }
+  private makeCelestialSprite(inner: string, middle: string, halo: string, scale: number) {
+    const sprite = new T.Sprite(new T.SpriteMaterial({
+      map: this.celestialTexture(inner, middle, halo),
+      transparent: true,
+      depthWrite: false,
+      fog: false,
+    }));
+    sprite.scale.setScalar(scale);
+    sprite.renderOrder = 1;
+    return sprite;
   }
   quality(high: boolean) {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, high ? 1.8 : 1));
     this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+  }
+  /** Reconstruye las colisiones de los modelos colocados con el editor 3D. */
+  refreshPlacementCollisions() {
+    this.walker.setEditorWorld(this.editorPlacements);
   }
   playerPose() {
     if (!this.walker.enabled) return null;

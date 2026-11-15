@@ -20,6 +20,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
   } catch {
     // El visor también funciona cuando el navegador bloquea el almacenamiento local.
   }
+  let enhancedGraphics = false;
   let engine: TourEngine | undefined;
   let currentMode: TourMode = "overview";
   let activeHudPanel: HudPanel | null = null;
@@ -90,6 +91,24 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     button.innerHTML = icon(dark ? "sun" : "moon");
   }
 
+  function syncGraphics() {
+    const label = enhancedGraphics ? "Luz original" : "Mejorar gráficos";
+    const button = element<HTMLButtonElement>("#graphics-btn");
+    button.setAttribute("aria-pressed", String(enhancedGraphics));
+    button.setAttribute("aria-label", label);
+    button.title = label;
+    button.querySelector("span")!.textContent = label;
+  }
+
+  function toggleGraphics() {
+    enhancedGraphics = !enhancedGraphics;
+    engine?.setEnhancedLighting(enhancedGraphics);
+    syncGraphics();
+    toast(enhancedGraphics
+      ? "Gráficos mejorados: sombras suaves y luz cinematográfica."
+      : "Luz original restaurada.");
+  }
+
   function onMode(mode: TourMode) {
     const changed = mode !== currentMode;
     currentMode = mode;
@@ -118,6 +137,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
   }
 
   syncTheme();
+  syncGraphics();
   try {
     engine = new TourEngine(element("#viewport"), theme);
     engine.onMode = onMode;
@@ -178,6 +198,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
       // La preferencia sigue activa durante esta visita.
     }
   };
+  element("#graphics-btn").onclick = toggleGraphics;
   const fullscreenButton = element<HTMLButtonElement>("#fullscreen-btn");
   fullscreenButton.onclick = () => {
     void (
