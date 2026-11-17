@@ -15,6 +15,14 @@ El frontend se sirve como archivos estáticos. Solo el backend utiliza el conten
 
 La compilación incluye las dos páginas HTML; el editor y sus modelos también quedan en `dist`. El modo `?local=1` del editor modifica únicamente el almacenamiento de ese navegador, no el servidor.
 
+## Publicación automática desde main
+
+Vercel está conectado al repositorio y publica automáticamente al recibir un push a `main` cuyo último commit tenga como autor de GitHub a `enzoericof`. No hace falta abrir el panel ni ejecutar Deploy manualmente. Un commit que permanece solo en la computadora no dispara la publicación: hay que subirlo a GitHub.
+
+`git.deploymentEnabled` desactiva las publicaciones automáticas de otras ramas. Cada servicio tiene un `ignoreCommand` que permite continuar solo cuando `VERCEL_GIT_COMMIT_REF` es `main` y `VERCEL_GIT_COMMIT_AUTHOR_LOGIN` es `enzoericof`. Según la convención de Vercel, salir con código 1 permite construir y salir con 0 omite el build. Si faltan estos metadatos, se omite el build; mantener habilitado el acceso a System Environment Variables en el proyecto. Un redeploy manual también respeta el filtro salvo que se elija explícitamente omitir el Ignored Build Step en Vercel.
+
+El filtro selecciona quién dispara la publicación, no qué líneas se publican. Un commit de Enzo publica el estado completo de `main`, incluyendo aportes anteriores de sus compañeros. Si el último commit del push es de otra persona, no se busca un commit anterior de Enzo ni se cambia la versión pública.
+
 ## Variables de entorno en Vercel
 
 Agregar estos valores en **Settings → Environment Variables** del proyecto antes de desplegar. Copiar las credenciales desde **Connect** en Neon y marcar la contraseña como sensible. No escribir valores reales en archivos versionados, chats, capturas ni variables con prefijo `VITE_`.
