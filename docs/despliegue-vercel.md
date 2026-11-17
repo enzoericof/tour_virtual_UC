@@ -65,6 +65,12 @@ La biblioteca, los paneles y el chat que aún usan contratos del backend anterio
 
 No se modificó el backend ni se probó su arranque contra Neon. No se publicaron servicios ni se cargaron credenciales. La configuración y las rutas de Vercel deben validarse con un despliegue real antes de considerar lista la demostración.
 
+## Ajustes de la primera publicación (17/11/2026)
+
+La primera compilación en Vercel generó los archivos del visor y el contenedor. Se comprobó la carga de `/index.html` y los registros del backend confirmaron conexión con PostgreSQL en Neon y esquema Flyway V8 actualizado. La ruta `/` devolvía 404: se agregó una regla explícita que selecciona `/index.html` dentro del servicio frontend.
+
+También se observó un timeout de arranque de una instancia Java. El contenedor utiliza `-XX:TieredStopAtLevel=1` para favorecer el arranque en frío de esta demostración, a cambio de limitar la optimización JIT de larga ejecución. Se conserva la verificación de bytecode. La respuesta HTTP de la API y la autenticación deben comprobarse después de desplegar este ajuste; los registros de conexión a Neon por sí solos no prueban el flujo completo.
+
 ## Referencias oficiales
 
 - [Vercel Hobby](https://vercel.com/docs/plans/hobby)

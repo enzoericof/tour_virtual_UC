@@ -10,4 +10,5 @@ WORKDIR /app
 COPY --from=build /build/target/*.jar app.jar
 USER 10001:10001
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Favorecer el arranque en instancias breves de la demostración académica.
+ENTRYPOINT ["java", "-XX:TieredStopAtLevel=1", "-jar", "/app/app.jar"]
