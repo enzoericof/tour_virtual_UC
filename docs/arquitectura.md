@@ -12,7 +12,7 @@ Vite apunta al backend en `http://127.0.0.1:8080` por defecto. Para usar otra di
 | Backend `campus-backend/` | Autenticación y sesiones, materias, trabajos y presencia multijugador. |
 | Datos | PostgreSQL con JPA y Flyway (`ddl-auto=validate`). |
 
-`main.ts` monta la interfaz, el motor del recorrido y la comunidad. En `ui/`, `tour-shell.ts` monta la barra y administra el diálogo compartido, `tour-controls.ts` maneja la cámara y los modos del visor, y `community.ts` dirige la sesión y la presencia. La biblioteca y los paneles se implementan en `library.ts` y `campus-content.ts`.
+`main.ts` comprueba el dispositivo antes de importar `tour.ts`, que monta la interfaz, el motor del recorrido y la comunidad. `editor/main.ts` aplica el mismo bloqueo antes de importar el editor. En celulares y tabletas se muestra un aviso con las fuentes compartidas en `ui/fonts.css`; no se inicia el motor 3D. La detección combina señales del navegador y del puntero, sin usar el ancho de la ventana como criterio de bloqueo. En `ui/`, `tour-shell.ts` monta la barra y administra el diálogo compartido, `tour-controls.ts` maneja la cámara y los modos del visor, y `community.ts` dirige la sesión y la presencia. La biblioteca y los paneles se implementan en `library.ts` y `campus-content.ts`.
 
 `scene/faculty-reconstruction.ts` arma el modelo a partir de las medidas de `data/`. En `scene/faculty/` están los constructores de la torre de baños, la Sala Manfred, la cantina y los anexos. Usan las mismas primitivas para añadir geometría visible y colisiones al marco de cada sector.
 

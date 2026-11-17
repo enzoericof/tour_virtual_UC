@@ -18,7 +18,9 @@ npm run dev
 
 Abrí la dirección que indica Vite, normalmente `http://127.0.0.1:5173/`. Podés explorar el modelo y recorrer el campus sin iniciar el servidor.
 
-Para caminar, elegí **Recorrer** o hacé clic en un punto del modelo. Usá **WASD** o las **flechas** para moverte, el **mouse** para mirar y **Esc** para pausar y liberar el cursor. **Más opciones → Ayuda** muestra los demás controles. En pantallas táctiles está disponible la vista general.
+Para caminar, elegí **Recorrer** o hacé clic en un punto del modelo. Usá **WASD** o las **flechas** para moverte, el **mouse** para mirar y **Esc** para pausar y liberar el cursor. **Más opciones → Ayuda** muestra los demás controles.
+
+El recorrido y el editor requieren una PC o laptop. En celulares y tabletas se muestra un aviso con la tipografía del proyecto y no se inicia el motor 3D. Una ventana pequeña de escritorio no activa este bloqueo.
 
 ## Inicio con multijugador
 

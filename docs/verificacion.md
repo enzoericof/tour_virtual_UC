@@ -343,3 +343,9 @@ Distribución corregida según croquis: seis mesas en dos filas de tres, tres co
 Ajuste final de plaza techada: seis conjuntos desplazados 1 m hacia el exterior para separarlos de los pilares; solo el marrón junto al extremo del toldo tiene dos sillas de cabecera. Vista revisada en Chrome sin errores de página, compilación y 40 pruebas aprobadas.
 
 Fila de galería desplazada 0,8 m adicionales; fila exterior sin cambios. Revisión visual en Chrome sin errores, sin superposición entre conjuntos. Build y 40 pruebas aprobadas; no se realizó recorrido manual a pie.
+
+### Acceso desde computadoras - 17/11/2026
+
+45/45 pruebas aprobadas y compilación TypeScript/Vite correcta. Nuevas pruebas: celulares aun con mouse, tabletas con identidad de escritorio, laptops táctiles con puntero preciso, bloqueo sin ejecutar el inicio del tour/editor y arranque normal de escritorio. La ejecución conserva el aviso preexistente de puerto HMR 24678 ocupado, sin fallos.
+
+Aviso revisado en Chrome a 390 × 844 y 320 × 568 mediante una página local de prueba con señales de iPhone: Manrope y DM Sans, sin desbordamiento horizontal, texto accesible y ningún canvas. No se usó un celular físico. El visor de escritorio inició correctamente en el navegador. La página de prueba está en `.local/`, ignorada por Git y fuera de las entradas de producción.
