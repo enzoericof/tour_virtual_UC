@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 const backend = process.env.CAMPUS_API_URL ?? "http://127.0.0.1:8080";
 export default defineConfig({
+  input: ["index.html", "editor.html"],
   server: {
     proxy: {
       "/api": backend,

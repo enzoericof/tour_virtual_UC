@@ -56,6 +56,7 @@ Desde `frontend/`, ejecutá `npm test` y `npm run build`. Para verificar el back
 
 ## Documentación
 
+- [Despliegue académico en Vercel Hobby y Neon](docs/despliegue-vercel.md)
 - [Arquitectura y API](docs/arquitectura.md)
 - [Referencias y recursos del modelo](docs/referencias.md)
 - [Pendientes del proyecto](docs/pendientes.md)
