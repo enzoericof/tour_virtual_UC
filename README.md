@@ -1,6 +1,6 @@
 # Tour virtual UC
 
-Recorrido interactivo por la Facultad de Ciencias y Tecnología de la Universidad Católica, en el campus Santa Librada. El proyecto se desarrolla para Informática III y reúne una vista general del campus, un recorrido a pie y un modo multijugador con cuentas y avatares.
+Recorrido interactivo por la Facultad de Ciencias y Tecnología de la Universidad Católica, en el campus Santa Librada. El proyecto se desarrolla para Informática III y reúne una vista general de la facultad, un recorrido a pie y un modo multijugador con cuentas y avatares.
 
 El visor usa Three.js y TypeScript. El servidor utiliza Spring Boot y PostgreSQL.
 
