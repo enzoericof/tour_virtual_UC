@@ -31,6 +31,8 @@ export function mountTourShell(pauseTour: () => void) {
     <button id="recenter">${icon("cube")} Recentrar cámara</button>
     <button type="button" id="graphics-btn" aria-pressed="false">${icon("sparkles")}<span>Mejorar gráficos</span></button>
     <button type="button" id="fullscreen-btn" aria-pressed="false">${icon("expand")}<span>Pantalla completa</span></button>
+    <button id="remove-scene-object" aria-pressed="false">Eliminar objeto</button>
+    <button id="restore-scene-objects">Restaurar objetos eliminados</button>
     <button id="help">${icon("help")} Ayuda</button>
    </section>
    <section id="tour-account" class="tour-popover tour-panel hidden" aria-label="Menú de cuenta">

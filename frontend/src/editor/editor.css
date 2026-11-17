@@ -237,3 +237,5 @@ body { overflow: hidden; background: #102346; color: var(--ink); }
   cursor: pointer;
 }
 .gate-card .dev-note { margin-top: 22px; font-size: 10.5px; color: #8fb0dc; }
+
+#delete-mode[aria-pressed="true"] { background: #9b2d20; color: white; outline: 2px solid #9b2d20; }

@@ -8,6 +8,7 @@ import { addCantinaTree } from "./cantina-tree";
 import { createFacultyBuilder, galleryTileOffset, type Range } from "./faculty/builder";
 import { addRestroomTower } from "./faculty/restroom-tower";
 import { addManfredHall } from "./faculty/manfred-hall";
+import { addCoveredPlazaSeating } from "./faculty/covered-plaza-seating";
 import { addCantina } from "./faculty/cantina";
 import { addAnnexes } from "./faculty/annexes";
 import {
@@ -696,7 +697,12 @@ export function createFaculty(grass = makeGrassMaterial()) {
     // ---- Cabecera este: planta baja y primer piso retraídos bajo los pisos 2 y 3 ----
     const ee = plan.eastEnd, rp = ee.ramp, [groundEnd] = ee.roomsEnd;
     // Columnas que sostienen los pisos 2 y 3 donde planta baja y primer piso se retraen.
-    for (const [x, z] of ee.columns) pole(0.25, 2 * H, x, H, z, m.concrete, true);
+    for (const [x, z] of ee.columns) {
+      if (x === ee.serviceColumn[0] && z === ee.serviceColumn[1])
+        box(0.65, 2 * H, 0.65, x, H, z, m.concrete, true,
+          { rotation: -(gridAngle - Math.PI / 2) });
+      else pole(0.25, 2 * H, x, H, z, m.concrete, true);
+    }
     // Rampa: losa inclinada de la explanada de Manfred a la galería de planta baja, con pasamanos sobre
     // la pared de las aulas y baranda del lado del rellano. Donde estaba la pared de la cabecera quedan
     // solo las columnas.
@@ -767,13 +773,14 @@ export function createFaculty(grass = makeGrassMaterial()) {
   addRestroomTower(builder);
 
   // ---- Bloque G ----
-  const gStair = -13, gHalf = 2.8, gWidth = 1.4;
+  const { start: gStair, halfRun: gHalf, width: gWidth } = plan.blockGStair;
+  const gEntry = gStair + gHalf;
   frame(plan.block2, () => {
     academicBlock({
       ...blockG, front: -1, topWall: 3.6, roof: m.blue, louvers: false,
       label: () => "BLOQUE G",
       rooms: (level) => plan.rooms.block2[level],
-      openings: (level) => level ? [[gStair - 1.3, gStair]] : [],
+      openings: (level) => level ? [[gEntry, gEntry + 1.3]] : [],
       door: "single",
       columns: { radius: 0.17 },
     });
@@ -781,15 +788,15 @@ export function createFaculty(grass = makeGrassMaterial()) {
     const zA = -blockG.depth / 2 - 0.1 - gWidth / 2, zB = zA - gWidth;
     for (let level = 0; level < blockG.levels - 1; level++) {
       const y = level * H;
-      flight(gStair, y, gStair + gHalf, y + H / 2, zA, gWidth);
-      box(1.3, 0.2, 2 * gWidth, gStair + gHalf + 0.65, y + H / 2 - 0.1, (zA + zB) / 2, m.stone, true);
-      railZ(zB - gWidth / 2, zA + gWidth / 2, y + H / 2, gStair + gHalf + 1.3);
-      rail(gStair + gHalf, gStair + gHalf + 1.3, y + H / 2, zB - gWidth / 2 - 0.03);
-      rail(gStair + gHalf, gStair + gHalf + 1.3, y + H / 2, zA + gWidth / 2 + 0.03);
-      flight(gStair + gHalf, y + H / 2, gStair, y + H, zB, gWidth);
-      box(1.3, 0.2, 2 * gWidth + 0.15, gStair - 0.65, y + H - 0.1, (zA + zB) / 2 + 0.075, m.stone, true);
-      rail(gStair - 1.3, gStair, y + H, zB - gWidth / 2 - 0.03);
-      railZ(zB - gWidth / 2, zA + gWidth / 2, y + H, gStair - 1.3);
+      flight(gEntry, y, gStair, y + H / 2, zA, gWidth);
+      box(1.3, 0.2, 2 * gWidth, gStair - 0.65, y + H / 2 - 0.1, (zA + zB) / 2, m.stone, true);
+      railZ(zB - gWidth / 2, zA + gWidth / 2, y + H / 2, gStair - 1.3);
+      rail(gStair - 1.3, gStair, y + H / 2, zB - gWidth / 2 - 0.03);
+      rail(gStair - 1.3, gStair, y + H / 2, zA + gWidth / 2 + 0.03);
+      flight(gStair, y + H / 2, gEntry, y + H, zB, gWidth);
+      box(1.3, 0.2, 2 * gWidth + 0.15, gEntry + 0.65, y + H - 0.1, (zA + zB) / 2 + 0.075, m.stone, true);
+      rail(gEntry, gEntry + 1.3, y + H, zB - gWidth / 2 - 0.03);
+      railZ(zB - gWidth / 2, zA + gWidth / 2, y + H, gEntry + 1.3);
     }
   });
 
@@ -931,8 +938,8 @@ export function createFaculty(grass = makeGrassMaterial()) {
     ramp(v3(ss.center[0] + ss.direction[0] * ss.run, ss.bottom, ss.center[1] + ss.direction[1] * ss.run),
       v3(ss.center[0], PLAZA_LEVEL, ss.center[1]), ss.width);
     // El pavimento lo define la plataforma, recortada por el borde superior de la escalera.
-    // El primer apoyo aloja los servicios y se construye rectangular más abajo.
-    for (const [x, z] of g.columns.slice(1))
+    // Todos los apoyos de esta galería son cilíndricos.
+    for (const [x, z] of g.columns)
       pole(0.23, g.roof - PLAZA_LEVEL, x, (g.roof + PLAZA_LEVEL) / 2, z, m.concrete, true);
     // Segunda fila, lado plaza: deja libre el eje de circulación como en el video.
     const rearA=g.outline[1], rearB=g.outline[2];
@@ -963,14 +970,12 @@ export function createFaculty(grass = makeGrassMaterial()) {
     }
     // Equipamiento reubicado alrededor de una columna rectangular: bebedero a la
     // izquierda, maceta en la esquina y máquina de hielo a su derecha.
-    const equipmentAt = g.columns[0];
+    const equipmentAt = plan.eastEnd.serviceColumn;
     // Frente hacia la plaza (el observador de la captura), no hacia las escaleras.
     frame({ center: equipmentAt, size: [2.8, 1.5], angle: gridAngle - Math.PI / 2 }, () => {
       const inox = new T.MeshStandardMaterial({ color: "#cbd2cf", roughness: 0.45, metalness: 0.3 });
       const white = new T.MeshStandardMaterial({ color: "#e5e4d8", roughness: 0.6, metalness: 0.12 });
       const recess = new T.MeshStandardMaterial({ color: "#313d3d", roughness: 0.6 });
-      const columnHeight = g.roof - PLAZA_LEVEL - 0.015;
-      box(0.65, columnHeight, 0.65, 0, columnHeight / 2, 0, m.concrete, true);
       // Bebedero de acero con pileta, rejilla de drenaje y grifo curvado.
       box(0.56, 0.88, 0.52, -0.83, 0.49, 0, inox, true);
       box(0.62, 0.055, 0.58, -0.83, 0.96, 0.02, inox);
@@ -1118,6 +1123,8 @@ export function createFaculty(grass = makeGrassMaterial()) {
       }
     }
   }
+
+  addCoveredPlazaSeating(builder);
 
   // ---- Cuadrado descubierto, Bedelía, Sala Manfred, cantina y Electrónica ----
   for (const center of plan.planters) frame({ center, size: [3.4, 1.6], angle: gridAngle }, () => {
@@ -1285,6 +1292,9 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
         [start[0] - 0.06, galleryEdge], [end[0], galleryEdge],
         [end[0], lawnEdge], [start[0] - 0.06, lawnEdge],
       ], courtyardConcrete, 0.049);
+    } else if (index === 2) {
+      // Termina junto a la terraza: se retira el brazo transversal sobrante.
+      path(p.slice(0, 2));
     } else if (index === 6) {
       // El enlace desde el toldo hasta la plaza ya tiene peldaños y piso propio.
       path(p.slice(1));
@@ -1517,20 +1527,64 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
   {
     const { terrace, gravel, tables } = plan.blockGCourtyard;
     const floor = 0.055;
+    // Cuña entre el sendero oblicuo y el borde de la terraza.
+    prism([[22.8,19.2],[32.9,19.2],[22.8,24.27]], -0.03, floor + 0.03, friendshipMaterial("tile"));
     pave(gravel, m.courtyardGravel, 0.043);
     const paving = friendshipMaterial("tile"), soil = friendshipMaterial("soil");
     prism(rectCorners(terrace), -0.03, floor + 0.03, paving);
     // Sendero de piezas circulares desde el mural al área de bancos.
     pave([[22.8,9.52],[25,9.52],[26,12.6],[23.8,12.6]], friendshipMaterial("round"), .05);
-    for (const [tx,tz] of [plan.tree1,plan.courtyardTrees[2]]) {
+    for (const [tx,tz] of [plan.tree1,plan.blockGCourtyard.addedTree]) {
       const patch: Vec2[] = Array.from({length:32},(_,i)=>{
         const a=i*Math.PI/16,r=1.7+Math.sin(i*2.3)*.13;
         return [tx+Math.cos(a)*r,tz+Math.sin(a)*r*.8];
       });
       pave(patch,soil,.046);
     }
+    // Cantero cuadrangular junto al acceso desde la escalera.
+    frame(plan.blockGCourtyard.planter,()=>{
+      const [w,d]=plan.blockGCourtyard.planter.size;
+      for(const side of [-1,1]) {
+        box(w,.42,.16,0,.21,side*(d/2-.08),m.brick,true);
+        box(.16,.42,d-.32,side*(w/2-.08),.21,0,m.brick,true);
+      }
+      box(w-.32,.28,d-.32,0,.14,0,soil);
+      for(let i=0;i<9;i++) {
+        const x=(i%3-1)*.43,z=(Math.floor(i/3)-1)*.43;
+        for(let j=0;j<7;j++) {
+          const a=j*Math.PI*2/7, height=.32+(j%3)*.1;
+          const leaf=new T.Mesh(new T.ConeGeometry(.075,height,4),m.leaves[(i+j)%m.leaves.length]);
+          leaf.position.set(x+Math.cos(a)*.1,.28+height/2,z+Math.sin(a)*.1);
+          leaf.rotation.z=Math.cos(a)*.35;leaf.rotation.x=Math.sin(a)*.35;
+          leaf.castShadow=true;layers.visual.add(leaf);
+        }
+      }
+      // Árbol de corteza pálida y copa verde, hasta la cota del segundo piso.
+      const paleBark = m.concrete.clone(); paleBark.color.set("#d6d0bb");
+      const greenLeaves = ["#416b2c", "#527e35", "#638d42"].map(color =>
+        new T.MeshStandardMaterial({color,roughness:1}));
+      const treeTop = 2 * H - floor;
+      beam(v3(0,.28,0),v3(.12,3.9,.06),.17,paleBark);
+      pole(.17,3.6,0,2.08,0,paleBark,true);
+      beam(v3(.12,3.9,.06),v3(.04,treeTop-.35,0),.095,paleBark);
+      for(let i=0;i<12;i++) {
+        const a=i*2.39996,y=3.5+(i%4)*.55;
+        const reach=.8+(i%3)*.16;
+        const tip=v3(Math.cos(a)*reach,Math.min(treeTop-.45,y+1),Math.sin(a)*reach);
+        beam(v3(.09,y,0),tip,.065,paleBark);
+        for(let j=0;j<3;j++) {
+          const leaves=new T.Mesh(new T.IcosahedronGeometry(1,1),greenLeaves[(i+j)%3]);
+          leaves.position.copy(tip).add(v3(Math.cos(a+j*2)*.25,j*.08,Math.sin(a+j*2)*.25));
+          leaves.scale.set(.52,.35,.46);
+          leaves.castShadow=true;leaves.receiveShadow=true;layers.visual.add(leaves);
+        }
+      }
+      const crown=new T.Mesh(new T.IcosahedronGeometry(1,1),greenLeaves[1]);
+      crown.position.set(.04,treeTop-.35,0);crown.scale.set(.55,.35,.5);
+      crown.castShadow=true;crown.receiveShadow=true;layers.visual.add(crown);
+    },floor);
     // Cartel azul sobre dos postes, al borde de acceso a la plaza.
-    frame({center:[34.1,18],size:[1.2,.1],angle:-Math.PI/2},()=>{
+    frame(plan.blockGCourtyard.sign,()=>{
       for(const x of [-.67,.67]) pole(.025,2.25,x,1.125,0,m.metal,true);
       box(1.24,1.52,.06,0,1.42,0,m.blue,true);
       const board=new T.Mesh(new T.PlaneGeometry(1.2,1.5),friendshipSign());
@@ -1553,7 +1607,34 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
         box(0.31, 0.32, 1.17, w / 2 - 0.14, 0.16, z, lowWall, true);
         box(0.35, 0.045, 1.17, w / 2 - 0.14, 0.34, z, lowWall);
       }
+      // Copias del banco rojizo en los dos bordes señalados junto al árbol.
+      for (const z of [-1.3, -0.1]) {
+        box(0.31, 0.32, 1.17, -w / 2 + 0.14, 0.16, z, lowWall, true);
+        box(0.35, 0.045, 1.17, -w / 2 + 0.14, 0.34, z, lowWall);
+      }
+      for (const x of [-3.65, -2.45]) {
+        box(1.17, 0.32, 0.31, x, 0.16, -d / 2 + 0.14, lowWall, true);
+        box(1.17, 0.045, 0.35, x, 0.34, -d / 2 + 0.14, lowWall);
+      }
     }, floor);
+
+    // Farolas de cuatro caras, en las posiciones indicadas junto a cada mesa.
+    const lampIron = new T.MeshStandardMaterial({color:"#161a1b",roughness:.68,metalness:.65});
+    const lampGlass = new T.MeshStandardMaterial({color:"#e6e8d9",roughness:.4,emissive:"#fff0c4",emissiveIntensity:.22});
+    for (const [x,z] of plan.blockGCourtyard.lamps) {
+      pole(.085,.16,x,floor+.08,z,lampIron,true);
+      pole(.036,2.15,x,floor+1.075,z,lampIron,true);
+      for(const y of [.18,.5,1.5,2.08]) pole(.055,.065,x,floor+y,z,lampIron);
+      const glass = new T.Mesh(new T.CylinderGeometry(.22,.14,.43,4),lampGlass);
+      glass.rotation.y=Math.PI/4;glass.position.set(x,floor+2.34,z);layers.visual.add(glass);
+      for(const dx of [-1,1]) for(const dz of [-1,1])
+        beam(v3(x+dx*.1,floor+2.125,z+dz*.1),v3(x+dx*.156,floor+2.555,z+dz*.156),.014,lampIron);
+      box(.36,.035,.36,x,floor+2.12,z,lampIron);
+      box(.5,.035,.5,x,floor+2.57,z,lampIron);
+      const roof=new T.Mesh(new T.ConeGeometry(.34,.19,4),lampIron);
+      roof.rotation.y=Math.PI/4;roof.position.set(x,floor+2.68,z);layers.visual.add(roof);
+      pole(.035,.08,x,floor+2.81,z,lampIron);
+    }
 
     const blueSlats = friendshipMaterial("blue");
     const tube = new T.MeshStandardMaterial({ color: "#303536", roughness: 0.76 });
@@ -1628,7 +1709,7 @@ function mergeByMaterial(root: T.Group) {
   const inverse = root.matrixWorld.clone().invert();
   const buckets = new Map<T.Material, Map<number, T.BufferGeometry[]>>(), merged: T.Object3D[] = [];
   root.traverse((o) => {
-    if (!(o instanceof T.Mesh) || o instanceof T.InstancedMesh || o.userData.keep || Array.isArray(o.material)
+    if (!(o instanceof T.Mesh) || o instanceof T.InstancedMesh || o.userData.keep || o.userData.removalLabel || Array.isArray(o.material)
       || o.material.transparent) return;
     let geo = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()) as T.BufferGeometry;
     for (const name of Object.keys(geo.attributes)) if (!["position", "normal", "uv"].includes(name)) geo.deleteAttribute(name);

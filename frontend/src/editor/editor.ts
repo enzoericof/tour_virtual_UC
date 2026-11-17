@@ -90,8 +90,9 @@ function renderApp(localMode: boolean) {
         <button class="btn-ghost" id="export-json">Exportar JSON</button>
         <button class="btn-ghost" id="import-json">Importar JSON</button>
         <input type="file" id="import-file" accept="application/json" hidden />
+        <button class="btn-danger" id="delete-mode" aria-pressed="false">Eliminar objetos: desactivado</button>
         <button class="btn-danger" id="clear-all">Limpiar todo</button>
-        <p class="editor-hint">Arrastrá una tarjeta y soltala sobre el mapa. Usá la rueda para acercarte y el botón 🗑 para quitar un modelo.</p>
+        <p class="editor-hint">Activá Eliminar objetos y hacé clic en un modelo colocado para quitarlo. Esc sale del modo. Solo se eliminan modelos agregados con el editor.</p>
       </div>
     </aside>
     <div id="editor-toast" class="hidden" role="status"></div>`;
@@ -133,6 +134,20 @@ function initEditor() {
     resumeButton.classList.toggle("hidden", mode !== "paused");
   };
   engine.overview();
+
+  let deleting = false;
+  const deleteButton = $<HTMLButtonElement>("#delete-mode");
+  function setDeleting(value: boolean) {
+    deleting = value;
+    if (value) engine.overview();
+    deleteButton.setAttribute("aria-pressed", String(value));
+    deleteButton.textContent = `Eliminar objetos: ${value ? "activado" : "desactivado"}`;
+    engine.renderer.domElement.style.cursor = value ? "crosshair" : "";
+  }
+  deleteButton.onclick = () => setDeleting(!deleting);
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setDeleting(false);
+  });
 
   const loader = new GLTFLoader();
   let placements: Placement[] = readPlacements();
@@ -323,6 +338,22 @@ function initEditor() {
     for (const child of [...engine.editorPlacements.children]) {
       if (child.userData.editorPlacementId === id) {
         engine.editorPlacements.remove(child);
+        const geometries = new Set<T.BufferGeometry>();
+        const materials = new Set<T.Material>();
+        const textures = new Set<T.Texture>();
+        child.traverse((node) => {
+          if (!(node instanceof T.Mesh)) return;
+          geometries.add(node.geometry);
+          for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
+            materials.add(material);
+            for (const value of Object.values(material)) {
+              if (value instanceof T.Texture) textures.add(value);
+            }
+          }
+        });
+        geometries.forEach((geometry) => geometry.dispose());
+        materials.forEach((material) => material.dispose());
+        textures.forEach((texture) => texture.dispose());
       }
     }
     engine.refreshPlacementCollisions();
@@ -331,6 +362,39 @@ function initEditor() {
   }
 
   const canvas = engine.renderer.domElement;
+  let deletePress: { x: number; y: number; id: number } | null = null;
+  // Captura antes que los controles del recorrido para no entrar a caminar al borrar.
+  canvas.addEventListener("pointerdown", (event) => {
+    if (!deleting) return;
+    event.stopImmediatePropagation();
+    if (event.button === 0 && event.isPrimary) {
+      deletePress = { x: event.clientX, y: event.clientY, id: event.pointerId };
+    }
+  }, true);
+  canvas.addEventListener("pointercancel", () => { deletePress = null; });
+  canvas.addEventListener("pointerup", (event) => {
+    if (!deleting) return;
+    event.stopImmediatePropagation();
+    const press = deletePress;
+    deletePress = null;
+    if (!press || press.id !== event.pointerId ||
+        Math.hypot(event.clientX - press.x, event.clientY - press.y) > 6) return;
+    const bounds = canvas.getBoundingClientRect();
+    const ray = new T.Raycaster();
+    ray.setFromCamera(new T.Vector2(
+      (event.clientX - bounds.left) / bounds.width * 2 - 1,
+      -(event.clientY - bounds.top) / bounds.height * 2 + 1,
+    ), engine.camera);
+    const hit = ray.intersectObject(engine.editorPlacements, true)[0];
+    const obstruction = ray.intersectObject(engine.campus.colliders, true)[0];
+    if (!hit || (obstruction && obstruction.distance + 0.02 < hit.distance)) {
+      toast("Hacé clic sobre un modelo colocado con el editor.");
+      return;
+    }
+    let object: T.Object3D | null = hit.object;
+    while (object && !object.userData.editorPlacementId) object = object.parent;
+    if (object) removePlacement(object.userData.editorPlacementId as string);
+  }, true);
   for (const card of document.querySelectorAll<HTMLButtonElement>(".model-card")) {
     card.addEventListener("dragstart", (event) => {
       const id = card.dataset.model;

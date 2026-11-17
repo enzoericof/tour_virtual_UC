@@ -398,3 +398,43 @@ Se prolonga el pavimento gris de la plaza en L: franja entre el fondo de cantina
 ### Plaza de la Amistad — 14/11/2026
 
 El usuario identifica el patio de mesas frente al Bloque G y al mural como Plaza de la Amistad. Fotos aportadas: bancos y mesas de listones azules sobre estructura negra, baldosas beige con franjas azules, grava gris, tierra con raíces expuestas, piezas circulares en el sendero, muretes rojizos y señalética azul sobre dos postes. Se conserva la implantación de edificios y se interpretan visualmente acabados y mobiliario, sin nuevas medidas de campo.
+
+### Escalera del Bloque G junto al árbol — 14/11/2026
+
+Según la foto del usuario, se traslada la escalera exterior a la zona de la Plaza de la Amistad: arranque local x=13 m en lugar de -13 m. Se conservan ancho, altura, tramos y descansos; las aberturas de baranda acompañan la nueva ubicación. Ajuste visual provisional, sin medida de campo.
+
+La corrección posterior invierte los tramos en la misma huella: el primer tramo sube hacia x local decreciente. Los descansos de llegada quedan entre x=15,8 y 17,1 m, con aberturas de baranda coincidentes en los dos pisos.
+
+Cartel de Plaza de la Amistad: trasladado al césped de acceso según la flecha del usuario, centro (41,14), con giro adicional de 15 grados hacia la izquierda (corrección del usuario). Ubicación aproximada a partir de la captura.
+
+Ajuste fino del cartel: otros 15 grados en el mismo sentido (30 grados totales), conservando el centro (41,14), según la nueva flecha curva.
+
+Plaza de la Amistad: completar la cuña de césped entre terraza y sendero del Bloque G; retirar el enlace transversal sobresaliente al sur de la terraza según captura del usuario.
+
+### Mobiliario duplicado — 17/11/2026
+
+Plaza de la Amistad: segunda fila paralela a 3,6 m de la original, hacia la franja pavimentada indicada por el usuario. Cuatro conjuntos completos en total, con una mesa, dos bancos y dos sillas por conjunto; misma orientación, materiales y colisiones.
+
+Corrección del usuario: retirados los dos conjuntos duplicados. Se conservan los dos originales y se copian los tres módulos del banco rojizo sobre el borde junto al árbol y el borde perpendicular junto al sendero circular, según los dos rectángulos de la captura.
+
+Farolas de Plaza de la Amistad (17/11): dos farolas negras de cuatro caras y remate piramidal, de unos 2,9 m, junto a las mesas según los círculos. Retirado un módulo extremo de cada banco rojizo añadido, conservando dos módulos por borde.
+
+### Vegetación y cantero — 17/11/2026
+
+Árbol del borde de las mesas trasladado a la grava (21,5;11), otro similar en (30,4;11). Retirado el árbol (19;23) junto a la escalera, incluidas raíces y mancha de tierra. Cantero de ladrillo de 1,7 m de lado con plantas en (24;21,8), según los cuatro recuadros aportados. Posiciones aproximadas visualmente.
+
+Ajuste posterior: árbol añadido (30,4;11) sin raíces superficiales. Cantero trasladado a (25,3;21,1) y girado al mismo eje del Bloque G y su escalera.
+
+Árbol joven de corteza pálida en el centro del cantero: ramificación fina y follaje claro poco denso, remate a 3,5 m (cota del primer piso). Conservadas las plantas bajas.
+
+Ajuste del árbol del cantero: tronco pálido más robusto, ramas gruesas y copa verde más densa; altura total hasta la cota del segundo piso (7 m).
+
+Intercambio de pilares junto a la escalera (17/11): el apoyo alto exterior de cabecera este (37,25; -5,75) pasa a sección rectangular de 0,65 m; el primer apoyo de la galería vuelve a ser cilíndrico. Bebedero, maceta y máquina de hielo se trasladan junto al apoyo alto, sobre la plataforma.
+
+Plaza techada: retirar el primer cantero con banco señalado y disponer tres conjuntos de mesa, dos bancos y dos sillas bajo la cubierta. Centros locales (1;-5), (1;0), (1;5); huella de cada conjunto 3,6 x 2,8 m. Separación longitudinal de 2,2 m y corredor lateral libre. Medidas estimadas a partir de la foto.
+
+Corrección de distribución: seis conjuntos (seis mesas y doce bancos largos), sin sillas. Dos filas en x=-1,8 y x=3; tres columnas en z=-5, 0, 5. Tres conjuntos azules y tres marrones siguiendo el croquis: primera columna ambos azules, columna central azul del lado exterior y marrón del lado de galería, última ambos marrones.
+
+Ajuste de mobiliario: ambos grupos de la plaza techada se desplazan 1 m hacia el exterior (izquierda desde Bedelía), conservando la separación. Solo el conjunto marrón del extremo junto al toldo y la galería lleva dos sillas laterales.
+
+Solo la fila próxima a la galería se desplaza otros 0,8 m hacia el exterior: x local -0,8 a 0. La otra fila permanece en x=4; queda un paso mínimo aproximado de 1,2 m incluso junto a la silla lateral del último conjunto.

@@ -87,14 +87,14 @@ export function addCourtyardVegetation(group: T.Object3D, colliders: T.Object3D)
     colliders.add(mesh);
   }
 
-  function tree([x, z]: Vec2, y: number, height: number, spread: number, radius: number, forkRatio: number, spreading = false) {
+  function tree([x, z]: Vec2, y: number, height: number, spread: number, radius: number, forkRatio: number, spreading = false, roots = true) {
     const base = new T.Vector3(x, y, z);
     const fork = base.clone().add(new T.Vector3(-radius * 0.5, height * forkRatio, radius * 0.55));
     const mid = base.clone().lerp(fork, 0.47).add(new T.Vector3(radius * 0.4, 0, -radius * 0.25));
     branch(base, mid, radius, radius * 0.76);
     branch(mid, fork, radius * 0.78, radius * 0.56);
     obstacle([x, y + height * forkRatio / 2, z], [radius * 1.6, height * forkRatio, radius * 1.6]);
-    for (let i = 0; i < (spreading ? 11 : 5); i++) {
+    for (let i = 0; i < (roots ? (spreading ? 11 : 5) : 0); i++) {
       const a = i * TAU / (spreading ? 11 : 5);
       branch(base.clone().add(new T.Vector3(0, radius * 1.15, 0)),
         base.clone().add(new T.Vector3(Math.cos(a) * radius * (spreading ? 3.1 : 2.25), 0.025, Math.sin(a) * radius * (spreading ? 3.1 : 2.25))),
@@ -132,6 +132,7 @@ export function addCourtyardVegetation(group: T.Object3D, colliders: T.Object3D)
   }
 
   tree(plan.tree1, 0.015, 10.5, 6.2, 0.74, 0.26, true);
+  tree(plan.blockGCourtyard.addedTree, 0.015, 10.2, 5.8, 0.68, 0.26, true, false);
   tree(plan.tree2, 0.015, 17.2, 7.3, 0.65, 0.34);
   tree(plan.tree3, 0.015, 10.1, 4.8, 0.48, 0.39);
   plan.courtyardTrees.forEach((point, index) => {

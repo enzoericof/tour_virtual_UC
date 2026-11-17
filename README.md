@@ -48,3 +48,7 @@ Desde `frontend/`, ejecutá `npm test` y `npm run build`. Para verificar el back
 - [Arquitectura y API](docs/arquitectura.md)
 - [Referencias y recursos del modelo](docs/referencias.md)
 - [Pendientes del proyecto](docs/pendientes.md)
+
+En el editor, **Eliminar objetos** activa el borrado por clic de los modelos colocados. **Esc** desactiva el modo. El cambio se guarda en este navegador; los edificios y objetos del escenario base no se eliminan con esta herramienta.
+
+En el visor principal, **Más opciones → Eliminar objeto** permite señalar pilares y soportes verticales del escenario. Se marca la pieza y se pide confirmación; cancelar no modifica el mapa. **Restaurar objetos eliminados** recupera las piezas y sus colisiones. Los borrados son locales a este navegador, no se publican al servidor. Otros elementos agrupados aún no admiten selección individual.

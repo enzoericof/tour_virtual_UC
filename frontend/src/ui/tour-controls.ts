@@ -1,3 +1,4 @@
+import { mountSceneDeletion } from "./scene-deletion";
 import { campusName, campusZoneAt } from "../data/campus-zones";
 import { places, type Place } from "../data/places";
 import type { CampusTheme } from "../scene/campus-sky";
@@ -140,6 +141,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
   syncGraphics();
   try {
     engine = new TourEngine(element("#viewport"), theme);
+    mountSceneDeletion(engine, shell, () => setHudPanel(null));
     engine.onMode = onMode;
     engine.onVisitPosition = syncLocation;
     engine.overview();

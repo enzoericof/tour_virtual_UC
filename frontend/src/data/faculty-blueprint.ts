@@ -250,7 +250,17 @@ const accessGarden = [[-3.35, 4.05], [-3.42, 2.8], [-2.5, 2.55], [-1.65, 2.43],
 export const facultyBlueprint = {
   main: { center: [b1x, 0], size: [block1.length, block1.depth], angle: 0 } as Rect,
   block2: gRect,
+  /** Escalera exterior junto al árbol de la Plaza de la Amistad. */
+  blockGStair: { start: 13, halfRun: 2.8, width: 1.4 },
   coveredPlaza,
+  coveredPlazaSeating: [
+    { center: [0, -5] as Vec2, blue: true, sideChairs: false },
+    { center: [4, -5] as Vec2, blue: true, sideChairs: false },
+    { center: [0, 0] as Vec2, blue: false, sideChairs: false },
+    { center: [4, 0] as Vec2, blue: true, sideChairs: false },
+    { center: [0, 5] as Vec2, blue: false, sideChairs: true },
+    { center: [4, 5] as Vec2, blue: false, sideChairs: false },
+  ],
   /** Galería baja junto al ascensor, interpretada de IMG_5706/5707/5713.
    * Mantiene la cubierta metálica principal independiente y el paso a las escaleras. */
   plazaGallery: {
@@ -336,6 +346,7 @@ export const facultyBlueprint = {
    * y primer piso se retraen. */
   eastEnd: {
     roomsEnd, ramp,
+    serviceColumn: [east - 0.25, -half.z + 0.25] as Vec2,
     columns: [-half.z + 0.25, -1.25, eastStair.top - 0.25].flatMap((z) => [[recessColumns, z], [east - 0.25, z]] as Vec2[])
       .filter(([, z]) => z !== -1.25),
   },
@@ -391,24 +402,29 @@ export const facultyBlueprint = {
       corridorTop, corridorFoot],
   ] as Vec2[][],
   /** Árbol 1: mango frondoso en el patio este (foto árbol_1.HEIC, posición 1 en cómo_debe_ser.png). */
-  tree1: [21.5, 15] as Vec2,
+  tree1: [21.5, 11] as Vec2,
   /** Árbol 2: árbol autóctono alto en el patio oeste (foto árbol_2.HEIC, posición 2 en cómo_debe_ser.png). */
   tree2: [-20, 22] as Vec2,
   /** Árbol frente a la cantina / pergolado de mesas */
   cantinaTree: shiftPlaza([62, 16]) as Vec2,
   tree3: [2, 19] as Vec2,
   courtyardCT: [-6, 22] as Vec2,
-  courtyardTrees: [[-16, 31], [-2, 34], [19, 23]] as Vec2[],
+  courtyardTrees: [[-16, 31], [-2, 34]] as Vec2[],
   /** Patio frente al Bloque G, situado con el mural del ascensor como referencia. */
   blockGCourtyard: {
+    addedTree: [30.4, 11] as Vec2,
+    planter: { center: [25.3, 21.1], size: [1.7, 1.7], angle: gridAngle } as Rect,
+    sign: { center: [41, 14], size: [1.2, 0.1], angle: -Math.PI / 2 - Math.PI / 6 } as Rect,
     terrace: { center: [27.9, 15.9], size: [10.2, 6.6], angle: 0 } as Rect,
     gravel: [[18.4, 9.52], [35.7, 9.52], [36.2, 10.4], [33, 12.6], [22.8, 12.6],
       [21.9, 16.9], [18.7, 16.1]] as Vec2[],
+    // Cada centro genera el conjunto original de mesa, dos bancos y dos sillas.
     tables: [[25.45, 15.8], [30.3, 15.8]] as Vec2[],
+    lamps: [[26.95, 17.3], [31.8, 17.3]] as Vec2[],
   },
   picnic: [shiftPlaza([60, 13]), shiftPlaza([65, 19])] as Vec2[],
   /** Canteros con banco del cuadrado. */
-  planters: [[46.1 + plazaShift, -7.35], [54.4 + plazaShift, -10.9]].map(p => add([p[0], p[1]], [Z, 3.2])),
+  planters: [[54.4 + plazaShift, -10.9]].map(p => add([p[0], p[1]], [Z, 3.2])),
 } as const;
 
 export const facultyCorners = { gNorthWest, gNorthEast, gSouthEast, gSouthWest, plazaWest, plazaNorth };

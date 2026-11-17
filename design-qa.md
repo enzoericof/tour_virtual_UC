@@ -322,4 +322,23 @@ Vista cenital revisada: ambas franjas marcadas cubiertas con el acabado gris exi
 
 Revisión visual en Chrome: bancos y mesas azules, baldosas beige, grava, tierra, franja de piezas circulares y muretes rojizos. Árboles del sector con copas extendidas, raíces y nervaduras en hojas. Captura `C:/Users/Elias Román/.codex/visualizations/2026/11/05/01a1ac84-d1c1-70e1-b3ad-03374e582eec/plaza-amistad.png`.
 
+### Escalera junto a Plaza de la Amistad — 14/11/2026
+
+Escalera del Bloque G trasladada hacia los árboles; descansos y aperturas de baranda acompañan el cambio. Vista desde el mural revisada en Chrome, sin errores de página. Build correcto y 40/40 pruebas. No se hizo recorrido manual completo de los tramos.
+
+Sentido de subida invertido según captura posterior del 14/11: primer tramo visible desde el acceso a la plaza; descansos y huecos de barandas trasladados juntos para conectar ambos pisos. Revisión visual en Chrome sin errores, build correcto y 40/40 pruebas. No se realizó recorrido manual completo por la escalera.
+
+Cartel adelantado al césped y girado 15 grados hacia la izquierda por corrección del usuario. Revisado en Chrome desde el acceso, sin errores de página; compilación correcta.
 </details>
+
+### Pilares y servicios — 17/11/2026
+
+Intercambiadas las secciones: apoyo alto exterior rectangular y primer apoyo de galería cilíndrico. Bebedero, maceta y máquina de hielo trasladados al apoyo alto, conservando colisiones. Compilación correcta y 40 pruebas aprobadas. Vista revisada en Chrome con captura `pilares-servicios.png`: pilar rectangular detrás de los servicios y apoyos cilíndricos de la galería; sin errores de página. No se comprobó el recorrido a pie manual.
+
+Plaza techada (17/11): retirado el cantero/banco señalado. Tres conjuntos con seis bancos en total y sillas de cabecera, íntegros bajo la cubierta. Revisados en Chrome sin errores de página; captura plaza-techada-bancos.png. Separación libre de aproximadamente 2,4 m entre respaldos de conjuntos, con corredor lateral. Colisiones simples independientes del detalle visual. Build y 40 pruebas correctas; recorrido manual a pie pendiente.
+
+Distribución corregida según croquis: seis mesas en dos filas de tres, tres conjuntos azules y tres marrones; dos bancos largos por mesa, sin sillas de cabecera. Copiado el diseño de listones y patas curvas de Plaza de la Amistad para los azules. Pasillo central de 2,9 m y separación longitudinal superior a 2 m. Revisión visual en Chrome sin errores de página, build y 40 pruebas aprobadas. No se realizó recorrido manual a pie.
+
+Ajuste final de plaza techada: seis conjuntos desplazados 1 m hacia el exterior para separarlos de los pilares; solo el marrón junto al extremo del toldo tiene dos sillas de cabecera. Vista revisada en Chrome sin errores de página, compilación y 40 pruebas aprobadas.
+
+Fila de galería desplazada 0,8 m adicionales; fila exterior sin cambios. Revisión visual en Chrome sin errores, sin superposición entre conjuntos. Build y 40 pruebas aprobadas; no se realizó recorrido manual a pie.
