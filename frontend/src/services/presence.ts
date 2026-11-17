@@ -58,13 +58,14 @@ export class CampusPresence {
       this.onPlayers(others);
       this.report(others.length === 1 ? "1 visitante en el recorrido" : `${others.length} visitantes en el recorrido`);
     };
-    socket.onclose = () => {
+    socket.onclose = (event) => {
       if (this.socket !== socket) return;
       this.socket = null;
       this.lastPose = null;
       this.onPlayers([]);
-      this.report("Reconectando…");
-      if (this.running) this.reconnect = window.setTimeout(() => this.connect(), 2500);
+      const full = event.code === 4001;
+      this.report(full ? "Recorrido completo (10 jugadores). Reintentando…" : "Reconectando…");
+      if (this.running) this.reconnect = window.setTimeout(() => this.connect(), full ? 10000 : 2500);
     };
   }
 

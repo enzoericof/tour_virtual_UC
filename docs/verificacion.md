@@ -349,3 +349,9 @@ Fila de galería desplazada 0,8 m adicionales; fila exterior sin cambios. Revisi
 45/45 pruebas aprobadas y compilación TypeScript/Vite correcta. Nuevas pruebas: celulares aun con mouse, tabletas con identidad de escritorio, laptops táctiles con puntero preciso, bloqueo sin ejecutar el inicio del tour/editor y arranque normal de escritorio. La ejecución conserva el aviso preexistente de puerto HMR 24678 ocupado, sin fallos.
 
 Aviso revisado en Chrome a 390 × 844 y 320 × 568 mediante una página local de prueba con señales de iPhone: Manrope y DM Sans, sin desbordamiento horizontal, texto accesible y ningún canvas. No se usó un celular físico. El visor de escritorio inició correctamente en el navegador. La página de prueba está en `.local/`, ignorada por Git y fuera de las entradas de producción.
+
+## Multijugador entre instancias y capacidad (17/11/2026)
+
+Prueba local con PostgreSQL y dos procesos del backend en 18081 y 18082 compartiendo la misma base de pruebas. Ejecutar node scripts/verify-presence-capacity.mjs desde la raíz, con frontend/node_modules instalado y CAMPUS_FRONTEND_ORIGINS=http://127.0.0.1:5174 en ambos servidores. El script crea once cuentas de prueba y cierra sus sesiones al terminar. Usar exclusivamente una base local de pruebas.
+
+Comprobados diez avatares simultáneos repartidos entre ambos procesos, nueve compañeros por conexión, permanencia superior a los 20 segundos de caducidad, rechazo del undécimo con cierre 4001, conservación de los diez participantes y entrada del siguiente al liberar una plaza. Comprobado además el intercambio de sesiones entre servidores y el flujo de movimiento, skin, salida y cierre de sesión. Las 45 pruebas del frontend y su compilación pasaron. Maven verify pasó con PostgreSQL local. Falta desplegar esta corrección y repetir la comprobación sobre Vercel.

@@ -69,3 +69,7 @@ Broker en memoria: una sola instancia de backend, sin historial.
 ## No incluido en esta versión
 
 Historial de chat, subida de archivos, agente IA y despliegue público.
+
+## Presencia compartida y cupo
+
+V9 agrega Spring Session JDBC y campus_presence para compartir sesiones y avatares entre instancias de Vercel. V10 reserva un máximo global de 10 plazas de recorrido mediante una transacción con bloqueo asesor de PostgreSQL y una restricción única por plaza. Las conexiones en vista general no ocupan plaza. El servidor envía los jugadores de todas las instancias y toma las skins actuales de usuarios. Las posiciones caducan después de 20 segundos sin actualizarse y se retiran al salir o cerrar sesión. El cliente muestra cupo completo ante el cierre WebSocket 4001 y reintenta después de 10 segundos.

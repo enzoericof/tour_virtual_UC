@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -51,10 +52,15 @@ public class PresenceSocket extends TextWebSocketHandler {
     private final Map<Long, String> skins = new ConcurrentHashMap<>();
     private final UsuarioService users;
     private final ObjectMapper json;
+    private final PresenceStore store;
+    private final JdbcIndexedSessionRepository sessions;
 
-    public PresenceSocket(UsuarioService users, ObjectMapper json) {
+    public PresenceSocket(UsuarioService users, ObjectMapper json, PresenceStore store,
+            JdbcIndexedSessionRepository sessions) {
         this.users = users;
         this.json = json;
+        this.store = store;
+        this.sessions = sessions;
     }
 
     @Override
@@ -76,7 +82,9 @@ public class PresenceSocket extends TextWebSocketHandler {
 
     private boolean authenticated(Peer peer) {
         try {
-            Object context = peer.http.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+            org.springframework.session.Session session = sessions.findById(peer.http.getId());
+            if (session == null) return false;
+            Object context = session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
             return context instanceof SecurityContext security && security.getAuthentication() != null
                 && security.getAuthentication().isAuthenticated()
                 && security.getAuthentication().getName().equals(peer.socket.getPrincipal().getName());
@@ -93,7 +101,10 @@ public class PresenceSocket extends TextWebSocketHandler {
         String body = message.getPayload();
         if (body.equals("ping") || body.equals("leave")) {
             peer.lastSeen = now;
-            if (body.equals("leave")) peer.player = null;
+            if (body.equals("leave")) {
+                peer.player = null;
+                store.remove(peer.id);
+            }
             return;
         }
         if (now - peer.lastMovement < 45_000_000L) return;
@@ -105,6 +116,13 @@ public class PresenceSocket extends TextWebSocketHandler {
             peer.lastSeen = now;
             peer.player = new Player(peer.id, peer.name, skins.getOrDefault(peer.userId, "azul"),
                 pose.x(), pose.y(), pose.z(), pose.yaw(), pose.walking());
+            if (!store.save(peer.id, peer.userId, peer.http.getId(), peer.player)) {
+                peer.player = null;
+                socket.close(new CloseStatus(4001, "Recorrido completo: 10 jugadores"));
+            }
+        } catch (IOException e) {
+            peers.remove(socket.getId(), peer);
+            store.remove(peer.id);
         } catch (RuntimeException e) {
             // Un dato inválido no altera la presencia previa.
         }
@@ -120,27 +138,25 @@ public class PresenceSocket extends TextWebSocketHandler {
 
     @Scheduled(fixedDelay = 100)
     public void publish() {
+        if (peers.isEmpty()) return;
         long now = System.nanoTime();
         List<Peer> connected = new ArrayList<>();
-        List<Player> players = new ArrayList<>();
         for (Peer peer : peers.values()) {
             if (!authenticated(peer) || now - peer.lastSeen > INACTIVE) {
                 peers.remove(peer.socket.getId(), peer);
+                store.remove(peer.id);
                 try { peer.socket.close(CloseStatus.POLICY_VIOLATION); } catch (IOException ignored) {}
                 continue;
             }
             connected.add(peer);
-            Player p = peer.player;
-            if (p != null) {
-                players.add(new Player(p.id(), p.name(), skins.getOrDefault(peer.userId, "azul"),
-                    p.x(), p.y(), p.z(), p.yaw(), p.walking()));
-            }
         }
+        List<Player> players = store.players();
         for (Peer peer : connected) {
             try {
                 peer.socket.sendMessage(new TextMessage(json.writeValueAsString(new Snapshot(peer.id, players))));
             } catch (IOException | RuntimeException e) {
                 peers.remove(peer.socket.getId(), peer);
+                store.remove(peer.id);
                 try { peer.socket.close(CloseStatus.SERVER_ERROR); } catch (IOException ignored) {}
             }
         }
@@ -148,6 +164,7 @@ public class PresenceSocket extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession socket, CloseStatus status) {
-        peers.remove(socket.getId());
+        Peer peer = peers.remove(socket.getId());
+        if (peer != null) store.remove(peer.id);
     }
 }
