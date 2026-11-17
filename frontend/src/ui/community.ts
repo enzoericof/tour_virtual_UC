@@ -26,6 +26,7 @@ export function mountCommunity(
       const label = document.querySelector("#presence-status");
       if (label) label.textContent = status;
     },
+    (players, self) => engine?.receiveSeating(players, self),
   );
   const library = createLibrary(shell, () => user, account);
 

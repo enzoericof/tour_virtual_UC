@@ -1,3 +1,4 @@
+import { occupiedSeat, type Seat } from "./seating";
 import * as T from "three";
 import { skins } from "../data/skins";
 import type { Player } from "../services/presence";
@@ -18,8 +19,10 @@ class Avatar {
   private target = new T.Vector3();
   private yaw = 0;
   private walking = false;
+  private sitting = false;
+  private knees: T.Group[] = [];
 
-  constructor(player: Player) {
+  constructor(player: Player, private seats: Seat[]) {
     const piece = (parent: T.Object3D, geometry: T.BufferGeometry, material: T.Material,
         at: [number, number, number], size: [number, number, number]) => {
       const mesh = new T.Mesh(geometry, material);
@@ -37,8 +40,10 @@ class Avatar {
       leg.position.set(side * 0.105, 0.91, 0);
       piece(arm, cube, this.shirt, [0, -0.11, 0], [0.13, 0.25, 0.15]);
       piece(arm, cube, skinTone, [0, -0.33, 0], [0.095, 0.24, 0.1]);
-      piece(leg, cube, this.pants, [0, -0.4, 0], [0.155, 0.79, 0.16]);
-      piece(leg, cube, shoes, [0, -0.85, -0.044], [0.16, 0.12, 0.25]);
+      piece(leg, cube, this.pants, [0, -0.2, 0], [0.155, 0.4, 0.16]);
+      const knee = new T.Group(); knee.position.y = -0.4; leg.add(knee); this.knees.push(knee);
+      piece(knee, cube, this.pants, [0, -0.2, 0], [0.15, 0.4, 0.16]);
+      piece(knee, cube, shoes, [0, -0.45, -0.044], [0.16, 0.12, 0.25]);
       this.group.add(arm, leg);
       this.limbs.push(arm, leg);
     }
@@ -71,7 +76,8 @@ class Avatar {
     this.hair.color.setHex(skin.hair);
     this.target.set(player.x, player.y, player.z);
     this.yaw = player.yaw;
-    this.walking = player.walking;
+    this.sitting = Boolean(occupiedSeat(this.seats, player));
+    this.walking = player.walking && !this.sitting;
   }
 
   update(dt: number) {
@@ -82,9 +88,10 @@ class Avatar {
     this.group.rotation.y += Math.atan2(Math.sin(turn), Math.cos(turn)) * blend;
     this.step += dt * 11;
     for (const [i, limb] of this.limbs.entries()) {
-      const angle = this.walking ? Math.sin(this.step) * 0.55 * (i === 0 || i === 3 ? 1 : -1) : 0;
+      const angle = this.sitting ? (i % 2 ? Math.PI / 2 : Math.PI / 5) : this.walking ? Math.sin(this.step) * 0.55 * (i === 0 || i === 3 ? 1 : -1) : 0;
       limb.rotation.x = T.MathUtils.lerp(limb.rotation.x, angle, blend);
     }
+    for (const knee of this.knees) knee.rotation.x = T.MathUtils.lerp(knee.rotation.x, this.sitting ? -Math.PI / 2 : 0, blend);
   }
 
   remove() {
@@ -96,6 +103,7 @@ class Avatar {
 }
 
 export class RemotePlayers {
+  seats: Seat[] = [];
   private avatars = new Map<string, Avatar>();
 
   constructor(private scene: T.Scene) {}
@@ -111,7 +119,7 @@ export class RemotePlayers {
       const avatar = this.avatars.get(player.id);
       if (avatar) avatar.receive(player);
       else {
-        const created = new Avatar(player);
+        const created = new Avatar(player, this.seats);
         this.avatars.set(player.id, created);
         this.scene.add(created.group);
       }

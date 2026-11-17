@@ -342,3 +342,5 @@ Distribución corregida según croquis: seis mesas en dos filas de tres, tres co
 Ajuste final de plaza techada: seis conjuntos desplazados 1 m hacia el exterior para separarlos de los pilares; solo el marrón junto al extremo del toldo tiene dos sillas de cabecera. Vista revisada en Chrome sin errores de página, compilación y 40 pruebas aprobadas.
 
 Fila de galería desplazada 0,8 m adicionales; fila exterior sin cambios. Revisión visual en Chrome sin errores, sin superposición entre conjuntos. Build y 40 pruebas aprobadas; no se realizó recorrido manual a pie.
+
+Asientos: cámara a altura sentada, aviso E para sentarse/levantarse y retorno al punto de aproximación. Revisada captura sentado.png en Chrome. Ayuda actualizada; Esc mantiene su comportamiento.

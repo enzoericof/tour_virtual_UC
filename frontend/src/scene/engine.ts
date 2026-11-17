@@ -1,3 +1,5 @@
+import { collectSeats, occupiedSeat, type Seat } from "./seating";
+import type { Player } from "../services/presence";
 import * as T from "three";
 import { RemotePlayers } from "./remote-players";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -26,6 +28,12 @@ export class TourEngine {
   readonly campus = createCampus();
   /** Modelos colocados con el editor 3D (solo lectura para el visitante normal). */
   readonly editorPlacements = new T.Group();
+  readonly seats = collectSeats(this.campus.group);
+  private seated: Seat | null = null;
+  private seatReturn = new T.Vector3();
+  private occupied = new Set<string>();
+  private nextSeatHint = 0;
+  private seatHint = document.createElement("div");
   private sun = new T.DirectionalLight(0xfff2d6, 2.4);
   private hemi = new T.HemisphereLight(0xdbeaf4, 0xb1ada0, 1.7);
   private fill = new T.DirectionalLight(0x9fc2ff, 0);
@@ -102,6 +110,16 @@ export class TourEngine {
         locked ? "walking" : this.walker.enabled ? "paused" : "overview",
       );
     };
+    this.remotePlayers.seats = this.seats;
+    this.seatHint.className = "seat-hint";
+    this.seatHint.setAttribute("role", "status");
+    container.append(this.seatHint);
+    window.addEventListener("keydown", event => {
+      if (event.code !== "KeyE" || event.repeat || event.ctrlKey || event.metaKey || event.altKey || !this.walker.active) return;
+      event.preventDefault();
+      if (this.seated) this.leaveSeat();
+      else this.sit();
+    });
     this.walker.onInteract = () => {
       const p = this.nearest();
       if (p) this.onLocation(p);
@@ -150,6 +168,52 @@ export class TourEngine {
     });
     this.animate();
   }
+  private nearSeat() {
+    if (this.seated || this.elevatorPassenger) return null;
+    let best: Seat | null = null, distance = 1.65;
+    const direction = this.camera.getWorldDirection(new T.Vector3());
+    for (const seat of this.seats) {
+      if (this.occupied.has(seat.id)) continue;
+      const delta = seat.point.clone().sub(this.camera.position);
+      if (Math.abs(delta.y + 1.05) > 0.8) continue;
+      const d = Math.hypot(delta.x, delta.z);
+      delta.y = 0;
+      if (d >= distance || direction.dot(delta.normalize()) < 0.15) continue;
+      // La línea a la altura de los ojos evita sentarse atravesando paredes.
+      const target = seat.point.clone(); target.y = this.camera.position.y;
+      const ray = new T.Ray(this.camera.position.clone(), target.sub(this.camera.position).normalize());
+      if (this.walker.obstructs(ray, d)) continue;
+      best = seat; distance = d;
+    }
+    return best;
+  }
+  private sit() {
+    const seat = this.nearSeat();
+    if (!seat) return;
+    this.seatReturn.copy(this.walker.body.end).add(new T.Vector3(0, -1.5, 0));
+    this.seated = seat;
+    this.camera.position.copy(seat.point).add(new T.Vector3(0, 0.75, 0));
+    this.camera.lookAt(this.camera.position.clone().add(seat.forward));
+  }
+  private leaveSeat() {
+    if (!this.seated) return;
+    this.seated = null;
+    this.walker.teleport(this.seatReturn);
+  }
+  /** El desempate por id evita que dos clientes con la misma instantánea conserven una plaza. */
+  receiveSeating(players: Player[], self?: string) {
+    this.occupied.clear();
+    for (const player of players) {
+      if (player.id === self) continue;
+      const seat = occupiedSeat(this.seats, player);
+      if (!seat) continue;
+      this.occupied.add(seat.id);
+      if (this.seated?.id === seat.id && self && player.id < self) {
+        this.leaveSeat();
+        this.onError("Otro visitante ocupó ese lugar. Elegí otro asiento.");
+      }
+    }
+  }
   private resize(container: HTMLElement) {
     const { width, height } = container.getBoundingClientRect();
     this.camera.aspect = width / height;
@@ -162,7 +226,12 @@ export class TourEngine {
     const elapsed = (now - this.previous) / 1000;
     const dt = Math.min(elapsed, 0.05);
     this.previous = now;
-    if (!this.elevatorPassenger) this.walker.update(dt);
+    if (!this.elevatorPassenger && !this.seated) this.walker.update(dt);
+    if (now >= this.nextSeatHint) {
+      this.nextSeatHint = now + 100;
+      const available = this.walker.active ? this.nearSeat() : null;
+      this.seatHint.textContent = !this.walker.active ? "" : this.seated ? "E · Levantarse" : available ? "E · Sentarse" : "";
+    }
     this.updateElevator(elapsed);
     if (this.orbit.enabled) this.orbit.update();
     // Far views need depth precision for ground, paving and grass surfaces.
@@ -269,6 +338,7 @@ export class TourEngine {
     this.walker.walk();
   }
   overview() {
+    this.leaveSeat();
     this.elevatorPassenger = false;
     this.walker.pause();
     this.walker.enabled = false;
@@ -307,6 +377,7 @@ export class TourEngine {
     this.walker.enabled = false;
     this.orbit.enabled = false;
     this.campus.setDetail(true);
+    this.leaveSeat();
     this.spawn = new T.Vector3(...(place ?? places.find((p) => p.id === "acceso")!).position);
     this.gaze = this.lookTarget(place?.id ?? "acceso", this.spawn);
     if (place) {
@@ -413,8 +484,9 @@ export class TourEngine {
   playerPose() {
     if (!this.walker.enabled) return null;
     const { x, y, z } = this.camera.position;
-    this.camera.getWorldDirection(this.playerDirection);
-    return { x, y: y - 1.5, z, yaw: Math.atan2(-this.playerDirection.x, -this.playerDirection.z) };
+    if (this.seated) this.playerDirection.copy(this.seated.forward);
+    else this.camera.getWorldDirection(this.playerDirection);
+    return { x, y: this.seated ? this.seated.point.y - 0.9 : y - 1.5, z, yaw: Math.atan2(-this.playerDirection.x, -this.playerDirection.z) };
   }
   get position() {
     return this.camera.position;

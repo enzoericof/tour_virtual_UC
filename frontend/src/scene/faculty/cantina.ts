@@ -1,3 +1,4 @@
+import { registerSeats } from "../seating";
 import * as T from "three";
 import { facultyToWorld, insidePolygon } from "../../data/campus-geometry";
 import { cantinaPatioStair, gardenBounds, gardenHeight, inCantina } from "../../data/cantina-terrain";
@@ -461,6 +462,7 @@ export function addCantina(builder: FacultyBuilder) {
     function chair(x: number, z: number, facing: number, perforated = false, raised = 0, yaw = 0) {
       frame({ center: [x, z], size: [0.5, 0.5], angle: (facing > 0 ? 0 : Math.PI) + yaw }, () => {
         const seatY = 0.91 + raised;
+        registerSeats(layers.visual, 0.5, 0, seatY, 0, -1);
         box(0.44, 0.045, 0.43, 0, seatY, 0, blackFurniture);
         for (const dx of [-0.17, 0.17]) for (const dz of [-0.16, 0.16])
           beam(v3(dx, seatY - 0.02, dz), v3(dx * 1.28, 0.48, dz * 1.35), 0.016, blackFurniture);
@@ -478,6 +480,7 @@ export function addCantina(builder: FacultyBuilder) {
     // Las posiciones se conservan; solo cambia el modelo utilizado en el exterior.
     function ironChair(x: number, z: number, facing: number, yaw = 0) {
       frame({ center: [x, z], size: [0.62, 0.6], angle: (facing > 0 ? 0 : Math.PI) + yaw }, () => {
+        registerSeats(layers.visual, 0.62, 0, 0.91, 0, -1);
         for (let i = 0; i < 6; i++) box(0.52, 0.032, 0.065, 0, 0.91, -0.19 + i * 0.075, blackFurniture);
         for (const dx of [-0.23, 0.23]) for (const dz of [-0.19, 0.2])
           beam(v3(dx, 0.9, dz), v3(dx * 1.2, 0.48, dz * 1.3), 0.022, blackFurniture);

@@ -16,6 +16,7 @@ export class CampusPresence {
     private pose: () => Omit<Pose, "walking"> | null,
     private onPlayers: (players: Player[]) => void,
     private onStatus: (status: string) => void,
+    private onSeating: (players: Player[], self?: string) => void = () => {},
   ) {}
 
   start() {
@@ -34,6 +35,7 @@ export class CampusPresence {
     socket?.close();
     this.lastPose = null;
     this.onPlayers([]);
+    this.onSeating([]);
     this.report("Sin sesión");
   }
 
@@ -54,6 +56,7 @@ export class CampusPresence {
     socket.onmessage = (event) => {
       if (this.socket !== socket) return;
       const { self, players } = JSON.parse(event.data) as Snapshot;
+      this.onSeating(players, self);
       const others = players.filter(player => player.id !== self);
       this.onPlayers(others);
       this.report(others.length === 1 ? "1 visitante en el recorrido" : `${others.length} visitantes en el recorrido`);
@@ -63,6 +66,7 @@ export class CampusPresence {
       this.socket = null;
       this.lastPose = null;
       this.onPlayers([]);
+      this.onSeating([]);
       const full = event.code === 4001;
       this.report(full ? "Recorrido completo (10 jugadores). Reintentando…" : "Reconectando…");
       if (this.running) this.reconnect = window.setTimeout(() => this.connect(), full ? 10000 : 2500);

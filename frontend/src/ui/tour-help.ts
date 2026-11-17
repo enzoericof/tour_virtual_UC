@@ -18,6 +18,7 @@ export function openTourHelp({ openDialog }: TourShell) {
           <dt><kbd>Mouse</kbd></dt><dd>Mirar alrededor</dd>
           <dt><kbd>Shift izq.</kbd></dt><dd>Caminar más rápido</dd>
           <dt><kbd>Espacio</kbd></dt><dd>Saltar</dd>
+          <dt><kbd>E</kbd></dt><dd>Sentarte en un asiento cercano o levantarte</dd>
           <dt><kbd>Clic</kbd></dt><dd>Pulsar el botón resaltado del ascensor</dd>
           <dt><kbd>Esc</kbd></dt><dd>Pausar y liberar el cursor</dd>
         </dl>

@@ -64,3 +64,5 @@ Desde `frontend/`, ejecutá `npm test` y `npm run build`. Para verificar el back
 En el editor, **Eliminar objetos** activa el borrado por clic de los modelos colocados. **Esc** desactiva el modo. El cambio se guarda en este navegador; los edificios y objetos del escenario base no se eliminan con esta herramienta.
 
 En el visor principal, **Más opciones → Eliminar objeto** permite señalar pilares y soportes verticales del escenario. Se marca la pieza y se pide confirmación; cancelar no modifica el mapa. **Restaurar objetos eliminados** recupera las piezas y sus colisiones. Los borrados son locales a este navegador, no se publican al servidor. Otros elementos agrupados aún no admiten selección individual.
+
+En el recorrido, acercate y mirá un banco o silla: **E** permite sentarte y volver a levantarte. Cada banco tiene dos plazas y cada silla una. Sentado podés mirar alrededor; Esc pausa y conserva el asiento.

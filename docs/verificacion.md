@@ -365,3 +365,5 @@ Reproducción con dos instancias y pools de tres conexiones. Iniciar `node scrip
 Se agregó una prueba de renderizado que recibe posiciones nuevas para diez avatares y comprueba su desplazamiento e interpolación de giro durante los siguientes cuadros. Las 46 pruebas del frontend y la compilación TypeScript/Vite pasaron. Maven verify pasó con PostgreSQL local.
 
 En el sitio publicado se midieron dos conexiones de diagnóstico antes de esta corrección. Una recibió tres snapshots en ocho segundos. Se crearon dos cuentas con nombre QA movimiento y se cerraron sus sesiones al terminar la medición. La corrección requiere desplegarse y comprobarse nuevamente en Vercel.
+
+Asientos: 48 pruebas frontend aprobadas, incluidas capacidad 2/1, transformaciones, ocupación independiente y desempate entre visitantes. Chrome: E sienta y levanta, W no desplaza sentado, Esc pausa y permite reanudar sin perder el asiento. Sin errores de página. Ocupación comprobada con instantáneas simuladas; no se verificaron dos cuentas contra un servidor real.

@@ -1,3 +1,4 @@
+import { registerSeats } from "../seating";
 import * as T from "three";
 import { facultyBlueprint as plan, PLAZA_LEVEL } from "../../data/faculty-blueprint";
 import { friendshipMaterial } from "../friendship-materials";
@@ -10,6 +11,7 @@ export function addCoveredPlazaSeating(builder: FacultyBuilder) {
   const wood = new T.MeshStandardMaterial({ color: "#805036", roughness: 0.75 });
   // Respaldo abierto con rombos, sin una placa opaca detrás.
   function seat(width: number) {
+    registerSeats(layers.visual, width);
     for (let i = 0; i < 5; i++) box(width, 0.045, 0.075, 0, 0.46, -0.19 + i * 0.095, wood);
     for (const x of [-width / 2 + 0.08, width / 2 - 0.08]) {
       for (const z of [-0.19, 0.19])
@@ -36,6 +38,7 @@ export function addCoveredPlazaSeating(builder: FacultyBuilder) {
   const blueSlats = friendshipMaterial("blue");
   function blueSeat() {
     const width = 1.58;
+    registerSeats(layers.visual, width, 0, 0.44);
     for (let i = 0; i < 4; i++) box(width, 0.032, 0.093, 0, 0.44, -0.14 + i * 0.1, blueSlats);
     for (let i = 0; i < 4; i++) box(width, 0.074, 0.035, 0, 0.54 + i * 0.082, -0.17 - i * 0.025, blueSlats);
     for (const x of [-width / 2 + 0.075, width / 2 - 0.075]) {

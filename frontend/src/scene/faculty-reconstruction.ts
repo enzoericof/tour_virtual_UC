@@ -1,3 +1,4 @@
+import { registerSeats } from "./seating";
 import * as T from "three";
 import { friendshipMaterial, friendshipSign } from "./friendship-materials";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
@@ -125,6 +126,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
     const body = new T.Mesh(unit); body.scale.set(0.1, 1.1, z1 - z0); body.position.set(x, y + 0.55, (z0 + z1) / 2); layers.solid.add(body);
   }
   function bench(x: number, z: number, y = 0, facing = 1) {
+    registerSeats(layers.visual, 1.7, x, y + 0.46, z, facing);
     for (let i = 0; i < 4; i++) box(1.7, 0.05, 0.09, x, y + 0.46, z + facing * (i * 0.11 - 0.16), m.wood);
     for (let i = 0; i < 3; i++) box(1.7, 0.09, 0.05, x, y + 0.65 + i * 0.12, z - facing * 0.22, m.wood);
     for (const dx of [-0.68, 0.68]) for (const dz of [-0.2, 0.15]) pole(0.028, 0.46, x + dx, y + 0.23, z + facing * dz);
@@ -1316,6 +1318,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     }
     for (const dz of [-1.02, 1.02]) {
       const z = tableZ + dz;
+      registerSeats(layers.visual, 2, tableX, floor + 0.44, z, dz < 0 ? 1 : -1);
       box(2, 0.055, 0.32, tableX, floor + 0.44, z, benchSeat, true);
       for (const dx of [-0.86, 0.86]) for (const legZ of [-0.12, 0.12]) {
         box(0.045, 0.42, 0.045, tableX + dx, floor + 0.21, z + legZ, frameMetal, true);
@@ -1323,6 +1326,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     }
 
     const chairX = tableX - 1.55;
+    frame({center: [chairX, tableZ], size: [0.45,0.46], angle: -Math.PI / 2}, () => registerSeats(layers.visual, 0.45, 0, floor + 0.44));
     box(0.45, 0.045, 0.46, chairX, floor + 0.44, tableZ, m.blue, true);
     for (const dz of [-0.19, 0.19]) {
       for (const dx of [-0.18, 0.18]) {
@@ -1604,15 +1608,18 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       }
       // Murete bajo en tramos, con una salida hacia el sendero y el césped.
       for (const z of [-2.15, -0.95, 0.25]) {
+        frame({ center: [w / 2 - 0.14, z], size: [1.17, 0.35], angle: Math.PI / 2 }, () => registerSeats(layers.visual, 1.17, 0, 0.36));
         box(0.31, 0.32, 1.17, w / 2 - 0.14, 0.16, z, lowWall, true);
         box(0.35, 0.045, 1.17, w / 2 - 0.14, 0.34, z, lowWall);
       }
       // Copias del banco rojizo en los dos bordes señalados junto al árbol.
       for (const z of [-1.3, -0.1]) {
+        frame({ center: [-w / 2 + 0.14, z], size: [1.17, 0.35], angle: -Math.PI / 2 }, () => registerSeats(layers.visual, 1.17, 0, 0.36));
         box(0.31, 0.32, 1.17, -w / 2 + 0.14, 0.16, z, lowWall, true);
         box(0.35, 0.045, 1.17, -w / 2 + 0.14, 0.34, z, lowWall);
       }
       for (const x of [-3.65, -2.45]) {
+        registerSeats(layers.visual, 1.17, x, 0.36, -d / 2 + 0.14);
         box(1.17, 0.32, 0.31, x, 0.16, -d / 2 + 0.14, lowWall, true);
         box(1.17, 0.045, 0.35, x, 0.34, -d / 2 + 0.14, lowWall);
       }
@@ -1640,6 +1647,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     const tube = new T.MeshStandardMaterial({ color: "#303536", roughness: 0.76 });
     function seat(center: Vec2, angle: number, width: number) {
       frame({ center, size: [width, 0.65], angle }, () => {
+        registerSeats(layers.visual, width, 0, 0.44);
         for (let i = 0; i < 4; i++) box(width, 0.032, 0.093, 0, 0.44, -0.14 + i * 0.1, blueSlats);
         for (let i = 0; i < 4; i++) box(width, 0.074, 0.035, 0, 0.54 + i * 0.082, -0.17 - i * 0.025, blueSlats);
         for (const x of [-width / 2 + 0.075, width / 2 - 0.075]) {
@@ -1680,6 +1688,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       ? gardenHeight(lx, lz) : 0;
     box(2.5, 0.06, 1, x, y + 0.77, z, m.metal);
     for (const dz of [-0.85, 0.85]) {
+      registerSeats(layers.visual, 2.7, x, y + 0.43, z + dz, dz < 0 ? 1 : -1);
       box(2.7, 0.08, 0.42, x, y + 0.43, z + dz, m.blue);
       for (const dx of [-0.9, 0.9]) pole(0.035, 0.75, x + dx, y + 0.38, z + dz * 0.5);
     }
