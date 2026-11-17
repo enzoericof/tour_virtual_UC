@@ -49,11 +49,9 @@ Cuando publiques el frontend compilado, configurá su servidor para reenviar `/a
 La biblioteca, los paneles informativos y el chat del visor están pendientes de integración con el backend actual. [Arquitectura y contratos](docs/arquitectura.md#aporte-campus-backend).
 
 ## Editor de mapa 3D
-
 Con el frontend en marcha, abrí `/editor.html` con una cuenta administradora. Para una prueba local sin backend, usá `/editor.html?local=1`. El editor guarda las colocaciones en el navegador y permite exportarlas o importarlas en JSON. [Modelos del editor](frontend/editor-models/LEEME.txt).
 
 ## Verificación
-
 Desde `frontend/`, ejecutá `npm test` y `npm run build`. Para verificar el backend, configurá PostgreSQL y ejecutá `.\mvnw.cmd verify` desde `campus-backend/` en PowerShell, o `sh ./mvnw verify` en Linux o macOS. [Registro de verificación](docs/verificacion.md).
 
 ## Documentación
