@@ -2,10 +2,7 @@ package py.edu.uc.campus_backend.multiplayer;
 
 import jakarta.servlet.http.HttpSession;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -19,6 +16,8 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,7 +31,7 @@ public class PresenceSocket extends TextWebSocketHandler {
     private static class Peer {
         final String id = UUID.randomUUID().toString();
         final WebSocketSession socket;
-        final HttpSession http;
+        final String sessionId;
         final long userId;
         final String name;
         volatile Player player;
@@ -41,7 +40,7 @@ public class PresenceSocket extends TextWebSocketHandler {
 
         Peer(WebSocketSession socket, HttpSession http, long userId, String name) {
             this.socket = new ConcurrentWebSocketSessionDecorator(socket, 3000, 65536);
-            this.http = http;
+            this.sessionId = http.getId();
             this.userId = userId;
             this.name = name;
         }
@@ -53,14 +52,11 @@ public class PresenceSocket extends TextWebSocketHandler {
     private final UsuarioService users;
     private final ObjectMapper json;
     private final PresenceStore store;
-    private final JdbcIndexedSessionRepository sessions;
 
-    public PresenceSocket(UsuarioService users, ObjectMapper json, PresenceStore store,
-            JdbcIndexedSessionRepository sessions) {
+    public PresenceSocket(UsuarioService users, ObjectMapper json, PresenceStore store) {
         this.users = users;
         this.json = json;
         this.store = store;
-        this.sessions = sessions;
     }
 
     @Override
@@ -80,23 +76,10 @@ public class PresenceSocket extends TextWebSocketHandler {
         }
     }
 
-    private boolean authenticated(Peer peer) {
-        try {
-            org.springframework.session.Session session = sessions.findById(peer.http.getId());
-            if (session == null) return false;
-            Object context = session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-            return context instanceof SecurityContext security && security.getAuthentication() != null
-                && security.getAuthentication().isAuthenticated()
-                && security.getAuthentication().getName().equals(peer.socket.getPrincipal().getName());
-        } catch (IllegalStateException e) {
-            return false; // Sesión caducada o cerrada.
-        }
-    }
-
     @Override
-    protected void handleTextMessage(WebSocketSession socket, TextMessage message) {
+    protected void handleTextMessage(WebSocketSession socket, TextMessage message) throws IOException {
         Peer peer = peers.get(socket.getId());
-        if (peer == null || !authenticated(peer)) return;
+        if (peer == null) return;
         long now = System.nanoTime();
         String body = message.getPayload();
         if (body.equals("ping") || body.equals("leave")) {
@@ -109,23 +92,23 @@ public class PresenceSocket extends TextWebSocketHandler {
         }
         if (now - peer.lastMovement < 45_000_000L) return;
         peer.lastMovement = now;
+        Pose pose;
         try {
-            Pose pose = json.readValue(body, Pose.class);
-            if (pose == null || !bounded(pose.x(), 10000) || !bounded(pose.y(), 55)
-                    || !bounded(pose.z(), 10000) || !bounded(pose.yaw(), Math.PI + 0.001)) return;
-            peer.lastSeen = now;
-            peer.player = new Player(peer.id, peer.name, skins.getOrDefault(peer.userId, "azul"),
-                pose.x(), pose.y(), pose.z(), pose.yaw(), pose.walking());
-            if (!store.save(peer.id, peer.userId, peer.http.getId(), peer.player)) {
-                peer.player = null;
-                socket.close(new CloseStatus(4001, "Recorrido completo: 10 jugadores"));
-            }
-        } catch (IOException e) {
-            peers.remove(socket.getId(), peer);
-            store.remove(peer.id);
+            pose = json.readValue(body, Pose.class);
         } catch (RuntimeException e) {
             // Un dato inválido no altera la presencia previa.
+            return;
         }
+        if (pose == null || !bounded(pose.x(), 10000) || !bounded(pose.y(), 55)
+                || !bounded(pose.z(), 10000) || !bounded(pose.yaw(), Math.PI + 0.001)) return;
+        peer.lastSeen = now;
+        Player player = new Player(peer.id, peer.name, skins.getOrDefault(peer.userId, "azul"),
+            pose.x(), pose.y(), pose.z(), pose.yaw(), pose.walking());
+        if (peer.player == null && !store.enter(peer.id, peer.userId, peer.sessionId, player)) {
+            socket.close(new CloseStatus(4001, "Recorrido completo: 10 jugadores"));
+            return;
+        }
+        peer.player = player;
     }
 
     private static boolean bounded(Double value, double max) {
@@ -140,17 +123,33 @@ public class PresenceSocket extends TextWebSocketHandler {
     public void publish() {
         if (peers.isEmpty()) return;
         long now = System.nanoTime();
+        List<Peer> local = new ArrayList<>(peers.values());
+        List<PresenceStore.Update> updates = new ArrayList<>();
+        for (Peer peer : local) {
+            Player player = peer.player;
+            if (player != null && now - peer.lastSeen <= INACTIVE) {
+                updates.add(new PresenceStore.Update(peer.id, player));
+            }
+        }
+        var exchange = store.exchange(updates, local.stream().map(peer -> peer.sessionId).toList());
+        Set<String> missing = new HashSet<>();
+        for (var update : updates) missing.add(update.id());
+        for (var player : exchange.players()) missing.remove(player.id());
         List<Peer> connected = new ArrayList<>();
-        for (Peer peer : peers.values()) {
-            if (!authenticated(peer) || now - peer.lastSeen > INACTIVE) {
+        for (Peer peer : local) {
+            if (!exchange.sessions().contains(peer.sessionId) || now - peer.lastSeen > INACTIVE
+                    || missing.contains(peer.id)) {
                 peers.remove(peer.socket.getId(), peer);
                 store.remove(peer.id);
-                try { peer.socket.close(CloseStatus.POLICY_VIOLATION); } catch (IOException ignored) {}
+                try {
+                    // Si una instancia perdió su plaza durante una interrupción, el cliente vuelve a conectarse.
+                    peer.socket.close(missing.contains(peer.id) ? CloseStatus.SERVER_ERROR : CloseStatus.POLICY_VIOLATION);
+                } catch (IOException ignored) {}
                 continue;
             }
             connected.add(peer);
         }
-        List<Player> players = store.players();
+        List<Player> players = exchange.players();
         for (Peer peer : connected) {
             try {
                 peer.socket.sendMessage(new TextMessage(json.writeValueAsString(new Snapshot(peer.id, players))));

@@ -29,7 +29,24 @@ function connect(client) {
       headers: { Cookie: client.cookie, Origin: origin }, handshakeTimeout: 5000,
     });
     sockets.add(socket);
-    socket.on('message', bytes => { socket.snapshot = JSON.parse(bytes); });
+    socket.movements = new Map();
+    socket.on('message', bytes => {
+      socket.snapshot = JSON.parse(bytes);
+      for (const player of socket.snapshot.players) {
+        let movement = socket.movements.get(player.id);
+        if (!movement) {
+          movement = { positions: new Set(), turns: new Set(), last: Date.now(), maxGap: 0 };
+          socket.movements.set(player.id, movement);
+        }
+        const position = [player.x, player.y, player.z].map(value => value.toFixed(3)).join(',');
+        if (!movement.positions.has(position)) {
+          movement.maxGap = Math.max(movement.maxGap, Date.now() - movement.last);
+          movement.last = Date.now();
+          movement.positions.add(position);
+        }
+        movement.turns.add(player.yaw.toFixed(3));
+      }
+    });
     socket.once('error', reject);
     socket.once('open', () => resolve(socket));
   });
@@ -44,13 +61,16 @@ async function until(condition, label) {
 }
 
 function move(socket, index) {
+  const started = Date.now();
   const send = () => {
+    const elapsed = (Date.now() - started) / 1000;
     if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({
-      x: 10 + index, y: 0, z: 20, yaw: 0, walking: true,
+      x: 10 + index * 3 + Math.sin(elapsed), y: Math.max(0, Math.sin(elapsed * 2)) * 0.3,
+      z: 20 + Math.cos(elapsed), yaw: Math.sin(elapsed) * Math.PI, walking: true,
     }));
   };
   send();
-  timers.push(setInterval(send, 150));
+  timers.push(setInterval(send, 100));
 }
 
 try {
@@ -72,13 +92,25 @@ try {
     assert.equal(new Set(socket.snapshot.players.map(player => player.id)).size, 10);
     assert.equal(socket.snapshot.players.filter(player => player.id !== socket.snapshot.self).length, 9);
   }
-  // Supera los 20 segundos de caducidad para detectar pérdidas de presencia durante el recorrido.
+  active.forEach(socket => socket.movements.clear());
+  // Supera la caducidad y comprueba desplazamiento y giro continuos en cada observador.
   const stableUntil = Date.now() + 22000;
   while (Date.now() < stableUntil) {
     assert.ok(active.every(socket => socket.readyState === WebSocket.OPEN
       && socket.snapshot?.players.length === 10), 'Los diez permanecen conectados y visibles');
     await new Promise(resolve => setTimeout(resolve, 100));
   }
+  for (const socket of active) {
+    assert.equal(socket.movements.size, 10);
+    for (const movement of socket.movements.values()) {
+      assert.ok(movement.positions.size >= 35, `Movimiento insuficiente: ${movement.positions.size} posiciones en 22 segundos`);
+      assert.ok(movement.turns.size >= 35, 'El giro debe actualizarse durante el recorrido');
+      assert.ok(movement.maxGap < 2000, `Movimiento detenido durante ${movement.maxGap} ms`);
+      assert.ok(Date.now() - movement.last < 2000, 'La última posición debe ser reciente');
+    }
+  }
+  const observations = active.flatMap(socket => [...socket.movements.values()]);
+  console.log(`Movimiento observado: mínimo ${Math.min(...observations.map(value => value.positions.size))} posiciones por avatar en 22 s, pausa máxima ${Math.max(...observations.map(value => value.maxGap))} ms.`);
   const extra = await connect(clients[10]);
   const rejected = new Promise(resolve => extra.once('close', code => resolve(code)));
   move(extra, 10);
@@ -92,11 +124,9 @@ try {
   const replacement = await connect(clients[10]);
   move(replacement, 10);
   await until(() => [replacement, ...active.slice(1)].every(socket => socket.snapshot?.players.length === 10), 'El siguiente jugador ocupa la plaza libre');
-  console.log('PASS: diez jugadores entre dos servidores, nueve compañeros por jugador, rechazo del undécimo y reutilización de plaza.');
+  console.log('PASS: diez jugadores entre dos servidores, desplazamiento y giro continuos durante 22 segundos, rechazo del undécimo y reutilización de plaza.');
 } finally {
   timers.forEach(clearInterval);
-  for (const socket of sockets) socket.close();
-  for (const client of clients) {
-    try { await request(client, 'logout', 'POST'); } catch {}
-  }
+  for (const socket of sockets) socket.terminate();
+  await Promise.allSettled(clients.map(client => request(client, 'logout', 'POST')));
 }
