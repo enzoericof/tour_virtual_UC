@@ -1,6 +1,6 @@
 # Configuración y ejecución del backend
 
-Guía para ejecutar `campus-backend` en Windows 11 con Visual Studio Code, PowerShell y PostgreSQL local. No requiere Docker.
+Guía para ejecutar `campus-backend` en Windows 11 con Visual Studio Code, PowerShell y PostgreSQL local o Neon.
 
 Este documento corresponde al módulo `campus-backend`. Las instrucciones del README general que mencionan la carpeta retirada `backend/`, Java 25 o el perfil H2 no corresponden a este módulo.
 
@@ -20,7 +20,7 @@ No hace falta instalar Maven globalmente ni instalar Spring Boot por separado. L
 
 ## 2. Crear la base de datos en PostgreSQL
 
-El backend está configurado para conectarse a:
+Para PostgreSQL local se usan los siguientes valores. Para una base `TP_INFO3` ya creada en Neon, continuar con la sección 3.
 
 | Dato | Valor |
 | --- | --- |
@@ -118,7 +118,16 @@ $securePassword = Read-Host "Introduce tu contraseña de PostgreSQL" -AsSecureSt
 $env:DB_PASSWORD = [System.Net.NetworkCredential]::new("", $securePassword).Password
 ```
 
-Si se utiliza otro usuario de PostgreSQL, reemplazar `postgres`. La contraseña solicitada es la de **PostgreSQL**, no la de una cuenta de la aplicación.
+Para usar **Neon**, en lugar del bloque anterior ejecutar lo siguiente. El host corresponde a la conexión directa del proyecto. Si se cambia de rama o de proyecto en Neon, tomar el host y el rol de su panel **Connect**.
+
+```powershell
+$env:DB_URL = 'jdbc:postgresql://ep-orange-term-b6ptzawc.c-2.sa-east-1.aws.neon.tech:5432/TP_INFO3?sslmode=require&channelBinding=require'
+$env:DB_USER = 'neondb_owner'
+$securePassword = Read-Host 'Contraseña del rol en Neon' -AsSecureString
+$env:DB_PASSWORD = [System.Net.NetworkCredential]::new('', $securePassword).Password
+```
+
+Al arrancar contra Neon, Flyway aplica allí las migraciones pendientes. Para trasladar los registros de una base local existente mediante una restauración completa, restaurar primero la copia en la base vacía de Neon, incluido el historial de Flyway. Para volver al servidor local en la misma terminal, ejecutar `Remove-Item Env:DB_URL` y volver a cargar sus credenciales.
 
 Estas variables pertenecen a la terminal actual y a los procesos que se inicien desde ella. Al abrir otra terminal habrá que configurarlas nuevamente. No guardar la contraseña en `application.properties`, scripts versionados ni archivos compartidos.
 

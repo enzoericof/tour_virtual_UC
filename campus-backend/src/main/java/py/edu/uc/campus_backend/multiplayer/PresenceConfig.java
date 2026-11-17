@@ -1,6 +1,7 @@
 package py.edu.uc.campus_backend.multiplayer;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -19,14 +20,16 @@ import java.util.Map;
 @EnableScheduling
 public class PresenceConfig implements WebSocketConfigurer {
     private final PresenceSocket presence;
+    private final String[] frontendOrigins;
 
-    public PresenceConfig(PresenceSocket presence) {
+    public PresenceConfig(PresenceSocket presence,
+            @Value("${CAMPUS_FRONTEND_ORIGINS:}") String[] frontendOrigins) {
         this.presence = presence;
+        this.frontendOrigins = frontendOrigins;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        // Spring solo acepta el mismo origen. El proxy de Vite conserva el origen del visitante.
         registry.addHandler(presence, "/ws/presence").addInterceptors(new HandshakeInterceptor() {
             @Override
             public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
@@ -42,6 +45,6 @@ public class PresenceConfig implements WebSocketConfigurer {
             public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
                     WebSocketHandler handler, Exception failure) {
             }
-        });
+        }).setAllowedOrigins(frontendOrigins);
     }
 }

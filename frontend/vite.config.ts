@@ -4,7 +4,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": backend,
-      "/ws": { target: backend, ws: true },
+      "/ws": { target: backend, ws: true, changeOrigin: new URL(backend).protocol === "https:" },
     },
   },
   build: {

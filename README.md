@@ -33,6 +33,17 @@ En Linux o macOS, usá `sh ./mvnw spring-boot:run` desde el mismo directorio.
 
 Mantené Vite en ejecución. Por defecto, redirige la API y el WebSocket al puerto `8080`. Abrí **Menú** para iniciar sesión. Podés probar la presencia con dos sesiones de navegador independientes.
 
+Para usar un backend compartido, cada compañero configura la URL HTTPS pública del servicio Spring Boot en la terminal de PowerShell donde inicia Vite. Desde `frontend/`, ejecutá estos comandos con la URL del servicio.
+
+```powershell
+$env:CAMPUS_API_URL = 'https://TU-PROYECTO.vercel.app'
+npm run dev -- --port 5173 --strictPort
+```
+
+En el backend, configurá `CAMPUS_FRONTEND_ORIGINS=http://127.0.0.1:5173,http://localhost:5173` para que ambos orígenes puedan abrir la conexión de presencia. Desde el equipo de cada compañero, `http://127.0.0.1:5173/api/health` permite comprobar la conexión al backend a través de Vite.
+
+Cuando publiques el frontend compilado, configurá su servidor para reenviar `/api` y `/ws` al backend, con soporte de WebSocket para `/ws`. Si el frontend tiene otro dominio, agregá su origen HTTPS a `CAMPUS_FRONTEND_ORIGINS`.
+
 La biblioteca, los paneles informativos y el chat del visor están pendientes de integración con el backend actual. [Arquitectura y contratos](docs/arquitectura.md#aporte-campus-backend).
 
 ## Editor de mapa 3D
