@@ -46,10 +46,8 @@ export function mountCommunity(
         try {
           await logout();
           user = null;
-          updateAccount();
-          await chat.disconnect();
-          if (isDialogContent(logoutButton)) closeDialog();
-          toast("Sesión cerrada.");
+          endVisit();
+          location.reload();
         } catch (e) {
           toast((e as Error).message);
         }

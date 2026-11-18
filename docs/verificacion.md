@@ -425,3 +425,10 @@ Seto según foto (18/11): vista cercana en navegador confirma copa rectangular d
 En Chrome, con API y WebSocket locales simulados en 18086 y Vite en 5188: ingreso con cuenta ficticia, capa de Validando tu cuenta y Preparando el campus 3D, recarga que vuelve a elegir cuenta, y Continuar sin contraseña. Las métricas pasaron de una conexión activa a cero tras recargar (un leave), sin nuevo login automático; Continuar abrió otra conexión manteniendo un solo login. Usar otra cuenta ejecutó logout y mostró el formulario; una segunda identidad se abrió correctamente. Son pruebas del flujo cliente y cierre de presencia, sin Neon ni credenciales reales; no equivalen a verificar autenticación compartida en producción.
 
 El build separa el acceso del motor 3D: el módulo tour-runtime y Three.js se solicitan después de la elección. El indicador es indeterminado y no muestra porcentajes ficticios. Se conserva la cuenta mediante la cookie existente; finalizar el recorrido no invalida esa autenticación persistente.
+
+
+## Acceso exclusivo con cuenta (18/11/2026)
+
+Retirada la entrada como invitado y sus estilos. La apertura del 3D exige una cuenta validada y conexión disponible; cerrar sesión detiene presencia y chat y vuelve al acceso. Se mantiene la elección explícita de la cuenta recordada y la opción de usar otra.
+
+61 pruebas frontend y compilación TypeScript/Vite correctas. En Chrome con la API local simulada: acceso con solo Iniciar sesión/Crear cuenta, formulario de registro visible, ingreso con identidad ficticia y Cerrar sesión que vuelve al formulario sin visor ni acceso invitado. Sin credenciales reales ni cambios en Neon.

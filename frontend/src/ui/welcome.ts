@@ -1,11 +1,11 @@
 import { logout, type User } from "../services/api";
-import { restoreSession, type InitialSession } from "../services/session";
+import { restoreSession, type RegisteredSession } from "../services/session";
 import { consumeVisitEnd } from "../services/visit-lifecycle";
 import { mountAuthForm } from "./auth-form";
 import { escapeHtml } from "./dom";
 import { paintLoading, showVisitLoading } from "./visit-loading";
 
-export async function enterCampus(root: HTMLElement): Promise<InitialSession> {
+export async function enterCampus(root: HTMLElement): Promise<RegisteredSession> {
   try { document.documentElement.dataset.theme = localStorage.getItem("cyt-theme") === "dark" ? "dark" : "light"; }
   catch { document.documentElement.dataset.theme = "light"; }
   document.body.classList.add("at-welcome");
@@ -17,14 +17,13 @@ export async function enterCampus(root: HTMLElement): Promise<InitialSession> {
       <div class="welcome-heading"><span class="eyebrow">CIENCIAS Y TECNOLOGÍA</span><h1 id="welcome-title">Tour virtual</h1><p>Elegí cómo ingresar al recorrido.</p></div>
       ${reason ? `<p class="visit-note" role="status">${escapeHtml(reason)}</p>` : ""}
       <div id="welcome-auth"><p role="status" class="session-loading"><span class="inline-spinner" aria-hidden="true"></span>Comprobando cuenta…</p></div>
-      <div class="welcome-guest"><button type="button" id="welcome-guest" class="text-btn">Entrar como invitado</button></div>
       <footer class="welcome-footnote">El recorrido termina al recargar, cerrar la página o pasar 3 min sin actividad. Tu cuenta puede quedar recordada.</footer>
     </section>
   </main>`;
   const card = root.querySelector<HTMLElement>(".welcome-card")!;
   const container = root.querySelector<HTMLElement>("#welcome-auth")!;
   return new Promise(resolve => {
-    let finished = false, pending = false, online = false;
+    let finished = false, pending = false;
     let loading: ReturnType<typeof showVisitLoading> | null = null;
     function busy(message: string) {
       card.inert = true;
@@ -36,7 +35,7 @@ export async function enterCampus(root: HTMLElement): Promise<InitialSession> {
       card.inert = false;
       pending = false;
     }
-    function finish(session: InitialSession) {
+    function finish(session: RegisteredSession) {
       if (finished) return;
       finished = true;
       pending = true;
@@ -63,8 +62,8 @@ export async function enterCampus(root: HTMLElement): Promise<InitialSession> {
         await paintLoading();
         const session = await restoreSession();
         if (finished) return;
-        if (session.user?.id === user.id) { finish(session); return; }
-        ready(); online = session.online;
+        if (session.online && session.user?.id === user.id) { finish({ user: session.user, online: true }); return; }
+        ready();
         if (session.user) renderAccount(session.user, "La cuenta recordada cambió. Confirmá con cuál querés entrar.");
         else if (session.online) renderLogin("Esta cuenta ya no tiene acceso guardado. Iniciá sesión para continuar.");
         else renderAccount(user, "No pudimos verificar la cuenta. Revisá la conexión y volvé a intentar.");
@@ -82,17 +81,13 @@ export async function enterCampus(root: HTMLElement): Promise<InitialSession> {
         }
       };
     }
-    root.querySelector<HTMLButtonElement>("#welcome-guest")!.onclick = () => {
-      if (!pending) finish({ user: null, online });
-    };
     async function check() {
       const session = await restoreSession();
       if (finished) return;
-      online = session.online;
       if (session.user) renderAccount(session.user);
       else {
-        renderLogin(online ? "" : "No pudimos comprobar tu cuenta. Reintentá la conexión o entrá como invitado.");
-        if (!online) {
+        renderLogin(session.online ? "" : "No pudimos comprobar tu cuenta. Revisá la conexión y volvé a intentar.");
+        if (!session.online) {
           const retry = document.createElement("button");
           retry.type = "button"; retry.className = "text-btn"; retry.textContent = "Reintentar conexión";
           retry.onclick = () => { retry.disabled = true; void check(); };

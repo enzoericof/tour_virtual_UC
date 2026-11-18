@@ -3,11 +3,12 @@ import { mountCampusContent } from "./ui/campus-content";
 import { mountCommunity } from "./ui/community";
 import { mountTourControls } from "./ui/tour-controls";
 import { mountTourShell } from "./ui/tour-shell";
-import type { InitialSession } from "./services/session";
+import type { RegisteredSession } from "./services/session";
 import { monitorVisit, rememberVisitEnd } from "./services/visit-lifecycle";
 import { paintLoading, showVisitLoading } from "./ui/visit-loading";
 
-export async function startTour(initialSession: InitialSession) {
+export async function startTour(initialSession: RegisteredSession) {
+  if (!initialSession.user || !initialSession.online) throw new Error("Iniciá sesión para entrar al campus.");
   let engine: TourEngine | undefined;
   const shell = mountTourShell(() => engine?.pause());
   const loading = showVisitLoading(document.querySelector<HTMLElement>("#app")!, "Preparando el campus 3D…");
