@@ -27,8 +27,11 @@ export type Panel = {
   url: string;
 };
 let csrf: { token: string; headerName: string } | null = null;
+export class ApiError extends Error {
+  constructor(message: string, readonly status: number) { super(message); }
+}
 export async function refreshCsrf() {
-  const r = await fetch("/api/auth/csrf", { credentials: "same-origin" });
+  const r = await fetch("/api/auth/csrf", { credentials: "same-origin", signal: AbortSignal.timeout(10000) });
   if (!r.ok) throw new Error("El servicio no está disponible.");
   csrf = await r.json();
   return csrf!;
@@ -60,7 +63,7 @@ export async function api<T>(
       const data = await r.json();
       if (data.mensaje || data.message) message = data.mensaje ?? data.message;
     } catch {}
-    throw new Error(message);
+    throw new ApiError(message, r.status);
   }
   return r.status === 204 ? (undefined as T) : r.json();
 }

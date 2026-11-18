@@ -376,3 +376,14 @@ Se separaron los planificadores de difusión y sincronización. Nuevas pruebas d
 Se compiló el código Java y se ejecutaron esas cuatro pruebas con Maven 3.9.12 instalado y un POM temporal que omitía únicamente el starter de Spring Session JDBC, ausente en la caché y bloqueado para descarga desde este entorno. No equivale a Maven verify del proyecto completo ni verifica el arranque de Spring Session o dos instancias HTTP/WebSocket reales. El POM versionado conserva la dependencia. Queda pendiente esa verificación completa y la medición en Vercel.
 
 Frontend: 50 pruebas y compilación TypeScript/Vite correctas. La prueba temporal de movimiento usa paquetes alternados de 280/320 ms durante seis segundos y comprueba que no existan frenadas ni saltos de cada paquete; también prueba duplicados, giro corto, teletransporte y predicción limitada. Revisión visual en Chrome de diez avatares con ese intervalo, detención desde el botón y ausencia de errores visibles. La página .local/motion-preview.html es una herramienta local ignorada por Git. No constituye una medición multijugador de producción.
+
+
+## Acceso, sesión y menús (18/11/2026)
+
+53 pruebas frontend y build correctos. Las tres pruebas nuevas comprueban restauración mediante una sola petición autenticada por cookie, distinción entre sesión vencida y fallo de red, y cierre con CSRF seguido de cuenta no autenticada.
+
+Revisión en Chrome contra frontend 5186 y backend local 18085, con PostgreSQL aislado en 55433/tour_account y una cuenta ficticia: acceso visible antes de instanciar el visor; pestañas de ingreso/registro; login; recuperación automática de la cuenta después de recargar; tema claro y oscuro del panel de cuenta, con el mismo degradado calculado que la barra. Prueba HTTP: cookie Path=/, Max-Age=2592000, HttpOnly, SameSite=Lax; dos consultas /me autenticadas y 401 después de cerrar sesión. Se usó el JAR local previamente compilado con la configuración de sesión actual: valida el flujo servlet y la cookie persistente, pero no el almacén JDBC compartido de producción. Falta comprobar en Vercel la sesión entre instancias y después de cerrar/reabrir completamente el navegador. No se usó Neon ni credenciales reales.
+
+Comprobación adicional en navegador: abrir otra pestaña recupera la cuenta; cerrar sesión y recargar vuelve a la bienvenida; invitado entra sin cuenta y el botón Ingresar abre el formulario con un clic. Se conserva un estado de carga visible mientras se construye el escenario.
+
+El intento de Maven Wrapper verify no pudo iniciar porque el Wrapper no logra resolver el directorio .m2 de este entorno. La validación HTTP descrita se hizo con el JAR local y la configuración de sesión actual, no reemplaza verify completo.

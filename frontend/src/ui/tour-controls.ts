@@ -56,6 +56,10 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     }
   }
 
+  dialog.addEventListener("toggle", () => {
+    if (dialog.open) setHudPanel(null);
+  });
+
   function showLocation() {
     heading.classList.add("is-visible");
     window.clearTimeout(locationTimer);

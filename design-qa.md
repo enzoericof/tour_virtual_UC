@@ -347,3 +347,8 @@ Asientos: cámara a altura sentada, aviso E para sentarse/levantarse y retorno a
 
 
 17/11/2026: revisión local de diez avatares con snapshots espaciados 280–320 ms en .local/motion-preview.html. Se renderizan, animan y detienen con el botón de prueba. No se realizó una sesión de usuarios reales en Vercel; la continuidad se verifica además mediante simulación temporal automatizada.
+
+
+18/11/2026: bienvenida con acceso previo al visor, formulario reutilizado, sesión recuperada tras recarga en Chrome. Cuenta revisada en claro y oscuro; el fondo calculado del diálogo coincide con la barra principal. Biblioteca y ayuda heredan el mismo material; sin rediseñar la escena. Entorno y límites de la prueba en docs/verificacion.md.
+
+18/11/2026: botón «Esc · Pausar» con el mismo fondo translúcido, esquinas y tipografía que «E · Sentarse», mediante estilos compartidos. Conserva su acción de pausa y su posición. Pasaron las 53 pruebas del frontend y la compilación de producción. Revisión visual pendiente: Chrome no pudo conectarse al servidor local durante la comprobación.

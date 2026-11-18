@@ -14,7 +14,7 @@ export function mountTourShell(pauseTour: () => void) {
     </div>
    </header>
    <div class="tour-guidance">
-    <button id="pause-tour" class="pause-tour hidden" aria-label="Pausar recorrido"><kbd>Esc</kbd> Pausar</button>
+    <button id="pause-tour" class="pause-tour hidden" aria-label="Pausar recorrido">Esc · Pausar</button>
     <p id="pause-label" class="hidden">En pausa</p>
    </div>
    <nav id="tour-toolbar" class="tour-toolbar" aria-label="Controles del recorrido">

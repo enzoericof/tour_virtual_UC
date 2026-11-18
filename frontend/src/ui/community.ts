@@ -1,21 +1,24 @@
 import { skinIds, skins, type Skin } from "../data/skins";
 import type { TourEngine } from "../scene/engine";
-import { api, currentUser, login, logout, type User } from "../services/api";
+import { api, logout, type User } from "../services/api";
 import { CampusChat } from "../services/chat";
 import { CampusPresence } from "../services/presence";
 import { element, escapeHtml } from "./dom";
 import { icon } from "./icons";
 import { createLibrary } from "./library";
 import type { TourShell } from "./tour-shell";
+import type { InitialSession } from "../services/session";
+import { mountAuthForm } from "./auth-form";
 
 export function mountCommunity(
   shell: TourShell,
   engine: TourEngine | undefined,
   managePanels: () => Promise<void>,
+  initialSession: InitialSession = { user: null, online: false },
 ) {
   const { openDialog, closeDialog, isDialogContent, toast } = shell;
-  let user: User | null = null;
-  let online = false;
+  let user: User | null = initialSession.user;
+  let online = initialSession.online;
   const chat = new CampusChat();
   let presenceStatus = "Sin sesión";
   const presence = new CampusPresence(
@@ -33,7 +36,7 @@ export function mountCommunity(
   function account() {
     if (user) {
       openDialog(
-        `<span class="eyebrow">MI CUENTA</span><h2>Hola, ${escapeHtml(user.name)}</h2><p>${escapeHtml(user.email)}</p><p class="subtle">${user.role === "ADMIN" ? "Administrador de contenidos" : "Miembro de la comunidad"}</p><p class="subtle" id="presence-status">${escapeHtml(presenceStatus)}</p><form id="skin-form"><label>Apariencia<select name="skin">${skinIds.map(id => `<option value="${id}" ${id === user?.skin ? "selected" : ""}>${skins[id].name}</option>`).join("")}</select></label><button class="secondary">Guardar apariencia</button><p class="form-error" role="alert"></p></form><button class="primary" id="my-works">Mis trabajos</button><button class="secondary" id="community-chat">Chat del campus</button>${user.role === "ADMIN" ? '<button class="secondary" id="manage-panels">Administrar paneles</button>' : ""}<button class="text-btn" id="logout">Cerrar sesión</button>`,
+        `<span class="eyebrow">MI CUENTA</span><h2>Hola, ${escapeHtml(user.name)}</h2><p>${escapeHtml(user.email)}</p><p class="subtle">${user.role === "ADMIN" ? "Administrador de contenidos" : "Miembro de la comunidad"}</p><p class="subtle" id="presence-status">${escapeHtml(presenceStatus)}</p><form id="skin-form"><label>Apariencia<select name="skin">${skinIds.map(id => `<option value="${id}" ${id === user?.skin ? "selected" : ""}>${skins[id].name}</option>`).join("")}</select></label><button class="secondary">Guardar apariencia</button><p class="form-error" role="alert"></p></form><div class="account-actions"><button class="primary" id="my-works">Mis trabajos</button><button class="secondary" id="community-chat">Chat del campus</button>${user.role === "ADMIN" ? '<button class="secondary" id="manage-panels">Administrar paneles</button>' : ""}<button class="text-btn" id="logout">Cerrar sesión</button></div>`,
       );
       element<HTMLFormElement>("#skin-form").onsubmit = async event => {
         event.preventDefault();
@@ -71,51 +74,22 @@ export function mountCommunity(
       };
       return;
     }
-    openDialog(
-      `<span class="eyebrow">COMUNIDAD UC</span><h2>Nos encontramos acá.</h2><p class="subtle">Ingresá para recorrer el campus con otros visitantes y elegir tu apariencia.</p><div class="auth-tabs"><button id="login-tab" class="selected">Ingresar</button><button id="register-tab">Crear cuenta</button></div><form id="auth-form"><fieldset id="register-fields" class="hidden" disabled><label>Nombre<input name="name" maxlength="100" autocomplete="given-name" required></label><label>Apellido<input name="surname" maxlength="100" autocomplete="family-name" required></label><label>Carrera<select name="career" required><option value="1">Ingeniería Informática</option><option value="2">Ingeniería Electrónica</option></select></label></fieldset><label>Correo electrónico<input name="email" type="email" required autocomplete="email" maxlength="150"></label><label>Contraseña<input name="password" type="password" required maxlength="72" autocomplete="current-password"></label><button class="primary" id="auth-submit">Ingresar ${icon("arrow")}</button><p class="form-error" role="alert"></p></form><button class="text-btn" id="account-library">Biblioteca de trabajos</button>`,
-    );
-    element("#account-library").onclick = () => void library();
-    let register = false;
-    element("#register-tab").onclick = () => {
-      register = true;
-      const fields = element<HTMLFieldSetElement>("#register-fields");
-      fields.classList.remove("hidden");
-      fields.disabled = false;
-      element<HTMLInputElement>("[name=password]").minLength = 8;
-      element<HTMLInputElement>("[name=password]").autocomplete = "new-password";
-      element("#auth-submit").textContent = "Crear mi cuenta";
-      element("#register-tab").classList.add("selected");
-      element("#login-tab").classList.remove("selected");
-    };
-    element("#login-tab").onclick = () => account();
-    element<HTMLFormElement>("#auth-form").onsubmit = async (e) => {
-      e.preventDefault();
-      const form = e.currentTarget as HTMLFormElement;
-      const data = Object.fromEntries(new FormData(form)) as Record<
-        string,
-        string
-      >;
-      const button = element<HTMLButtonElement>("#auth-submit");
-      button.disabled = true;
-      try {
-        if (register)
-          await api("/auth/registro", {
-            method: "POST",
-            body: JSON.stringify({ nombre: data.name, apellido: data.surname, correo: data.email, password: data.password, carrera: Number(data.career) }),
-          });
-        user = await login(data.email, data.password);
-        online = true;
-        updateAccount();
-        if (isDialogContent(form)) closeDialog();
-        toast(`Bienvenido, ${user.name}.`);
-      } catch (e) {
-        form.querySelector(".form-error")!.textContent = (e as Error).message;
-      } finally {
-        button.disabled = false;
-      }
-    };
+    openDialog(`<span class="eyebrow">COMUNIDAD UC</span><h2>Nos encontramos acá.</h2><p class="subtle">Ingresá para recorrer el campus con otros visitantes.</p><div id="account-auth"></div>`);
+    const container = element("#account-auth");
+    mountAuthForm(container, authenticatedUser => {
+      user = authenticatedUser;
+      online = true;
+      updateAccount();
+      if (isDialogContent(container)) closeDialog();
+      toast(`Bienvenido, ${user.name}.`);
+    });
   }
   function updateAccount() {
+    const accountButton = element<HTMLButtonElement>("#account-btn");
+    accountButton.querySelector("span")!.textContent = user ? user.name.split(" ")[0] : "Ingresar";
+    accountButton.title = user ? "Mi cuenta" : "Iniciar sesión";
+    accountButton.setAttribute("aria-controls", user ? "tour-account" : "dialog");
+    accountButton.setAttribute("aria-haspopup", user ? "true" : "dialog");
     if (user) presence.start();
     else presence.stop();
     element("#account-details span").textContent = user ? "Mi cuenta y apariencia" : "Ingresar o crear cuenta";
@@ -168,12 +142,13 @@ export function mountCommunity(
     };
   }
 
-  void currentUser().then(authenticatedUser => {
-    user = authenticatedUser;
-    online = true;
-    updateAccount();
-  }).catch(() => {});
-  void api("/health").then(() => { online = true; }).catch(() => { online = false; });
+  const accountButton = element<HTMLButtonElement>("#account-btn");
+  const openAccountMenu = accountButton.onclick;
+  accountButton.onclick = event => {
+    if (user) openAccountMenu?.call(accountButton, event);
+    else account();
+  };
+  updateAccount();
 
-  return { getUser: () => user, isOnline: () => online };
+  return { getUser: () => user, isOnline: () => online, openAccount: account };
 }
