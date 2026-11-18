@@ -20,10 +20,11 @@ function currentDevice(): DeviceHints {
 }
 
 export function isMobileDevice(device: DeviceHints): boolean {
+  // Un puntero táctil también puede pertenecer a una PC o laptop.
+  // Bloquear solo cuando el navegador identifica un dispositivo móvil.
   return device.mobile === true
     || /Android|iPhone|iPad|iPod|IEMobile|Windows Phone|Opera Mini|webOS|BlackBerry/i.test(device.userAgent)
-    || (device.platform === "MacIntel" && device.maxTouchPoints > 1)
-    || (device.coarsePointer && !device.finePointer);
+    || (device.platform === "MacIntel" && device.maxTouchPoints > 1);
 }
 
 export function startDesktopExperience(

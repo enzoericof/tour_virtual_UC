@@ -387,3 +387,8 @@ Revisión en Chrome contra frontend 5186 y backend local 18085, con PostgreSQL a
 Comprobación adicional en navegador: abrir otra pestaña recupera la cuenta; cerrar sesión y recargar vuelve a la bienvenida; invitado entra sin cuenta y el botón Ingresar abre el formulario con un clic. Se conserva un estado de carga visible mientras se construye el escenario.
 
 El intento de Maven Wrapper verify no pudo iniciar porque el Wrapper no logra resolver el directorio .m2 de este entorno. La validación HTTP descrita se hizo con el JAR local y la configuración de sesión actual, no reemplaza verify completo.
+
+
+## Falso bloqueo en PC (18/11/2026)
+
+Retirada la condición que clasificaba como móvil cualquier dispositivo con pointer:coarse sin any-pointer:fine. También puede cumplirse en PCs Windows y laptops táctiles. La regresión comprueba inicio normal con esas señales y 0, 1 o 10 puntos táctiles; se conserva el bloqueo explícito de Android, iPhone e iPad. No se pudo medir directamente qué señales informó la PC de la captura; el código confirma que esa combinación provocaba el falso bloqueo.

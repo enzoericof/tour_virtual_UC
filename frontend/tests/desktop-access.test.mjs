@@ -14,9 +14,21 @@ test("Phones stay blocked in landscape and even with a connected mouse", () => {
   }
   assert.equal(isMobileDevice({ ...desktop, mobile: true }), true);
 });
-test("Tablets using a desktop identity or only touch controls stay blocked", () => {
+test("iPad using a desktop identity and Android tablets stay blocked", () => {
   assert.equal(isMobileDevice({ ...desktop, platform: "MacIntel", maxTouchPoints: 5 }), true);
-  assert.equal(isMobileDevice({ ...desktop, coarsePointer: true, finePointer: false }), true);
+  assert.equal(isMobileDevice({ ...desktop, userAgent: "Mozilla/5.0 (Linux; Android 15; Tablet)", mobile: false, coarsePointer: true, finePointer: false }), true);
+});
+
+test("Windows laptops and PCs stay available even when Chrome reports only touch input", () => {
+  for (const maxTouchPoints of [0, 1, 10]) {
+    const device = { ...desktop, maxTouchPoints, coarsePointer: true, finePointer: false };
+    assert.equal(isMobileDevice(device), false);
+    let starts = 0;
+    const root = { innerHTML: "existing", classList: { add: () => assert.fail("PC was blocked") } };
+    assert.equal(startDesktopExperience(root, () => starts++, device), true);
+    assert.equal(starts, 1);
+    assert.equal(root.innerHTML, "existing");
+  }
 });
 test("Desktop and touch laptops with a precise pointer remain available", () => {
   assert.equal(isMobileDevice(desktop), false);
