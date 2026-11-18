@@ -79,7 +79,24 @@ export const facultyAnnexes: Annex[] = [
 const led = facultyAnnexes.find((building) => building.id === "led")!;
 const dei = facultyAnnexes.find((building) => building.id === "dei-led")!;
 /** Único acceso exterior del DEI: lateral derecho, cerca del fondo. */
-export const deiSideDoor = { center: [-11.4, -6] as Vec2, width: 1.3, height: 2.45 };
+export const deiSideDoor = { center: [-11.4, -6] as Vec2, width: 1.7, height: 2.75 };
+/** Lateral fotografiado del LED. Distribución estimada de las fotos del 18/11. */
+export const deiRightFacade = {
+  windows: [
+    { x: 11.7, width: 1.45 }, { x: 8.6, width: 1.5 }, { x: 5.4, width: 1.55 },
+    { x: -2.7, width: 1.65 }, { x: -6.0, width: 1.55 }, { x: -8.5, width: 1.4 },
+    { x: -13.35, width: 1.05 },
+  ],
+  sill: 0.95, windowHeight: 1.35,
+  serviceDoor: { x: 1.6, width: 1.25, height: 2.65 },
+  screen: { bottom: 3.75, top: 5.65, offset: 0.50, pitch: 0.115 },
+  airConditioners: [
+    { x: 10.4, y: 3.35 }, { x: 10.4, y: 2.65 },
+    { x: 4.1, y: 3.35 }, { x: 4.1, y: 2.65 },
+    { x: -0.5, y: 3.35 }, { x: -7.3, y: 3.35 }, { x: -7.3, y: 2.65 },
+    { x: -11.8, y: 3.35 },
+  ],
+};
 dei.front = fromRect(dei.rect, deiSideDoor.center);
 dei.entrance = fromRect(dei.rect, [deiSideDoor.center[0], deiSideDoor.center[1] - 2]);
 const linkStartU = led.mapCenter[0] + led.rect.size[1] / 2;

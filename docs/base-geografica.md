@@ -482,3 +482,7 @@ Se reemplaza el piso liso bajo el ramal de carpa hacia la galería del Bloque G 
 ### Seto según foto de referencia — 18/11/2026
 
 La foto de Horacio sustituye las copas redondeadas anteriores por una copa continua podada en bloque rectangular, hojas pequeñas verdes claras y troncos separados bifurcados visibles desde el suelo hasta unos 80 cm. La copa alcanza aproximadamente 1,8 m; se conserva exclusivamente la franja en L ya indicada. Dimensiones estimadas de la imagen.
+
+### Lateral derecho del LED según dos fotografías — 18/11/2026
+
+Las fotos aportadas por Horacio reemplazan el lateral genérico: pantalla de lamas horizontales gris azuladas entre 3,75 y 5,65 m, bastidor exterior con diagonales superiores y apoyos, siete ventanas con rejas diagonales, puerta metálica central cerrada y acceso abierto al fondo. Se añaden ocho equipos de aire con ventiladores, rejillas, escuadras, cajas y bajadas, cinco reflectores, remates de ladrillo y mástil con tensores. Cantero angosto con plantas de hojas en roseta, vereda con interrupciones de acceso, árbol de copa redondeada, macetas y papelera azul. Carpa azul junto al extremo posterior según el segundo ángulo. Distribución, alturas y profundidades son estimaciones visuales, no medidas relevadas. La puerta central se modela cerrada; el acceso del fondo sigue siendo el punto de visita del DEI y conserva la conexión al corredor de oficinas. Las fuentes originales permanecen fuera del repositorio.

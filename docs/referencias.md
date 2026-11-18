@@ -137,3 +137,7 @@ Las tres capturas c0bf5aaa, 34b1d5fe y e7eb9449 muestran el acceso a los baños 
 ### Plaza de la Amistad: fotos del usuario, 14/11/2026
 
 Referencias aportadas en el chat: `codex-clipboard-a9c726cc-006e-4e97-814b-ceb20d564918.jpg`, `codex-clipboard-1b970d6a-b108-4232-bdc8-489a6cb1f9c3.jpg`, `codex-clipboard-ee1918e0-60d4-488f-92a0-dce2133db67b.jpg`, `codex-clipboard-f6713ff1-5166-4985-9c64-c7b59079115a.jpg` y `codex-clipboard-db9abaa4-ad82-4c77-8db4-07e34a0b4a9b.jpg`. Acabados procedurales interpretados visualmente: baldosas, piezas circulares, tierra, pintura azul, hojas nervadas y corteza. El cartel se recrea con texto legible; no es una reproducción fotográfica exacta.
+
+### LED, lateral derecho — 18/11/2026
+
+Dos fotografías aportadas por Horacio en el chat, identificadas como codex-clipboard-4603ba68-5bd5-441d-b5c6-b460d19ee81e y codex-clipboard-f94b3e79-5906-43cb-8e26-d8b16f60e1f0. Referencias de lamas, rejas, equipos, estructura metálica, puertas y entorno inmediato. No se incorporan los originales al repositorio ni se usan como textura; la reconstrucción se genera con geometría y materiales del proyecto.

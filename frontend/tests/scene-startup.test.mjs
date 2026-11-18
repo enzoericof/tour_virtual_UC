@@ -1,6 +1,6 @@
 import { Box3, PerspectiveCamera, Ray, Raycaster, Vector2, Vector3 } from "three";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
-import { facultyAnnexes, deiSideDoor, deiGardenPath } from "../src/data/faculty-annexes.ts";
+import { facultyAnnexes, deiSideDoor, deiGardenPath, deiRightFacade, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -88,6 +88,18 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     for (const offset of [-0.3, 0, 0.3])
       assert.equal(traceDei(deiSideDoor.center[0] + offset, -7, -5).length, 0,
         "La nueva puerta derecha deja pasar al visitante");
+    assert.ok(traceDei(deiRightFacade.serviceDoor.x, -7, -5).length,
+      "La puerta metálica central fotografiada queda cerrada");
+    for (const window of deiRightFacade.windows)
+      assert.ok(traceDei(window.x, -7, -5).length, "Las ventanas con rejas conservan la colisión de fachada");
+    const ledPortal = annexEnclosedLink.portals.find(p => p.annexId === "dei-led");
+    for (const offset of [-0.8, 0, 0.8]) {
+      const a = fromRect(dei.rect, [ledPortal.center[0] - 0.7, ledPortal.center[1] + offset]);
+      const b = fromRect(dei.rect, [ledPortal.center[0] + 0.7, ledPortal.center[1] + offset]);
+      const origin = new Vector3(a[0], 1.2, a[1]), target = new Vector3(b[0], 1.2, b[1]);
+      const hits = new Raycaster(origin, target.clone().sub(origin).normalize(), 0, 1.4).intersectObject(colliders, true);
+      assert.equal(hits.length, 0, "El muro posterior conserva el paso al ala de oficinas");
+    }
     // El sendero del LED debe tener espesor y colisión en la tapa y en sus cantos.
     const gardenSlabs = colliders.children.filter(o => o.userData.gardenSlab);
     assert.ok(gardenSlabs.length > 10, "El caminero conserva sus tramos separados");

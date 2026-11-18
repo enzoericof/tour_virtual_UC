@@ -432,3 +432,5 @@ El build separa el acceso del motor 3D: el módulo tour-runtime y Three.js se so
 Retirada la entrada como invitado y sus estilos. La apertura del 3D exige una cuenta validada y conexión disponible; cerrar sesión detiene presencia y chat y vuelve al acceso. Se mantiene la elección explícita de la cuenta recordada y la opción de usar otra.
 
 61 pruebas frontend y compilación TypeScript/Vite correctas. En Chrome con la API local simulada: acceso con solo Iniciar sesión/Crear cuenta, formulario de registro visible, ingreso con identidad ficticia y Cerrar sesión que vuelve al formulario sin visor ni acceso invitado. Sin credenciales reales ni cambios en Neon.
+
+LED, lateral derecho según fotos (18/11): revisión en navegador del frente, acercamiento de rejas/equipos y ángulo del acceso posterior. La prueba de escena comprueba el cierre de la puerta metálica central, la colisión de las ventanas, el acceso abierto del fondo y el paso al corredor interior tras cerrar la cabecera posterior con ladrillo. Las 55 pruebas frontend y la compilación pasaron. Geometría estimada de las fotos, pendiente de medición en el sitio.
