@@ -407,7 +407,7 @@ export const facultyBlueprint = {
   /** Árbol 2: árbol autóctono alto en el patio oeste (foto árbol_2.HEIC, posición 2 en cómo_debe_ser.png). */
   tree2: [-20, 22] as Vec2,
   /** Árbol frente a la cantina / pergolado de mesas */
-  cantinaTree: shiftPlaza([62, 16]) as Vec2,
+  cantinaTree: fromRect(cantina, [12.5, 29]),
   tree3: [2, 19] as Vec2,
   courtyardCT: [-6, 22] as Vec2,
   courtyardTrees: [[-16, 31], [-2, 34]] as Vec2[],
@@ -423,7 +423,12 @@ export const facultyBlueprint = {
     tables: [[25.45, 15.8], [30.3, 15.8]] as Vec2[],
     lamps: [[26.95, 17.3], [31.8, 17.3]] as Vec2[],
   },
-  picnic: [shiftPlaza([60, 13]), shiftPlaza([65, 19])] as Vec2[],
+  picnic: [[14, 25.8], [19, 28.5], [14.5, 20], [19, 22]].map(([x, z]) => fromRect(cantina, [x, z])),
+  /** Jardín de mesas y parrilla: distribución estimada según la foto del 18/11. */
+  cantinaGarden: {
+    trees: [[12.5, 29], [11, 21.5], [22, 22]].map(([x, z]) => fromRect(cantina, [x, z])),
+    grill: { center: fromRect(cantina, [15, 33]), size: [3.65, 1.45], angle: cantina.angle + 0.72 } as Rect,
+  },
   /** Canteros con banco del cuadrado. */
   planters: [[54.4 + plazaShift, -10.9]].map(p => add([p[0], p[1]], [Z, 3.2])),
 } as const;

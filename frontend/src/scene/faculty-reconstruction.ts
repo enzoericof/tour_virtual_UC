@@ -5,7 +5,7 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { brushedSteel, elevatorLabel, type ElevatorModel } from "./elevator";
 import { makeGrassMaterial, makeMaterials } from "./materials";
 import { addCourtyardVegetation } from "./courtyard-vegetation";
-import { addCantinaTree } from "./cantina-tree";
+import { addCantinaGarden } from "./faculty/cantina-garden";
 import { createFacultyBuilder, galleryTileOffset, type Range } from "./faculty/builder";
 import { addRestroomTower } from "./faculty/restroom-tower";
 import { addManfredHall } from "./faculty/manfred-hall";
@@ -1683,24 +1683,11 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     }
   }
 
-  for (const [x, z] of plan.picnic) {
-    const dx = x - plan.cantina.center[0], dz = z - plan.cantina.center[1], a = plan.cantina.angle;
-    const lx = dx * Math.cos(a) + dz * Math.sin(a), lz = -dx * Math.sin(a) + dz * Math.cos(a);
-    const y = lx >= gardenBounds.minX && lx <= gardenBounds.maxX && lz >= gardenBounds.minZ && lz <= gardenBounds.maxZ
-      ? gardenHeight(lx, lz) : 0;
-    box(2.5, 0.06, 1, x, y + 0.77, z, m.metal);
-    for (const dz of [-0.85, 0.85]) {
-      registerSeats(layers.visual, 2.7, x, y + 0.43, z + dz, dz < 0 ? 1 : -1);
-      box(2.7, 0.08, 0.42, x, y + 0.43, z + dz, m.blue);
-      for (const dx of [-0.9, 0.9]) pole(0.035, 0.75, x + dx, y + 0.38, z + dz * 0.5);
-    }
-  }
+  addCantinaGarden(builder);
   addCourtyardVegetation(layers.visual, layers.solid);
   const [treeX, treeZ] = plan.tree2;
   box(2.8, 0.45, 0.6, treeX + 3, 0.225, treeZ - 2.5, m.brick, true);
   box(2.4, 0.45, 0.6, treeX + 3, 0.225, treeZ - 5, m.brick, true);
-  // Árbol personalizado de la cantina / mesas
-  addCantinaTree(layers.visual, layers.solid, plan.cantinaTree, plan.platform.some((p) => insidePolygon(plan.cantinaTree, p)) ? PLAZA_LEVEL : 0);
   mergeByMaterial(group);
   group.updateMatrixWorld(true); colliders.updateMatrixWorld(true);
   return { group, colliders, elevator };

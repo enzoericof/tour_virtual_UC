@@ -1,5 +1,6 @@
 import * as T from "three";
 import { facultyBlueprint as plan, type Vec2 } from "../data/faculty-blueprint";
+import { gardenMaterial } from "./faculty/garden-materials";
 
 /**
  * Árbol procedural frondoso de gran porte para el sector de la cantina / mesas.
@@ -26,22 +27,15 @@ export function addCantinaTree(
   const randRange = (min: number, max: number) => min + rand() * (max - min);
 
   // Materiales de corteza
-  const trunkBarkMat = new T.MeshStandardMaterial({
-    color: "#433427",
-    roughness: 0.96,
-    metalness: 0.01,
-  });
-  const branchBarkMat = new T.MeshStandardMaterial({
-    color: "#524132",
-    roughness: 0.92,
-    metalness: 0.01,
-  });
+  const trunkBarkMat = gardenMaterial("bark", "#6a6250");
+  const branchBarkMat = trunkBarkMat;
 
   type MeshBucket = {
     mat: T.MeshStandardMaterial;
     verts: number[];
     normals: number[];
     indices: number[];
+    uvs: number[];
   };
 
   const makeBucket = (mat: T.MeshStandardMaterial): MeshBucket => ({
@@ -49,6 +43,7 @@ export function addCantinaTree(
     verts: [],
     normals: [],
     indices: [],
+    uvs: [],
   });
 
   const trunkBucket = makeBucket(trunkBarkMat);
@@ -117,6 +112,7 @@ export function addCantinaTree(
 
         bucket.verts.push(vertex.x, vertex.y, vertex.z);
         bucket.normals.push(normal.x, normal.y, normal.z);
+        bucket.uvs.push(u * Math.max(.6, rStart * 4), t * curve.getLength() / 1.8);
       }
     }
 
@@ -512,6 +508,7 @@ export function addCantinaTree(
     geo.setAttribute("position", new T.Float32BufferAttribute(bucket.verts, 3));
     geo.setAttribute("normal", new T.Float32BufferAttribute(bucket.normals, 3));
     geo.setIndex(bucket.indices);
+    if (bucket.uvs.length) geo.setAttribute("uv", new T.Float32BufferAttribute(bucket.uvs, 2));
     geo.computeBoundingSphere();
 
     const mesh = new T.Mesh(geo, bucket.mat);
@@ -521,4 +518,5 @@ export function addCantinaTree(
   }
 
   group.add(treeGroup);
+  return treeGroup;
 }

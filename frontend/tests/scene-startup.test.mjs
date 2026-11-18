@@ -12,7 +12,7 @@ test("The complete faculty scene starts with the current blueprint and valid geo
   // Canvas drawing and image loading are browser services; this check builds the actual scene.
   const context = new Proxy({}, {
     get: (target, key) => {
-      if (key === "createRadialGradient") return () => ({ addColorStop() {} });
+      if (key === "createRadialGradient" || key === "createLinearGradient") return () => ({ addColorStop() {} });
       if (key === "measureText") return () => ({ width: 100 });
       return target[key] ?? (() => {});
     },
@@ -33,6 +33,25 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const grass = makeGrassMaterial();
     assert.ok(grass.map && grass.normalMap && !grass.displacementMap, "Grass has color and fine relief on the existing terrain");
     const { group, colliders, elevator } = createFaculty(grass);
+    const garden = group.getObjectByName("Jardín de mesas y parrilla de cantina");
+    assert.ok(garden, "Se construye el jardín de cantina");
+    assert.equal(garden.children.filter(o => o.userData.gardenTable).length, 4, "Hay cuatro conjuntos completos de mesas y asientos");
+    const gardenTrees = garden.children.filter(o => o.name.startsWith("Árbol del jardín de cantina"));
+    assert.equal(gardenTrees.length, 3, "Hay tres árboles grandes en el sector");
+    const { cantinaGardenFloor } = await server.ssrLoadModule("/src/scene/faculty/cantina-garden.ts");
+    for (const tree of gardenTrees) {
+      assert.ok(Math.abs(tree.position.y - cantinaGardenFloor([tree.position.x, tree.position.z])) < 1e-6,
+        "Los troncos apoyan en la altura real del jardín");
+    }
+    assert.ok(garden.getObjectByName("Parrilla antigua de cantina"), "La parrilla se incluye en el mismo modelo del recorrido");
+    const { collectSeats } = await server.ssrLoadModule("/src/scene/seating.ts");
+    assert.equal(collectSeats(garden).length, 16, "Los cuatro conjuntos ofrecen dieciséis plazas para sentarse");
+    for (const [x, z] of plan.picnic) {
+      const floor = cantinaGardenFloor([x, z]);
+      const [hit] = new Raycaster(new Vector3(x, floor + 1.1, z), new Vector3(0, -1, 0), 0, 1.2)
+        .intersectObject(colliders, true);
+      assert.ok(hit && Math.abs(hit.point.y - floor - .78) < .06, "Cada mesa tiene colisión a la altura de su tablero");
+    }
     const { group: context } = createCampusContext(grass);
     const ground = context.getObjectByName("Terreno continuo");
     assert.equal(ground.material, grass, "The base terrain uses the same grass material as the garden");
