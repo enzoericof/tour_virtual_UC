@@ -392,3 +392,10 @@ El intento de Maven Wrapper verify no pudo iniciar porque el Wrapper no logra re
 ## Falso bloqueo en PC (18/11/2026)
 
 Retirada la condición que clasificaba como móvil cualquier dispositivo con pointer:coarse sin any-pointer:fine. También puede cumplirse en PCs Windows y laptops táctiles. La regresión comprueba inicio normal con esas señales y 0, 1 o 10 puntos táctiles; se conserva el bloqueo explícito de Android, iPhone e iPad. No se pudo medir directamente qué señales informó la PC de la captura; el código confirma que esa combinación provocaba el falso bloqueo.
+
+
+## Retiro de borrado y personalización (18/11/2026)
+
+54 pruebas frontend y compilación TypeScript/Vite correctas, incluida la construcción del escenario y sus colisiones. Las clases Java compilaron y las tres pruebas PresenceSocketTest pasaron con el POM temporal sin el starter de sesión no disponible, ya descrito arriba. La consulta de presencia conserva las apariencias existentes; se retiró la acción que las modificaba. La persistencia de borrados locales dejó de aplicarse. No se cambiaron datos en Neon.
+
+Revisión en Chrome con los componentes reales de menú y una cuenta ficticia en una página local aislada: Más opciones ya no contiene borrado/restauración; Mi cuenta ya no contiene selector ni guardado de ropa. La página de prueba no abre conexiones reales ni está incluida en la compilación.

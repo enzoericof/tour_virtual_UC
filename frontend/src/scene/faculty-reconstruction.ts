@@ -1718,7 +1718,7 @@ function mergeByMaterial(root: T.Group) {
   const inverse = root.matrixWorld.clone().invert();
   const buckets = new Map<T.Material, Map<number, T.BufferGeometry[]>>(), merged: T.Object3D[] = [];
   root.traverse((o) => {
-    if (!(o instanceof T.Mesh) || o instanceof T.InstancedMesh || o.userData.keep || o.userData.removalLabel || Array.isArray(o.material)
+    if (!(o instanceof T.Mesh) || o instanceof T.InstancedMesh || o.userData.keep || Array.isArray(o.material)
       || o.material.transparent) return;
     let geo = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()) as T.BufferGeometry;
     for (const name of Object.keys(geo.attributes)) if (!["position", "normal", "uv"].includes(name)) geo.deleteAttribute(name);

@@ -61,7 +61,6 @@ body.in-tour .tour-panel .form-error, [data-theme="dark"] .tour-panel .form-erro
 .tour-menu span { max-width: 94px; overflow: hidden; text-overflow: ellipsis; }
 .account-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
 .account-actions .text-btn { grid-column: 1 / -1; justify-self: start; }
-#skin-form { padding: 18px; background: var(--surface-tint); border: 1px solid var(--surface-border); border-radius: 14px; }
 .register-fields { display: grid; gap: 16px; padding: 0; margin: 0; border: 0; min-width: 0; }
 .form-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-columns label { min-width: 0; }

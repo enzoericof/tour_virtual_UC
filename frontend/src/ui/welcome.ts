@@ -17,7 +17,7 @@ export async function enterCampus(root: HTMLElement): Promise<InitialSession> {
     </section>
     <section class="welcome-card tour-panel" aria-labelledby="welcome-title">
       <span class="eyebrow">VISITA VIRTUAL UC</span><h2 id="welcome-title">Tu próxima visita empieza acá.</h2>
-      <p class="subtle">Ingresá para encontrarte con la comunidad y elegir tu apariencia.</p>
+      <p class="subtle">Ingresá para encontrarte con la comunidad y compartir el recorrido.</p>
       <div id="welcome-auth"><p role="status" class="session-loading">Reconociendo tu sesión…</p></div>
       <div class="welcome-guest"><span>¿Solo querés conocer el campus?</span><button type="button" id="welcome-guest" class="text-btn">Explorar como invitado</button></div>
       <p class="welcome-footnote">Para PC o laptop · Teclado y mouse</p>

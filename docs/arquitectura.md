@@ -24,7 +24,7 @@ El commit `9c5d019` retiró `backend/`. Sus contratos históricos de contenido y
 
 ## Usuarios, sesiones y multijugador en campus-backend
 
-El visor usa `/api/auth/registro`, `/api/auth/login`, `/api/auth/me`, `/api/auth/logout` y `/api/auth/skin`. Las escrituras requieren el token de `GET /api/auth/csrf`. El inicio de sesión rota el identificador de la sesión existente y restaura la identidad de Spring Security a través de la cookie HttpOnly. La tabla `usuarios` guarda los perfiles. V8 agrega `skin` con valor inicial `azul` para cuentas previas. Los valores admitidos son `azul`, `verde`, `terracota` y `violeta`.
+El visor usa `/api/auth/registro`, `/api/auth/login`, `/api/auth/me` y `/api/auth/logout`. Las escrituras requieren el token de `GET /api/auth/csrf`. El inicio de sesión rota el identificador de la sesión existente y restaura la identidad de Spring Security a través de la cookie HttpOnly. La tabla `usuarios` guarda los perfiles. V8 agrega `skin` con valor inicial `azul` para cuentas previas. Los valores admitidos son `azul`, `verde`, `terracota` y `violeta`.
 
 `/ws/presence` es un WebSocket JSON autenticado con la sesión HTTP. Spring admite el mismo origen y los orígenes adicionales enumerados en `CAMPUS_FRONTEND_ORIGINS`, separados por comas. La configuración del proxy para el equipo está en el [inicio con multijugador](../README.md#inicio-con-multijugador). El cliente envía posición de los pies, orientación y marcha en coordenadas del mundo hasta 10 Hz cuando cambian; quieto manda un ping cada cinco segundos. La respuesta identifica la conexión propia y contiene la lista de avatares visibles. El servidor asigna nombre e identidad y carga la apariencia guardada. El visor interpola el movimiento. Al volver a la vista general, desconectarse o cerrar sesión se retira el avatar. Las posiciones son efímeras y el ascensor todavía se simula por cliente.
 
@@ -96,3 +96,10 @@ Antes de construir el visor, `tour.ts` presenta `ui/welcome.ts` y hace una sola 
 La cookie `JSESSIONID` usa Path=/, HttpOnly, SameSite=Lax y duración de 30 días; la caducidad de sesión del servidor y de Spring Session también es de 30 días de inactividad. HTTPS conserva la detección de cookie segura mediante las cabeceras del proxy. La contraseña y los identificadores de sesión no se guardan en localStorage. El cierre de sesión invalida la sesión en el servidor. La preferencia visual continúa usando localStorage. Configuración documentada por Spring: https://docs.spring.io/spring-boot/appendix/application-properties/ y https://docs.spring.io/spring-session/reference/configuration/common.html .
 
 `ui/tour-theme.css` comparte el mismo material, borde, radios, fuentes y colores entre barra principal, cuenta, biblioteca, chat, administración, ayuda y acceso. Los temas claro/oscuro y el modo a pie seleccionan la misma variante para todos los paneles. Al abrir un diálogo se cierra el desplegable previo.
+
+
+## Funciones retiradas del recorrido (18/11/2026)
+
+Se retiraron Eliminar objeto y Restaurar objetos eliminados del menú público del recorrido, sus manejadores de selección y confirmación, y el registro y aplicación de borrados locales. La clave histórica `cyt-scene-removals-v1` ya no se lee: el campus vuelve a construirse completo con sus colisiones. Se quitaron las exclusiones del agrupado de mallas que solo necesitaba la selección para borrar. No se modifican las coordenadas ni las dimensiones del modelo.
+
+Mi cuenta ya no ofrece selector ni guardado de apariencia; también se retiraron `PUT /api/auth/skin`, el servicio de cambio y la actualización de apariencia en presencia. La columna existente de la base y las paletas se conservan para mostrar los avatares ya guardados. La bienvenida ya no anuncia personalización.

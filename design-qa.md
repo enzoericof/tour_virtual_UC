@@ -352,3 +352,6 @@ Asientos: cámara a altura sentada, aviso E para sentarse/levantarse y retorno a
 18/11/2026: bienvenida con acceso previo al visor, formulario reutilizado, sesión recuperada tras recarga en Chrome. Cuenta revisada en claro y oscuro; el fondo calculado del diálogo coincide con la barra principal. Biblioteca y ayuda heredan el mismo material; sin rediseñar la escena. Entorno y límites de la prueba en docs/verificacion.md.
 
 18/11/2026: botón «Esc · Pausar» con el mismo fondo translúcido, esquinas y tipografía que «E · Sentarse», mediante estilos compartidos. Conserva su acción de pausa y su posición. Pasaron las 53 pruebas del frontend y la compilación de producción. Revisión visual pendiente: Chrome no pudo conectarse al servidor local durante la comprobación.
+
+
+18/11/2026: comprobados los menús del recorrido sin Eliminar/Restaurar objetos y cuenta sin selector de ropa en .local/menu-removal-preview.html, con cuenta ficticia y sin backend real. Pruebas del escenario y build correctos.

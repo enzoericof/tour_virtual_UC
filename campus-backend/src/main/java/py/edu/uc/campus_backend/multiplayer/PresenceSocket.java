@@ -129,11 +129,6 @@ public class PresenceSocket extends TextWebSocketHandler {
         return value != null && Double.isFinite(value) && Math.abs(value) <= max;
     }
 
-    public void updateSkin(long userId, String skin) {
-        skins.put(userId, skin);
-        lastChange = System.nanoTime();
-    }
-
     // PostgreSQL queda en otro hilo: nunca frena los mensajes del recorrido.
     @Scheduled(fixedDelay = 200, scheduler = "presenceSync")
     public void synchronizePresence() {

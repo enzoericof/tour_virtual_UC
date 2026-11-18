@@ -6,4 +6,3 @@ export const skins = {
 } as const;
 
 export type Skin = keyof typeof skins;
-export const skinIds = Object.keys(skins) as Skin[];

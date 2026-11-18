@@ -1,6 +1,5 @@
-import { skinIds, skins, type Skin } from "../data/skins";
 import type { TourEngine } from "../scene/engine";
-import { api, logout, type User } from "../services/api";
+import { logout, type User } from "../services/api";
 import { CampusChat } from "../services/chat";
 import { CampusPresence } from "../services/presence";
 import { element, escapeHtml } from "./dom";
@@ -36,25 +35,8 @@ export function mountCommunity(
   function account() {
     if (user) {
       openDialog(
-        `<span class="eyebrow">MI CUENTA</span><h2>Hola, ${escapeHtml(user.name)}</h2><p>${escapeHtml(user.email)}</p><p class="subtle">${user.role === "ADMIN" ? "Administrador de contenidos" : "Miembro de la comunidad"}</p><p class="subtle" id="presence-status">${escapeHtml(presenceStatus)}</p><form id="skin-form"><label>Apariencia<select name="skin">${skinIds.map(id => `<option value="${id}" ${id === user?.skin ? "selected" : ""}>${skins[id].name}</option>`).join("")}</select></label><button class="secondary">Guardar apariencia</button><p class="form-error" role="alert"></p></form><div class="account-actions"><button class="primary" id="my-works">Mis trabajos</button><button class="secondary" id="community-chat">Chat del campus</button>${user.role === "ADMIN" ? '<button class="secondary" id="manage-panels">Administrar paneles</button>' : ""}<button class="text-btn" id="logout">Cerrar sesión</button></div>`,
+        `<span class="eyebrow">MI CUENTA</span><h2>Hola, ${escapeHtml(user.name)}</h2><p>${escapeHtml(user.email)}</p><p class="subtle">${user.role === "ADMIN" ? "Administrador de contenidos" : "Miembro de la comunidad"}</p><p class="subtle" id="presence-status">${escapeHtml(presenceStatus)}</p><div class="account-actions"><button class="primary" id="my-works">Mis trabajos</button><button class="secondary" id="community-chat">Chat del campus</button>${user.role === "ADMIN" ? '<button class="secondary" id="manage-panels">Administrar paneles</button>' : ""}<button class="text-btn" id="logout">Cerrar sesión</button></div>`,
       );
-      element<HTMLFormElement>("#skin-form").onsubmit = async event => {
-        event.preventDefault();
-        const form = event.currentTarget as HTMLFormElement;
-        const accountUser = user;
-        const skin = new FormData(form).get("skin") as Skin;
-        const button = form.querySelector("button")!;
-        button.disabled = true;
-        try {
-          await api("/auth/skin", { method: "PUT", body: JSON.stringify({ skin }) });
-          if (accountUser && user === accountUser) user.skin = skin;
-          toast("Apariencia guardada.");
-        } catch (error) {
-          form.querySelector(".form-error")!.textContent = (error as Error).message;
-        } finally {
-          button.disabled = false;
-        }
-      };
       element("#my-works").onclick = () => void library();
       element("#community-chat").onclick = openChat;
       const panelsButton = document.querySelector<HTMLButtonElement>("#manage-panels");
@@ -92,7 +74,7 @@ export function mountCommunity(
     accountButton.setAttribute("aria-haspopup", user ? "true" : "dialog");
     if (user) presence.start();
     else presence.stop();
-    element("#account-details span").textContent = user ? "Mi cuenta y apariencia" : "Ingresar o crear cuenta";
+    element("#account-details span").textContent = user ? "Mi cuenta" : "Ingresar o crear cuenta";
     element("#account-works span").textContent = user ? "Mis trabajos" : "Biblioteca de trabajos";
     element("#account-chat").classList.toggle("hidden", !user);
     element("#account-panels").classList.toggle("hidden", user?.role !== "ADMIN");
