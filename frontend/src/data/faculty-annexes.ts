@@ -18,11 +18,14 @@ function annex(id: string, name: string, u: number, v: number, w: number, d: num
   return { id, name, rect, height, outline, mapCenter: [u, v],
     entrance: annexPoint(u, v + d / 2 + 2.5), front: annexPoint(u, v + d / 2) };
 }
+const officeShiftU = -7.75, officeShiftV = 7.9;
 function office(id: string, name: string, v: number, w: number, d: number): Annex {
-  const b = annex(id, name, -45.7, v, d, w);
+  v += officeShiftV;
+  const u = -45.7 + officeShiftU;
+  const b = annex(id, name, u, v, d, w);
   b.rect.angle -= Math.PI / 2;
-  b.entrance = annexPoint(-45.7 + w / 2 + 2.5, v);
-  b.front = annexPoint(-45.7 + w / 2, v);
+  b.entrance = annexPoint(u + w / 2 + 2.5, v);
+  b.front = annexPoint(u + w / 2, v);
   return b;
 }
 // Frente de Kampus Print al fondo del pasillo, orientado hacia la plaza.
@@ -64,7 +67,7 @@ export const facultyAnnexes: Annex[] = [
   maquetas,
   kampusPrint,
   dicia,
-  annex("dei-led", "DEI–LED", -4.2, -27.8, 28.8, 12, 4.4),
+  annex("dei-led", "DEI–LED", ...annexCoordinates(plan.electronics.center), 28.8, 12, 7.2),
   office("led", "LED", -24.8, 9.2, 11.6),
   office("da-cap", "DA / CAP", -14.5, 9.2, 9),
   office("das", "DAS", -5.6, 9.2, 8.6),
@@ -75,6 +78,10 @@ export const facultyAnnexes: Annex[] = [
 // a la pared lateral de DEI–LED. Las cotas se derivan de los pabellones existentes.
 const led = facultyAnnexes.find((building) => building.id === "led")!;
 const dei = facultyAnnexes.find((building) => building.id === "dei-led")!;
+/** Único acceso exterior del DEI: lateral derecho, cerca del fondo. */
+export const deiSideDoor = { center: [-11.4, -6] as Vec2, width: 1.3, height: 2.45 };
+dei.front = fromRect(dei.rect, deiSideDoor.center);
+dei.entrance = fromRect(dei.rect, [deiSideDoor.center[0], deiSideDoor.center[1] - 2]);
 const linkStartU = led.mapCenter[0] + led.rect.size[1] / 2;
 const linkEndU = dei.mapCenter[0] - dei.rect.size[0] / 2;
 const linkCenterU = (linkStartU + linkEndU) / 2;
@@ -90,30 +97,57 @@ export const annexEnclosedLink = {
   clearWidth: 3,
   openingHeight: 3.1,
   // El acceso lateral da a la galería de oficinas.
-  sideDoorX: -28 - linkCenterU,
+  sideDoorX: -28 + officeShiftU - linkCenterU,
   sideDoorWidth: 2.1,
   portals: [
     { annexId: led.id, center: [0, led.rect.size[1] / 2] as Vec2 },
     { annexId: dei.id, center: [-dei.rect.size[0] / 2, linkV - dei.mapCenter[1]] as Vec2 },
   ],
 };
+// Sendero desde la galería azul, junto a la fachada exterior del DEI–LED.
+const coveredWalkU = annexCoordinates(plan.coveredWalk[0])[0];
+const outerWalkV = dei.mapCenter[1] - dei.rect.size[1] / 2 - 2.0;
+export const deiGardenPath: Vec2[] = [
+  [coveredWalkU, outerWalkV + 9.75],
+  [21, outerWalkV + 5.35],
+  [11, outerWalkV + 5.55],
+  [6.0, outerWalkV + 4.8],
+  [5.5, outerWalkV + 0.6],
+  [1.2, outerWalkV - 0.2],
+  [-6, outerWalkV - 0.1],
+  [-18, outerWalkV - 0.25],
+  [dei.mapCenter[0] - dei.rect.size[0] / 2 - 3, outerWalkV - 0.55],
+].map(([u, v]) => annexPoint(u, v));
+/** Seto limitado a la L marcada por Horacio junto al empalme del jardín. */
+export const gardenWalkHedge: Vec2[] = (() => {
+  const [a, b] = plan.coveredWalk, length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const dx = (b[0] - a[0]) / length, dz = (b[1] - a[1]) / length;
+  const origin = deiGardenPath[0], branch = deiGardenPath[1];
+  const along = (origin[0] - a[0]) * dx + (origin[1] - a[1]) * dz;
+  const side = Math.sign((branch[0] - origin[0]) * -dz + (branch[1] - origin[1]) * dx);
+  return [[along - 4.4, 1.85], [along - 1.5, 1.85], [along - 1.3, 3.0]]
+    .map(([d, offset]): Vec2 => [a[0] + dx * d - dz * side * offset, a[1] + dz * d + dx * side * offset]);
+})();
 /** Circuito exterior: evita atravesar los edificios y llega al sendero existente detrás de Manfred. */
 const officeIds = new Set(["led", "da-cap", "das"]);
+const officeWalkU = -38 + officeShiftU;
 export const annexPaths: Vec2[][] = [
-  [[-38,-36],[-38,-18],[-38,-9],[-38,bypassV],[bypassU,bypassV],[bypassU,23],[-55,23],[-55,48],[-38,48],[30,48],[printU + 8,48],[57.1,48]].map(([u,v])=>annexPoint(u,v)),
+  [[officeWalkU,-36 + officeShiftV],[officeWalkU,-18 + officeShiftV],[officeWalkU,-9 + officeShiftV],[officeWalkU,bypassV],[bypassU,bypassV],[bypassU,23],[-55,23],[-55,48],[-38,48],[30,48],[printU + 8,48],[57.1,48]].map(([u,v])=>annexPoint(u,v)),
+  [annexPoint(-45.7 + officeShiftU + 9.2 / 2 + 0.3, dg.mapCenter[1]), annexPoint(officeWalkU, dg.mapCenter[1]), annexPoint(officeWalkU, bypassV)],
   // Maquetas y DG ya tienen su punto de visita sobre los caminos principales.
   ...facultyAnnexes.filter(b => b !== maquetas && b !== dg).map((b): Vec2[] => {
     const [u,v] = b.mapCenter;
-    if (officeIds.has(b.id)) return [b.entrance, annexPoint(-38,v)];
+    if (b === dei) return [b.entrance, annexPoint(u + deiSideDoor.center[0], outerWalkV - 0.4)];
+    if (officeIds.has(b.id)) return [b.entrance, annexPoint(officeWalkU,v)];
     if (b.id === "kampus-print") return [plan.plazaPassage.foot, b.entrance, annexPoint(u + 8, v - 4.8), annexPoint(u + 8, 48)];
     if (b.id === "cta-dicia") return [b.entrance,annexPoint(u,48),annexPoint(-38,48)];
-    return [b.entrance,annexPoint(-38,v+b.rect.size[1]/2+2.5)];
+    return [b.entrance,annexPoint(officeWalkU,v+b.rect.size[1]/2+2.5)];
   }),
   [annexPoint(57.1,48), annexPoint(70,48), [0,-22]],
 ];
 export const annexCoveredPaths: Vec2[][] = [
   // Solo continúa la galería exterior del ala de oficinas, desde la puerta del corredor.
-  [[-38,linkV + annexEnclosedLink.rect.size[1] / 2],[-38,-9]].map(([u,v])=>annexPoint(u,v)),
+  [[officeWalkU,linkV + annexEnclosedLink.rect.size[1] / 2],[officeWalkU,-9 + officeShiftV]].map(([u,v])=>annexPoint(u,v)),
 ];
 export const annexVisitTargets: Record<string, [number, number, number]> = Object.fromEntries(
   facultyAnnexes.map((b)=>[b.id,[b.front[0],1.7,b.front[1]]]),

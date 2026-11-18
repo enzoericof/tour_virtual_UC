@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { facultyAnnexes, annexPaths } from "../src/data/faculty-annexes.ts";
+import { facultyAnnexes, annexPaths, deiGardenPath } from "../src/data/faculty-annexes.ts";
 import { facultyBlueprint as plan, rectCorners, manfredOutline, facultyVisitPoints } from "../src/data/faculty-blueprint.ts";
+import { cantinaPatioStair, inCantina } from "../src/data/cantina-terrain.ts";
 import { insidePolygon } from "../src/data/campus-geometry.ts";
 const footprints = facultyAnnexes.map((b)=>b.outline.map(([x,z])=>[
  b.rect.center[0]+x*Math.cos(b.rect.angle)-z*Math.sin(b.rect.angle),
@@ -15,7 +16,7 @@ test("The eight annexes have distinct ids and arrivals outside every building",(
    assert.ok(!insidePolygon(b.entrance,polygon),`${b.name}: arrival inside building`);
 });
 test("New pedestrian routes do not cut across existing or added buildings",()=>{
- for(const points of annexPaths) for(let i=1;i<points.length;i++) {
+ for(const points of [...annexPaths, deiGardenPath]) for(let i=1;i<points.length;i++) {
   const a=points[i-1],b=points[i],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])*4);
   for(let k=0;k<=n;k++) { const t=n?k/n:0,p=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
    for(const polygon of [...footprints,...existing]) assert.ok(!insidePolygon(p,polygon),`Path crosses building at ${p}`);
@@ -32,4 +33,12 @@ test("Kampus Print is visible straight ahead from the covered plaza passage", ()
     const point = start.map((coord, axis) => coord + (target[axis] - coord) * i / 40);
     assert.ok(!existing.some(outline => insidePolygon(point, outline)), "The sightline stays outside the other buildings");
   }
+});
+
+test("DEI–LED respeta la terraza lateral, sus escalones y una franja de césped", () => {
+ const dei = facultyAnnexes.find(b => b.id === "dei-led");
+ const nearest = Math.min(...rectCorners(dei.rect).map(p => inCantina(p)[0]));
+ const stairEdge = cantinaPatioStair.startX + cantinaPatioStair.run;
+ assert.ok(nearest >= stairEdge + 3 - 1e-6, `Separación desde la escalera: ${nearest - stairEdge} m`);
+ assert.deepEqual(dei.rect.center, plan.electronics.center);
 });

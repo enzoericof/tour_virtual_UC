@@ -62,7 +62,7 @@ export function gardenHeight(x: number, z: number): number {
   const startHeight = plan.plazaGallery.smallSteps.bottom;
   const pavement = startHeight * (1 - t) + coveredWalkSurface.endHeight * t
     + 3 * coveredWalkSurface.controlLift * t * (1 - t);
-  const cut = Math.max(0, height - (pavement - 0.03));
+  const cut = Math.max(0, height - Math.max(0.008, pavement - 0.14));
   height -= cut * (1 - blendToLawn * blendToLawn * (3 - 2 * blendToLawn));
 
   // El césped se mantiene por debajo del último peldaño y recupera su cota fuera de la escalera.

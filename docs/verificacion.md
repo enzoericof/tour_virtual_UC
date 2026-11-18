@@ -399,3 +399,21 @@ Retirada la condición que clasificaba como móvil cualquier dispositivo con poi
 54 pruebas frontend y compilación TypeScript/Vite correctas, incluida la construcción del escenario y sus colisiones. Las clases Java compilaron y las tres pruebas PresenceSocketTest pasaron con el POM temporal sin el starter de sesión no disponible, ya descrito arriba. La consulta de presencia conserva las apariencias existentes; se retiró la acción que las modificaba. La persistencia de borrados locales dejó de aplicarse. No se cambiaron datos en Neon.
 
 Revisión en Chrome con los componentes reales de menú y una cuenta ficticia en una página local aislada: Más opciones ya no contiene borrado/restauración; Mi cuenta ya no contiene selector ni guardado de ropa. La página de prueba no abre conexiones reales ni está incluida en la compilación.
+
+### LED y caminero del jardín — 18/11/2026
+
+Revisión en navegador con vistas cercanas de fachada y sendero: ventanas visibles detrás de la franja central azul, ladrillo libre arriba y abajo, tramos de pavimento con juntas abiertas y bordes ondulados. Comprobación automatizada del trazado para evitar edificios; pruebas del frontend y compilación satisfactorias.
+
+Corrección posterior del 18/11: revisión cercana de ambos laterales y del caminero desde arriba. Prueba de colisión confirma el cierre del antiguo acceso y un paso libre de 60 cm centrado en la puerta nueva. Pasaron las 54 pruebas del frontend y la compilación.
+
+Caminero elevado del LED (18/11): vistas en navegador a nivel peatonal y desde arriba confirman cantos expuestos, juntas, separación y empalme con la carpa. La prueba de escena comprueba espesor y colisión superior/lateral de las losas; las 54 pruebas del frontend y la compilación pasaron.
+
+Unión del piso bajo carpa con LED (18/11): revisión en navegador desde el propio piso y desde arriba; material continuo y sin parche de losas superpuestas. La prueba de escena comprueba que las losas quedan fuera de la senda cubierta y que los vértices del encuentro comparten su altura. Pasaron las 54 pruebas del frontend y la compilación.
+
+Losas separadas bajo carpa (18/11): revisión frontal y lateral en navegador confirma piezas independientes con cantos y juntas abiertas. La prueba de escena exige volumen en cada losa, conserva las cotas de piso transitable y comprueba mediante rayos que no exista una superficie continua cerrando las juntas. Pasaron las 54 pruebas del frontend y la compilación.
+
+Uniones y canales (18/11): vistas en navegador de la pieza en T, del giro final y de la sección abierta de las canaletas. Rayos comprueban la cobertura a todo el ancho de la unión y la ausencia de tapas superpuestas tanto en la T como en el giro. Se conservan las juntas reales y la pendiente. Pasaron las 54 pruebas y la compilación.
+
+Ramal, apoyos y seto (18/11): revisión en navegador del piso hacia Bloque G, los postes junto a canales y la franja vegetal desde arriba. La prueba de escena confirma losas y pieza de unión en el ramal y exige espacio libre de canaleta bajo el centro y el contorno de los apoyos principales. Pasaron las 54 pruebas del frontend y la compilación.
+
+Seto según foto (18/11): vista cercana en navegador confirma copa rectangular de hojas pequeñas y troncos visibles con bifurcación; emplazamiento en L conservado. Pruebas del frontend y compilación satisfactorias.

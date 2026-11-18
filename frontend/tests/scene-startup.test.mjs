@@ -1,5 +1,6 @@
 import { Box3, PerspectiveCamera, Ray, Raycaster, Vector2, Vector3 } from "three";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
+import { facultyAnnexes, deiSideDoor, deiGardenPath } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -74,20 +75,105 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       const [cover] = new Raycaster(at, new Vector3(0, -1, 0), 0, 0.24).intersectObject(group, true);
       assert.ok(cover, "The blue canopy meets the roof face across its width");
     }
-    // El suelo visible y el de colisión comparten la misma malla de césped.
+    // LED: pared cerrada hacia cantina y acceso real por el otro lateral, al fondo.
+    const dei = facultyAnnexes.find(b => b.id === "dei-led");
+    const traceDei = (x, z, toZ) => {
+      const a = fromRect(dei.rect, [x, z]), b = fromRect(dei.rect, [x, toZ]);
+      const origin = new Vector3(a[0], 1.2, a[1]);
+      const destination = new Vector3(b[0], 1.2, b[1]);
+      return new Raycaster(origin, destination.clone().sub(origin).normalize(), 0,
+        origin.distanceTo(destination)).intersectObject(colliders, true);
+    };
+    assert.ok(traceDei(0, 7, 5).length, "La antigua puerta hacia cantina queda cerrada por colisión");
+    for (const offset of [-0.3, 0, 0.3])
+      assert.equal(traceDei(deiSideDoor.center[0] + offset, -7, -5).length, 0,
+        "La nueva puerta derecha deja pasar al visitante");
+    // El sendero del LED debe tener espesor y colisión en la tapa y en sus cantos.
+    const gardenSlabs = colliders.children.filter(o => o.userData.gardenSlab);
+    assert.ok(gardenSlabs.length > 10, "El caminero conserva sus tramos separados");
+    const slab = gardenSlabs[Math.floor(gardenSlabs.length / 2)];
+    const bounds = new Box3().setFromObject(slab), center = bounds.getCenter(new Vector3());
+    assert.ok(bounds.max.y - bounds.min.y >= 0.13, "Las losas tienen volumen real");
+    const [topHit] = new Raycaster(new Vector3(center.x, bounds.max.y + 1, center.z),
+      new Vector3(0, -1, 0), 0, 2).intersectObject(slab);
+    assert.ok(topHit && topHit.face.normal.y > 0.9, "La tapa elevada es transitable");
+    const sideHit = new Raycaster(new Vector3(bounds.max.x + 1, center.y, center.z),
+      new Vector3(-1, 0, 0), 0, bounds.max.x - bounds.min.x + 2).intersectObject(slab);
+    assert.ok(sideHit.length, "El canto de la losa también tiene colisión");
+    // Una sola pieza recibe el ramal del LED: sin tapas dobles ni huecos en el cruce.
+    const junction = colliders.children.find(o => o.userData.walkJunction === "LED");
+    assert.ok(junction, "Existe una pieza única para la unión lateral");
+    const [ja, jb] = deiGardenPath;
+    const jLength = Math.hypot(jb[0] - ja[0], jb[1] - ja[1]);
+    const jx = (jb[0] - ja[0]) / jLength, jz = (jb[1] - ja[1]) / jLength;
+    for (let along = 0.1; along < 2.35; along += 0.2) for (const side of [-0.5, 0, 0.5]) {
+      const origin = new Vector3(ja[0] + jx * along - jz * side, 1,
+        ja[1] + jz * along + jx * side);
+      const hits = new Raycaster(origin, new Vector3(0, -1, 0), 0, 1.5).intersectObject(colliders, true);
+      assert.ok(hits[0] && hits[0].object === junction, "La unión tiene piso completo a todo su ancho");
+      const topBodies = new Set(hits.filter(hit => hit.face.normal.y > 0.5
+        && Math.abs(hit.point.y - hits[0].point.y) < 0.005).map(hit => hit.object));
+      assert.equal(topBodies.size, 1, "La unión no superpone losas");
+    }
+    assert.ok(colliders.children.some(o => o.userData.walkChannel), "Se construyeron canales laterales con sección real");
+    const blockBranchSlabs = colliders.children.filter(o => o.userData.segmentedWalk === "Ramal segmentado al Bloque G");
+    assert.ok(blockBranchSlabs.length >= 4, "El ramal al bloque también tiene losas separadas");
+    assert.ok(colliders.children.some(o => o.userData.walkJunction === "Bloque G"), "El ramal al bloque tiene su pieza de unión");
+    const channelBodies = colliders.children.filter(o => o.userData.walkChannel);
+    const posts = [];
+    group.traverse(o => { if (o.userData.walkCanopyPost) posts.push(o); });
+    assert.ok(posts.length >= 12, "Se revisan los apoyos de ambos lados de la carpa");
+    for (const post of posts) for (let k = 0; k < 6; k++) {
+      const origin = post.getWorldPosition(new Vector3()); origin.y = 1;
+      origin.x += Math.cos(k / 6 * Math.PI * 2) * 0.045;
+      origin.z += Math.sin(k / 6 * Math.PI * 2) * 0.045;
+      assert.equal(new Raycaster(origin, new Vector3(0, -1, 0), 0, 2).intersectObjects(channelBodies).length, 0,
+        "Ningún apoyo ni su perímetro invade una canaleta");
+    }
+    // Bajo carpa también hay piezas con volumen y huecos reales entre ellas.
+    const coveredSlabs = colliders.children.filter(o => o.userData.segmentedWalk === "Caminero bajo carpa");
+    assert.ok(coveredSlabs.length >= 12, "El piso bajo carpa está dividido en losas");
     const [[ax, az], [bx, bz]] = plan.coveredWalk;
     const length = Math.hypot(bx - ax, bz - az);
-    const { width: walkWidth, endHeight, controlLift } = coveredWalkSurface;
-    for (const t of [0.08, 0.2, 0.35, 0.45, 0.55, 0.75, 0.95]) {
-      const y = plan.plazaGallery.smallSteps.bottom * (1 - t) + endHeight * t + 3 * controlLift * t * (1 - t);
-      for (const offset of [-walkWidth / 2 + 0.02, 0, walkWidth / 2 - 0.02]) {
-        const point = new Vector3(ax + (bx - ax) * t - (bz - az) * offset / length, y + 0.5,
-          az + (bz - az) * t + (bx - ax) * offset / length);
-        const [surface] = new Raycaster(point, new Vector3(0, -1, 0), 0, 1).intersectObject(colliders, true);
-        assert.ok(surface && Math.abs(surface.point.y - y) < 0.005,
-          `Covered walkway remains exposed at t=${t}, offset=${offset}`);
-      }
+    const { endHeight, controlLift } = coveredWalkSurface;
+    const expectedY = t => plan.plazaGallery.smallSteps.bottom * (1 - t) + endHeight * t + 3 * controlLift * t * (1 - t);
+    const ranges = coveredSlabs.map(body => {
+      const p = body.geometry.attributes.position, n = body.geometry.attributes.normal;
+      const cap = [];
+      for (let i = 0; i < p.count; i++) if (n.getY(i) > 0.9)
+        cap.push(new Vector3().fromBufferAttribute(p, i));
+      const middle = cap.reduce((v, p) => v.add(p), new Vector3()).multiplyScalar(1 / cap.length);
+      const t = ((middle.x - ax) * (bx - ax) + (middle.z - az) * (bz - az)) / (length * length);
+      const sample = body.userData.walkJunction ? new Vector3(ax + (bx - ax) * t, middle.y, az + (bz - az) * t) : middle;
+      const [hit] = new Raycaster(sample.clone().add(new Vector3(0, 0.4, 0)), new Vector3(0, -1, 0), 0, 1).intersectObject(body);
+      if (t >= 0 && t <= 1) assert.ok(hit && Math.abs(hit.point.y - expectedY(t)) < 0.008, "Cada losa conserva la pendiente transitable");
+      const box = new Box3().setFromObject(body);
+      assert.ok(box.max.y - box.min.y >= 0.13, "Hay cantos y espesor bajo carpa");
+      const along = cap.map(p => ((p.x - ax) * (bx - ax) + (p.z - az) * (bz - az)) / length);
+      return [Math.min(...along), Math.max(...along)];
+    }).sort((a, b) => a[0] - b[0]);
+    let openJoints = 0;
+    for (let i = 1; i < ranges.length; i++) {
+      const t = (ranges[i - 1][1] + ranges[i][0]) / 2 / length;
+      if (t < 0.68 || t > 0.95) continue;
+      const y = expectedY(t), point = new Vector3(ax + (bx - ax) * t, y + 0.3, az + (bz - az) * t);
+      const [hit] = new Raycaster(point, new Vector3(0, -1, 0), 0, 1).intersectObject(colliders, true);
+      assert.ok(!hit || hit.point.y < y - 0.02, "Las juntas no tienen una cinta de piso continua por debajo");
+      openJoints++;
     }
+    assert.ok(openJoints >= 3, "Hay varias juntas físicamente abiertas bajo carpa");
+    // El giro al final usa una sola huella, sin dos caminos encimados.
+    const incoming = new Vector3(bx - ax, 0, bz - az).normalize();
+    const outgoing = new Vector3(55 - bx, 0, 37 - bz).normalize();
+    let cornerCoverage = 0;
+    for (const u of [-0.25, 0, 0.25]) for (const v of [-0.25, 0, 0.25]) {
+      const origin = new Vector3(bx, 0.5, bz).addScaledVector(incoming, u).addScaledVector(outgoing, v);
+      const hits = new Raycaster(origin, new Vector3(0, -1, 0), 0, 1).intersectObjects(coveredSlabs);
+      const tops = new Set(hits.filter(hit => hit.face.normal.y > 0.8).map(hit => hit.object));
+      assert.ok(tops.size <= 1, "La esquina no encabalga dos tapas");
+      if (tops.size) cornerCoverage++;
+    }
+    assert.ok(cornerCoverage >= 5, "El giro conserva una superficie de paso completa salvo las juntas");
     // El vano recuperado debe dejar pasar un cuerpo, no solo verse abierto.
     const width = Math.hypot(4.3,4.3), bays = 6;
     const doorX = -width/2 + width*2.5/bays;

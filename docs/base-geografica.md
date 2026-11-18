@@ -438,3 +438,47 @@ Corrección de distribución: seis conjuntos (seis mesas y doce bancos largos), 
 Ajuste de mobiliario: ambos grupos de la plaza techada se desplazan 1 m hacia el exterior (izquierda desde Bedelía), conservando la separación. Solo el conjunto marrón del extremo junto al toldo y la galería lleva dos sillas laterales.
 
 Solo la fila próxima a la galería se desplaza otros 0,8 m hacia el exterior: x local -0,8 a 0. La otra fila permanece en x=4; queda un paso mínimo aproximado de 1,2 m incluso junto a la silla lateral del último conjunto.
+
+### Ajuste provisional de DEI–LED — 18/11/2026
+
+El DEI–LED se acerca a la cantina y su cabecera se alinea con la fachada, según la línea azul indicada por Horacio. Corrección posterior: la separación se mide desde el extremo de la escalera de la terraza lateral, dejando 3 m adicionales de césped; así se conservan la cubierta, las mesas y las sillas. El ala LED, DA/CAP, DAS y DG acompaña el ajuste junto con el enlace cerrado; se adaptan los caminos y el mapa. Ubicación y separación estimadas, pendientes de confirmación visual y medición.
+
+### LED junto a la cantina: foto del jardín — 18/11/2026
+
+Según la fotografía aportada por Horacio, la cabecera orientada al jardín se representa como un muro ciego de ladrillo visto, más alto que la cantina, con una franja de parasoles azules en el lateral hacia ella. Altura, profundidad y longitud del paño son estimaciones visuales de una sola imagen, no medidas relevadas. Se mantiene la alineación de la cabecera, la terraza de la cantina, el jardín de separación y la conexión con las oficinas.
+
+### Fachadas y sendero del LED — 18/11/2026
+
+Por indicación de Horacio, los laterales largos del DEI–LED se cierran con celosías azules, conservando los accesos y la cabecera ciega de ladrillo. Se añade un caminero de 1,6 m desde la galería azul, a lo largo de la fachada exterior, con adoquines circulares grises inspirados en la foto. Trazado, dimensiones y textura aproximados.
+
+### Corrección de celosías y caminero del LED — 18/11/2026
+
+La franja de lamas ocupa Y = 2 a 5,2 m, dejando 2 m de ladrillo arriba y abajo. Se elimina el respaldo opaco y se recuperan ventanas detrás, con lamas finas cada 34 cm. El caminero incorpora quiebres suaves, placas de unos 1,8 m con juntas de unos 11 cm, bordes ondulados y hormigón gris con círculos y desgaste. Se mantiene el ancho aproximado de 1,6 m y la unión con la galería azul. Son estimaciones de las fotos aportadas, no medidas de campo.
+
+### LED: laterales y giro del caminero — 18/11/2026
+
+Corrección de Horacio: el lateral hacia cantina queda cerrado con ladrillo detrás de las celosías, sin puerta ni ventanas. El lateral opuesto recibe ventanas de aproximadamente 1,15 × 0,85 m entre Y = 0,70 y 1,55 m, bajo la franja azul. La puerta exterior se traslada cerca del fondo, en el mismo lateral; su llegada y vano de colisión se actualizan. Se conserva la conexión interior con el ala de oficinas. El caminero se interna en el jardín y rodea la esquina del LED siguiendo el nuevo trazo rojo. Distancias aproximadas interpretadas de las capturas.
+
+### Volumen del caminero del LED — 18/11/2026
+
+El sendero deja de ser una superficie plana: cada tramo tiene tapa y cantos de hormigón, con aproximadamente 14 cm de volumen y apoyo por debajo del terreno. La colisión usa el mismo volumen visible. El empalme inicial conserva la cota del caminero bajo carpa y pasa gradualmente a la losa elevada. El tramo paralelo al LED se aleja 75 cm adicionales; el quiebre también se separa de la esquina. Textura de hormigón con círculos gastados, poros y desconchones; mapa de relieve independiente del color. Dimensiones y acabado interpretados de las fotos.
+
+### Pavimento bajo carpa y unión al LED — 18/11/2026
+
+El tramo principal bajo carpa, su prolongación y su acceso curvo comparten el material de hormigón circular del sendero del LED. Las coordenadas de textura se calculan sobre el plano de facultad para mantener el patrón continuo. La primera losa del ramal se recorta contra el borde de la senda cubierta, conservando su altura y eliminando tapas superpuestas; se interrumpe el bordillo en ese acceso.
+
+### Losas separadas bajo carpa — 18/11/2026
+
+Corrección expresa de Horacio: se retira la cinta de piso continua bajo la carpa y se reconstruye con el mismo generador de losas volumétricas del sendero del LED. Hay juntas abiertas, cantos y bordes ondulados reales. También se segmentan el acceso curvo y la prolongación. Se conservan la pendiente y las alturas de conexión; la unión lateral queda sobre una pieza completa. Se retiran los bordillos continuos y se rebaja el terreno inmediato para exponer los cantos y el fondo de las juntas. Esta corrección sustituye el cambio exclusivamente de material del registro anterior.
+
+### Uniones y canales del camino bajo carpa — 18/11/2026
+
+El tramo hasta (55, 37) y su continuación hasta (30, 50) se construyen como un único trazado de losas con esquinas a inglete; se retira el último piso liso genérico. El encuentro con el sendero del LED pasa a ser una pieza en T que recibe el ramal, sin losas superpuestas. Canaletas abiertas de hormigón de unos 29 cm de ancho a ambos lados del trazado desde la plaza techada hasta detrás del Bloque G, con fondo oscuro y cortes en los accesos. El caminero del jardín del LED conserva sus laterales sin canales. Dimensiones aproximadas a partir de la referencia visual.
+
+### Ramal al Bloque G, apoyos y seto puntual — 18/11/2026
+
+Se reemplaza el piso liso bajo el ramal de carpa hacia la galería del Bloque G por losas volumétricas separadas, con una pieza en T en la unión. Los apoyos del tramo principal se desplazan a 1,28 m del eje, fuera de las canaletas, unidos a la cubierta con prolongaciones metálicas cortas. Se añade un seto de verde claro de unos 1,7 m de altura exclusivamente sobre la L marcada por Horacio junto al empalme del sendero del LED. La franja se define en faculty-annexes.ts y conserva los pasos libres. Dimensiones interpretadas de las capturas.
+
+### Seto según foto de referencia — 18/11/2026
+
+La foto de Horacio sustituye las copas redondeadas anteriores por una copa continua podada en bloque rectangular, hojas pequeñas verdes claras y troncos separados bifurcados visibles desde el suelo hasta unos 80 cm. La copa alcanza aproximadamente 1,8 m; se conserva exclusivamente la franja en L ya indicada. Dimensiones estimadas de la imagen.

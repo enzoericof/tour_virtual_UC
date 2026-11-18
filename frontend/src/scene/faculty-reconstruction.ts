@@ -11,7 +11,10 @@ import { addRestroomTower } from "./faculty/restroom-tower";
 import { addManfredHall } from "./faculty/manfred-hall";
 import { addCoveredPlazaSeating } from "./faculty/covered-plaza-seating";
 import { addCantina } from "./faculty/cantina";
+import { addGardenHedge } from "./faculty/garden-hedge";
+import { addWalkChannels } from "./faculty/walk-channels";
 import { addAnnexes } from "./faculty/annexes";
+import { addSegmentedGardenPath, makeGardenPaving, gardenJunctionReach, type WalkOptions } from "./faculty/garden-path";
 import {
   facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, ELEVATOR_LANDING_LEVEL, STEPS_RUN, rectCorners,
   elevatorStairEdge, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR, fromRect,
@@ -19,7 +22,7 @@ import {
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
 import { gardenHeight, gardenBounds, inCantina, coveredWalkSurface } from "../data/cantina-terrain";
-import { cantinaRearPaving, diciaWalkExtension } from "../data/faculty-annexes";
+import { cantinaRearPaving, deiGardenPath, diciaWalkExtension, gardenWalkHedge } from "../data/faculty-annexes";
 
 type BlockSpec = {
   length: number; depth: number; levels: number; bay: number; margin: number; gallery: number;
@@ -53,6 +56,7 @@ type BlockSpec = {
 export function createFaculty(grass = makeGrassMaterial()) {
   const group = new T.Group(), colliders = new T.Group();
   const m = makeMaterials(grass);
+  const gardenWalkMaterial = makeGardenPaving();
   const elevatorLevels = ["PB", "1", "2", "3"];
   const displayLabel = (text: string) => elevatorLabel(text, "#ff5945", "#242522");
   const elevator: ElevatorModel = {
@@ -64,7 +68,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
   const { layers, unit, box, pole, beam, v3, sign, frame, prism, pave, path, spans, ramp, glazing, slopedWall } = builder;
 
   /** Lona azul continua con caída leve entre apoyos y faldón festoneado. */
-  function fabricCover(curve: T.Curve<T.Vector3>, width: number, supports: number[], ridge = 0, ridgeAtStart = ridge) {
+  function fabricCover(curve: T.Curve<T.Vector3>, width: number, supports: number[], ridge = 0, ridgeAtStart = ridge, postOffset = width * 0.475) {
     const length = curve.getLength(), segments = Math.ceil(length / 0.12), across = 8;
     const positions: number[] = [], uv: number[] = [], indices: number[] = [];
     const at = (t: number, u: number) => {
@@ -107,7 +111,16 @@ export function createFaculty(grass = makeGrassMaterial()) {
         const peak = at(t, 0);
         beam(a, peak, 0.025, m.metal); beam(peak, b, 0.025, m.metal);
       } else beam(a, b, 0.025, m.metal);
-      for (const p of [a, b]) pole(0.035, p.y, p.x, p.y / 2, p.z, m.metal, true);
+      const center = curve.getPointAt(t);
+      for (const edge of [a, b]) {
+        const outward = edge.clone().sub(center).setY(0).normalize();
+        const p = edge.clone().addScaledVector(outward, postOffset - width * 0.475);
+        if (postOffset > width * 0.475) beam(edge, p, 0.025, m.metal);
+        const support = pole(0.035, p.y, p.x, p.y / 2, p.z, m.metal, true);
+        if (postOffset > width * 0.475) {
+          support.userData.walkCanopyPost = true; support.userData.keep = true;
+        }
+      }
     }
   }
   /** Baranda de barras horizontales, como la del escaneo, a lo largo de x. */
@@ -1279,7 +1292,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
 
   addCantina(builder);
 
-  addAnnexes(builder, officeBrick, passageTile, annexPavingHeight);
+  addAnnexes(builder, officeBrick, passageTile, annexPavingHeight, gardenWalkMaterial);
 
   // ---- Caminos entre áreas comunes ----
   const galleryEdge = block1.depth / 2;
@@ -1300,7 +1313,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     } else if (index === 6) {
       // El enlace desde el toldo hasta la plaza ya tiene peldaños y piso propio.
       path(p.slice(1));
-    } else if (index !== 3) {
+    } else if (index !== 3 && index !== 4) {
       // El tramo bajo el caminero tiene su propio pavimento.
       path(p);
     }
@@ -1384,32 +1397,22 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     const bendCurve = new T.CubicBezierCurve3(bend, guide, tangent, merge);
     curve.add(bendCurve);
     const approachWidth = 1.7;
-    function ribbon(c: T.Curve<T.Vector3>, width: number, mat: T.Material, collide: boolean, skirt = false) {
-      const positions: number[] = [], uvs: number[] = [], indices: number[] = [];
-      const sideMaterial = m.stone.clone(); sideMaterial.side = T.DoubleSide;
-      const count = 48;
-      for (let i = 0; i <= count; i++) {
-        const t = i / count, p = c.getPoint(t), tangent = c.getTangent(t);
-        const side = v3(-tangent.z, 0, tangent.x).normalize().multiplyScalar(width / 2);
-        for (const sign of [-1, 1]) {
-          const q = p.clone().addScaledVector(side, sign); positions.push(q.x, q.y, q.z);
-          const tile = mat.userData.tile as number[] | undefined;
-          uvs.push(tile ? q.x / tile[0] : (sign + 1) / 2, tile ? q.z / tile[1] : t * 5);
+    function segmentedCurve(c: T.Curve<T.Vector3>, width: number, name: string, options: WalkOptions = {}) {
+      const samples = c.getPoints(Math.max(48, Math.ceil(c.getLength() / 0.35)));
+      const points: Vec2[] = samples.map(p => [p.x, p.z]);
+      const height = ([x, z]: Vec2) => {
+        let nearest = Infinity, y = samples[0].y;
+        for (let i = 1; i < samples.length; i++) {
+          const a = samples[i - 1], b = samples[i], dx = b.x - a.x, dz = b.z - a.z;
+          const t = T.MathUtils.clamp(((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz), 0, 1);
+          const distance = (x - a.x - dx * t) ** 2 + (z - a.z - dz * t) ** 2;
+          if (distance < nearest) { nearest = distance; y = T.MathUtils.lerp(a.y, b.y, t); }
         }
-        if (i < count) { const k = i * 2; indices.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
-      }
-      const geo = new T.BufferGeometry(); geo.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
-      geo.setAttribute("uv", new T.Float32BufferAttribute(uvs, 2)); geo.setIndex(indices); geo.computeVertexNormals();
-      // El orden izquierda/derecha debe producir normales hacia arriba para la colisión.
-      if (geo.attributes.normal.getY(0) < 0) flipFaces(geo);
-      const mesh = new T.Mesh(geo, mat); mesh.receiveShadow = true; mesh.castShadow = !collide; layers.visual.add(mesh);
-      if (collide) layers.solid.add(new T.Mesh(geo));
-      if (skirt) for (const side of [0, 1]) for (let i = 0; i < count; i++) {
-        const k = (i * 2 + side) * 3, j = ((i + 1) * 2 + side) * 3;
-        const a = v3(positions[k], positions[k + 1], positions[k + 2]), b = v3(positions[j], positions[j + 1], positions[j + 2]);
-        const wall = new T.BufferGeometry().setFromPoints([a,b,a.clone().setY(0),b,b.clone().setY(0),a.clone().setY(0)]);
-        wall.computeVertexNormals(); layers.visual.add(new T.Mesh(wall,sideMaterial));
-      }
+        return y;
+      };
+      addSegmentedGardenPath(builder, points, height, gardenWalkMaterial,
+        { ...options, width, finishedHeight: true, name });
+      return { points, height };
     }
     // Los empalmes comparten aristas con el granito y con el resto del sendero.
     function joinPaving(a: T.Vector3, b: T.Vector3, c: T.Vector3, d: T.Vector3, material: T.Material) {
@@ -1424,29 +1427,9 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       layers.visual.add(mesh);
       layers.solid.add(new T.Mesh(geometry));
     }
-    const bendTangent = bendCurve.getTangent(0);
-    const bendSide = v3(bendTangent.z, 0, -bendTangent.x).normalize().multiplyScalar(approachWidth / 2);
     const approachLeft = startX - approachWidth / 2, approachRight = startX + approachWidth / 2;
-    joinPaving(v3(approachLeft, start.y, startZ), bend.clone().sub(bendSide),
-      bend.clone().add(bendSide), v3(approachRight, start.y, startZ), m.accessStone);
-    ribbon(bendCurve, approachWidth, m.accessStone, true, true);
-    // Adoquines junto al toldo; el resto del sendero es hormigón liso.
-    const approachLength = curve.getLength();
-    const paverTones = ["#a29f94", "#c1b9a9", "#b1ad9f"].map(color => {
-      const material = m.accessStone.clone();
-      material.color.set(color);
-      return material;
-    });
-    for (let distance = approachLength - 2.45; distance < approachLength - 0.24; distance += 0.27) {
-      const t = distance / approachLength;
-      const p = curve.getPointAt(t), tangent = curve.getTangentAt(t), side = v3(-tangent.z, 0, tangent.x).normalize();
-      for (const offset of [-0.53, -0.265, 0, 0.265, 0.53]) {
-        const q = p.clone().addScaledVector(side,offset);
-        const material = paverTones[Math.round(distance / 0.27 + offset / 0.265 + 2) % paverTones.length];
-        const disc = pole(0.13, 0.012, q.x, q.y + 0.01, q.z, material);
-        disc.quaternion.setFromUnitVectors(v3(0,1,0), side.clone().cross(tangent).normalize());
-      }
-    }
+    segmentedCurve(new T.LineCurve3(start, bend), approachWidth, "Acceso segmentado a la carpa");
+    segmentedCurve(bendCurve, approachWidth, "Curva segmentada de la carpa");
     // La lona arranca plana dentro del canto de la losa y forma la cumbrera hacia el caminero.
     const [stepX, stepZ] = g.smallSteps.center;
     const attachment = v3(stepX, g.roof + 0.08, stepZ).addScaledVector(direction, -0.12);
@@ -1468,13 +1451,30 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       pave([[left, landingZ - 0.025], [left, landingZ], [right, landingZ], [right, landingZ - 0.025]],
         edgeBand, ELEVATOR_LANDING_LEVEL + 0.003);
     }
-    ribbon(walk, width, m.accessStone, true, true);
-    ribbon(new T.LineCurve3(walkEnd,v3(55,endHeight,37)), width, m.accessStone, true);
+    const gardenJoinDistance = v3(deiGardenPath[0][0] - ax, 0, deiGardenPath[0][1] - az).dot(direction);
+    const fullWalk = new T.CurvePath<T.Vector3>();
+    fullWalk.add(walk);
+    fullWalk.add(new T.LineCurve3(walkEnd, v3(55, endHeight, 37)));
+    fullWalk.add(new T.LineCurve3(v3(55, endHeight, 37), v3(30, endHeight, 50)));
+    const { junction, end } = plan.blockGAwning;
+    const branchT = v3(junction[0] - ax, 0, junction[1] - az).dot(direction) / Math.hypot(bx - ax, bz - az);
+    const branchFloorStart = walk.getPoint(branchT), branchFloorEnd = v3(end[0], 0.05, end[1]);
+    const branchCurve = new T.LineCurve3(branchFloorStart, branchFloorEnd);
+    const branchPoints: Vec2[] = [[branchFloorStart.x, branchFloorStart.z], end];
+    const branchHeight = ([x, z]: Vec2) => {
+      const dx = end[0] - branchFloorStart.x, dz = end[1] - branchFloorStart.z;
+      const t = T.MathUtils.clamp(((x - branchFloorStart.x) * dx + (z - branchFloorStart.z) * dz) / (dx * dx + dz * dz), 0, 1);
+      return T.MathUtils.lerp(branchFloorStart.y, branchFloorEnd.y, t);
+    };
+    const coveredPaving = segmentedCurve(fullWalk, width, "Caminero bajo carpa", {
+      junctionAt: gardenJoinDistance, junctionBranch: { points: deiGardenPath, ground: annexPavingHeight },
+      junctions: [{ at: branchT * walk.getLength(), points: branchPoints, width: 2.25,
+        height: branchHeight, label: "Bloque G" }],
+    });
     const roof = new T.LineCurve3(canopyFoot,v3(bx,2.5,bz));
     const bays = Math.ceil(roof.getLength() / 4.5);
-    fabricCover(roof, canopyWidth, Array.from({length:bays + 1},(_,i)=>i / bays), canopyRidge);
+    fabricCover(roof, canopyWidth, Array.from({length:bays + 1},(_,i)=>i / bays), canopyRidge, canopyRidge, 1.28);
     // El ramal se une a la lona existente y desemboca en el eje de la galería del Bloque G.
-    const { junction, end } = plan.blockGAwning;
     const junctionPoint = v3(junction[0], 0, junction[1]);
     const junctionT = junctionPoint.sub(walkStart).dot(direction) / Math.hypot(bx - ax, bz - az);
     const branchStart = roof.getPoint(junctionT);
@@ -1484,16 +1484,17 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     fabricCover(branchRoof, canopyWidth,
       Array.from({ length: branchBays }, (_, i) => (i + 1) / branchBays), canopyRidge);
     // El piso arranca en el empalme real de la cubierta, cubriendo la junta.
-    path([[branchStart.x, branchStart.z], end], 2.25);
-    // Bordes del caminero y juntas transversales: pavimento angosto entre jardines.
-    for (const offset of [-0.85, 0.85]) {
-      const side = v3(-(bz-az),0,bx-ax).normalize().multiplyScalar(offset);
-      for (let i=0; i<30; i++) {
-        if (offset > 0 && Math.abs(i + 0.5 - junctionDistance) < approachWidth / 2 + 0.5) continue;
-        const a=walk.getPoint(i/30).add(side), b=walk.getPoint((i+1)/30).add(side);
-        beam(a.clone().add(v3(0,0.025,0)),b.clone().add(v3(0,0.025,0)),0.035,m.stone);
-      }
-    }
+    segmentedCurve(branchCurve, 2.25, "Ramal segmentado al Bloque G", { startDistance: gardenJunctionReach });
+    const normal = v3(-direction.z, 0, direction.x);
+    const gardenSide = Math.sign(v3(deiGardenPath[1][0] - deiGardenPath[0][0], 0,
+      deiGardenPath[1][1] - deiGardenPath[0][1]).dot(normal));
+    const branchSide = Math.sign(v3(end[0] - branchStart.x, 0, end[1] - branchStart.z).dot(normal));
+    addWalkChannels(builder, coveredPaving.points, coveredPaving.height, width, [
+      { side: gardenSide, from: gardenJoinDistance - 1.5, to: gardenJoinDistance + 1.5 },
+      { side: branchSide, from: junctionT * walk.getLength() - 1.4, to: junctionT * walk.getLength() + 1.4 },
+      { side: 1, from: junctionDistance - 1.2, to: junctionDistance + 1.2 },
+    ]);
+    addGardenHedge(builder, gardenWalkHedge, point => gardenHeight(...inCantina(point)));
     // Macizos bajos de sansevierias flanqueando la salida, sin invadir los peldaños.
     const leafGeo = new T.BufferGeometry().setFromPoints([
       v3(-0.065,0,0),v3(0.065,0,0),v3(0.015,0.95,0.08)]);
@@ -1501,6 +1502,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     const leafMat = new T.MeshStandardMaterial({color: '#455d3c',side:T.DoubleSide,roughness:1});
     const lateral=v3(-(bz-az),0,bx-ax).normalize();
     // Fila exterior de hojas siguiendo el giro de la foto y dejando libre el empalme.
+    const approachLength = curve.getLength();
     for (let distance = 1; distance < approachLength - 1.1; distance += 0.31) {
       const t = distance / approachLength;
       const tangent = curve.getTangent(t);
