@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PresenceStoreTest {
     @Test
     @EnabledIfEnvironmentVariable(named = "PRESENCE_TEST_DB", matches = "jdbc:postgresql://127\\.0\\.0\\.1:55433/tour_fluidity")
-    void sharesTimestampedMovementAndPreservesCapacityAndSessionRevocation() {
+    void sharesTimestampedMovementAndPreservesCapacityAndSessionRevocation() throws Exception {
         var ds = new DriverManagerDataSource(System.getenv("PRESENCE_TEST_DB"), "campus_test", "");
         var jdbc = new JdbcTemplate(ds);
         // Exclusivamente la base desechable nombrada en la condición; no usa las credenciales del proyecto.
@@ -35,14 +35,24 @@ class PresenceStoreTest {
             assertEquals(true, tx.execute(status -> store.enter(p.id(), 1, "session", p)));
             updates.add(new PresenceStore.Update(p.id(), p));
         }
-        var extra = new PresenceSocket.Player(UUID.randomUUID().toString(), "Extra", "azul", 0, 0, 0, 0, false);
+        var extra = new PresenceSocket.Player(UUID.randomUUID().toString(), "Extra", "azul", 0, 0, 0, 0, false, System.currentTimeMillis(), true);
         assertEquals(false, tx.execute(status -> store.enter(extra.id(), 1, "session", extra)));
         var shared = store.exchange(updates, List.of("session"));
         assertEquals(10, shared.players().size());
         assertTrue(shared.sessions().contains("session"));
         assertTrue(shared.players().stream().allMatch(p -> p.at() >= 1000 && p.at() < 1010));
         store.remove(updates.get(0).id());
-        assertEquals(true, tx.execute(status -> store.enter(extra.id(), 1, "session", extra)));
+        var rival = new PresenceSocket.Player(UUID.randomUUID().toString(), "Rival", "azul", 0, 0, 0, 0, false, System.currentTimeMillis(), true);
+        var start = new java.util.concurrent.CountDownLatch(1);
+        try (var pool = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+            var first = pool.submit(() -> { start.await(); return tx.execute(status -> store.enter(extra.id(), 1, "session", extra)); });
+            var second = pool.submit(() -> { start.await(); return tx.execute(status -> store.enter(rival.id(), 1, "session", rival)); });
+            start.countDown();
+            assertNotEquals(first.get(5, java.util.concurrent.TimeUnit.SECONDS), second.get(5, java.util.concurrent.TimeUnit.SECONDS));
+        }
+        var reserved = store.exchange(List.of(), List.of("session"));
+        assertEquals(10, reserved.players().size());
+        assertEquals(1, reserved.players().stream().filter(PresenceSocket.Player::hidden).count());
         jdbc.update("UPDATE spring_session SET expiry_time = 0");
         var revoked = store.exchange(List.of(), List.of("session"));
         assertTrue(revoked.players().isEmpty());

@@ -14,13 +14,15 @@ export function mountCommunity(
   engine: TourEngine | undefined,
   managePanels: () => Promise<void>,
   initialSession: InitialSession = { user: null, online: false },
+  admittedPresence?: CampusPresence,
 ) {
   const { openDialog, closeDialog, isDialogContent, toast } = shell;
   let user: User | null = initialSession.user;
   let online = initialSession.online;
   const chat = new CampusChat();
   let presenceStatus = "Sin sesión";
-  const presence = new CampusPresence(
+  const presence = admittedPresence ?? new CampusPresence(() => null, () => {}, () => {});
+  presence.bind(
     () => engine?.playerPose() ?? null,
     players => engine?.remotePlayers.receive(players),
     status => {

@@ -434,3 +434,12 @@ Retirada la entrada como invitado y sus estilos. La apertura del 3D exige una cu
 61 pruebas frontend y compilación TypeScript/Vite correctas. En Chrome con la API local simulada: acceso con solo Iniciar sesión/Crear cuenta, formulario de registro visible, ingreso con identidad ficticia y Cerrar sesión que vuelve al formulario sin visor ni acceso invitado. Sin credenciales reales ni cambios en Neon.
 
 LED, lateral derecho según fotos (18/11): revisión en navegador del frente, acercamiento de rejas/equipos y ángulo del acceso posterior. La prueba de escena comprueba el cierre de la puerta metálica central, la colisión de las ventanas, el acceso abierto del fondo y el paso al corredor interior tras cerrar la cabecera posterior con ladrillo. Las 55 pruebas frontend y la compilación pasaron. Geometría estimada de las fotos, pendiente de medición en el sitio.
+
+
+## Cupo antes de cargar el campus (18/11/2026)
+
+66 pruebas frontend y build TypeScript/Vite correctos. Cinco pruebas nuevas cubren admisión pendiente hasta confirmación del servidor, rechazo 4001 sin reconexión automática, plazo de 15 segundos sin confirmación, hide que conserva el cupo y rechazo de una reconexión que devuelve al acceso.
+
+Las cinco pruebas PresenceSocketTest y PresenceStoreTest pasaron (6 casos, sin omisiones). PostgreSQL desechable local en 127.0.0.1:55433/tour_fluidity comprueba diez admisiones, rechazo de la undécima, liberación y dos solicitudes concurrentes al último lugar (solo una aceptada), conservación de la reserva hidden y revocación de sesión. El servidor de prueba se detuvo al terminar; no se usó Neon. El Wrapper volvió a fallar al localizar .m2; se ejecutó Maven 3.9.12 ya instalado con Java 21, caché y POM temporal sin el starter de sesión no disponible, como en verificaciones anteriores. No es una ejecución íntegra del POM original.
+
+Chrome con API/WebSocket simulados locales: tras iniciar sesión, rechazo por cupo completo muestra el panel Recorrido completo con logo, fuentes compartidas y Volver a intentar, sin visor. Las métricas confirman una sola conexión rechazada y ninguna activa mientras espera; no hay reintento automático. Al liberar cupo en la simulación, el botón vuelve a la elección de cuenta, Continuar no pide contraseña y la confirmación admitted abre el escenario y la barra de controles. Estas pruebas visuales son del cliente, separadas de las pruebas reales de PostgreSQL; no simulan diez cuentas reales en producción.

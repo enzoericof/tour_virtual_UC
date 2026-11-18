@@ -2,7 +2,14 @@ import type { Skin } from "../data/skins";
 
 export type Pose = { x: number; y: number; z: number; yaw: number; walking: boolean };
 export type Player = Pose & { id: string; name: string; skin: Skin; at?: number };
-type Snapshot = { self: string; players: Player[] };
+type Snapshot = { self: string; players: Player[]; admitted?: boolean };
+
+export class AdmissionError extends Error {
+  constructor(readonly reason: "full" | "connection" | "auth") {
+    super(reason === "full" ? "El recorrido está completo. Hay 10 personas conectadas. Reintentá cuando se libere un lugar."
+      : reason === "auth" ? "Tu cuenta necesita iniciar sesión nuevamente." : "No pudimos comprobar el cupo. Revisá tu conexión y volvé a intentar.");
+  }
+}
 
 export class CampusPresence {
   private socket: WebSocket | null = null;
@@ -12,13 +19,38 @@ export class CampusPresence {
   private running = false;
   private status = "";
   private lastSent = 0;
+  private admitted = false;
+  private admission?: { resolve: () => void; reject: (error: Error) => void; timer: number };
 
   constructor(
     private pose: () => Omit<Pose, "walking"> | null,
     private onPlayers: (players: Player[]) => void,
     private onStatus: (status: string) => void,
     private onSeating: (players: Player[], self?: string) => void = () => {},
+    private onDenied: (error: AdmissionError) => void = () => {},
   ) {}
+
+  bind(pose: typeof this.pose, onPlayers: typeof this.onPlayers, onStatus: typeof this.onStatus, onSeating: typeof this.onSeating) {
+    this.pose = pose; this.onPlayers = onPlayers; this.onStatus = onStatus; this.onSeating = onSeating;
+    onStatus(this.status);
+  }
+
+  /** Espera la reserva de una de las diez plazas en el servidor. */
+  admit(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const timer = window.setTimeout(() => this.stop(), 15000);
+      this.admission = { resolve, reject, timer };
+      this.start();
+    });
+  }
+
+  private finishAdmission(error?: AdmissionError) {
+    const pending = this.admission;
+    if (!pending) return;
+    this.admission = undefined;
+    window.clearTimeout(pending.timer);
+    if (error) pending.reject(error); else pending.resolve();
+  }
 
   start() {
     if (this.running) return;
@@ -28,7 +60,9 @@ export class CampusPresence {
   }
 
   stop() {
+    this.finishAdmission(new AdmissionError("connection"));
     this.running = false;
+    this.admitted = false;
     window.clearInterval(this.timer);
     window.clearTimeout(this.reconnect);
     const socket = this.socket;
@@ -53,13 +87,23 @@ export class CampusPresence {
     const protocol = location.protocol === "https:" ? "wss:" : "ws:";
     const socket = new WebSocket(`${protocol}//${location.host}/ws/presence`);
     this.socket = socket;
+    this.admitted = false;
     this.report("Conectando…");
     socket.onopen = () => {
-      if (this.socket === socket) this.sendPose();
+      if (this.socket === socket) socket.send("join");
     };
     socket.onmessage = (event) => {
       if (this.socket !== socket) return;
-      const { self, players } = JSON.parse(event.data) as Snapshot;
+      let snapshot: Snapshot;
+      try { snapshot = JSON.parse(event.data) as Snapshot; } catch { return; }
+      if (snapshot.admitted === true) {
+        this.admitted = true;
+        this.finishAdmission();
+        this.sendPose();
+        return;
+      }
+      const { self, players } = snapshot;
+      if (!Array.isArray(players)) return;
       this.onSeating(players, self);
       const others = players.filter(player => player.id !== self);
       this.onPlayers(others);
@@ -72,14 +116,23 @@ export class CampusPresence {
       this.onPlayers([]);
       this.onSeating([]);
       const full = event.code === 4001;
-      this.report(full ? "Recorrido completo (10 jugadores). Reintentando…" : "Reconectando…");
-      if (this.running) this.reconnect = window.setTimeout(() => this.connect(), full ? 10000 : 2500);
+      if (full || event.code === 1008 || this.admission) {
+        const initial = !!this.admission;
+        const error = new AdmissionError(full ? "full" : event.code === 1008 ? "auth" : "connection");
+        this.finishAdmission(error);
+        this.stop();
+        this.report(error.message);
+        if (!initial) this.onDenied(error);
+        return;
+      }
+      this.report("Reconectando.");
+      if (this.running) this.reconnect = window.setTimeout(() => this.connect(), 2500);
     };
   }
 
   private sendPose() {
     const socket = this.socket;
-    if (socket?.readyState !== WebSocket.OPEN || socket.bufferedAmount > 4096) return;
+    if (!this.admitted || socket?.readyState !== WebSocket.OPEN || socket.bufferedAmount > 4096) return;
     const pose = this.pose();
     if (pose) {
       const prev = this.lastPose;
@@ -93,7 +146,7 @@ export class CampusPresence {
       this.lastPose = next;
     } else {
       if (!this.lastPose && Date.now() - this.lastSent < 5000) return;
-      socket.send(this.lastPose ? "leave" : "ping");
+      socket.send(this.lastPose ? "hide" : "ping");
       this.lastPose = null;
     }
     this.lastSent = Date.now();

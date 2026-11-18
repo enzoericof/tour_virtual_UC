@@ -358,3 +358,6 @@ Asientos: cámara a altura sentada, aviso E para sentarse/levantarse y retorno a
 
 
 18/11/2026: acceso compacto con logo, panel y tipografías compartidos, sin hero ni eslogan. Revisados en Chrome el formulario inicial, la elección de cuenta recordada y la transición con logo, giro y barra indeterminada durante validación/construcción del 3D. Cuenta ficticia y servidor local simulado; condiciones detalladas en docs/verificacion.md.
+
+
+18/11/2026: revisado en Chrome el panel Recorrido completo con logo UC, tarjeta y fuentes compartidas; texto de 10 personas y reintento manual sin escena 3D. API/WebSocket simulados. Tras liberar una plaza, se conserva la elección de cuenta y abre el campus. Detalles en docs/verificacion.md.

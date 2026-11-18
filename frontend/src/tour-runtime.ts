@@ -4,10 +4,11 @@ import { mountCommunity } from "./ui/community";
 import { mountTourControls } from "./ui/tour-controls";
 import { mountTourShell } from "./ui/tour-shell";
 import type { RegisteredSession } from "./services/session";
+import type { CampusPresence } from "./services/presence";
 import { monitorVisit, rememberVisitEnd } from "./services/visit-lifecycle";
 import { paintLoading, showVisitLoading } from "./ui/visit-loading";
 
-export async function startTour(initialSession: RegisteredSession) {
+export async function startTour(initialSession: RegisteredSession, presence: CampusPresence) {
   if (!initialSession.user || !initialSession.online) throw new Error("Iniciá sesión para entrar al campus.");
   let engine: TourEngine | undefined;
   const shell = mountTourShell(() => engine?.pause());
@@ -18,7 +19,7 @@ export async function startTour(initialSession: RegisteredSession) {
   const content = mountCampusContent(shell, () => community.getUser(), place => tour.visit(place));
   const tour = mountTourControls(shell, content.select);
   engine = tour.engine;
-  const community = mountCommunity(shell, engine, content.managePanels, initialSession);
+  const community = mountCommunity(shell, engine, content.managePanels, initialSession, presence);
   await paintLoading();
   loading.hide();
   toolbar.inert = false;

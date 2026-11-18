@@ -26,7 +26,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PresenceSocket extends TextWebSocketHandler {
     public record Pose(Double x, Double y, Double z, Double yaw, boolean walking) {}
     public record Player(String id, String name, String skin, double x, double y, double z,
-            double yaw, boolean walking, long at) {
+            double yaw, boolean walking, long at, boolean hidden) {
+        public Player(String id, String name, String skin, double x, double y, double z,
+                double yaw, boolean walking, long at) {
+            this(id, name, skin, x, y, z, yaw, walking, at, false);
+        }
         public Player(String id, String name, String skin, double x, double y, double z,
                 double yaw, boolean walking) {
             this(id, name, skin, x, y, z, yaw, walking, System.currentTimeMillis());
@@ -94,6 +98,31 @@ public class PresenceSocket extends TextWebSocketHandler {
         if (peer == null) return;
         long now = System.nanoTime();
         String body = message.getPayload();
+        if (body.equals("join")) {
+            peer.lastSeen = now;
+            if (peer.player == null) {
+                Player reservation = new Player(peer.id, peer.name, skins.getOrDefault(peer.userId, "azul"),
+                    0, 0, 0, 0, false, System.currentTimeMillis(), true);
+                if (!store.enter(peer.id, peer.userId, peer.sessionId, reservation)) {
+                    socket.close(new CloseStatus(4001, "Recorrido completo: 10 jugadores"));
+                    return;
+                }
+                peer.player = reservation;
+                lastChange = now;
+            }
+            peer.socket.sendMessage(new TextMessage("{\"admitted\":true}"));
+            return;
+        }
+        if (body.equals("hide")) {
+            peer.lastSeen = now;
+            Player p = peer.player;
+            if (p != null) {
+                peer.player = new Player(p.id(), p.name(), p.skin(), p.x(), p.y(), p.z(), p.yaw(),
+                    false, System.currentTimeMillis(), true);
+                lastChange = now;
+            }
+            return;
+        }
         if (body.equals("ping") || body.equals("leave")) {
             peer.lastSeen = now;
             if (body.equals("leave")) {
@@ -189,10 +218,11 @@ public class PresenceSocket extends TextWebSocketHandler {
                     && exchange.sessions().contains(peer.sessionId)) {
                 Player p = peer.player;
                 visible.put(peer.id, new Player(p.id(), p.name(), skins.getOrDefault(peer.userId, p.skin()),
-                    p.x(), p.y(), p.z(), p.yaw(), p.walking(), p.at()));
+                    p.x(), p.y(), p.z(), p.yaw(), p.walking(), p.at(), p.hidden()));
             }
         }
         List<Player> players = new ArrayList<>(visible.values());
+        players.removeIf(Player::hidden); // La vista general reserva cupo sin dibujar un avatar fantasma.
         players.sort(java.util.Comparator.comparing(Player::id));
         for (Peer peer : connected) {
             try {

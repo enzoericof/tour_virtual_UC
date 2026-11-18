@@ -47,13 +47,14 @@ export function monitorVisit(onEnd: (reason: VisitEnd) => void, options: Options
 }
 
 const reasonKey = "cyt-visit-end";
-export function rememberVisitEnd() {
-  try { sessionStorage.setItem(reasonKey, "idle"); } catch { /* El acceso sigue disponible sin almacenamiento. */ }
+export function rememberVisitEnd(reason: "idle" | "full" = "idle") {
+  try { sessionStorage.setItem(reasonKey, reason); } catch { /* El acceso sigue disponible sin almacenamiento. */ }
 }
 export function consumeVisitEnd(): string {
   try {
     const reason = sessionStorage.getItem(reasonKey);
     sessionStorage.removeItem(reasonKey);
-    return reason === "idle" ? "El recorrido se cerró tras 3 minutos sin actividad." : "";
+    return reason === "idle" ? "El recorrido se cerró tras 3 minutos sin actividad."
+      : reason === "full" ? "El recorrido está completo: hay 10 personas conectadas. Reintentá cuando se libere un lugar." : "";
   } catch { return ""; }
 }

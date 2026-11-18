@@ -15,15 +15,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class PresenceSocketTest {
     static class Store extends PresenceStore {
         int exchanges, admissions, removals;
+        boolean available = true;
+        PresenceSocket.Player reserved;
         Function<List<Update>, Exchange> answer = updates -> new Exchange(updates.stream().map(Update::pose).toList(), Set.of("session"));
         Store() { super(null, null); }
-        @Override public boolean enter(String id, long uid, String sid, PresenceSocket.Player p) { admissions++; return true; }
+        @Override public boolean enter(String id, long uid, String sid, PresenceSocket.Player p) { admissions++; reserved = p; return available; }
         @Override public Exchange exchange(List<Update> updates, List<String> ids) { exchanges++; return answer.apply(updates); }
         @Override public void remove(String id) { removals++; }
     }
     private final Store store = new Store();
     private final List<TextMessage> sent = new CopyOnWriteArrayList<>();
     private int closed;
+    private CloseStatus closeStatus;
     private final HttpSession session = (HttpSession) Proxy.newProxyInstance(HttpSession.class.getClassLoader(), new Class<?>[]{HttpSession.class},
         (proxy, method, args) -> method.getName().equals("getId") ? "session" : null);
     private final WebSocketSession socket = (WebSocketSession) Proxy.newProxyInstance(WebSocketSession.class.getClassLoader(), new Class<?>[]{WebSocketSession.class},
@@ -33,7 +36,7 @@ class PresenceSocketTest {
             case "getAttributes" -> Map.of("httpSession", session);
             case "isOpen" -> true;
             case "sendMessage" -> { sent.add((TextMessage) args[0]); yield null; }
-            case "close" -> { closed++; yield null; }
+            case "close" -> { closed++; closeStatus = (CloseStatus) args[0]; yield null; }
             case "getTextMessageSizeLimit", "getBinaryMessageSizeLimit" -> 512;
             case "hashCode" -> System.identityHashCode(proxy);
             case "equals" -> proxy == args[0];
@@ -54,6 +57,32 @@ class PresenceSocketTest {
     }
     private void move(double x) throws Exception {
         handler.handleTextMessage(socket, new TextMessage("{\"x\":" + x + ",\"y\":0,\"z\":0,\"yaw\":0,\"walking\":" + (x != 0) + "}"));
+    }
+    @Test void fullTourRejectsJoinBeforeAcknowledgingOrMoving() throws Exception {
+        store.available = false;
+        handler.afterConnectionEstablished(socket);
+        handler.handleTextMessage(socket, new TextMessage("join"));
+        assertEquals(4001, closeStatus.getCode());
+        assertEquals(1, store.admissions);
+        assertTrue(sent.isEmpty());
+    }
+    @Test void joinReservesOneSlotAndOverviewKeepsItWithoutVisibleAvatar() throws Exception {
+        handler.afterConnectionEstablished(socket);
+        handler.handleTextMessage(socket, new TextMessage("join"));
+        handler.handleTextMessage(socket, new TextMessage("join"));
+        assertEquals(1, store.admissions);
+        assertTrue(store.reserved.hidden());
+        assertEquals("{\"admitted\":true}", sent.getFirst().getPayload());
+        handler.synchronizePresence(); handler.publish();
+        assertTrue(sent.getLast().getPayload().contains("\"players\":[]"));
+        move(2); handler.synchronizePresence(); handler.publish();
+        assertTrue(sent.getLast().getPayload().contains("\"x\":2.0"));
+        handler.handleTextMessage(socket, new TextMessage("hide"));
+        handler.synchronizePresence(); handler.publish();
+        assertTrue(sent.getLast().getPayload().contains("\"players\":[]"));
+        assertEquals(0, store.removals);
+        handler.handleTextMessage(socket, new TextMessage("leave"));
+        assertEquals(1, store.removals);
     }
     @Test void slowDatabaseDoesNotBlockFreshLocalMovementOrFloodMessages() throws Exception {
         connect(); handler.publish(); sent.clear();
