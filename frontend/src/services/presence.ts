@@ -1,7 +1,7 @@
 import type { Skin } from "../data/skins";
 
 export type Pose = { x: number; y: number; z: number; yaw: number; walking: boolean };
-export type Player = Pose & { id: string; name: string; skin: Skin };
+export type Player = Pose & { id: string; name: string; skin: Skin; at?: number };
 type Snapshot = { self: string; players: Player[] };
 
 export class CampusPresence {
@@ -11,6 +11,7 @@ export class CampusPresence {
   private lastPose: Pose | null = null;
   private running = false;
   private status = "";
+  private lastSent = 0;
 
   constructor(
     private pose: () => Omit<Pose, "walking"> | null,
@@ -80,10 +81,18 @@ export class CampusPresence {
     if (pose) {
       const prev = this.lastPose;
       const distance = prev ? Math.hypot(pose.x - prev.x, pose.z - prev.z) : 0;
-      socket.send(JSON.stringify({ ...pose, walking: distance > 0.035 && distance < 2 }));
+      const walking = distance > 0.035 && distance < 2;
+      const next = { ...pose, walking };
+      const changed = !prev || Math.abs(pose.x - prev.x) > 0.001 || Math.abs(pose.y - prev.y) > 0.001
+        || Math.abs(pose.z - prev.z) > 0.001 || Math.abs(pose.yaw - prev.yaw) > 0.001 || walking !== prev.walking;
+      if (!changed && Date.now() - this.lastSent < 5000) return;
+      socket.send(changed ? JSON.stringify(next) : "ping");
+      this.lastPose = next;
     } else {
+      if (!this.lastPose && Date.now() - this.lastSent < 5000) return;
       socket.send(this.lastPose ? "leave" : "ping");
+      this.lastPose = null;
     }
-    this.lastPose = pose ? { ...pose, walking: false } : null;
+    this.lastSent = Date.now();
   }
 }

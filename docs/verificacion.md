@@ -367,3 +367,12 @@ Se agregó una prueba de renderizado que recibe posiciones nuevas para diez avat
 En el sitio publicado se midieron dos conexiones de diagnóstico antes de esta corrección. Una recibió tres snapshots en ocho segundos. Se crearon dos cuentas con nombre QA movimiento y se cerraron sus sesiones al terminar la medición. La corrección requiere desplegarse y comprobarse nuevamente en Vercel.
 
 Asientos: 48 pruebas frontend aprobadas, incluidas capacidad 2/1, transformaciones, ocupación independiente y desempate entre visitantes. Chrome: E sienta y levanta, W no desplaza sentado, Esc pausa y permite reanudar sin perder el asiento. Sin errores de página. Ocupación comprobada con instantáneas simuladas; no se verificaron dos cuentas contra un servidor real.
+
+
+## Fluidez con consumo limitado (17/11/2026)
+
+Se separaron los planificadores de difusión y sincronización. Nuevas pruebas de backend: una consulta bloqueada no detiene el envío de posiciones locales; no se repite la misma instantánea en cada tick; en reposo se omiten consultas antes del latido; la revocación cierra la conexión y la baja del último visitante se elimina. Una cuarta prueba ejecutó las consultas reales de PresenceStore contra PostgreSQL 17 aislado en 127.0.0.1:55433/tour_fluidity: diez plazas, rechazo del undécimo, marcas temporales conservadas, reutilización de plaza y caducidad de sesión. Las cuatro pasaron. No se usaron credenciales ni datos de Neon.
+
+Se compiló el código Java y se ejecutaron esas cuatro pruebas con Maven 3.9.12 instalado y un POM temporal que omitía únicamente el starter de Spring Session JDBC, ausente en la caché y bloqueado para descarga desde este entorno. No equivale a Maven verify del proyecto completo ni verifica el arranque de Spring Session o dos instancias HTTP/WebSocket reales. El POM versionado conserva la dependencia. Queda pendiente esa verificación completa y la medición en Vercel.
+
+Frontend: 50 pruebas y compilación TypeScript/Vite correctas. La prueba temporal de movimiento usa paquetes alternados de 280/320 ms durante seis segundos y comprueba que no existan frenadas ni saltos de cada paquete; también prueba duplicados, giro corto, teletransporte y predicción limitada. Revisión visual en Chrome de diez avatares con ese intervalo, detención desde el botón y ausencia de errores visibles. La página .local/motion-preview.html es una herramienta local ignorada por Git. No constituye una medición multijugador de producción.

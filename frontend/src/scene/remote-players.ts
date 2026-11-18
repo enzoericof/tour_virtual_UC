@@ -2,6 +2,7 @@ import { occupiedSeat, type Seat } from "./seating";
 import * as T from "three";
 import { skins } from "../data/skins";
 import type { Player } from "../services/presence";
+import { MotionBuffer } from "./motion-buffer";
 
 const cube = new T.BoxGeometry(1, 1, 1);
 const head = new T.SphereGeometry(0.126, 12, 8);
@@ -21,8 +22,9 @@ class Avatar {
   private walking = false;
   private sitting = false;
   private knees: T.Group[] = [];
+  private motion = new MotionBuffer();
 
-  constructor(player: Player, private seats: Seat[]) {
+  constructor(player: Player, private seats: Seat[], now: number) {
     const piece = (parent: T.Object3D, geometry: T.BufferGeometry, material: T.Material,
         at: [number, number, number], size: [number, number, number]) => {
       const mesh = new T.Mesh(geometry, material);
@@ -64,12 +66,13 @@ class Avatar {
     this.label.scale.set(1.65, 0.275, 1);
     this.label.position.y = 1.92;
     this.group.add(this.label);
-    this.receive(player);
+    this.receive(player, now);
     this.group.position.copy(this.target);
     this.group.rotation.y = this.yaw;
   }
 
-  receive(player: Player) {
+  receive(player: Player, now: number) {
+    this.motion.receive(player, now);
     const skin = skins[player.skin] ?? skins.azul;
     this.shirt.color.setHex(skin.color);
     this.pants.color.setHex(skin.pants);
@@ -80,8 +83,12 @@ class Avatar {
     this.walking = player.walking && !this.sitting;
   }
 
-  update(dt: number) {
+  update(dt: number, now: number) {
     const blend = 1 - Math.exp(-15 * dt);
+    const pose = this.motion.sample(now);
+    this.walking = pose.walking && !this.sitting;
+    this.target.set(pose.x, pose.y, pose.z);
+    this.yaw = pose.yaw;
     if (this.group.position.distanceToSquared(this.target) > 25) this.group.position.copy(this.target);
     else this.group.position.lerp(this.target, blend);
     const turn = this.yaw - this.group.rotation.y;
@@ -106,7 +113,7 @@ export class RemotePlayers {
   seats: Seat[] = [];
   private avatars = new Map<string, Avatar>();
 
-  constructor(private scene: T.Scene) {}
+  constructor(private scene: T.Scene, private clock = () => performance.now()) {}
 
   receive(players: Player[]) {
     const visible = new Set(players.map(player => player.id));
@@ -117,9 +124,9 @@ export class RemotePlayers {
     }
     for (const player of players) {
       const avatar = this.avatars.get(player.id);
-      if (avatar) avatar.receive(player);
+      if (avatar) avatar.receive(player, this.clock());
       else {
-        const created = new Avatar(player, this.seats);
+        const created = new Avatar(player, this.seats, this.clock());
         this.avatars.set(player.id, created);
         this.scene.add(created.group);
       }
@@ -127,6 +134,7 @@ export class RemotePlayers {
   }
 
   update(dt: number) {
-    for (const avatar of this.avatars.values()) avatar.update(dt);
+    const now = this.clock();
+    for (const avatar of this.avatars.values()) avatar.update(dt, now);
   }
 }

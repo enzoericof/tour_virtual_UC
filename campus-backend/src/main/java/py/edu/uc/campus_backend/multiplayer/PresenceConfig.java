@@ -14,11 +14,34 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import java.util.Map;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @Configuration
 @EnableWebSocket
 @EnableScheduling
 public class PresenceConfig implements WebSocketConfigurer {
+    @Bean
+    public ThreadPoolTaskScheduler taskScheduler() {
+        return scheduler("campus-scheduled-");
+    }
+
+    @Bean
+    public ThreadPoolTaskScheduler presencePublish() {
+        return scheduler("presence-publish-");
+    }
+
+    @Bean
+    public ThreadPoolTaskScheduler presenceSync() {
+        return scheduler("presence-db-");
+    }
+
+    private static ThreadPoolTaskScheduler scheduler(String prefix) {
+        var scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix(prefix);
+        return scheduler;
+    }
     private final PresenceSocket presence;
     private final String[] frontendOrigins;
 

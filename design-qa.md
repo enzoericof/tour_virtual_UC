@@ -344,3 +344,6 @@ Ajuste final de plaza techada: seis conjuntos desplazados 1 m hacia el exterior 
 Fila de galería desplazada 0,8 m adicionales; fila exterior sin cambios. Revisión visual en Chrome sin errores, sin superposición entre conjuntos. Build y 40 pruebas aprobadas; no se realizó recorrido manual a pie.
 
 Asientos: cámara a altura sentada, aviso E para sentarse/levantarse y retorno al punto de aproximación. Revisada captura sentado.png en Chrome. Ayuda actualizada; Esc mantiene su comportamiento.
+
+
+17/11/2026: revisión local de diez avatares con snapshots espaciados 280–320 ms en .local/motion-preview.html. Se renderizan, animan y detienen con el botón de prueba. No se realizó una sesión de usuarios reales en Vercel; la continuidad se verifica además mediante simulación temporal automatizada.
