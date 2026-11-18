@@ -355,3 +355,6 @@ Asientos: cámara a altura sentada, aviso E para sentarse/levantarse y retorno a
 
 
 18/11/2026: comprobados los menús del recorrido sin Eliminar/Restaurar objetos y cuenta sin selector de ropa en .local/menu-removal-preview.html, con cuenta ficticia y sin backend real. Pruebas del escenario y build correctos.
+
+
+18/11/2026: acceso compacto con logo, panel y tipografías compartidos, sin hero ni eslogan. Revisados en Chrome el formulario inicial, la elección de cuenta recordada y la transición con logo, giro y barra indeterminada durante validación/construcción del 3D. Cuenta ficticia y servidor local simulado; condiciones detalladas en docs/verificacion.md.

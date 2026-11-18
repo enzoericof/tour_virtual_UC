@@ -417,3 +417,11 @@ Uniones y canales (18/11): vistas en navegador de la pieza en T, del giro final 
 Ramal, apoyos y seto (18/11): revisión en navegador del piso hacia Bloque G, los postes junto a canales y la franja vegetal desde arriba. La prueba de escena confirma losas y pieza de unión en el ramal y exige espacio libre de canaleta bajo el centro y el contorno de los apoyos principales. Pasaron las 54 pruebas del frontend y la compilación.
 
 Seto según foto (18/11): vista cercana en navegador confirma copa rectangular de hojas pequeñas y troncos visibles con bifurcación; emplazamiento en L conservado. Pruebas del frontend y compilación satisfactorias.
+
+## Visita de tres minutos, elección de cuenta y carga (18/11/2026)
+
+61 pruebas frontend y compilación TypeScript/Vite correctas, incluyendo los cambios de jardín y camineros de 7fc6796. Se agregaron pruebas con reloj controlado para el límite exacto de 180000 ms, actividad de teclado/mouse/rueda, mensajes de red que no reinician el plazo, retorno de una pestaña oculta, pagehide idempotente y primer movimiento tardío. Otra prueba verifica leave, cierre del WebSocket, cancelación de temporizadores y ausencia de reconexión al terminar el recorrido. Durante la suite aparecieron avisos del puerto HMR 24678 ocupado; ninguna prueba falló.
+
+En Chrome, con API y WebSocket locales simulados en 18086 y Vite en 5188: ingreso con cuenta ficticia, capa de Validando tu cuenta y Preparando el campus 3D, recarga que vuelve a elegir cuenta, y Continuar sin contraseña. Las métricas pasaron de una conexión activa a cero tras recargar (un leave), sin nuevo login automático; Continuar abrió otra conexión manteniendo un solo login. Usar otra cuenta ejecutó logout y mostró el formulario; una segunda identidad se abrió correctamente. Son pruebas del flujo cliente y cierre de presencia, sin Neon ni credenciales reales; no equivalen a verificar autenticación compartida en producción.
+
+El build separa el acceso del motor 3D: el módulo tour-runtime y Three.js se solicitan después de la elección. El indicador es indeterminado y no muestra porcentajes ficticios. Se conserva la cuenta mediante la cookie existente; finalizar el recorrido no invalida esa autenticación persistente.

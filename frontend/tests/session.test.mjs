@@ -6,11 +6,12 @@ import { createServer } from 'vite';
 const server = await createServer({ root: fileURLToPath(new URL('..', import.meta.url)), server: { middlewareMode: true, hmr: false }, appType: 'custom' });
 const { restoreSession } = await server.ssrLoadModule('/src/services/session.ts');
 const { logout } = await server.ssrLoadModule('/src/services/api.ts');
+const { CampusPresence } = await server.ssrLoadModule('/src/services/presence.ts');
 const originalFetch = globalThis.fetch;
 after(async () => { globalThis.fetch = originalFetch; await server.close(); });
 const account = { id: 7, nombre: 'Ana', apellido: 'Pérez', correo: 'ana@example.invalid', rol: 1, skin: 'verde' };
 
-test('Al recargar se recupera la cuenta desde la cookie con una sola solicitud', async () => {
+test('Al abrir se reconoce la cuenta guardada sin pedir contraseña', async () => {
   const calls = [];
   globalThis.fetch = async (url, options) => {
     calls.push({ url, options });
@@ -44,4 +45,27 @@ test('Cerrar sesión usa la cookie y CSRF, y el próximo acceso requiere identif
   assert.equal(calls[1].options.headers.get('X-CSRF-TOKEN'), 'test-csrf');
   assert.ok(calls.every(call => call.options.credentials === 'same-origin'));
   assert.deepEqual(await restoreSession(), { user: null, online: true });
+});
+
+test('Terminar el recorrido envía la salida, cierra WebSocket y no se reconecta', () => {
+  const previous = { window: globalThis.window, location: globalThis.location, WebSocket: globalThis.WebSocket };
+  let socket, reconnects = 0, cleared = 0;
+  class Socket {
+    static OPEN = 1;
+    readyState = 1; bufferedAmount = 0; messages = []; closed = false;
+    constructor() { socket = this; }
+    send(message) { this.messages.push(message); }
+    close() { this.closed = true; this.onclose?.({ code: 1000 }); }
+  }
+  globalThis.WebSocket = Socket;
+  globalThis.location = { protocol: 'http:', host: 'localhost' };
+  globalThis.window = { setInterval: () => 1, clearInterval: () => cleared++, clearTimeout() {}, setTimeout: () => reconnects++ };
+  try {
+    const presence = new CampusPresence(() => ({ x: 0, y: 0, z: 0, yaw: 0 }), () => {}, () => {});
+    presence.start(); socket.onopen(); presence.stop();
+    assert.equal(socket.messages.at(-1), 'leave');
+    assert.equal(socket.closed, true);
+    assert.equal(cleared, 1);
+    assert.equal(reconnects, 0);
+  } finally { Object.assign(globalThis, previous); }
 });

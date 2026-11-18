@@ -33,6 +33,9 @@ export class CampusPresence {
     window.clearTimeout(this.reconnect);
     const socket = this.socket;
     this.socket = null;
+    if (socket?.readyState === WebSocket.OPEN) {
+      try { socket.send("leave"); } catch { /* El cierre también retira la presencia. */ }
+    }
     socket?.close();
     this.lastPose = null;
     this.onPlayers([]);

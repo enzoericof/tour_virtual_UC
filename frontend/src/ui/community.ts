@@ -132,5 +132,11 @@ export function mountCommunity(
   };
   updateAccount();
 
-  return { getUser: () => user, isOnline: () => online, openAccount: account };
+  function endVisit() {
+    presence.stop();
+    void chat.disconnect().catch(() => {});
+    engine?.pause();
+  }
+
+  return { getUser: () => user, isOnline: () => online, openAccount: account, endVisit };
 }

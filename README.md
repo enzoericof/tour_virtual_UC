@@ -33,7 +33,7 @@ cd campus-backend
 
 En Linux o macOS, usá `sh ./mvnw spring-boot:run` desde el mismo directorio.
 
-Mantené Vite en ejecución. Por defecto, redirige la API y el WebSocket al puerto `8080`. Abrí **Menú** para iniciar sesión. Podés probar la presencia con dos sesiones de navegador independientes.
+Mantené Vite en ejecución. Por defecto, redirige la API y el WebSocket al puerto `8080`. En la pantalla de acceso, iniciá sesión o elegí continuar con la cuenta recordada; también podés usar otra cuenta o entrar como invitado. Recargar, cerrar la página o pasar tres minutos sin actividad termina el recorrido. Podés probar la presencia con dos sesiones de navegador independientes.
 
 Para usar un backend compartido, cada compañero configura la URL HTTPS pública del servicio Spring Boot en la terminal de PowerShell donde inicia Vite. Desde `frontend/`, ejecutá estos comandos con la URL del servicio.
 

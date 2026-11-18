@@ -2,7 +2,7 @@ import { api, login, type User } from "../services/api";
 import { icon } from "./icons";
 
 /** El mismo formulario se usa en la bienvenida y dentro del menú de cuenta. */
-export function mountAuthForm(root: HTMLElement, authenticated: (user: User) => void) {
+export function mountAuthForm(root: HTMLElement, authenticated: (user: User) => void, onPending: (pending: boolean) => void = () => {}) {
   root.innerHTML = `
     <div class="auth-tabs" role="tablist" aria-label="Acceso a la comunidad">
       <button type="button" role="tab" aria-selected="true" class="selected" data-mode="login">Iniciar sesión</button>
@@ -16,8 +16,9 @@ export function mountAuthForm(root: HTMLElement, authenticated: (user: User) => 
       </fieldset>
       <label>Correo electrónico<input name="email" type="email" required autocomplete="username" maxlength="150" placeholder="tu.correo@ejemplo.com"></label>
       <label>Contraseña<input name="password" type="password" required maxlength="72" autocomplete="current-password" placeholder="Tu contraseña"></label>
-      <p class="session-note">Tu sesión queda guardada en este dispositivo. Podés cerrarla desde tu cuenta.</p>
+      <p class="session-note">Recordaremos esta cuenta. En tu próxima visita elegís si querés continuar.</p>
       <button class="primary auth-submit" type="submit">Entrar al campus ${icon("arrow")}</button>
+      <p class="auth-progress hidden" role="status">Validando cuenta…</p>
       <p class="form-error" role="alert" aria-live="polite"></p>
     </form>`;
   const form = root.querySelector<HTMLFormElement>("form")!;
@@ -47,6 +48,8 @@ export function mountAuthForm(root: HTMLElement, authenticated: (user: User) => 
     event.preventDefault();
     if (pending) return;
     pending = true;
+    root.querySelector(".auth-progress")!.classList.remove("hidden");
+    onPending(true);
     const buttons = root.querySelectorAll<HTMLButtonElement>("button");
     buttons.forEach(button => button.disabled = true);
     errorLabel.textContent = "";
@@ -62,6 +65,8 @@ export function mountAuthForm(root: HTMLElement, authenticated: (user: User) => 
       errorLabel.textContent = error instanceof Error ? error.message : "No se pudo iniciar sesión.";
     } finally {
       pending = false;
+      root.querySelector(".auth-progress")?.classList.add("hidden");
+      onPending(false);
       buttons.forEach(button => button.disabled = false);
     }
   };
