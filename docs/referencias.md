@@ -163,3 +163,8 @@ Fotos y grabaciones del ascensor del Bloque 1 aportadas por el usuario el 19/11/
 | `Ascensor subiendo y llegando.m4a` | Zumbido del motor: un tramo estable de 7 s en bucle. El gong y la apertura del final ya están en las otras grabaciones |
 
 Los audios se analizaron con espectrogramas y envolventes de nivel para ubicar cada evento. El recorte no se comprobó escuchando por parlantes.
+
+
+### Acabado ilustrado de los pasillos (19/11/2026)
+
+Por indicación del usuario, galleryFloor y granite usan ahora un mosaico dibujado por código en materials.ts: base rosada uniforme, áridos geométricos discretos, acabado mate y franjas rectas oscuras cada 1,25 m. Los rellanos comparten la misma paleta sin franja. Se conservan la orientación, fase y dimensiones de las UV existentes. Son dos CanvasTexture de 256 × 256; las texturas extraídas del escaneo permanecen como referencia histórica y ya no se aplican a estos dos materiales.

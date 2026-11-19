@@ -477,3 +477,8 @@ Ventanas y pilares (18/11): 66/66 pruebas aprobadas y compilación correcta. La 
 ### Caminero exterior del LED — 19/11/2026
 
 Frontend: 67/67 pruebas aprobadas y compilación correcta. Las pruebas verifican que los caminos nuevos no corten edificios ni salgan del terreno, cuatro árboles fuera de la circulación, material de pavimento compartido con el caminero existente, piso completo a todo el ancho de los dos empalmes y la horquilla, carpas sobre ambos trazados y postes fuera de las losas y del cruce. Revisión en navegador desde arriba y a nivel peatonal: losas, juntas, cubiertas, uniones y distribución de árboles. Captura local `.local/dei-new-covered-path-and-trees.jpg`, fuera de Git. Sin cambios de backend ni pruebas multijugador en esta tarea.
+
+
+## Pasillos con piso ilustrado (19/11/2026)
+
+68 pruebas frontend y compilación TypeScript/Vite correctas sobre main c905cc1, incluyendo los aportes recientes de ascensor y DEI. Se sustituyó únicamente el acabado de galleryFloor y granite; la construcción y sus UV mantienen las dimensiones y colisiones. Chrome: vista local aislada del pasillo del tercer piso con el motor y modelo reales; franjas alineadas, superficie rosada uniforme y áridos dibujados, sin manchas ni iluminación de la foto. La vista no inicia sesión ni conecta presencia. No se modificó backend ni Neon.
