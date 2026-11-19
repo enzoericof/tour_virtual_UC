@@ -33,3 +33,16 @@ test('Scan-derived textures exist, stay small and match their tile sizes and pro
  }
  for(const[,name]of materials.matchAll(/scanMaterial\("([a-z-]+)"/g))assert.ok(catalogue[name],name);
 });
+test('Elevator textures, murals and recordings exist, stay small and keep their provenance',()=>{
+ const sources=JSON.parse(fs.readFileSync(new URL('sources.json',root),'utf8')).assets;
+ const shaft=fs.readFileSync(new URL('../src/scene/faculty/elevator-shaft.ts',import.meta.url),'utf8');
+ const audio=fs.readFileSync(new URL('../src/scene/elevator-audio.ts',import.meta.url),'utf8');
+ const names=new Set([...[...shaft.matchAll(/photo\("([a-z-]+)"/g)].map(m=>`ascensor/${m[1]}.webp`),
+  ...[...audio.matchAll(/\/assets\/(ascensor\/[a-z-]+\.mp3)/g)].map(m=>m[1])]);
+ assert.equal(names.size,14,'Eleven images and three sounds');
+ for(const name of names){
+  const data=fs.readFileSync(new URL(name,root));assert.ok(data.length<128*1024,name);
+  const entry=sources.find(a=>a.asset===name);assert.ok(entry,`${name} has no provenance entry`);
+  assert.equal(entry.sha256,crypto.createHash('sha256').update(data).digest('hex'),`${name}: run scripts/prepare-elevator-assets.py again`);
+ }
+});

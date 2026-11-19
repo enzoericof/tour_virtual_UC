@@ -361,3 +361,6 @@ Asientos: cámara a altura sentada, aviso E para sentarse/levantarse y retorno a
 
 
 18/11/2026: revisado en Chrome el panel Recorrido completo con logo UC, tarjeta y fuentes compartidas; texto de 10 personas y reintento manual sin escena 3D. API/WebSocket simulados. Tras liberar una plaza, se conserva la elección de cuenta y abre el campus. Detalles en docs/verificacion.md.
+
+
+19/11/2026: ascensor rehecho con las fotos del usuario. Revisado en Chromium sin ventana, en 1280 × 800, con una página temporal sin cuenta. El frente de planta baja coincide con la foto: armario de maniobra, marco y hojas de acero, indicador de dirección y botonera con «PB» sobre revoque azul. El primer piso tiene el mismo frente sin armario. Puertas abiertas con la cabina detrás. Interior con paneles de acero y sus reflejos, guarda de granito, pasamanos, avisos y botonera con indicador «P8», como el real. Murales: lápiz al sur, computadora al este y cascos al oeste, con los mismos vecinos que en las fotos. Corregidos durante la revisión: el hormigón del patio tapaba el piso de la cabina y una rendija dejaba ver el revoque junto a las hojas. Sin errores de página. Detalle en docs/verificacion.md.

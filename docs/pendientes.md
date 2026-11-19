@@ -13,7 +13,7 @@ Prioridades indicadas por el usuario, en este orden.
 | Issue | Criterio de terminado |
 | --- | --- |
 | 1. Plaza techada: ubicarla y renderizarla | Posición y tamaño medidos en el lugar (hoy 15 × 10 m y corrimiento de 6,5 m, de capturas); cubierta, columnas y servicios visibles desde la vista general y recorribles a pie sin atascos |
-| 2. Escaleras frente a ascensores de los bloques de clases | Decisión del equipo sobre la circulación vertical del Bloque 1 y el Bloque G (hoy el ascensor del Bloque 1 es solo un volumen y la escalera del Bloque G es una interpretación) e implementación verificada piso por piso |
+| 2. Escaleras frente a ascensores de los bloques de clases | Decisión del equipo sobre la circulación vertical del Bloque 1 y el Bloque G (el ascensor del Bloque 1 ya funciona en los cuatro niveles; la escalera del Bloque G es una interpretación) e implementación verificada piso por piso |
 | 3. Bedelía, LED y los demás edificios secundarios | Medidas o fotos de cada uno registradas en base-geografica.md; volúmenes, fachadas y accesos actualizados en `faculty-blueprint.ts` / `faculty-annexes.ts` |
 | 4. Camineros y árboles | Trazado y especies según referencias identificadas; red peatonal conectada (`npm test`) y árboles sin tapar accesos ni circulaciones |
 | 5. Interfaz general | Revisión de la interfaz (inicio, menú de pausa, explorador, biblioteca y cuentas) en escritorio y en 390 px de ancho, con resultado registrado en verificacion.md |
@@ -24,7 +24,7 @@ Prioridades indicadas por el usuario, en este orden.
 | --- | --- |
 | **Servidor del frontend:** integrar la biblioteca, los paneles y el chat con `campus-backend/`. Los contratos anteriores están en [arquitectura](arquitectura.md#aporte-campus-backend) | Biblioteca, paneles y chat operativos en el visor con pruebas de PostgreSQL y permisos |
 | Medidas: tomar en el lugar las que faltan del Bloque 1 y las de los demás edificios ([estado de las medidas](base-geografica.md#estado-de-las-medidas-03112026)) y confirmar las interpretaciones de los [límites de fidelidad](base-geografica.md#límites-de-fidelidad) | Medidas registradas en base-geografica.md e incorporadas a `faculty-blueprint.ts`, con `npm test` actualizado |
-| Murales del ascensor: hoy las tres caras repiten el mural de `IMG_5727` | Fotos de las caras sur y oeste incorporadas como texturas propias, con su procedencia en `sources.json` |
+| Ascensor: confirmar en el lugar si el armario de maniobra está solo en planta baja, medir la cabina (alto interior) y la puerta, y grabar el cierre de puertas (hoy se reutiliza la apertura) | Medidas y foto registradas en base-geografica.md e incorporadas a `elevator.ts` / `elevator-shaft.ts`, con `npm test` actualizado |
 | Cantina: fachada, forma de cubierta e interior; interior de Electrónica e Informática | Referencias recibidas e incorporadas a `faculty-blueprint.ts` / `faculty-reconstruction.ts` |
 | Referencias de segundo piso y baños (distribución interior de la torre; ya se conocen su forma y qué lado es de cada baño) | `piso-2` y `banos` pasan de `pending` a `reference` en `places.ts` |
 | Escaneos: huecos y alineación con el campus; recorrido por dentro de aulas, cantina y Bedelía | Recorrido sin atascos hasta los recintos del [catálogo de espacios](../frontend/src/data/places.ts); las escaleras de ambos bloques ya se recorrieron |

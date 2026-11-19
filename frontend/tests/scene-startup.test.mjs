@@ -379,7 +379,7 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     // Verifica llamadas, puerta, geometría y transporte continuo del jugador.
     const { Walker } = await server.ssrLoadModule("/src/navigation/walker.ts");
     const { TourEngine } = await server.ssrLoadModule("/src/scene/engine.ts");
-    const { ElevatorMotion } = await server.ssrLoadModule("/src/scene/elevator.ts");
+    const { ElevatorMotion, CABIN, DOOR_TIME, ARRIVAL_PAUSE, OPEN_TIME } = await server.ssrLoadModule("/src/scene/elevator.ts");
     const { Octree } = await import("three/addons/math/Octree.js");
     const { Capsule } = await import("three/addons/math/Capsule.js");
     const camera = new PerspectiveCamera();
@@ -523,10 +523,12 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       walker.addBarrier(stop.barrier, () => motion.moving || motion.floor !== level || motion.opening < 0.97);
       walker.addBarrier(stop.floor, () => !motion.moving && motion.floor === level);
     }
+    const sounds = [];
     const engine = Object.assign(Object.create(TourEngine.prototype), {
       camera, walker, campus: { elevator }, spawn: new Vector3(),
       elevatorRay: new Raycaster(), elevatorCenter: new Vector2(),
       elevatorFocus: null, elevator: motion, elevatorPassenger: false, cabinPoint: new Vector3(),
+      elevatorAudio: { unlock() {}, update: (m) => sounds.at(-1) !== m.state && sounds.push(m.state) },
     });
     const aim = (button) => {
       camera.lookAt(button.mesh.getWorldPosition(new Vector3()));
@@ -536,56 +538,87 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const tick = seconds => {
       for (let elapsed = 0; elapsed < seconds; elapsed += 0.025) engine.updateElevator(0.025);
     };
+    const travel = floors => 1.1 + floors * FLOOR_HEIGHT / 1.7;
     const thresholdAt = level => elevator.stops[level].barrier.getWorldPosition(new Vector3())
       .setY(level * FLOOR_HEIGHT + 0.06);
+    // Cabina de 1,1 × 1,4 m con el vano al ras de su pared oeste y la botonera en la pared este.
+    const carBox = new Box3();
+    elevator.car.traverse(o => { if (o.isMesh && o.geometry.type === "BoxGeometry" && !o.isPositionalAudio) carBox.expandByObject(o); });
+    assert.ok(Math.abs(carBox.max.z - carBox.min.z - CABIN.depth) < 0.2, "The cabin is about 1.4 m deep");
+    assert.ok(Math.abs(carBox.max.x - carBox.min.x - CABIN.width) < 0.25, "The cabin is about 1.1 m wide");
+    assert.equal(elevator.carButtons.length, 6, "Four floors plus door open and close");
+    assert.equal(elevator.carButtons.filter(b => b.action === "close").length, 1);
+    const murals = ["este", "sur", "oeste"].map(name => group.getObjectByName(`Mural ${name} del ascensor`));
+    assert.ok(murals.every(Boolean), "Three murals on the shaft");
+    assert.equal(new Set(murals.map(mural => mural.material.map)).size, 3, "Each face shows its own mural");
     assert.deepEqual(elevator.stops.map(stop => stop.buttons.length), [1, 2, 2, 1]);
     assert.equal(walker.canStandAt(thresholdAt(0).add(new Vector3(0, 0, -0.18))), false);
     walker.teleport(thresholdAt(0).add(new Vector3(0, 0, -0.9)));
     aim(elevator.stops[0].buttons[0]);
     engine.useElevator();
-    tick(0.66);
+    tick(DOOR_TIME / 2);
+    assert.ok(motion.opening > 0.4 && motion.opening < 0.6, "Telescopic doors take their recorded time");
+    const [slow, fast] = elevator.stops[0].doors;
+    assert.ok(Math.abs((fast.mesh.position.x - fast.closedX) - 2 * (slow.mesh.position.x - slow.closedX)) < 1e-6,
+      "The fast leaf travels twice as far as the slow one");
+    tick(DOOR_TIME / 2 + 0.05);
     assert.equal(motion.opening, 1);
     const openThreshold = thresholdAt(0);
     for (let depth = -0.65; depth < 1.1; depth += 0.14) {
       assert.ok(walker.canStandAt(openThreshold.clone().add(new Vector3(0, 0, depth))), "Open entrance is clear");
     }
-    walker.teleport(elevator.car.getWorldPosition(new Vector3()).add(new Vector3(0, 0.06, 0)));
-    tick(9.9);
+    const inside = elevator.car.getWorldPosition(new Vector3()).add(new Vector3(0, 0.06, 0));
+    for (const [dx, dz] of [[CABIN.width / 2, 0], [-CABIN.width / 2, 0], [0, CABIN.depth / 2]])
+      assert.equal(walker.canStandAt(inside.clone().add(new Vector3(dx, 0, dz))), false, "The cabin walls stop the visitor");
+    walker.teleport(inside);
+    tick(OPEN_TIME - 0.1);
     assert.equal(motion.opening, 1);
-    tick(0.85);
+    tick(DOOR_TIME + 0.3);
     assert.equal(motion.opening, 0, "Doors close after ten seconds even with a passenger");
     aim(elevator.carButtons[3]);
     engine.useElevator();
     tick(2);
     assert.ok(motion.height > 0 && motion.height < 3 * FLOOR_HEIGHT);
     assert.ok(elevator.stops.every(stop => stop.directionDisplay.material === elevator.directionLabels.up));
+    assert.equal(elevator.cabinDisplay.direction.material, elevator.directionLabels.up, "The cabin shows the direction too");
     assert.ok(Math.abs(camera.position.y - (motion.height + 1.56)) < 1e-6, "The player follows the moving cabin");
     motion.request(1);
     motion.request(2);
     motion.request(1);
-    tick(6);
+    tick(travel(3) - 2 + 0.05);
+    assert.equal(motion.state, "arriving", "The cabin stops and chimes before opening");
+    assert.equal(motion.opening, 0);
+    tick(ARRIVAL_PAUSE + DOOR_TIME + 0.05);
     assert.equal(motion.floor, 3);
     assert.equal(motion.opening, 1);
     assert.ok(elevator.stops.every(stop => stop.floorDisplay.material === elevator.floorLabels[3]));
+    assert.equal(elevator.cabinDisplay.floor.material, elevator.floorLabels[3]);
     assert.ok(elevator.stops.every(stop => stop.directionDisplay.material === elevator.directionLabels.idle));
     assert.ok(Math.abs(camera.position.y - 12.06) < 1e-6);
-    // Llamadas recibidas durante el viaje se atienden en orden y sin repetir el piso.
-    tick(12);
+    // Llamadas recibidas durante el viaje se atienden en orden y sin repetir el piso; el botón de
+    // cerrar adelanta el cierre.
+    aim(elevator.carButtons[5]);
+    engine.useElevator();
+    assert.equal(motion.state, "closing", "The close button closes the doors at once");
+    tick(DOOR_TIME + 0.5);
     assert.ok(elevator.stops.every(stop => stop.directionDisplay.material === elevator.directionLabels.down));
-    tick(4.7);
+    tick(travel(2));
     assert.equal(motion.floor, 1);
-    tick(15);
+    tick(ARRIVAL_PAUSE + DOOR_TIME + OPEN_TIME + DOOR_TIME + travel(1) + 0.5);
     assert.equal(motion.floor, 2);
-    tick(12);
+    tick(ARRIVAL_PAUSE + DOOR_TIME + OPEN_TIME + DOOR_TIME + 0.5);
     assert.equal(motion.floor, 2);
     assert.equal(motion.opening, 0);
     walker.teleport(thresholdAt(2).add(new Vector3(0, 0, -0.9)));
     aim(elevator.stops[2].buttons[1]);
     engine.useElevator();
-    tick(0.68);
+    tick(DOOR_TIME + 0.05);
     assert.equal(motion.opening, 1, "The outside button reopens a parked cabin");
-    tick(10.75);
+    tick(OPEN_TIME + DOOR_TIME + 0.1);
     assert.equal(motion.opening, 0, "The doors also close with the passenger outside");
+    // Cada sonido acompaña su evento: puertas, viaje y gong de llegada antes de abrir.
+    const order = sounds.join(" ");
+    assert.ok(order.includes("moving arriving opening open closing"), "Travel, chime and doors follow each other");
 
   } finally {
     await server.close();

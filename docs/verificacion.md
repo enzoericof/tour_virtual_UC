@@ -1,5 +1,12 @@
 # Verificación (versión 0.1.0)
 
+## Ascensor con fotos y sonido — 19/11/2026
+
+- Pasaron las 68 pruebas del frontend y la compilación de producción, sin avisos de tamaño: el bloque de three.js queda en 697 kB, porque el sonido usa Web Audio directo. La prueba de la escena comprueba la cabina de 1,1 × 1,4 m y que sus paredes frenan al visitante. También comprueba el vano libre con las puertas abiertas, la hoja rápida que recorre el doble que la lenta, los tiempos de apertura (2,3 s) y la pausa de llegada. Además, el botón de cerrar, el indicador de la cabina, los tres murales distintos y el orden viaje → gong → puertas. Una prueba nueva verifica el tamaño y la procedencia de los 14 recursos del ascensor.
+- Revisión en Chromium sin ventana (WebGL por software) con una página temporal que arma `TourEngine` sin iniciar sesión, porque el backend no estaba activo. Se revisaron el frente de planta baja y del primer piso, las puertas abiertas, el interior hacia el fondo, la botonera y la puerta, el piso y los tres murales desde el sur, el este y el oeste. Sin errores de página. Capturas locales fuera de Git.
+- Sonido en el mismo navegador: el contexto queda activo, los tres MP3 se decodifican (3,3 s, 2,49 s y 7,2 s). En un viaje de un piso suenan, en orden, el motor (su volumen sigue la velocidad), el gong al detenerse y las puertas al abrir. No se escuchó por parlantes.
+- No se recorrió a pie con el mouse capturado ni con el backend real.
+
 ## Refactor del visor y del servidor — 15/11/2026
 
 Pasaron las 40 pruebas del frontend y la compilación de producción. La comparación de la escena antes y después del refactor confirmó la equivalencia de las mallas y las colisiones. El backend pasó `mvn verify` con Java 21 y PostgreSQL 17.4 en una base temporal sobre la que se aplicaron las ocho migraciones. La prueba de contexto verifica el arranque de Spring Boot. [Revisión en navegador](../design-qa.md).

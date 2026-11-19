@@ -3,7 +3,8 @@ import type { Player } from "../services/presence";
 import * as T from "three";
 import { RemotePlayers } from "./remote-players";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { ElevatorMotion, type ElevatorButton, type ElevatorDoor } from "./elevator";
+import { CABIN, ElevatorMotion, type ElevatorButton, type ElevatorDoor } from "./elevator";
+import { ElevatorAudio } from "./elevator-audio";
 import { createCampus } from "./campus";
 import { EntranceDoors } from "./entrance-doors";
 import { loadPlacementsInto } from "./editor-placements";
@@ -58,6 +59,7 @@ export class TourEngine {
   private elevatorFocus: ElevatorButton | null = null;
   private elevator = new ElevatorMotion(FLOOR_HEIGHT);
   private elevatorPassenger = false;
+  private elevatorAudio = new ElevatorAudio(this.camera, this.campus.elevator.car);
   private cabinPoint = new T.Vector3();
   onMode = (_mode: TourMode) => {};
   onLocation = (_place: Place | null) => {};
@@ -105,7 +107,9 @@ export class TourEngine {
       this.walker.addBarrier(stop.floor, () => !this.elevator.moving && this.elevator.floor === floor);
     }
     this.canvas.addEventListener("click", (event) => {
-      if (event.button === 0 && this.walker.active) this.useElevator();
+      if (event.button !== 0) return;
+      this.elevatorAudio.unlock();
+      if (this.walker.active) this.useElevator();
     });
     this.walker.onLockChange = (locked) => {
       this.orbit.enabled = !locked && !this.walker.enabled;
@@ -164,6 +168,7 @@ export class TourEngine {
       this.gaze.copy(destination).addScaledVector(direction.normalize(), 8); this.gaze.y += 1.5;
       this.campus.setDetail(true);
       this.orbit.enabled = false;
+      this.elevatorAudio.unlock();
       this.walker.teleport(destination);
       this.camera.lookAt(this.gaze);
       this.walker.enabled = true;
@@ -257,9 +262,11 @@ export class TourEngine {
       if (this.walker.active) this.onLocation(this.nearest());
     }
   };
+  /** Ojos dentro de la cabina o en su umbral (origen de la cabina: centro de su piso). */
   private insideElevator() {
     const point = this.campus.elevator.car.worldToLocal(this.cabinPoint.copy(this.camera.position));
-    return Math.abs(point.x) < 1.05 && point.z > -1.19 && point.z < 1.11 && point.y > 0.7 && point.y < 2.33;
+    return Math.abs(point.x) < CABIN.width / 2 && point.z > -CABIN.depth / 2 - 0.3 && point.z < CABIN.depth / 2
+      && point.y > 0.7 && point.y < CABIN.height + 0.1;
   }
   private elevatorTarget() {
     if (!this.walker.active) return null;
@@ -279,13 +286,16 @@ export class TourEngine {
   }
   private useElevator() {
     const target = this.elevatorTarget();
-    if (target) this.elevator.request(target.button.destination ?? target.floor, target.inside);
+    if (!target) return;
+    if (target.button.action === "close") this.elevator.close();
+    else this.elevator.request(target.button.destination ?? target.floor, target.inside);
   }
   private updateElevator(dt: number) {
-    const { car, carDoors, stops, directionLabels, floorLabels } = this.campus.elevator;
+    const { car, carDoors, stops, directionLabels, floorLabels, cabinDisplay } = this.campus.elevator;
     const wasMoving = this.elevator.moving;
     const previousHeight = this.elevator.height;
     this.elevator.update(dt);
+    this.elevatorAudio.update(this.elevator, dt);
     if (!wasMoving && this.elevator.moving) {
       this.elevatorPassenger = this.walker.enabled && this.insideElevator();
     }
@@ -303,6 +313,8 @@ export class TourEngine {
     slide(carDoors, this.elevator.opening);
     const directionMaterial = directionLabels[this.elevator.direction];
     const floorMaterial = floorLabels[this.elevator.displayedFloor];
+    cabinDisplay.direction.material = directionMaterial;
+    cabinDisplay.floor.material = floorMaterial;
     for (const [floor, stop] of stops.entries()) {
       stop.directionDisplay.material = directionMaterial;
       stop.floorDisplay.material = floorMaterial;
@@ -339,6 +351,7 @@ export class TourEngine {
       this.camera.lookAt(this.gaze);
     }
     this.orbit.enabled = false;
+    this.elevatorAudio.unlock();
     this.walker.walk();
   }
   overview() {

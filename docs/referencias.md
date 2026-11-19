@@ -8,14 +8,17 @@ El Drive del equipo se consultó **solo para lectura**. El «Bloque 2» de sus c
 | --- | --- | --- | --- |
 | Fotos WebP optimizadas | 37 | 8,8 MB | `frontend/public/assets/photos/` |
 | Texturas WebP derivadas del escaneo `pasillo-p3`: ladrillo, granito con y sin franja, hormigón, lamas y chapa de la cubierta | 6 | 48 KB (≤64 KB cada una, lo verifica `npm test`) | `frontend/public/assets/textures/` |
+| Ascensor: once texturas y murales WebP enderezados de fotos y tres sonidos MP3 recortados de grabaciones ([detalle](#ascensor--19112026)) | 14 | 410 KB (≤128 KB cada uno, lo verifica `npm test`) | `frontend/public/assets/ascensor/` |
 
-Total de recursos servidos ≈ 8,9 MB. `frontend/public/assets/sources.json` registra para los 43 recursos el origen, el hash del original y el hash y tamaño del derivado. No se incluyen los originales ni el escaneo de persona (sin usar).
+Total de recursos servidos ≈ 9,3 MB. `frontend/public/assets/sources.json` registra para los 57 recursos el origen, el hash del original y el hash y tamaño del derivado. No se incluyen los originales ni el escaneo de persona (sin usar).
 
 ## Preparación
 
 `scripts/prepare-assets.py` (dependencias en `scripts/requirements-assets.txt`) lee las copias locales de Drive sin modificarlas, convierte las imágenes a WebP; ya no exporta escaneos GLB navegables. `npm test` comprueba que cada foto referenciada en `places.ts` exista.
 
 `scripts/extract-scan-textures.py` (mismas dependencias) lee el escaneo del pasillo sin modificarlo, lo alinea con su eje y rasteriza vistas ortográficas de zonas limpias de pared, piso, dintel, lamas y cubierta; compensa la iluminación, vuelve repetibles los bordes y escribe las texturas, `textures/textures.json` (tamaño real que cubre cada repetición) y sus entradas en `sources.json`. Se generaron desde el original de Drive (textura de 8192 px). Las lamas se ven a contraluz desde la galería: se llevó su color medio al gris azulado de las fotos tomadas desde el patio.
+
+`scripts/prepare-elevator-assets.py` (mismas dependencias y `ffmpeg`) lee las fotos y grabaciones del ascensor sin modificarlas, desde la carpeta que se le indique. Endereza cada superficie con una homografía a partir de esquinas marcadas en la foto, borra calcomanías y objetos delante e interpola los huecos, y vuelve repetibles el acero y el revoque azul. Recorta, filtra y normaliza los sonidos, y convierte el zumbido del viaje en un bucle sin costuras. Escribe los derivados y sus entradas en `sources.json`.
 
 ## Git
 
@@ -141,3 +144,22 @@ Referencias aportadas en el chat: `codex-clipboard-a9c726cc-006e-4e97-814b-ceb20
 ### LED, lateral derecho — 18/11/2026
 
 Dos fotografías aportadas por Horacio en el chat, identificadas como codex-clipboard-4603ba68-5bd5-441d-b5c6-b460d19ee81e y codex-clipboard-f94b3e79-5906-43cb-8e26-d8b16f60e1f0. Referencias de lamas, rejas, equipos, estructura metálica, puertas y entorno inmediato. No se incorporan los originales al repositorio ni se usan como textura; la reconstrucción se genera con geometría y materiales del proyecto.
+
+## Ascensor — 19/11/2026
+
+Fotos y grabaciones del ascensor del Bloque 1 aportadas por el usuario el 19/11/2026. Los originales quedan fuera del repositorio; los derivados y su procedencia (hash del original y del derivado) están en `sources.json`.
+
+| Original | Uso |
+| --- | --- |
+| `ascensor fondo.jpeg` | Pared del fondo enderezada. Se borran las calcomanías, el afiche de un evento con la foto de una persona y el pasamanos, que se modela aparte. Las paredes laterales repiten sus paneles y el acero repetible sale de un panel limpio |
+| `ascensor piso.jpeg` | Piso de granito negro con guarda clara, enderezado a 1,1 × 1,4 m. Confirma la proporción de la cabina y el lado al que se recogen las hojas |
+| `ascensor panel izquierda foto 2.jpeg` | Placa de la botonera, enderezada desde sus cuatro tornillos, con la posición de indicador y pulsadores. Avisos de OTIS (control de mantenimiento y recomendaciones) y afiche del PCOE de la universidad |
+| `ascensor panel izquierda.jpeg`, `ascensor derecha.jpeg` | Referencia de la ubicación de la botonera y los avisos, del techo y de las juntas. No se usan como textura |
+| `ascensor puerta.jpeg` | Frente de planta baja: marco y hojas de acero, armario de maniobra, revoque azul repetible e indicadores. Fija el vano de 0,82 × 2 m y los montantes |
+| `cara este.jpeg` | Mural de los cascos, enderezado. Se borran el carro de limpieza, el lampazo y el borde tapado por el edificio. Va en la **cara oeste** (ver [correcciones](correcciones.md#19112026--ascensor)) |
+| `cara sur.jpeg` | Mural del lápiz, enderezado. Donde había hojas de árbol se redibujan las figuras planas de la parte alta |
+| `Ascensor abriendose.m4a` | Puertas: del arranque del motor (0,1 s) al golpe de tope (2,3–2,5 s). Fija el tiempo de apertura y también se usa al cerrar |
+| `Sonido ascensor llegó.m4a` | Gong de llegada (tonos de 1,26 y 1,05 kHz), sin el ruido grave de pasos y voces |
+| `Ascensor subiendo y llegando.m4a` | Zumbido del motor: un tramo estable de 7 s en bucle. El gong y la apertura del final ya están en las otras grabaciones |
+
+Los audios se analizaron con espectrogramas y envolventes de nivel para ubicar cada evento. El recorte no se comprobó escuchando por parlantes.
