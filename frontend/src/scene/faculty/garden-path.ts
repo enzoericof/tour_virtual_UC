@@ -1,5 +1,5 @@
 import * as T from "three";
-import { facultyBlueprint as plan, type Vec2 } from "../../data/faculty-blueprint";
+import { facultyBlueprint as plan, type Vec2, type Rect } from "../../data/faculty-blueprint";
 import { coveredWalkSurface } from "../../data/cantina-terrain";
 import type { FacultyBuilder } from "./builder";
 
@@ -101,6 +101,7 @@ export type WalkOptions = {
   width?: number; finishedHeight?: boolean; name?: string; junctionAt?: number;
   junctionBranch?: { points: readonly Vec2[]; ground: (point: Vec2) => number };
   junctions?: WalkJunction[]; startDistance?: number;
+  pavingJoin?: { rect: Rect; minX: number; maxX: number; frontZ: (x: number) => number };
 };
 
 /** Tramos independientes: pequeños quiebres, bordes ondulados y juntas con tierra visible. */
@@ -202,7 +203,28 @@ export function addSegmentedGardenPath(
         [width / 2, run], [-width / 2, run]].map(([x, y]) => new T.Vector2(x * sign, y));
     }
     if (clipped.length < 3) { distance += length; index++; continue; }
-    const geometry = new T.ExtrudeGeometry(new T.Shape(clipped), { depth: 1, bevelEnabled: false });
+    let parts = [clipped];
+    if(options.pavingJoin) {
+      const join=options.pavingJoin, c=Math.cos(join.rect.angle),s=Math.sin(join.rect.angle);
+      const local=(p:T.Vector2)=>{
+        const q=at(start+p.y,p.x),dx=q[0]-join.rect.center[0],dz=q[1]-join.rect.center[1];
+        return new T.Vector2(dx*c+dz*s,-dx*s+dz*c);
+      };
+      const clip=(poly:T.Vector2[],signed:(p:T.Vector2)=>number)=>{
+        const result:T.Vector2[]=[];
+        for(let i=0;i<poly.length;i++) {
+          const a=poly[(i+poly.length-1)%poly.length],b=poly[i],da=signed(local(a)),db=signed(local(b));
+          if((da>=0)!==(db>=0))result.push(a.clone().lerp(b,da/(da-db)));
+          if(db>=0)result.push(b);
+        }
+        return result;
+      };
+      const middle=clip(clip(clipped,p=>p.x-join.minX),p=>join.maxX-p.x);
+      parts=[clip(clipped,p=>join.minX-p.x),clip(clipped,p=>p.x-join.maxX),
+        clip(middle,p=>join.frontZ(p.x)-p.y)].filter(p=>p.length>=3);
+    }
+    for(const part of parts) {
+    const geometry = new T.ExtrudeGeometry(new T.Shape(part), { depth: 1, bevelEnabled: false });
     const normals = geometry.attributes.normal;
     const positions = geometry.attributes.position, uv = geometry.attributes.uv;
     for (let i = 0; i < positions.count; i++) {
@@ -231,6 +253,7 @@ export function addSegmentedGardenPath(
     if (isJunction) body.userData.walkJunction = junction!.label ?? true;
     if (!options.finishedHeight) body.userData.gardenSlab = true;
     builder.layers.solid.add(body);
+    }
     distance += length; index++;
   }
 }

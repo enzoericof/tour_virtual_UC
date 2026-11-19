@@ -452,3 +452,17 @@ Ajuste posterior: 61/61 pruebas aprobadas y build correcto con las cuatro mesas 
 ### Mesas con banquitos — 18/11/2026
 
 Compilación y 61/61 pruebas aprobadas. Revisados en navegador los cuatro conjuntos de mesa rectangular y dos bancos largos, sin respaldos, con tapas perforadas, colisiones y apoyo sobre el jardín. Captura local `.local/garden-benches-final.jpg`.
+
+### Entrada del LED en ampliación baja — 18/11/2026
+
+66/66 pruebas frontend aprobadas y compilación correcta. La prueba de escena comprueba el cierre del acceso anterior, el paso libre por la nueva puerta hasta el corredor y el giro hacia el volumen principal, el piso continuo y la altura libre. Las pruebas de plano verifican que la huella ampliada no invada las llegadas ni los caminos. Revisión visual en navegador de fachada y nicho de entrada, marquesina, carpa y macetas. Captura local `.local/led-entrance-wing.jpg`, fuera de Git. Medidas estimadas; no se repitió el recorrido completo por el resto de la facultad.
+
+Entrada de blindex (18/11): compilación correcta y 66/66 pruebas aprobadas. La prueba de escena verifica cuatro paños transparentes (dos fijos y dos hojas), dos pilares de sección cuadrada de 28 cm, profundidad del pasillito, paso libre, piso y conexión al volumen principal. Revisión visual cercana de la entrada completa en navegador. Captura local `.local/led-blindex-passage.jpg`.
+
+Entrada frontal detallada (18/11): 66/66 pruebas y compilación aprobadas. La escena comprueba dos faldones centrados con el vidrio, dos pilares frontales y dos interiores, plataformas laterales elevadas, cuatro paños transparentes y el paso libre hasta el corredor y el LED. Revisión visual en navegador desde debajo de la carpa, comparando techo, frontón, vigas, rejas, baldositas, cordones, macetas y trepadoras con la fotografía. Captura local `.local/led-entry-photo-reference.jpg`. Sin nuevas pruebas de backend ni del resto de los edificios.
+
+Corrección de la entrada del DEI (18/11): verificación de la cota común y el recorte de losas en el empalme, embaldosado hasta las paredes y material de ladrillo compartido por identidad con el DEI. La prueba de escena comprueba una única hoja de blindex oscuro, barrera física del cierre, apertura por proximidad desde exterior e interior y cierre al alejarse. Revisión visual de puerta cerrada y abriéndose, laterales pavimentados y encuentro del caminero desde arriba. Capturas locales `.local/dei-entry-corrected.jpg` y `.local/dei-paving-joined.jpg`.
+
+Blindex al fondo (18/11): 66/66 pruebas aprobadas y compilación correcta. Rayos verifican la desaparición de los paños de ladrillo y ventanas de la antigua línea y la presencia del nuevo cierre vidriado en la línea del fondo. Comprobadas dos hojas, traslación a lados opuestos sin rotación, colisión al cerrar, apertura desde ambos lados y conexión al corredor. Revisado en navegador cerrado, abriéndose desde el exterior y desde el interior. Captura local `.local/dei-deeper-sliding-doors.jpg`.
+
+Ventanas y pilares (18/11): 66/66 pruebas aprobadas y compilación correcta. La escena verifica dos ventanas laterales con rejas azules, dos pilares intermedios situados entre el frente y el cierre, adelanto del conjunto, ausencia de los muros interiores retirados y apertura de las dos hojas corredizas. Revisado en navegador el frente cerrado y el paso abierto. Captura local `.local/dei-blue-windows-pillars.jpg`.

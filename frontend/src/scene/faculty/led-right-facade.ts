@@ -1,5 +1,5 @@
 import * as T from "three";
-import { deiRightFacade as detail, deiSideDoor, type Annex } from "../../data/faculty-annexes";
+import { deiRightFacade as detail, type Annex } from "../../data/faculty-annexes";
 import type { FacultyBuilder } from "./builder";
 
 /** Reconstrucción del lateral derecho del LED a partir de las dos fotos de Horacio. */
@@ -8,7 +8,7 @@ export function addLedRightFacade(builder: FacultyBuilder, annex: Annex, brick: 
   const z = -annex.rect.size[1] / 2, half = annex.rect.size[0] / 2, height = annex.height;
   const steel = new T.MeshStandardMaterial({ color: "#485e63", metalness: 0.4, roughness: 0.7 });
   const louver = new T.MeshStandardMaterial({ color: "#394b50", metalness: 0.25, roughness: 0.78 });
-  const wall = brick.clone(); wall.color.set("#c9bda8"); wall.roughness = 1;
+  const wall = brick;
   const sill = new T.MeshStandardMaterial({ color: "#969387", roughness: 1 });
   const dark = new T.MeshStandardMaterial({ color: "#202c2b", roughness: 0.86 });
   const glass = m.glass.clone(); glass.color.set("#6e8f88"); glass.opacity = 0.42;
@@ -18,7 +18,6 @@ export function addLedRightFacade(builder: FacultyBuilder, annex: Annex, brick: 
   const openings = [
     ...windows,
     { x: service.x, width: service.width, bottom: 0, top: service.top },
-    { x: deiSideDoor.center[0], width: deiSideDoor.width, bottom: 0, top: deiSideDoor.height },
   ];
   const edges = [...new Set([-half, half, ...openings.flatMap(o => [o.x - o.width / 2, o.x + o.width / 2])])].sort((a, b) => a - b);
   // Muros con huecos reales: la envolvente visual y las colisiones coinciden.
@@ -73,21 +72,6 @@ export function addLedRightFacade(builder: FacultyBuilder, annex: Annex, brick: 
   box(0.025, 0.20, 0.06, service.x - 0.43, 1.05, z - 0.10, dark);
   box(service.width + 0.22, 0.06, 0.50, service.x, 0.03, z - 0.16, sill, true);
 
-  const [doorX] = deiSideDoor.center, doorW = deiSideDoor.width, doorH = deiSideDoor.height;
-  for (const side of [-1, 1]) box(0.075, doorH, 0.24, doorX + side * doorW / 2, doorH / 2, z, steel);
-  box(doorW + 0.16, 0.10, 0.24, doorX, doorH + 0.025, z, steel);
-  // El acceso del fondo queda abierto, con la hoja recogida hacia adentro.
-  box(0.06, doorH - 0.08, doorW - 0.08, doorX - doorW / 2 + 0.035, doorH / 2, z + doorW / 2, dark, true);
-  box(doorW + 0.35, 0.08, 1.25, doorX, 0.01, z - 0.62, sill, true);
-  box(doorW, 0.025, 3.4, doorX, 0.0625, z + 1.7, dark, true);
-  box(doorW + 0.20, 0.10, 3.4, doorX, 2.90, z + 1.7, dark, true);
-  // Vestíbulo corto con salida por el lateral interior; evita ver el jardín a través del acceso.
-  box(doorW + .15, 2.85, .12, doorX, 1.425, z + 3.35, dark, true);
-  const canopy = box(3.4, 0.11, 1.45, doorX, 3.10, z - 0.64, louver, true);
-  canopy.rotation.x = -0.055;
-  for (let i = 0; i <= 22; i++) box(0.035, 0.045, 1.45, doorX - 1.65 + i * 3.3 / 22, 3.18, z - 0.64, steel);
-  for (const side of [-1, 1]) beam(v3(doorX + side * 1.4, 2.70, z - 0.03), v3(doorX + side * 1.4, 3.03, z - 1.20), 0.025, steel);
-
   // Pantalla continua de lamas HORIZONTALES, separada del muro.
   const screenZ = z - detail.screen.offset, screenH = detail.screen.top - detail.screen.bottom;
   const blades = Math.round(screenH / detail.screen.pitch);
@@ -98,7 +82,7 @@ export function addLedRightFacade(builder: FacultyBuilder, annex: Annex, brick: 
   }
   for (const y of [detail.screen.bottom, detail.screen.top])
     box(annex.rect.size[0] - 0.28, 0.075, 0.12, 0, y, screenZ - 0.07, steel);
-  const gaps = [deiSideDoor, { center: [service.x, z], width: service.width }].map(d =>
+  const gaps = [{ center: [service.x, z], width: service.width }].map(d =>
     [d.center[0] - d.width / 2 - 0.09, d.center[0] + d.width / 2 + 0.09] as const);
   for (const y of [0.53, 2.57]) for (const [a, b] of spans(-half + 0.12, half - 0.12, gaps))
     box(b - a, 0.045, 0.065, (a + b) / 2, y, screenZ - 0.11, steel);
@@ -242,28 +226,5 @@ export function addLedRightFacade(builder: FacultyBuilder, annex: Annex, brick: 
       leaf.position.set(x, .32, z - .64); leaf.rotation.y = j * Math.PI * 2 / 9; leaf.scale.setScalar(.65); layers.visual.add(leaf);
     }
   }
-
-  // Carpa azul junto al acceso posterior, según el segundo ángulo de referencia.
-  const tentX = -half - 1.2, tentZ = z - 2.7, tentW = 5.8, tentD = 4.4;
-  const tentMaterial = m.awning.clone(); tentMaterial.side = T.DoubleSide;
-  for (const side of [-1, 1]) {
-    const roof = new T.BufferGeometry().setFromPoints([
-      v3(tentX - tentW / 2, 3.15, tentZ + side * tentD / 2),
-      v3(tentX + tentW / 2, 3.15, tentZ + side * tentD / 2),
-      v3(tentX + tentW / 2, 3.78, tentZ),
-      v3(tentX - tentW / 2, 3.78, tentZ),
-    ]);
-    roof.setAttribute("uv", new T.Float32BufferAttribute([0,0,tentW,0,tentW,tentD/2,0,tentD/2],2));
-    roof.setIndex([0,1,2,0,2,3]); roof.computeVertexNormals();
-    const canvas = new T.Mesh(roof, tentMaterial); canvas.castShadow = canvas.receiveShadow = true; layers.visual.add(canvas);
-    box(tentW, .14, .025, tentX, 3.08, tentZ + side * tentD / 2, tentMaterial);
-    beam(v3(tentX - tentW/2,3.15,tentZ+side*tentD/2),v3(tentX+tentW/2,3.15,tentZ+side*tentD/2),.025,steel);
-  }
-  for (const side of [-1, 1]) for (const end of [-1, 1]) {
-    const x = tentX + side * tentW / 2, atZ = tentZ + end * tentD / 2;
-    pole(.035,3.15,x,1.575,atZ,steel,true);
-    beam(v3(x,3.15,atZ),v3(x,3.78,tentZ),.025,steel);
-  }
-  beam(v3(tentX-tentW/2,3.78,tentZ),v3(tentX+tentW/2,3.78,tentZ),.025,steel);
 
 }

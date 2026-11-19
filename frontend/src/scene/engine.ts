@@ -5,6 +5,7 @@ import { RemotePlayers } from "./remote-players";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { ElevatorMotion, type ElevatorButton, type ElevatorDoor } from "./elevator";
 import { createCampus } from "./campus";
+import { EntranceDoors } from "./entrance-doors";
 import { loadPlacementsInto } from "./editor-placements";
 import { campusRockDepth } from "./campus-rock";
 import { makeCampusSky, type CampusTheme } from "./campus-sky";
@@ -26,6 +27,7 @@ export class TourEngine {
   readonly orbit: OrbitControls;
   readonly walker: Walker;
   readonly campus = createCampus();
+  private readonly entranceDoors = new EntranceDoors(this.campus.group);
   /** Modelos colocados con el editor 3D (solo lectura para el visitante normal). */
   readonly editorPlacements = new T.Group();
   readonly seats = collectSeats(this.campus.group);
@@ -95,6 +97,7 @@ export class TourEngine {
     this.walker = new Walker(this.camera, this.canvas);
     this.walker.onCaptureError = (message) => this.onError(message);
     this.walker.setWorld(this.campus.colliders);
+    this.entranceDoors.register(this.walker);
     this.walker.addBarrier(this.campus.boundary, () => true);
     for (const [floor, stop] of this.campus.elevator.stops.entries()) {
       this.walker.addBarrier(stop.barrier, () =>
@@ -225,6 +228,7 @@ export class TourEngine {
     const now = performance.now();
     const elapsed = (now - this.previous) / 1000;
     const dt = Math.min(elapsed, 0.05);
+    this.entranceDoors.update(dt,this.camera.position,this.walker.enabled);
     this.previous = now;
     if (!this.elevatorPassenger && !this.seated) this.walker.update(dt);
     if (now >= this.nextSeatHint) {

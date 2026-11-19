@@ -1,8 +1,9 @@
 import * as T from "three";
-import { annexCoveredPaths, annexEnclosedLink, annexPaths, annexWalkEnd, deiGardenPath, deiSideDoor, diciaWalkExtension, facultyAnnexes } from "../../data/faculty-annexes";
+import { annexCoveredPaths, annexEnclosedLink, annexPaths, annexWalkEnd, deiGardenPath, deiSideDoor, deiEntranceWing, deiEntrancePaving, diciaWalkExtension, facultyAnnexes } from "../../data/faculty-annexes";
 import { facultyBlueprint as plan, fromRect, rectCorners, type Vec2 } from "../../data/faculty-blueprint";
 import type { FacultyBuilder, Range } from "./builder";
 import { addLedRightFacade } from "./led-right-facade";
+import { addLedEntranceWing } from "./led-entrance-wing";
 import { addSegmentedGardenPath, gardenJunctionReach } from "./garden-path";
 
 // ---- Anexos del plano general: exteriores provisionales, sin interiores relevados ----
@@ -17,6 +18,7 @@ export function addAnnexes(
   type AnnexOpening = { center: number; width: number; height: number };
   const workshopBrick = officeBrick.clone();
   workshopBrick.color.set("#ffb4a0");
+  const deiBrick = officeBrick.clone(); deiBrick.color.set("#c9bda8");
   const deiLouver = m.blue.clone(); deiLouver.color.set("#315a78");
   const workshopMetal = new T.MeshStandardMaterial({ color: "#353a41", roughness: 0.78 });
 
@@ -91,7 +93,8 @@ export function addAnnexes(
   }
 
   for (const annex of facultyAnnexes) frame(annex.rect, () => {
-    const h = annex.height, outline = annex.outline;
+    const h = annex.height;
+    const outline: Vec2[] = annex.id === "dei-led" ? [[-14.4,-6],[14.4,-6],[14.4,6],[-14.4,6]] : annex.outline;
     const isMaquetas = annex.id === "lab-maquetas";
     const isDei = annex.id === "dei-led";
     const maxZ = Math.max(...outline.map((p) => p[1]));
@@ -110,7 +113,7 @@ export function addAnnexes(
       const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
       const front = a[1] === maxZ && b[1] === maxZ;
       if (isDei && a[1] === -maxZ && b[1] === -maxZ) {
-        addLedRightFacade(builder, annex, officeBrick);
+        addLedRightFacade(builder, annex, deiBrick);
         continue;
       }
       if (isMaquetas && front) {
@@ -131,17 +134,17 @@ export function addAnnexes(
       }] : []) : front ? [{ center: 0, width: 2.1, height: 2.5 }] : [];
       if (isDei && a[0] === annex.rect.size[0] / 2 && b[0] === a[0]) {
         // Cabecera hacia el jardín: muro ciego de ladrillo como en la foto.
-        box(0.2, h, length, a[0], h / 2, cz, officeBrick, true);
+        box(0.2, h, length, a[0], h / 2, cz, deiBrick, true);
       } else if (isDei && a[0] === b[0]) {
         // Cabecera posterior de ladrillo; se conserva el vano al corredor interior.
         const parts = spans(-length / 2, length / 2, openings.map(o => [o.center - o.width / 2, o.center + o.width / 2] as Range));
         for (const [start, end] of parts)
-          box(.2, h, end - start, a[0], h / 2, cz + (start + end) / 2 * Math.sin(angle), officeBrick, true);
+          box(.2, h, end - start, a[0], h / 2, cz + (start + end) / 2 * Math.sin(angle), deiBrick, true);
         for (const o of openings)
-          box(.2, h - o.height, o.width, a[0], (h + o.height) / 2, cz + o.center * Math.sin(angle), officeBrick, true);
+          box(.2, h - o.height, o.width, a[0], (h + o.height) / 2, cz + o.center * Math.sin(angle), deiBrick, true);
       } else if (isDei && a[1] === b[1]) {
         // El lateral hacia cantina conserva el cierre y las lamas verticales aprobados.
-        box(length, h, 0.2, cx, h / 2, cz, officeBrick, true);
+        box(length, h, 0.2, cx, h / 2, cz, deiBrick, true);
         const count = Math.ceil(length / 0.34), bottom = 2, top = h - 2;
         for (let k = 0; k <= count; k++) {
           const x = cx + (-length / 2 + length * k / count) * Math.cos(angle);
@@ -165,10 +168,11 @@ export function addAnnexes(
         sign(annex.name.toUpperCase(),cx,portal ? 3.4 : 3.25,cz+0.13,portal ? 2.6 : Math.min(annex.rect.size[0]-1,9));
       }
     }
+    if (isDei) addLedEntranceWing(builder, deiBrick);
     if (!isDei && !isMaquetas) box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
   });
   annexPaths.forEach((points) => path(points, 2));
-  addSegmentedGardenPath(builder, deiGardenPath, annexPavingHeight, gardenWalkMaterial, { startDistance: gardenJunctionReach });
+  addSegmentedGardenPath(builder, deiGardenPath, annexPavingHeight, gardenWalkMaterial, { startDistance: gardenJunctionReach, pavingJoin: { rect: facultyAnnexes.find(a=>a.id === "dei-led")!.rect, ...deiEntrancePaving } });
   // Baldosas hasta la esquina de DICIA; desde allí sigue el caminero exterior.
   {
     const walk = plan.bedeliaWalk;
@@ -198,7 +202,10 @@ export function addAnnexes(
     box(length + 0.2, 0.18, width + 0.2, 0, link.height + 0.09, 0, m.roof, true);
     box(length, 0.08, width - link.wallThickness * 2, 0, link.height - 0.04, 0, m.concrete);
     const galleryZ = (width - link.wallThickness) / 2;
-    annexWall([-length / 2, -galleryZ], [length / 2, -galleryZ], link.height);
+    const dei = facultyAnnexes.find(b => b.id === "dei-led")!;
+    const linkCenterInDei = -dei.rect.size[0] / 2 - length / 2;
+    annexWall([-length / 2, -galleryZ], [length / 2, -galleryZ], link.height,
+      [{ center: (deiEntranceWing.minX+deiEntranceWing.maxX)/2 - linkCenterInDei, width: deiEntranceWing.maxX-deiEntranceWing.minX, height: link.openingHeight }]);
     annexWall([-length / 2, galleryZ], [length / 2, galleryZ], link.height,
       [{ center: link.sideDoorX, width: link.sideDoorWidth, height: link.openingHeight }]);
     for (const edge of [-1, 1]) box(0.07, link.openingHeight, 0.24,

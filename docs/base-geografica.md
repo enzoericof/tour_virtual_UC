@@ -496,3 +496,27 @@ Corrección posterior del jardín: los tres árboles y los cuatro conjuntos se a
 ### Mesas con banquitos — ajuste del 18/11/2026
 
 Los cuatro conjuntos del jardín pasan a ser mesas rectangulares de metal oscuro con dos banquitos alargados sin respaldo, según la última fotografía. Las tapas de mesas y bancos conservan perforaciones que permiten ver a través, con tamaño uniforme en metros. Se mantienen la distribución agrupada, las dieciséis plazas, las patas ajustadas al terreno y la parrilla girada sin la campana verde.
+
+### Prolongación y entrada del LED — 18/11/2026
+
+Según la nueva foto, se agrega un cuerpo bajo de unos 8 × 5,7 m a la derecha del paño alto del DEI–LED, manteniendo la posición y las medidas de ese volumen. Cubierta a unos 3,7 m y fachada retraída 1,6 m respecto de las lamas; entrada de 1,9 m en un nicho de 1,15 m, con marco oscuro, hoja recogida, paño fijo de vidrio, marquesina de chapa, ventanilla alta con reja, macetas y vereda. Se cierra la puerta anterior, se desplaza la carpa junto a la ampliación y se prolonga el sendero hasta el acceso nuevo. La huella del anexo y su llegada incluyen el cuerpo añadido. La puerta conecta con el corredor de oficinas y, por el vano existente, con el LED. Dimensiones interpretadas de la fotografía, pendientes de medición.
+
+### Entrada de blindex y pasillito del LED — 18/11/2026
+
+El cierre del acceso se retranquea otros 1,45 m: quedan 2,60 m de pasillo cubierto antes del vidrio. Todo el frente del nicho es blindex, de 3,40 m de ancho, con dos paños fijos y dos hojas vidriadas recogidas hacia adentro, herrajes discretos y tiradores. Se retiran la hoja opaca y las barras verticales. Dos pilares cuadrados de ladrillo visto, de 28 × 28 cm, enmarcan el cierre. El pavimento del pasillito continúa hasta el umbral sin interrumpir el giro al corredor. Medidas estimadas de las indicaciones del usuario.
+
+### Entrada frontal del LED según fotografía detallada — 18/11/2026
+
+Se sustituye la marquesina aislada y la carpa lateral por una lona azul a dos aguas longitudinal, centrada con el pasillito y el blindex, con bastidor y luminaria lineal en la cumbrera. El pórtico queda abierto en los laterales, con dos pilares frontales y dos junto al vidrio, zócalos de terracota, frontón triangular de ladrillo claro envejecido y vigas visibles. Se añaden ventanas laterales altas con rejas, puerta lateral de madera y fondo de puertas interiores con avisos. El cierre de blindex mantiene paños fijos, hojas recogidas y banda traslúcida. El acceso central de baldositas de 2,15 m queda entre plataformas laterales elevadas a 20 cm, con macetas de barro, follaje y trepadoras. Texturas de ladrillo y baldositas procedurales propias, inspiradas en la foto aportada por Horacio; medidas estimadas, no relevadas.
+
+### Corrección de pisos, ladrillo y puerta del DEI — 18/11/2026
+
+El embaldosado ocupa todo el frente entre las paredes, cubriendo las franjas de pasto junto a las plataformas. El encuentro con el caminero comparte una línea de recorte: las losas terminan allí y el embaldosado arranca a la misma cota de 15 cm, con transición suave hasta 7,5 cm en la puerta. Se conservan las juntas del caminero y las plataformas elevadas de macetas. Fachada, pilares, zócalos y frontón del acceso usan exactamente el mismo material de ladrillo del DEI; se retira el ladrillo claro procedural. Se elimina la puerta de madera del fondo y se deja un solo cierre de blindex oscuro, parcialmente transparente, con paños laterales fijos y una única hoja de 1,40 m. La hoja permanece cerrada a distancia, se abre por proximidad desde ambos lados y recupera su barrera física al cerrar.
+
+### Blindex corredizo al fondo, sin paños interiores de ladrillo — 18/11/2026
+
+Se retiran completos los dos paños con ventanas que flanqueaban el paso hacia el corredor, dentro del ancho de la ampliación. También desaparecen los paños de la antigua línea de acceso. El cierre se traslada de Z = −1,80 a Z = 1,25 m del marco del LED, en la posición de los muros retirados. El mismo vidrio oscuro queda como único cierre de pared a pared, con paños laterales fijos y dos hojas centrales juntas, de 1,15 m cada una. Las hojas se deslizan a lados opuestos por proximidad, sin giro sobre bisagras. Se prolongan el piso, las plataformas y la cubierta del pasillito hasta la nueva posición, conservando el giro al interior del LED.
+
+### Ventanas azules y pilares intermedios del acceso — 18/11/2026
+
+Por la nueva indicación, el frente de blindex y ventanas se adelanta 1 m, de Z = 1,25 a 0,25 m. Se restituye una ventana alta de 0,82 × 2,35 m a cada costado, con marcos, barrotes y diagonales de metal azul inspirados en la foto. Las ventanas comparten el mismo plano del blindex; los antiguos muros interiores del corredor permanecen retirados. Se añaden dos pilares intermedios de ladrillo visto de 28 × 28 cm, uno a cada lado entre los pilares frontales y el cierre, y se alinean los posteriores con los laterales del blindex. Se conservan el vidrio oscuro, las dos hojas corredizas y la continuidad del pavimento.

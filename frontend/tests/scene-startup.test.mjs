@@ -1,6 +1,6 @@
 import { Box3, PerspectiveCamera, Ray, Raycaster, Vector2, Vector3 } from "three";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
-import { facultyAnnexes, deiSideDoor, deiGardenPath, deiRightFacade, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
+import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -104,14 +104,134 @@ test("The complete faculty scene starts with the current blueprint and valid geo
         origin.distanceTo(destination)).intersectObject(colliders, true);
     };
     assert.ok(traceDei(0, 7, 5).length, "La antigua puerta hacia cantina queda cerrada por colisión");
-    for (const offset of [-0.3, 0, 0.3])
-      assert.equal(traceDei(deiSideDoor.center[0] + offset, -7, -5).length, 0,
-        "La nueva puerta derecha deja pasar al visitante");
+    assert.ok(traceDei(-11.4, -7, -5).length, "El acceso anterior se cierra en el paño alto del LED");
+    const entranceGlass = [], entrancePillars = [];
+    group.traverse(o => {
+      if(o.userData.ledEntranceGlass) entranceGlass.push(o);
+      if(o.name === "Pilar de ladrillo junto al blindex") entrancePillars.push(o);
+    });
+    assert.equal(entranceGlass.length,4,"Un único cierre de blindex con dos hojas corredizas y dos paños fijos");
+    assert.ok(entranceGlass.every(p=>p.material.transparent && p.material.opacity>=.6 && p.material.opacity<=.75),"El vidrio es oscuro y parcialmente transparente");
+    assert.equal(entrancePillars.length,2,"Dos pilares de ladrillo enmarcan el blindex");
+    {
+      const a=fromRect(dei.rect,[0,-7]),b=fromRect(dei.rect,[0,-5]);
+      const origin=new Vector3(a[0],6.9,a[1]),target=new Vector3(b[0],6.9,b[1]);
+      const [wall]=new Raycaster(origin,target.clone().sub(origin).normalize(),0,2).intersectObject(group,true);
+      assert.equal(entrancePillars[0].material,wall.object.material,"Entrada y fachada del DEI comparten exactamente el material de ladrillo");
+    }
+    assert.ok(entrancePillars.every(p=>Math.abs(p.scale.x-.28)<1e-6 && Math.abs(p.scale.z-.28)<1e-6),"Los pilares tienen sección cuadrada de 28 cm");
+    assert.ok(deiSideDoor.center[1]-deiEntranceWing.frontZ>=2.5,"El pasillito precede al blindex y lo retranquea al fondo");
+    const entranceCanopy = [], frontPillars = [];
+    group.traverse(o=>{
+      if(o.userData.ledEntranceCanopy) entranceCanopy.push(o);
+      if(o.name === "Pilar frontal del pórtico LED") frontPillars.push(o);
+    });
+    assert.equal(entranceCanopy.length,2,"La carpa de entrada tiene dos faldones longitudinales");
+    assert.equal(frontPillars.length,2,"El pórtico está abierto a los costados y apoyado en dos pilares frontales");
+    for (const roof of entranceCanopy) {
+      const p=roof.geometry.attributes.position;
+      assert.ok(Array.from({length:p.count},(_,i)=>p.getX(i)).some(x=>Math.abs(x-deiSideDoor.center[0])<1e-5),
+        "La cumbrera de la carpa se alinea con el centro del blindex");
+    }
+    for (const side of [-1,1]) {
+      const p=fromRect(dei.rect,[deiSideDoor.center[0]+side*1.5,deiEntranceWing.frontZ-1]);
+      const [hit]=new Raycaster(new Vector3(p[0],1,p[1]),new Vector3(0,-1,0),0,2).intersectObject(colliders,true);
+      assert.ok(hit && Math.abs(hit.point.y-deiEntranceWing.sidePlatformHeight)<.01,
+        "Las plataformas de macetas quedan elevadas a los lados del pasillito");
+    }
+    const { EntranceDoors } = await server.ssrLoadModule("/src/scene/entrance-doors.ts");
+    const automaticDoors = new EntranceDoors(group), barriers=[];
+    automaticDoors.register({addBarrier:(mesh,blocked)=>barriers.push({mesh,blocked})});
+    assert.equal(automaticDoors.doors.length,1,"Hay un único frente de acceso, sin segunda puerta detrás");
+    assert.equal(automaticDoors.doors[0].leaves.length,2,"El blindex tiene dos hojas juntas");
+    const sideWindows=[],blueGrilles=[],middlePillars=[];
+    group.traverse(o=>{
+      if(o.userData.ledEntrySideWindow)sideWindows.push(o);
+      if(o.isMesh && o.material.name === "Reja azul del acceso LED")blueGrilles.push(o);
+      if(o.name === "Pilar intermedio del acceso LED")middlePillars.push(o);
+    });
+    assert.equal(sideWindows.length,2,"Se restauran dos ventanas altas a los lados del blindex");
+    assert.equal(middlePillars.length,2,"Hay un nuevo pilar intermedio en cada lateral");
+    assert.ok(middlePillars.every(o=>o.position.z>deiEntranceWing.frontZ && o.position.z<deiSideDoor.center[1]),
+      "Los nuevos pilares se ubican entre los frontales y el cierre");
+    for(const side of [-1,1]) {
+      const x=deiSideDoor.center[0]+side*deiEntranceWing.sideWindows.offset;
+      assert.equal(traceDei(x,-2.1,-1.5).length,0,"El pasillito sigue libre antes del nuevo frente");
+      assert.equal(traceDei(x,.7,1.6).length,0,"No se reconstruyen los dos muros interiores retirados");
+      const a=fromRect(dei.rect,[x,deiSideDoor.center[1]-.4]),b=fromRect(dei.rect,[x,deiSideDoor.center[1]+.4]);
+      for(const y of [.65,2.15]) {
+        const from=new Vector3(a[0],y,a[1]),to=new Vector3(b[0],y,b[1]);
+        assert.ok(new Raycaster(from,to.clone().sub(from).normalize(),0,.8).intersectObjects(blueGrilles,true).length,
+          "Cada ventana tiene reja azul alta, delante del vidrio");
+      }
+    }
+    assert.ok(Math.abs(deiSideDoor.center[1]-.25)<1e-6,"Ventanas y blindex se adelantan un metro");
+    assert.ok(barriers[0].blocked(),"El blindex cerrado separa interior y exterior");
+    const {Octree:DoorOctree}=await import("three/addons/math/Octree.js");
+    const doorCollision=new DoorOctree().fromGraphNode(barriers[0].mesh);
+    const doorOrigin=fromRect(dei.rect,[deiSideDoor.center[0],deiSideDoor.center[1]-1]);
+    const doorTarget=fromRect(dei.rect,[deiSideDoor.center[0],deiSideDoor.center[1]+1]);
+    assert.ok(doorCollision.rayIntersect(new Ray(new Vector3(doorOrigin[0],1.3,doorOrigin[1]),
+      new Vector3(doorTarget[0]-doorOrigin[0],0,doorTarget[1]-doorOrigin[1]).normalize())),"La hoja cerrada tiene una barrera física");
+    const doorPoint=fromRect(dei.rect,[deiSideDoor.center[0],deiSideDoor.center[1]-1.4]);
+    for(let i=0;i<80;i++) automaticDoors.update(.016,new Vector3(doorPoint[0],1.7,doorPoint[1]));
+    assert.ok(!barriers[0].blocked(),"Al acercarse la puerta se abre y libera su colisión");
+    for(const leaf of automaticDoors.doors[0].leaves) {
+      assert.ok(Math.abs(leaf.object.position.x-leaf.closedX)>1.1,"Cada hoja se desliza hacia su costado");
+      assert.equal(leaf.object.rotation.y,0,"Las hojas corredizas no giran sobre bisagras");
+      assert.ok((leaf.object.position.x-leaf.closedX)*leaf.travel>0,"Las hojas abren en sentidos opuestos");
+    }
+    for(let i=0;i<80;i++) automaticDoors.update(.016,new Vector3(0,1.7,0));
+    assert.ok(barriers[0].blocked(),"La hoja vuelve a cerrar al alejarse");
+    for(let i=0;i<80;i++) automaticDoors.update(.016,new Vector3(doorTarget[0],1.7,doorTarget[1]));
+    assert.ok(!barriers[0].blocked(),"La puerta también abre desde el interior");
+    for(let i=0;i<80;i++) automaticDoors.update(.016,new Vector3(0,1.7,0));
+    // Encuentro del sendero: sin pasto, huecos ni dos tapas a la misma altura.
+    let apron; colliders.traverse(o=>{if(o.userData.deiEntranceApron)apron=o;});
+    assert.ok(apron,"El embaldosado ocupa todo el frente de entrada");
+    for(let x=deiEntrancePaving.minX+.1;x<deiEntrancePaving.maxX-.1;x+=.35) {
+      const seam=deiEntrancePaving.frontZ(x);
+      for(const offset of [-.025,.025]) {
+        const p=fromRect(dei.rect,[x,seam+offset]);
+        const hits=new Raycaster(new Vector3(p[0],.5,p[1]),new Vector3(0,-1,0),0,1).intersectObject(colliders,true);
+        if(offset<0 && !hits.some(h=>h.object.userData.gardenSlab))continue; // Juntas abiertas del caminero.
+        assert.ok(hits[0] && Math.abs(hits[0].point.y-.15)<.012,"El caminero y la entrada comparten cota en la unión");
+      }
+      const p=fromRect(dei.rect,[x,seam+.025]);
+      assert.equal(new Raycaster(new Vector3(p[0],.5,p[1]),new Vector3(0,-1,0),0,1)
+        .intersectObjects(colliders.children.filter(o=>o.userData.gardenSlab)).length,0,"El sendero termina en el borde de las baldositas");
+    }
+    for(const x of [deiEntrancePaving.minX+.1,deiEntrancePaving.maxX-.1]) {
+      const p=fromRect(dei.rect,[x,deiEntranceWing.frontZ-1]);
+      assert.ok(new Raycaster(new Vector3(p[0],.5,p[1]),new Vector3(0,-1,0),0,1).intersectObject(apron,true).length,
+        "Las franjas laterales hasta las paredes también tienen piso");
+    }
+    for (const offset of [-.3, 0, .3]) {
+      const x = deiSideDoor.center[0] - .32 + offset;
+      assert.equal(traceDei(x, deiEntranceWing.frontZ - 1, 3).length, 0,
+        "El acceso retraído permite atravesar la puerta y llegar al corredor interior");
+    }
+    for (const [x,z] of [[deiSideDoor.center[0]-.32,-5], [deiSideDoor.center[0]-.32,-2], [deiSideDoor.center[0]-.32,2.6]]) {
+      const p = fromRect(dei.rect,[x,z]);
+      const hits = new Raycaster(new Vector3(p[0],2.2,p[1]),new Vector3(0,-1,0),0,3).intersectObject(colliders,true);
+      const t=Math.max(0,Math.min(1,(z-deiEntrancePaving.frontZ(x))/(deiSideDoor.center[1]+.3-deiEntrancePaving.frontZ(x))));
+      const expected=z<=deiSideDoor.center[1]+.3?.15*(1-t)+.075*t:.05;
+      assert.ok(hits[0] && Math.abs(hits[0].point.y-expected)<.012, "La entrada y la unión al corredor tienen piso continuo");
+      assert.equal(new Raycaster(new Vector3(p[0],.15,p[1]),new Vector3(0,1,0),0,2.1).intersectObject(colliders,true).length,0,
+        "La ampliación conserva altura libre para el visitante");
+    }
     assert.ok(traceDei(deiRightFacade.serviceDoor.x, -7, -5).length,
       "La puerta metálica central fotografiada queda cerrada");
     for (const window of deiRightFacade.windows)
       assert.ok(traceDei(window.x, -7, -5).length, "Las ventanas con rejas conservan la colisión de fachada");
     const ledPortal = annexEnclosedLink.portals.find(p => p.annexId === "dei-led");
+    for (const offset of [-.3,0,.3]) {
+      const a = fromRect(dei.rect,[deiSideDoor.center[0]-.32,ledPortal.center[1]+offset]);
+      const b = fromRect(dei.rect,[ledPortal.center[0]+1,ledPortal.center[1]+offset]);
+      const from = new Vector3(a[0],1.2,a[1]), to = new Vector3(b[0],1.2,b[1]);
+      assert.equal(new Raycaster(from,to.clone().sub(from).normalize(),0,from.distanceTo(to)).intersectObject(colliders,true).length,0,
+        "Desde la ampliación se puede girar y entrar al volumen principal del LED");
+    }
     for (const offset of [-0.8, 0, 0.8]) {
       const a = fromRect(dei.rect, [ledPortal.center[0] - 0.7, ledPortal.center[1] + offset]);
       const b = fromRect(dei.rect, [ledPortal.center[0] + 0.7, ledPortal.center[1] + offset]);
