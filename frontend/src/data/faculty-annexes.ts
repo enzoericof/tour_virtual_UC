@@ -147,6 +147,22 @@ export const deiGardenPath: Vec2[] = [
   [-18, outerWalkV - 0.25],
   [dei.mapCenter[0] + deiEntranceWing.minX - 1.5, outerWalkV - 0.55],
 ].map(([u, v]) => annexPoint(u, v));
+/** Caminero y árboles señalados por Horacio en rojo y azul (19/11), medidas estimadas. */
+const exteriorRoadZ = (x: number) => {
+  const a=annexCoordinates(deiGardenPath[deiGardenPath.length-2]),b=annexCoordinates(deiGardenPath[deiGardenPath.length-1]);
+  const t=(x+dei.mapCenter[0]-a[0])/(b[0]-a[0]);
+  return a[1]+(b[1]-a[1])*t-dei.mapCenter[1];
+};
+const exteriorFork: Vec2 = [-19,-18.3];
+export const deiForecourt = {
+  width: 1.6, canopyWidth: 2.25, eave: 2.75, ridge: .44,
+  main: [[-15.7,exteriorRoadZ(-15.7)],[-16.3,-12.1],exteriorFork,[-18.9,-25],[-19.5,-33],[-19.8,-44]]
+    .map(([x,z])=>fromRect(dei.rect,[x,z])),
+  branch: [exteriorFork,[-22.2,-12.6],[-21.4,exteriorRoadZ(-21.4)]]
+    .map(([x,z])=>fromRect(dei.rect,[x,z])),
+  fork: fromRect(dei.rect,exteriorFork),
+  trees: [[16.5,-16.5],[3,-19],[-8.5,-21],[-28,-14.2]].map(([x,z])=>fromRect(dei.rect,[x,z])),
+};
 /** Corte compartido entre el borde del caminero y el embaldosado de entrada. */
 export const deiEntrancePaving = {
   minX: deiEntranceWing.minX, maxX: deiEntranceWing.maxX, frontHeight: .15, rearHeight: .075,

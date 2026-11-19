@@ -1,6 +1,6 @@
 import { Box3, PerspectiveCamera, Ray, Raycaster, Vector2, Vector3 } from "three";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
-import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
+import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -238,6 +238,40 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       const origin = new Vector3(a[0], 1.2, a[1]), target = new Vector3(b[0], 1.2, b[1]);
       const hits = new Raycaster(origin, target.clone().sub(origin).normalize(), 0, 1.4).intersectObject(colliders, true);
       assert.equal(hits.length, 0, "El muro posterior conserva el paso al ala de oficinas");
+    }
+    const exteriorSlabs=colliders.children.filter(o=>["Caminero exterior principal del LED","Ramal exterior derecho del LED"].includes(o.userData.segmentedWalk));
+    assert.ok(exteriorSlabs.length>15,"La prolongación tiene losas reales segmentadas");
+    const newTrees=[],newRoofs=[],newPosts=[];
+    group.traverse(o=>{
+      if(o.userData.deiForecourtTree)newTrees.push(o);
+      if(o.userData.deiForecourtCanopy)newRoofs.push(o);
+      if(o.userData.deiForecourtPost)newPosts.push(o);
+    });
+    assert.equal(newTrees.length,4,"Se agregan los cuatro árboles señalados");
+    assert.equal(newRoofs.length,2,"La carpa cubre el tramo principal y la bifurcación");
+    assert.ok(newPosts.length>12,"La carpa tiene soportes a lo largo del recorrido");
+    const oldWalk=group.getObjectByName("Caminero segmentado del LED"),newWalk=group.getObjectByName("Caminero exterior principal del LED");
+    assert.equal(newWalk.children.find(o=>o.isMesh).material[0],oldWalk.children.find(o=>o.isMesh).material[0],
+      "La prolongación usa exactamente el material del caminero existente");
+    const {pathSampler}=await server.ssrLoadModule("/src/scene/faculty/garden-path.ts");
+    const forkBranch=pathSampler(deiForecourt.branch);
+    for(const along of [.4,1.2,2.0,2.9]) for(const side of [-.5,0,.5]) {
+      const p=forkBranch.at(along,side);
+      const [hit]=new Raycaster(new Vector3(p[0],1,p[1]),new Vector3(0,-1,0),0,2).intersectObject(colliders,true);
+      assert.ok(hit && Math.abs(hit.point.y-.15)<.005,`La horquilla mantiene piso completo y enrasado: along=${along}, side=${side}, y=${hit?.point.y}`);
+    }
+    for(const route of [deiForecourt.main,deiForecourt.branch.slice().reverse()]) {
+      const sampler=pathSampler(route);
+      for(const along of [.4,1.2,2.0]) for(const side of [-.5,0,.5]) {
+        const p=sampler.at(along,side);
+        const [hit]=new Raycaster(new Vector3(p[0],1,p[1]),new Vector3(0,-1,0),0,2).intersectObject(colliders,true);
+        assert.ok(hit && Math.abs(hit.point.y-.15)<.005,"Ambos ramales empalman completos con el caminero existente");
+      }
+    }
+    const newBodies=[...exteriorSlabs,...colliders.children.filter(o=>o.userData.gardenSlab || o.userData.walkJunction === "Horquilla del jardín exterior LED")];
+    for(const post of newPosts) {
+      const p=post.getWorldPosition(new Vector3());p.y=1;
+      assert.equal(new Raycaster(p,new Vector3(0,-1,0),0,2).intersectObjects(newBodies).length,0,"Los postes quedan a los costados de las losas");
     }
     // El sendero del LED debe tener espesor y colisión en la tapa y en sus cantos.
     const gardenSlabs = colliders.children.filter(o => o.userData.gardenSlab);

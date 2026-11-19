@@ -4,6 +4,7 @@ import { facultyBlueprint as plan, fromRect, rectCorners, type Vec2 } from "../.
 import type { FacultyBuilder, Range } from "./builder";
 import { addLedRightFacade } from "./led-right-facade";
 import { addLedEntranceWing } from "./led-entrance-wing";
+import { addDeiForecourt, deiForecourtRoadJunctions } from "./dei-forecourt";
 import { addSegmentedGardenPath, gardenJunctionReach } from "./garden-path";
 
 // ---- Anexos del plano general: exteriores provisionales, sin interiores relevados ----
@@ -172,7 +173,9 @@ export function addAnnexes(
     if (!isDei && !isMaquetas) box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
   });
   annexPaths.forEach((points) => path(points, 2));
-  addSegmentedGardenPath(builder, deiGardenPath, annexPavingHeight, gardenWalkMaterial, { startDistance: gardenJunctionReach, pavingJoin: { rect: facultyAnnexes.find(a=>a.id === "dei-led")!.rect, ...deiEntrancePaving } });
+  addSegmentedGardenPath(builder, deiGardenPath, annexPavingHeight, gardenWalkMaterial, { startDistance: gardenJunctionReach,
+    junctions:deiForecourtRoadJunctions(),pavingJoin: { rect: facultyAnnexes.find(a=>a.id === "dei-led")!.rect, ...deiEntrancePaving } });
+  addDeiForecourt(builder,gardenWalkMaterial);
   // Baldosas hasta la esquina de DICIA; desde allí sigue el caminero exterior.
   {
     const walk = plan.bedeliaWalk;

@@ -101,6 +101,8 @@ export type WalkOptions = {
   width?: number; finishedHeight?: boolean; name?: string; junctionAt?: number;
   junctionBranch?: { points: readonly Vec2[]; ground: (point: Vec2) => number };
   junctions?: WalkJunction[]; startDistance?: number;
+  endInset?: number;
+  groundHeight?: (point:Vec2)=>number;
   pavingJoin?: { rect: Rect; minX: number; maxX: number; frontZ: (x: number) => number };
 };
 
@@ -135,17 +137,18 @@ export function addSegmentedGardenPath(
   const group = new T.Group(); group.name = options.name ?? "Caminero segmentado del LED";
   builder.layers.visual.add(group);
   let distance = options.startDistance ?? 0, index = 0;
-  while (distance < total - 0.05) {
-    let length = Math.min(1.8 + 0.18 * Math.sin(index * 1.7), total - distance);
+  const limit = total - (options.endInset ?? 0);
+  while (distance < limit - 0.05) {
+    let length = Math.min(1.8 + 0.18 * Math.sin(index * 1.7), limit - distance);
     // En el encuentro lateral se conserva una losa entera para recibir el ramal.
     for (const junction of junctions)
       if (Math.abs(distance + length - junction.at) < 1.3)
-        length = Math.min(junction.at + 1.3 - distance, total - distance);
+        length = Math.min(junction.at + 1.3 - distance, limit - distance);
     for (const corner of corners)
       if (Math.abs(distance + length - corner) < 1.35)
-        length = Math.min(corner + 1.35 - distance, total - distance);
+        length = Math.min(corner + 1.35 - distance, limit - distance);
     const start = distance === 0 ? 0 : distance + 0.055;
-    const end = distance + length >= total ? total : distance + length - 0.055;
+    const end = distance + length >= limit ? limit : distance + length - 0.055;
     const run = end - start, half = width / 2 - 0.01 + 0.025 * Math.sin(index * 2.3);
     const border: T.Vector2[] = [];
     const scallop = (n: number) => 0.025 * Math.cos(n / 0.2 * Math.PI * 2);
@@ -239,7 +242,7 @@ export function addSegmentedGardenPath(
         top = junction!.height ? junction!.height(point)
           : T.MathUtils.lerp(surfaceHeight(point), junction!.ground!(point) + 0.1, blend);
       }
-      const bottom = Math.min(surfaceHeight(point) - 0.05, top - 0.14);
+      const bottom = Math.min((options.groundHeight?.(point) ?? surfaceHeight(point)) - 0.05, top - 0.14);
       const isCap = Math.abs(normals.getZ(i)) > 0.5;
       positions.setXYZ(i, point[0], T.MathUtils.lerp(bottom, top, layer), point[1]);
       if (isCap) uv.setXY(i, point[0] / 1.6, point[1] / 1.4);
