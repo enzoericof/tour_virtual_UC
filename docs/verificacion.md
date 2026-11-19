@@ -482,3 +482,10 @@ Frontend: 67/67 pruebas aprobadas y compilación correcta. Las pruebas verifican
 ## Pasillos con piso ilustrado (19/11/2026)
 
 68 pruebas frontend y compilación TypeScript/Vite correctas sobre main c905cc1, incluyendo los aportes recientes de ascensor y DEI. Se sustituyó únicamente el acabado de galleryFloor y granite; la construcción y sus UV mantienen las dimensiones y colisiones. Chrome: vista local aislada del pasillo del tercer piso con el motor y modelo reales; franjas alineadas, superficie rosada uniforme y áridos dibujados, sin manchas ni iluminación de la foto. La vista no inicia sesión ni conecta presencia. No se modificó backend ni Neon.
+
+
+## Fachada curva de la torre: superposición de superficies (19/11/2026)
+
+Una prueba con rayos reprodujo dos materiales ocupando la misma superficie exterior entre top+0,08 y top+0,26: canto blanco de la losa y ladrillo del parapeto. Falló antes de la corrección. La losa conserva su volumen de colisión y su tapa horizontal; el canto exterior queda revestido únicamente por ladrillo. La comprobación cubre ambos semicírculos, cinco ángulos y tres alturas, además de la superficie superior y colisión de la cubierta.
+
+Después del cambio pasaron las 68 pruebas frontend y el build TypeScript/Vite. En Chrome se revisó el arco superior de la torre con iluminación nocturna, sin los fragmentos claros sobre el ladrillo. Vista local aislada con la escena real (.local/tower-preview.html); sin sesión ni presencia y sin cambios de backend.

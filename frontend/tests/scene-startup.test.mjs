@@ -87,6 +87,30 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     assert.ok(meshes > 100, "The complete scene was built");
     assert.ok(grassReceivers > 0, "The garden is present in the rendered scene");
     assert.ok(colliders.children.length > 0, "Walkable collision geometry was built");
+    // El canto de la losa no debe competir con el ladrillo de la fachada curva.
+    {
+      const { center: [cx, cz], core, radiusX, radius } = plan.tower;
+      const roof = (block1.levels - 1) * FLOOR_HEIGHT + 4.1;
+      for (const side of [-1, 1]) for (const angle of [-0.65, -0.3, 0, 0.5, 1.1]) {
+        const outward = new Vector3(side * Math.cos(angle) / radiusX, 0, Math.sin(angle) / radius).normalize();
+        for (const rise of [0.08, 0.18, 0.26]) {
+          const face = new Vector3(cx + side * (core / 2 + radiusX * Math.cos(angle)), roof + rise, cz + radius * Math.sin(angle));
+          const hits = new Raycaster(face.clone().addScaledVector(outward, 0.5), outward.clone().negate(), 0, 0.54).intersectObject(group, true);
+          assert.ok(hits.length, "El parapeto mantiene su fachada exterior");
+          assert.equal(new Set(hits.map(hit => hit.object.material)).size, 1,
+            `Una sola superficie exterior en el arco ${side}/${angle}, altura ${rise}`);
+          assert.deepEqual(hits[0].object.material.userData.tile, [1.08, 1.184], "El acabado exterior sigue siendo ladrillo");
+        }
+      }
+      for (const side of [-1, 1]) {
+        const above = new Vector3(cx + side * (core / 2 + 2), roof + 0.5, cz);
+        const down = new Vector3(0, -1, 0);
+        assert.ok(new Raycaster(above, down, 0, 0.25).intersectObject(group, true).length,
+          "La cubierta conserva su superficie superior");
+        assert.ok(new Raycaster(above, down, 0, 0.25).intersectObject(colliders, true).length,
+          "La losa conserva su colisión superior");
+      }
+    }
     const { roof: galleryRoof, smallSteps } = plan.plazaGallery;
     const [stepX, stepZ] = smallSteps.center, [dx, dz] = smallSteps.direction;
     for (const side of [-1, 0, 1]) {

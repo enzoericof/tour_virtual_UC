@@ -257,11 +257,16 @@ export function addRestroomTower(builder: FacultyBuilder) {
     placeFixture(fixtures.fountain, cx, y + 0.01, fountainZ - 0.071, Math.PI / 2);
     fixtureBody(cx, y + 0.69, fountainZ - 0.31, 0.54, 0.38, 0.43);
   }
-  // Pilastras de hormigón en los encuentros posteriores de los semicírculos con el núcleo.
+  // El ladrillo reviste el canto de la losa: dibujar también el canto blanco
+  // en el mismo plano provoca parpadeos y fragmentos claros en la fachada curva.
+  const roofSlab = (outline: readonly Vec2[]) => {
+    wallCollision(outline, [], top, 0.3);
+    pave(outline, m.white, top + 0.3, true);
+  };
   for (const { side, outer, insetPath, outline } of halves) {
-    prism(outline, top, 0.3, m.white);
+    roofSlab(outline);
     const [frontInner, frontOuter] = towerEntryFront(side);
-    prism([[cx, north], [frontOuter[0], north], frontOuter, frontInner], top, 0.3, m.white);
+    roofSlab([[cx, north], [frontOuter[0], north], frontOuter, frontInner]);
     const inside = insetPath(wallThickness);
     wallCollision(outer, inside, top, 0.7);
     wallFace(outer, 0, outer.length - 1, top, top + 0.7, m.brick, -side);

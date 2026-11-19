@@ -367,3 +367,6 @@ Asientos: cámara a altura sentada, aviso E para sentarse/levantarse y retorno a
 
 
 19/11/2026: revisado el pasillo del tercer piso en Chrome con la escena real. Piso rosado mate, pequeños áridos geométricos y franjas oscuras regulares, integrado con las formas del modelo. Se conserva la distribución original. Vista local .local/gallery-preview.html, excluida del build.
+
+
+19/11/2026: comprobada la fachada curva superior de la torre de baños en modo nocturno. Se retiró el canto blanco coplanar oculto tras el ladrillo; ya no aparecen manchas triangulares claras. Tapa y colisión de la cubierta conservadas. Regresión por rayos en docs/verificacion.md.
