@@ -363,6 +363,12 @@ La cabina del Bloque 1 recorre el hueco vertical con una sola botonera interior 
 El indicador superior exterior señala el sentido de marcha. La placa gris inferior reúne el visor del piso de la cabina y los pulsadores circulares. En la pared izquierda interior, los botones circulares se ordenan en una columna con PB abajo y 3 arriba.
 ### Fachadas detrás de la cantina — 12/11/2026
 
+Detalles del 19/11/2026: las fotos del equipo identifican estos volúmenes como laboratorios de Civil; se mantiene el id histórico `lab-maquetas`. Se agregan una ventana posterior y tres laterales al bloque bajo, una superior y otra de celosías al lateral alto expuesto, franjas grises, pilastras, aleros, canaletas, bajantes, dos condensadoras, mesada de tres huecos, tuberías y luminarias. `laboratoryDetails` reúne las medidas estimadas en metros; `laboratory-facades.ts` construye los detalles usando el ladrillo y el color existentes, sin desgaste añadido. Se conservan las huellas y los portones. Depósito, cilindro, pequeño volumen rojizo, cantina y árboles quedan fuera de esta etapa.
+
+El bloque bajo se acorta desde atrás 4 m respecto del alto, según la foto posterior aportada por el usuario (`codex-clipboard-e5a1852b-f580-4106-ae2f-92888aeaf570.png`). Profundidades del modelo: 11,05 m y 15,05 m respectivamente; retiro estimado, pendiente de medición. La huella en L, el piso, los muros y las colisiones dejan un rincón abierto y parte del lateral alto expuesta. El frente hacia cantina conserva sus portones y longitud total.
+
+Corrección del 18/11/2026 según la captura del usuario. La cara exterior del muro posterior de Maquetas se alinea con el eje de la última columna del pasillo techado. La profundidad del edificio pasa de 18,40 a 15,05 m, calculada a partir de la columna existente, y se ajustan cubierta, piso, colisiones y caminero posterior mediante su huella. El frente hacia cantina conserva su posición y longitud de 14,17 m. La nueva profundidad es un ajuste del modelo, pendiente de medición en el lugar.
+
 La foto del 11/11 a las 18:26 muestra el frente de ladrillo del Área de Ensayo de Materiales, con un cuerpo alto y otro bajo, franjas oscuras y portones metálicos. Se tomó como referencia de forma para Maquetas. Las alturas, la pendiente y la distribución de los portones son aproximaciones visuales. El 12/11 se retiró del recorrido el Laboratorio de Ingeniería situado detrás de la cantina. El cuerpo bajo de Maquetas se prolonga hacia ese terreno. El equipo indicó una longitud total de 1417 cm para el frente de Maquetas hacia la cantina. De izquierda a derecha, la nave alta ocupa 9,50 m y el cuerpo bajo ocupa 4,67 m. Esta distribución entre cuerpos es aproximada.
 ### Fachada trasera del Bloque 1
 
@@ -394,6 +400,10 @@ Confirmado por el usuario: desplazar únicamente la cantina hacia la izquierda d
 ### Piso junto a cantina — 14/11/2026
 
 Se prolonga el pavimento gris de la plaza en L: franja entre el fondo de cantina y el frente de Maquetas, y franja lateral hasta el pasillo de Bedelía. Límites derivados de las huellas actuales; sin mover edificios. Misma cota de la plataforma y acabado gris existente.
+
+Actualización del 18/11/2026, primera etapa del patio de Maquetas. Las fotos del usuario `WhatsApp Image 2026-11-18 at 13.49.12.jpeg` y `WhatsApp Image 2026-11-18 at 13.49.12 (1).jpeg` muestran un jardín junto a cantina y pavimento frente a los portones. Se recorta la extensión gris para incorporar esa franja de césped enrasada, con colisión transitable. Se estiman 4 m de circulación frente a Maquetas, una entrada ensanchada desde el pasillo techado y 2 m de paso en el extremo opuesto. Estas anchuras requieren validación. Las fachadas, los arbustos y los árboles corresponden a etapas posteriores.
+
+Acabado del piso (18/11/2026): hormigón gris cálido mate con árido fino, manchas suaves y juntas orientadas con las fachadas. Textura procedural propia de 1024 px en `materials.ts`, interpretada de las mismas fotos, sin incorporar sus sombras ni modificar los originales. Repetición de 8 × 6 m con paños estimados de 4 × 3 m; no son medidas relevadas. Material exclusivo del pavimento de este patio, con la huella, altura y colisión existentes.
 
 ### Plaza de la Amistad — 14/11/2026
 
@@ -524,6 +534,12 @@ Por la nueva indicación, el frente de blindex y ventanas se adelanta 1 m, de Z 
 ### Caminero techado y árboles frente al DEI — 19/11/2026
 
 Según las marcas rojas, se prolonga el caminero del jardín en forma de Y: dos ramales conectan con el trazado existente frente al DEI y se unen en un tramo hacia la franja arbolada del perímetro. Ancho de 1,60 m, mismo material de hormigón con piezas circulares, losas con volumen y juntas abiertas. Los dos empalmes comparten losas de unión y la horquilla tiene una pieza común, con los brazos recortados para evitar solapamientos. Cota de tapa 0,15 m y bases bajo el césped. La carpa azul de 2,25 m de ancho sigue los quiebres de los dos trazados, con aleros a 2,75 m y cumbrera 44 cm más alta; sus apoyos quedan fuera de las losas y del cruce. Se plantan cuatro árboles en los puntos azules, reutilizando geometrías y materiales, con variación de escala y giro. Trazado, longitudes y posiciones son estimaciones interpretadas de la captura, no medidas relevadas. No se amplía el perímetro del campus.
+
+### Volumen del rincón y depósito de Civil — 19/11/2026
+
+Detalles de suelo: `laboratoryGroundDetails` define dos rejillas (0,38 × 1,05 m junto al portón bajo y 0,55 × 0,65 m hacia el depósito), dos registros cerrados (0,62 × 0,62 m en el patio y 0,58 × 0,68 m sobre el sendero lateral) y una plataforma de 1,50 × 2 m bajo la ventana del rincón. Medidas y posiciones estimadas de las fotos, pendientes de confirmación. Rejillas y registros sobresalen como máximo 7 mm sobre sus pavimentos existentes: patio a 0,905 m y lateral a 0,05 m. La plataforma alcanza 12 cm, con un bisel visible de 18 cm en su contorno y colisión de la misma forma. Se reutiliza el hormigón del patio. Se conservan las alturas generales, los edificios y el césped; no se añaden árboles ni se abren pozos transitables bajo las rejillas.
+
+Dos piezas independientes definidas en `laboratoryOutbuildings`, en el marco local de Maquetas. El volumen rojizo del rincón mide aproximadamente 2,15 × 1,15 m y 1,75 m de alto, con tapa sobresaliente, celosía frontal y persiana lateral cerrada. El depósito rectangular se sitúa enfrente del lateral bajo, dejando 3,4 m entre ambos cuerpos; mide aproximadamente 3 × 2,6 m y 3,05 m de alto. Su frente hacia el patio tiene dos respiraderos circulares con aro de terracota y rejilla radial. Todas estas medidas y la ubicación son estimaciones visuales pendientes de confirmación. Se conserva el ladrillo existente y no se añade desgaste. El cilindro de las fotos pertenece a otro edificio y no forma parte del depósito. Se modelan únicamente los exteriores; no se inventa una puerta del depósito en caras sin referencia. Los árboles y demás detalles del patio quedan para las siguientes etapas.
 
 ### Ascensor según las fotos del 19/11/2026
 

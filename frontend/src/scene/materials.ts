@@ -86,6 +86,51 @@ function courtyardPaving() {
   return tiled(map, [1.6, 1.6], { roughness: 0.98 });
 }
 
+/** Hormigón envejecido del patio de Maquetas, según fotos del 18/11/2026.
+ * Paños grandes de tamaño estimado; textura propia, sin sombras de árboles incorporadas. */
+function maquetasConcrete() {
+  const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1024;
+  const ctx = canvas.getContext("2d")!;
+  let state = 181126;
+  const rand = () => ((state = (1664525 * state + 1013904223) >>> 0) / 4294967296);
+  ctx.fillStyle = "#aaa597"; ctx.fillRect(0, 0, 1024, 1024);
+  for (let row = 0; row < 2; row++) for (let col = 0; col < 2; col++) {
+    const tone = Math.floor(163 + rand() * 12);
+    ctx.fillStyle = `rgb(${tone + 5},${tone + 2},${tone - 9})`;
+    ctx.fillRect(col * 512, row * 512, 512, 512);
+  }
+  // Manchas suaves y periódicas: los bordes de la textura continúan al repetirse.
+  for (let i = 0; i < 100; i++) {
+    const x = rand() * 1024, y = rand() * 1024, radius = 28 + rand() * 140;
+    const dark = rand() > 0.45;
+    for (const dx of [-1024, 0, 1024]) for (const dy of [-1024, 0, 1024]) {
+      const gradient = ctx.createRadialGradient(x + dx, y + dy, 0, x + dx, y + dy, radius);
+      gradient.addColorStop(0, dark ? "rgba(64,61,52,0.15)" : "rgba(237,230,209,0.19)");
+      gradient.addColorStop(1, dark ? "rgba(64,61,52,0)" : "rgba(237,230,209,0)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x + dx - radius, y + dy - radius, radius * 2, radius * 2);
+    }
+  }
+  // Árido fino y poros: variación superficial sin modificar el suelo transitable.
+  for (let i = 0; i < 110000; i++) {
+    ctx.fillStyle = rand() > 0.5 ? "rgba(247,240,217,0.24)" : "rgba(55,52,45,0.21)";
+    ctx.fillRect(rand() * 1024, rand() * 1024, 0.6 + rand() * 1.6, 0.6 + rand() * 1.6);
+  }
+  for (const position of [0, 512, 1024]) {
+    // Junta fina con bordes gastados, sin la retícula pequeña del pasillo de baldosas.
+    for (const [width, color] of [[5, "rgba(67,63,53,0.12)"], [1.2, "rgba(65,61,52,0.42)"]] as const) {
+      ctx.lineWidth = width; ctx.strokeStyle = color;
+      ctx.beginPath(); ctx.moveTo(position, 0); ctx.lineTo(position, 1024);
+      ctx.moveTo(0, position); ctx.lineTo(1024, position); ctx.stroke();
+    }
+  }
+  const map = new T.CanvasTexture(canvas);
+  map.wrapS = map.wrapT = T.RepeatWrapping; map.colorSpace = T.SRGBColorSpace; map.anisotropy = 8;
+  const material = tiled(map, [8, 6], { roughness: 0.98 });
+  material.name = "Hormigón del patio de Maquetas";
+  return material;
+}
+
 /** Grava gris del patio, con áridos irregulares de unos pocos centímetros. */
 function courtyardGravel() {
   const canvas = document.createElement("canvas"); canvas.width = canvas.height = 512;
@@ -190,6 +235,7 @@ export function makeMaterials(grass: T.MeshStandardMaterial) {
   return {
     courtyardPaving: courtyardPaving(),
     courtyardGravel: courtyardGravel(),
+    maquetasConcrete: maquetasConcrete(),
     accessStone: accessFinish(false),
     awning: accessFinish(true),
     accessLeaf: accessLeaf(),

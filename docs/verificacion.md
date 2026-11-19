@@ -1,11 +1,43 @@
 # Verificación (versión 0.1.0)
 
+## Detalles de suelo de Civil — 19/11/2026
+
+Pasaron las 68 pruebas y la compilación de producción. La prueba de arranque de escena comprueba por rayos descendentes el apoyo de cada rejilla y registro en tres puntos, la altura de la plataforma y la pendiente de sus dos bordes laterales. Las rejillas tienen una tapa de colisión continua para no introducir huecos entre barras. Persisten avisos del puerto HMR 24678 ocupado durante las pruebas, sin fallos. No se realizó revisión visual ni recorrido manual con cápsula; la apertura externa del navegador había sido denegada en la etapa anterior. No se cambió la cota general del patio ni la conexión previa entre el patio elevado y el sendero lateral.
+
+## Volumen del rincón y depósito de Civil — 19/11/2026
+
+Pasaron las 68 pruebas del frontend y `npm run build`. El proceso de pruebas avisó que el puerto HMR 24678 estaba ocupado, sin fallos en las pruebas. Comprobación adicional sobre los colliders de la escena completa: tres líneas paralelas a altura de torso atraviesan el paso lateral sin obstáculos; el frente del volumen rojizo y el frente y lateral del depósito interceptan los rayos de colisión. Esto no sustituye un recorrido con cápsula ni la inspección visual. La revisión en Edge quedó pendiente: el navegador no inició dentro del aislamiento y no se autorizó ejecutarlo fuera. No se generaron capturas nuevas ni se modificaron los procesos de desarrollo del usuario.
+
+## Actualización de main conservando los laboratorios — 19/11/2026
+
+Integrados los cambios remotos hasta `c905cc1`, incluidos el ascensor y el acceso al DEI. Recuperados los cambios locales de volúmenes, patio, hormigón y fachadas de los laboratorios desde un stash completo con archivos nuevos. Los conflictos de importaciones y documentación se combinaron conservando ambos aportes. Pasaron las 68 pruebas, `npm run build` y la comprobación de marcadores de conflicto. El archivo de detalles de fachadas coincide con el respaldo. No se realizó una nueva revisión visual de esta integración.
+
 ## Ascensor con fotos y sonido — 19/11/2026
 
 - Pasaron las 68 pruebas del frontend y la compilación de producción, sin avisos de tamaño: el bloque de three.js queda en 697 kB, porque el sonido usa Web Audio directo. La prueba de la escena comprueba la cabina de 1,1 × 1,4 m y que sus paredes frenan al visitante. También comprueba el vano libre con las puertas abiertas, la hoja rápida que recorre el doble que la lenta, los tiempos de apertura (2,3 s) y la pausa de llegada. Además, el botón de cerrar, el indicador de la cabina, los tres murales distintos y el orden viaje → gong → puertas. Una prueba nueva verifica el tamaño y la procedencia de los 14 recursos del ascensor.
 - Revisión en Chromium sin ventana (WebGL por software) con una página temporal que arma `TourEngine` sin iniciar sesión, porque el backend no estaba activo. Se revisaron el frente de planta baja y del primer piso, las puertas abiertas, el interior hacia el fondo, la botonera y la puerta, el piso y los tres murales desde el sur, el este y el oeste. Sin errores de página. Capturas locales fuera de Git.
 - Sonido en el mismo navegador: el contexto queda activo, los tres MP3 se decodifican (3,3 s, 2,49 s y 7,2 s). En un viaje de un piso suenan, en orden, el motor (su volumen sigue la velocidad), el gong al detenerse y las puertas al abrir. No se escuchó por parlantes.
 - No se recorrió a pie con el mouse capturado ni con el backend real.
+
+## Detalles de los laboratorios de Civil — 19/11/2026
+
+Pasaron las 66 pruebas del frontend y `npm run build`. Revisión de dos vistas de la geometría completa en Edge headless (rincón posterior y lateral), sin errores JavaScript. Capturas locales: `output/laboratorios-rincon.png` y `output/laboratorios-lateral.png`. La cápsula de navegación tuvo paso libre en 36 muestras del lateral frente a los nuevos equipos y la mesada; la última muestra junto al extremo hacia cantina registró contacto, por lo que la conexión completa y el recorrido manual siguen pendientes. Se mantuvieron las huellas, alturas principales y el material de ladrillo; Git conserva el estado de resolución pendiente de la integración anterior.
+
+## Integración de cambios locales de Maquetas — 19/11/2026
+
+Se actualizó `main` hasta `6381cfb` y se recuperaron los cambios locales del patio, el hormigón y los volúmenes de Maquetas. Los conflictos en los dos constructores de escena se resolvieron conservando también las fachadas de DEI–LED y los senderos entrantes. Pasaron las 66 pruebas del frontend, `npm run build` y la revisión de marcadores de conflicto. La suite avisó de un puerto HMR ocupado y terminó con código 0. Revisión visual de la integración pendiente; no se ejecutaron pruebas del backend.
+
+## Acabado del hormigón de Maquetas — 18/11/2026
+
+Pasaron las 53 pruebas de `npm test` y `npm run build`. La suite avisó que el puerto HMR 24678 estaba ocupado, pero terminó con código 0. El cambio se limita al material y las coordenadas UV del piso del patio. La revisión visual de este acabado queda pendiente: Edge no pudo iniciarse en el entorno restringido y no se autorizó ejecutarlo fuera de él.
+
+## Muro posterior de Maquetas — 18/11/2026
+
+Pasaron las 53 pruebas de `npm test` y la compilación `npm run build`. Se comprobó numéricamente que la cara exterior del muro posterior coincide con el eje de la última columna del pasillo y se revisó la alineación en un render de `createFaculty` en Edge headless. El frente hacia cantina mantiene su ubicación y longitud de 14,17 m. El recorrido manual por el caminero posterior queda pendiente.
+
+## Piso del patio de Maquetas — 18/11/2026
+
+Pasaron las 53 pruebas de `npm test` y `npm run build` desde `frontend/`. Las pruebas emitieron un aviso de puerto HMR 24678 ocupado y finalizaron con código 0. Se renderizó la geometría de `createFaculty` en Edge headless con una cámara de revisión hacia el patio. Se comprobó visualmente el recorte del pavimento junto a cantina. Ocho rayos verticales sobre la colisión confirmaron apoyo en accesos, circulación y jardín, con 5 mm de diferencia entre ambas superficies. Las comprobaciones corresponden a geometría y apoyo estático; el recorrido manual completo queda pendiente. Distribución y aproximaciones en [Geografía y reconstrucción](base-geografica.md#piso-junto-a-cantina--14112026).
 
 ## Refactor del visor y del servidor — 15/11/2026
 

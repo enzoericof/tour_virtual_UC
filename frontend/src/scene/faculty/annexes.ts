@@ -1,10 +1,13 @@
 import * as T from "three";
-import { annexCoveredPaths, annexEnclosedLink, annexPaths, annexWalkEnd, deiGardenPath, deiSideDoor, deiEntranceWing, deiEntrancePaving, diciaWalkExtension, facultyAnnexes } from "../../data/faculty-annexes";
+import { annexCoveredPaths, annexEnclosedLink, annexPaths, annexWalkEnd, deiGardenPath, deiSideDoor, deiEntranceWing, deiEntrancePaving, diciaWalkExtension, facultyAnnexes, maquetasVolumes } from "../../data/faculty-annexes";
 import { facultyBlueprint as plan, fromRect, rectCorners, type Vec2 } from "../../data/faculty-blueprint";
 import type { FacultyBuilder, Range } from "./builder";
 import { addLedRightFacade } from "./led-right-facade";
 import { addLedEntranceWing } from "./led-entrance-wing";
 import { addDeiForecourt, deiForecourtRoadJunctions } from "./dei-forecourt";
+import { addLaboratoryFacades } from "./laboratory-facades";
+import { addLaboratoryOutbuildings } from "./laboratory-outbuildings";
+import { addLaboratoryGround } from "./laboratory-ground";
 import { addSegmentedGardenPath, gardenJunctionReach } from "./garden-path";
 
 // ---- Anexos del plano general: exteriores provisionales, sin interiores relevados ----
@@ -99,15 +102,31 @@ export function addAnnexes(
     const isMaquetas = annex.id === "lab-maquetas";
     const isDei = annex.id === "dei-led";
     const maxZ = Math.max(...outline.map((p) => p[1]));
-    // Desde el extremo del pasillo, los primeros 9,50 m corresponden a la nave alta.
-    const roofBreakZ = maxZ - 9.50, lowEave = 3.55;
     prism(outline, -0.1, 0.15, m.concrete);
     if (isMaquetas) {
-      workshopRoof(annex.rect.size[0], roofBreakZ, maxZ, h);
-      box(annex.rect.size[0], 0.12, roofBreakZ + maxZ, 0, lowEave + 0.06, (roofBreakZ - maxZ) / 2, workshopMetal, true);
-      box(annex.rect.size[0], h - lowEave, 0.2, 0, (h + lowEave) / 2, roofBreakZ, workshopBrick, true);
+      const depth = annex.rect.size[0], rear = -depth / 2, front = depth / 2;
+      const { lowRearInset, highFrontLength, lowHeight } = maquetasVolumes;
+      const lowDepth = depth - lowRearInset;
+      const roofBreakZ = maxZ - highFrontLength;
+      workshopRoof(depth, roofBreakZ, maxZ, h);
+      box(lowDepth, 0.12, roofBreakZ + maxZ, lowRearInset / 2, lowHeight + 0.06,
+        (roofBreakZ - maxZ) / 2, workshopMetal, true);
+      // Frente conservado; el retiro se hace solo desde el jardín posterior.
+      annexWall([front, -maxZ], [front, roofBreakZ], lowHeight, [], true);
+      annexWall([front, roofBreakZ], [front, maxZ], h, [], true);
+      workshopFront(front, roofBreakZ, maxZ, h, true);
+      workshopFront(front, -maxZ, roofBreakZ, lowHeight, false, true);
+      annexWall([rear, maxZ - 0.1], [front, maxZ - 0.1], h, [], true);
+      annexWall([rear, roofBreakZ], [rear, maxZ], h, [], true);
+      // Pared alta expuesta en el rincón y parte superior sobre el techo bajo.
+      addLaboratoryFacades(builder, annex, workshopBrick, workshopMetal);
+      addLaboratoryOutbuildings(builder, officeBrick);
+      addLaboratoryGround(builder);
+      box(lowDepth, h - lowHeight, 0.2, lowRearInset / 2, (h + lowHeight) / 2,
+        roofBreakZ, workshopBrick, true);
+      return;
     }
-    else prism(outline, h, 0.18, m.roof);
+    prism(outline, h, 0.18, m.roof);
     for (let i = 0; i < outline.length; i++) {
       const a = outline[i], b = outline[(i + 1) % outline.length];
       const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
@@ -115,11 +134,6 @@ export function addAnnexes(
       const front = a[1] === maxZ && b[1] === maxZ;
       if (isDei && a[1] === -maxZ && b[1] === -maxZ) {
         addLedRightFacade(builder, annex, deiBrick);
-        continue;
-      }
-      if (isMaquetas && front) {
-        // Muro continuo de Maquetas junto al pasillo de Bedelía.
-        annexWall([a[0], maxZ - 0.1], [b[0], maxZ - 0.1], h, [], true);
         continue;
       }
       const cx = (a[0] + b[0]) / 2, cz = (a[1] + b[1]) / 2;
@@ -152,15 +166,6 @@ export function addAnnexes(
           box(0.045, top - bottom, 0.12, x, (top + bottom) / 2, cz + 0.23, deiLouver);
         }
         for (const y of [bottom, top]) box(length, 0.045, 0.13, cx, y, cz + 0.23, deiLouver);
-      } else if (isMaquetas && a[0] === b[0]) {
-        annexWall([a[0], -maxZ], [a[0], roofBreakZ], lowEave, [], true);
-        annexWall([a[0], roofBreakZ], [a[0], maxZ], h, [], true);
-        if (a[0] > 0) {
-          workshopFront(a[0], roofBreakZ, maxZ, h, true);
-          workshopFront(a[0], -maxZ, roofBreakZ, lowEave, false, true);
-        }
-      } else if (isMaquetas) {
-        annexWall([a[0], -maxZ + 0.1], [b[0], -maxZ + 0.1], lowEave, [], true);
       } else {
         annexWall(a, b, h, openings);
       }
@@ -170,7 +175,7 @@ export function addAnnexes(
       }
     }
     if (isDei) addLedEntranceWing(builder, deiBrick);
-    if (!isDei && !isMaquetas) box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
+    if (!isDei) box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
   });
   annexPaths.forEach((points) => path(points, 2));
   addSegmentedGardenPath(builder, deiGardenPath, annexPavingHeight, gardenWalkMaterial, { startDistance: gardenJunctionReach,

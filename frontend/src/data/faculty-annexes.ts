@@ -46,17 +46,76 @@ const [walkU, walkV] = annexCoordinates(fromRect(walk, [walk.size[0] / 2, 0]));
 const wallOffset = walk.size[1] / 2 + 0.22;
 // Retiro longitudinal para ensanchar el paso junto a la escalera de la cantina.
 const maquetasSetback = 2.8;
-// Longitud total del frente hacia la cantina, medida por el equipo en centímetros.
-const maquetasLength = 1417 / 100;
-const maquetas = annex("lab-maquetas", "Laboratorio de Maquetas",
-  walkU - maquetasSetback - 18.4 / 2, walkV - wallOffset - maquetasLength / 2, 18.4, maquetasLength, 4.85);
-maquetas.entrance = annexPoint(maquetas.mapCenter[0], walkV);
 const dicia = annex("cta-dicia", "CTA–DICIA", walkU + 6 - 34 / 2, walkV + wallOffset + 16 / 2, 34, 16, 4.2,
   [[-7,-8],[17,-8],[17,8],[-17,8],[-17,3],[-7,3]]);
 // El techo termina donde la fachada junto al pasillo gira hacia el interior de la L.
 const corridorWall = dicia.outline.filter(([, z]) => z === -dicia.rect.size[1] / 2);
 const cornerU = dicia.mapCenter[0] + Math.min(...corridorWall.map(([x]) => x));
 export const diciaWalkExtension = walkU - cornerU;
+export const coveredWalkPostInset = 0.05;
+// Cara exterior del muro posterior alineada con el eje del último poste.
+// El frente hacia cantina conserva su posición; el muro tiene 20 cm de espesor.
+const maquetasRearU = cornerU + coveredWalkPostInset + 0.1;
+const maquetasDepth = walkU - maquetasSetback - maquetasRearU;
+// Longitud total del frente hacia la cantina, medida por el equipo en centímetros.
+const maquetasLength = 1417 / 100;
+// Foto posterior del 18/11: el cuerpo bajo termina antes y deja un rincón abierto.
+// Retiro de profundidad estimado, pendiente de medición.
+export const maquetasVolumes = { lowRearInset: 4, highFrontLength: 9.5, lowHeight: 3.55 };
+/** Detalles de las fotos del 19/11. Metros estimados en cada fachada, desde su centro.
+ * Se conserva el identificador histórico lab-maquetas para los laboratorios de Civil. */
+export const laboratoryDetails = {
+  bandY: 2.75, bandHeight: 0.28, eaveProjection: 0.32,
+  lowRearWindow: { x: 0, width: 1.5, sill: 1.15, height: 1.2 },
+  lowSideWindows: [
+    { x: -3.3, width: 1.6, sill: 1.15, height: 1.35 },
+    { x: 0, width: 1.45, sill: 1.15, height: 1.35 },
+    { x: 3.25, width: 1.55, sill: 1.15, height: 1.35 },
+  ],
+  highCornerWindows: [
+    { x: 0.9, width: 1.15, sill: 3.4, height: 1.0 },
+    { x: -1.0, width: 0.78, sill: 1.08, height: 1.18, louvered: true },
+  ],
+  airConditioners: [{ x: 1.3, y: 2.1 }, { x: 2.4, y: 3.05 }],
+  bench: { x: 2.4, width: 3.25, depth: 0.65, height: 0.82 },
+};
+const rearX = -maquetasDepth / 2, frontX = maquetasDepth / 2;
+const minZ = -maquetasLength / 2, maxZ = maquetasLength / 2;
+const splitZ = maxZ - maquetasVolumes.highFrontLength;
+/** Dos piezas distintas según las fotos del 19/11. Dimensiones estimadas en metros.
+ * Centros en el marco del laboratorio; el depósito no representa el edificio cilíndrico. */
+export const laboratoryOutbuildings = {
+  corner: {
+    center: [rearX + maquetasVolumes.lowRearInset - 1.25, splitZ - 0.73] as Vec2,
+    size: [2.15, 1.15] as Vec2, height: 1.75, angle: 0,
+  },
+  depot: {
+    center: [frontX - 1.5, minZ - 4.9] as Vec2,
+    size: [3, 2.6] as Vec2, height: 3.05, angle: Math.PI / 2,
+    ventY: 2.22, ventSpacing: 1.55, ventRadius: 0.245,
+  },
+};
+/** Detalles de suelo de las fotos del 19/11; posiciones y medidas estimadas.
+ * Cotas distintas: patio frente a los portones a 0,90 m y sendero lateral a 0,05 m. */
+export const laboratoryGroundDetails = {
+  drains: [
+    { center: [frontX + 0.8, (minZ + splitZ) / 2] as Vec2, size: [0.38, 1.05] as Vec2, level: 0.905 },
+    { center: [frontX + 1.65, minZ - 1.4] as Vec2, size: [0.55, 0.65] as Vec2, level: 0.905 },
+  ],
+  covers: [
+    { center: [frontX + 1.7, minZ + 0.35] as Vec2, size: [0.62, 0.62] as Vec2, level: 0.905 },
+    { center: [1.4, minZ - 1.45] as Vec2, size: [0.58, 0.68] as Vec2, level: 0.05 },
+  ],
+  apron: {
+    center: [rearX + 0.85, splitZ - 1.12] as Vec2,
+    size: [1.5, 2] as Vec2, height: 0.12, bevel: 0.18,
+  },
+};
+const maquetas = annex("lab-maquetas", "Laboratorio de Maquetas",
+  maquetasRearU + maquetasDepth / 2, walkV - wallOffset - maquetasLength / 2, maquetasDepth, maquetasLength, 4.85,
+  [[rearX + maquetasVolumes.lowRearInset, minZ], [frontX, minZ], [frontX, maxZ],
+    [rearX, maxZ], [rearX, splitZ], [rearX + maquetasVolumes.lowRearInset, splitZ]]);
+maquetas.entrance = annexPoint(maquetas.mapCenter[0], walkV);
 // El caminero de 2 m rodea Maquetas y continúa hacia las oficinas.
 const bypassU = maquetas.mapCenter[0] - maquetas.rect.size[0] / 2 - 1.12;
 const bypassV = maquetas.mapCenter[1] - maquetas.rect.size[1] / 2 - 1.45;
@@ -209,8 +268,8 @@ export const annexVisitTargets: Record<string, [number, number, number]> = Objec
   facultyAnnexes.map((b)=>[b.id,[b.front[0],1.7,b.front[1]]]),
 );
 
-/** Extensión gris en L indicada en la captura del 14/11, alrededor de cantina. */
-export const cantinaRearPaving: Vec2[] = (() => {
+/** Patio detrás de cantina, según fotos del 18/11. Anchos estimados visualmente. */
+export const cantinaRearCourtyard = (() => {
   const local = ([x, z]: Vec2): Vec2 => {
     const dx = x - plan.cantina.center[0], dz = z - plan.cantina.center[1];
     const a = plan.cantina.angle;
@@ -221,7 +280,22 @@ export const cantinaRearPaving: Vec2[] = (() => {
   const back = -plan.cantina.size[1] / 2;
   const end = plan.cantina.size[0] / 2;
   const plazaEdge = Math.max(...plan.bedeliaLawnEdge.map(p => local(p)[1]));
-  return ([[walkEdge, rearEdge], [end, rearEdge], [end, back],
-    [-end - 0.5, back], [-end - 0.5, plazaEdge], [walkEdge, plazaEdge]] as Vec2[])
-    .map(p => fromRect(plan.cantina, p));
+  // Jardín junto a cantina y paso de 4 m frente a Maquetas. La entrada se
+  // ensancha hacia el pasillo techado; el extremo opuesto conserva 2 m de paso.
+  const gardenEdge: Vec2[] = [
+    [-end + 1.5, back],
+    [-end + 1.5, rearEdge + 6],
+    [-end + 3.5, rearEdge + 4],
+    [end - 2, rearEdge + 4],
+    [end - 2, back],
+  ];
+  const paving: Vec2[] = [
+    [walkEdge, rearEdge], [end, rearEdge], [end, back],
+    ...[...gardenEdge].reverse(),
+    [-end - 0.5, back], [-end - 0.5, plazaEdge], [walkEdge, plazaEdge],
+  ];
+  return {
+    paving: paving.map(p => fromRect(plan.cantina, p)),
+    garden: gardenEdge.map(p => fromRect(plan.cantina, p)),
+  };
 })();

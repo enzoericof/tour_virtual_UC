@@ -163,3 +163,11 @@ Fotos y grabaciones del ascensor del Bloque 1 aportadas por el usuario el 19/11/
 | `Ascensor subiendo y llegando.m4a` | Zumbido del motor: un tramo estable de 7 s en bucle. El gong y la apertura del final ya están en las otras grabaciones |
 
 Los audios se analizaron con espectrogramas y envolventes de nivel para ubicar cada evento. El recorte no se comprobó escuchando por parlantes.
+
+### Laboratorios de Civil detrás de cantina — 19/11/2026
+
+Para el suelo, `00.44.49.jpeg` guía la pequeña plataforma junto a la ventana; `00.50.05.jpeg` y `00.44.48 (1).jpeg` guían rejillas y registros. Se aproximan medidas y distribución, manteniendo el material de hormigón existente.
+
+La vista `00.44.49.jpeg` también guía el pequeño volumen rojizo del rincón; `00.50.05.jpeg` guía el depósito rectangular con dos respiraderos. Se construyen con geometría y materiales propios, sin reproducir manchas ni desgaste y sin importar los originales al repositorio.
+
+Fotos del usuario: `WhatsApp Image 2026-11-19 at 00.44.48 (2).jpeg`, `WhatsApp Image 2026-11-19 at 00.44.49.jpeg`, `WhatsApp Image 2026-11-19 at 00.44.48 (1).jpeg` y `WhatsApp Image 2026-11-19 at 00.50.05.jpeg`. Guían ventanas, franjas, pilares, desagües, mesada y equipamiento de los laboratorios. Se interpretan proporciones, sin medidas nuevas relevadas. Por instrucción del usuario se conserva el color del modelo y no se reproduce desgaste. Los originales permanecen fuera del repositorio y no se usan como texturas.

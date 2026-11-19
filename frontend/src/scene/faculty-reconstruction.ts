@@ -22,7 +22,7 @@ import {
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
 import { gardenHeight, gardenBounds, inCantina, coveredWalkSurface } from "../data/cantina-terrain";
-import { cantinaRearPaving, deiGardenPath, diciaWalkExtension, gardenWalkHedge } from "../data/faculty-annexes";
+import { cantinaRearCourtyard, coveredWalkPostInset, deiGardenPath, diciaWalkExtension, gardenWalkHedge } from "../data/faculty-annexes";
 
 type BlockSpec = {
   length: number; depth: number; levels: number; bay: number; margin: number; gallery: number;
@@ -696,9 +696,22 @@ export function createFaculty(grass = makeGrassMaterial()) {
     prism(outline, 0, PLAZA_LEVEL, m.concrete);
     pave(outline, i === 0 ? m.tile : m.stone, PLAZA_LEVEL + (i === 0 ? 0.008 : 0.005));
   }
-  // Continuación del mismo piso gris por el fondo y lateral de cantina.
-  prism(cantinaRearPaving, 0, PLAZA_LEVEL, m.concrete, true);
-  pave(cantinaRearPaving, m.stone, PLAZA_LEVEL + 0.005);
+  // Circulación frente a Maquetas y jardín enrasado junto a cantina.
+  prism(cantinaRearCourtyard.paving, 0, PLAZA_LEVEL, m.concrete, true);
+  const rearPaving = pave(cantinaRearCourtyard.paving, m.maquetasConcrete, PLAZA_LEVEL + 0.005);
+  // Orientar las juntas con las fachadas del patio, conservando la huella y su colisión.
+  const rearPositions = rearPaving.geometry.attributes.position;
+  const rearUV = rearPaving.geometry.attributes.uv;
+  const [concreteTileX, concreteTileZ] = m.maquetasConcrete.userData.tile as number[];
+  const patioCos = Math.cos(plan.cantina.angle), patioSin = Math.sin(plan.cantina.angle);
+  for (let i = 0; i < rearPositions.count; i++) {
+    const dx = rearPositions.getX(i) - plan.cantina.center[0];
+    const dz = rearPositions.getZ(i) - plan.cantina.center[1];
+    rearUV.setXY(i, (dx * patioCos + dz * patioSin) / concreteTileX,
+      (-dx * patioSin + dz * patioCos) / concreteTileZ);
+  }
+  const rearGarden = prism(cantinaRearCourtyard.garden, 0, PLAZA_LEVEL + 0.005, m.grass);
+  rearGarden.castShadow = false;
 
   // La galería y el sendero comparten cota de piso terminado.
   const bedeliaPavingTop = 0.012;
@@ -731,7 +744,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
       const x = -half + i * roofLength / (2 * bays);
       const arch = new T.Mesh(rib, steel); arch.position.set(x, axisY - 0.025, 0); layers.visual.add(arch);
       if (i % 2 === 0) {
-        const postX = T.MathUtils.clamp(x, -half + 0.05, half + diciaWalkExtension - 0.05);
+        const postX = T.MathUtils.clamp(x, -half + coveredWalkPostInset, half + diciaWalkExtension - coveredWalkPostInset);
         for (const side of [-1, 1]) {
           const z = side * (span - 0.045);
           const foot = postX <= half ? bedeliaPavingTop

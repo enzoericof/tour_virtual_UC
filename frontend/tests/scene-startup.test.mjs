@@ -2,6 +2,7 @@ import { Box3, PerspectiveCamera, Ray, Raycaster, Vector2, Vector3 } from "three
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
 import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
+import { laboratoryGroundDetails } from "../src/data/faculty-annexes.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "vite";
@@ -33,6 +34,26 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const grass = makeGrassMaterial();
     assert.ok(grass.map && grass.normalMap && !grass.displacementMap, "Grass has color and fine relief on the existing terrain");
     const { group, colliders, elevator } = createFaculty(grass);
+    // Civil: piezas de suelo en sus cotas reales, sin pozos entre los barrotes.
+    const civil = facultyAnnexes.find(a => a.id === "lab-maquetas");
+    const civilFloor = (x, z) => {
+      const p = fromRect(civil.rect, [x, z]);
+      return new Raycaster(new Vector3(p[0], 1.2, p[1]), new Vector3(0, -1, 0), 0, 1.4)
+        .intersectObject(colliders, true)[0]?.point.y;
+    };
+    for (const item of [...laboratoryGroundDetails.drains, ...laboratoryGroundDetails.covers]) {
+      const [x, z] = item.center;
+      for (const offset of [-0.2, 0, 0.2]) {
+        const y = civilFloor(x + item.size[0] * offset, z);
+        assert.ok(Math.abs(y - item.level - 0.006) < 0.002, "Rejilla o registro apoyado y transitable");
+      }
+    }
+    const civilApron = laboratoryGroundDetails.apron;
+    assert.ok(Math.abs(civilFloor(...civilApron.center) - civilApron.height) < 0.002, "La plataforma tiene colisión en su tapa");
+    for (const side of [-1, 1]) {
+      const y = civilFloor(civilApron.center[0] + side * (civilApron.size[0] / 2 - civilApron.bevel / 2), civilApron.center[1]);
+      assert.ok(Math.abs(y - (0.008 + civilApron.height) / 2) < 0.003, "El bisel tiene superficie ascendente por ambos lados");
+    }
     const garden = group.getObjectByName("Jardín de mesas y parrilla de cantina");
     assert.ok(garden, "Se construye el jardín de cantina");
     assert.equal(garden.children.filter(o => o.userData.gardenTable).length, 4, "Hay cuatro conjuntos completos de mesas y asientos");
