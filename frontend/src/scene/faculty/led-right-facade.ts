@@ -1,3 +1,4 @@
+import {addCourtyardElevatorTree} from "../courtyard-elevator-tree";
 import * as T from "three";
 import { deiRightFacade as detail, type Annex } from "../../data/faculty-annexes";
 import type { FacultyBuilder } from "./builder";
@@ -185,36 +186,7 @@ export function addLedRightFacade(builder: FacultyBuilder, annex: Annex, brick: 
   for (const side of [-1, 1]) pole(0.015, 0.94, binX + side * 0.27, 0.47, binZ, steel);
   // Árbol pequeño del cantero frente al extremo de acceso, con copa de hojas finas.
   const treeX = -8.8, treeZ = z - 0.70;
-  const bark = new T.MeshStandardMaterial({ color: "#696551", roughness: 1 });
-  pole(0.075, 2.8, treeX, 1.40, treeZ, bark, true);
-  for (let i = 0; i < 5; i++) {
-    const angle = i * Math.PI * 2 / 5;
-    beam(v3(treeX, 1.7, treeZ), v3(treeX + Math.cos(angle) * 0.75, 3.1 + (i % 2) * 0.35,
-      treeZ + Math.sin(angle) * 0.65), 0.028, bark);
-  }
-  const treeLeaf = new T.BufferGeometry();
-  treeLeaf.setAttribute("position", new T.Float32BufferAttribute([
-    -.5,0,0, -.16,0,-.22, .30,0,-.18, .5,0,0, .30,0,.18, -.16,0,.22, 0,.06,0,
-  ],3));
-  treeLeaf.setIndex([6,0,5,6,5,4,6,4,3,6,3,2,6,2,1,6,1,0]); treeLeaf.computeVertexNormals();
-  const treeLeaves = new T.InstancedMesh(treeLeaf,
-    new T.MeshStandardMaterial({ color: "#ffffff", side: T.DoubleSide, roughness: .92 }), 6500);
-  treeLeaves.name = "Árbol del cantero del LED"; treeLeaves.userData.keep = true;
-  treeLeaves.castShadow = treeLeaves.receiveShadow = true;
-  const dummy = new T.Object3D(), tint = new T.Color();
-  const noise = (i: number) => { const n = Math.sin(i * 127.1 + 311.7) * 43758.5453; return n - Math.floor(n); };
-  for (let i = 0; i < treeLeaves.count; i++) {
-    const angle = noise(i + 1) * Math.PI * 2, radius = Math.sqrt(noise(i + 9)) * 1.25;
-    const level = noise(i + 54);
-    dummy.position.set(treeX + Math.cos(angle) * radius * Math.sqrt(Math.max(.015, 1 - (level * 2 - 1) ** 2)) * 1.30,
-      2.25 + level * 2.8, treeZ + Math.sin(angle) * radius * Math.sqrt(Math.max(.015, 1 - (level * 2 - 1) ** 2)) * 0.90);
-    dummy.rotation.set(noise(i + 25) * 2.8, angle, noise(i + 42) * 2.5);
-    const size = .075 + noise(i + 97) * .08; dummy.scale.setScalar(size); dummy.updateMatrix();
-    treeLeaves.setMatrixAt(i, dummy.matrix);
-    tint.setHSL(.24 + noise(i + 127) * .07, .35 + noise(i + 131) * .25, .24 + noise(i + 138) * .16, T.SRGBColorSpace);
-    treeLeaves.setColorAt(i, tint);
-  }
-  treeLeaves.instanceMatrix.needsUpdate = true; treeLeaves.computeBoundingSphere(); layers.visual.add(treeLeaves);
+  addCourtyardElevatorTree(layers.visual,layers.solid,{center:[treeX,treeZ],baseY:.05,height:5,spread:1.5,name:"Árbol del cantero del LED"});
 
   const potGeometry = new T.CylinderGeometry(.18, .12, .27, 12);
   const terracotta = new T.MeshStandardMaterial({ color: "#9b674b", roughness: .95 });

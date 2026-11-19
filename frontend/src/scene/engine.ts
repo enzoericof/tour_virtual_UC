@@ -1,3 +1,4 @@
+import { CampusCats } from "./campus-cats";
 import { collectSeats, occupiedSeat, type Seat } from "./seating";
 import type { Player } from "../services/presence";
 import * as T from "three";
@@ -28,6 +29,7 @@ export class TourEngine {
   readonly orbit: OrbitControls;
   readonly walker: Walker;
   readonly campus = createCampus();
+  readonly cats: CampusCats;
   private readonly entranceDoors = new EntranceDoors(this.campus.group);
   /** Modelos colocados con el editor 3D (solo lectura para el visitante normal). */
   readonly editorPlacements = new T.Group();
@@ -99,6 +101,8 @@ export class TourEngine {
     this.walker = new Walker(this.camera, this.canvas);
     this.walker.onCaptureError = (message) => this.onError(message);
     this.walker.setWorld(this.campus.colliders);
+    this.cats = new CampusCats(this.walker.collisionWorld,Math.random,sphere=>this.walker.blocksDynamicSphere(sphere));
+    this.scene.add(this.cats.group);
     this.entranceDoors.register(this.walker);
     this.walker.addBarrier(this.campus.boundary, () => true);
     for (const [floor, stop] of this.campus.elevator.stops.entries()) {
@@ -250,6 +254,7 @@ export class TourEngine {
       this.camera.near = near;
       this.camera.updateProjectionMatrix();
     }
+    this.cats.update(dt);
     this.remotePlayers.update(dt);
     this.renderer.render(this.scene, this.camera);
     if (this.walker.enabled && now >= this.nextVisitPosition) {

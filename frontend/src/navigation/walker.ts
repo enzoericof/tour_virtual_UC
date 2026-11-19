@@ -75,6 +75,11 @@ export class Walker {
     window.addEventListener("keyup", (e) => this.keys.delete(e.code));
     window.addEventListener("blur", () => this.pause());
   }
+  /** Índice estático compartido con la fauna del campus, sin duplicar geometría. */
+  get collisionWorld() { return this.world; }
+  blocksDynamicSphere(sphere:T.Sphere) {
+    return Boolean(this.editorWorld.sphereIntersect(sphere)) || this.barriers.some(b=>b.blocked() && Boolean(b.world.sphereIntersect(sphere)));
+  }
   setWorld(object: T.Object3D) {
     this.world.clear();
     this.world.fromGraphNode(object);

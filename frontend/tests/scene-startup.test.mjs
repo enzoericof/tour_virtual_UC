@@ -1,4 +1,4 @@
-import { Box3, PerspectiveCamera, Ray, Raycaster, Vector2, Vector3 } from "three";
+import { Box3, Matrix4, PerspectiveCamera, Ray, Raycaster, Triangle, Vector2, Vector3 } from "three";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
 import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
@@ -33,6 +33,42 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const grass = makeGrassMaterial();
     assert.ok(grass.map && grass.normalMap && !grass.displacementMap, "Grass has color and fine relief on the existing terrain");
     const { group, colliders, elevator } = createFaculty(grass);
+    // Verifica superficies reales, no solo centros de ramas o la posición de la base.
+    const elevatorTree = group.getObjectByName("Árbol junto al ascensor");
+    assert.ok(elevatorTree, "El árbol del ascensor está en el mismo modelo del recorrido");
+    const [ex, ez] = plan.elevator.center, [ew, ed] = plan.elevator.size;
+    const protectedShaft = new Box3(new Vector3(ex - ew / 2 - .6, -1, ez - ed / 2 - .6),
+      new Vector3(ex + ew / 2 + .6, 30, ez + ed / 2 + .6));
+    const triangle = new Triangle(), matrix = new Matrix4(), instance = new Matrix4(), leafBounds = new Box3();
+    let leafCount = 0, centralLeaves = 0;
+    elevatorTree.traverse(mesh => {
+      if (!mesh.isMesh) return;
+      if (mesh.isInstancedMesh) {
+        mesh.geometry.computeBoundingBox();
+        for (let i = 0; i < mesh.count; i++) {
+          mesh.getMatrixAt(i, instance); matrix.multiplyMatrices(mesh.matrixWorld, instance);
+          leafBounds.copy(mesh.geometry.boundingBox).applyMatrix4(matrix);
+          assert.ok(!protectedShaft.intersectsBox(leafBounds), "Ninguna hoja invade el ascensor ni su margen");
+          const center=leafBounds.getCenter(new Vector3());
+          if(Math.hypot(center.x-elevatorTree.position.x,center.z-elevatorTree.position.z)<1.6 && center.y>5.8 && center.y<8.8)centralLeaves++;
+        }
+        leafCount += mesh.count;
+      } else {
+        const p = mesh.geometry.attributes.position, index = mesh.geometry.index;
+        for (let i = 0; i < (index?.count ?? p.count); i += 3) {
+          for (const [offset, vertex] of [[0, triangle.a], [1, triangle.b], [2, triangle.c]])
+            vertex.fromBufferAttribute(p, index ? index.getX(i + offset) : i + offset).applyMatrix4(mesh.matrixWorld);
+          assert.ok(!protectedShaft.intersectsTriangle(triangle), "Ninguna rama cruza la caja durante el viaje");
+        }
+        assert.ok(mesh.material.map && mesh.material.normalMap && mesh.material.roughnessMap,
+          "La corteza tiene color, relieve y rugosidad");
+      }
+    });
+    assert.ok(centralLeaves>2500,"El centro de la copa tiene cobertura, no solo las puntas");
+    assert.ok(leafCount > 14000, "La separación del ascensor conserva una copa frondosa");
+    assert.ok(new Box3().setFromObject(elevatorTree).max.y > 8, "Se conserva el porte del árbol");
+    assert.ok(Math.hypot(elevatorTree.position.x - plan.blockGCourtyard.addedTree[0],
+      elevatorTree.position.z - plan.blockGCourtyard.addedTree[1]) < 1e-6, "La base conserva su ubicación");
     const garden = group.getObjectByName("Jardín de mesas y parrilla de cantina");
     assert.ok(garden, "Se construye el jardín de cantina");
     assert.equal(garden.children.filter(o => o.userData.gardenTable).length, 4, "Hay cuatro conjuntos completos de mesas y asientos");

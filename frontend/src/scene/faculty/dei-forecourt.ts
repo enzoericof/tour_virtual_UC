@@ -76,7 +76,7 @@ export function addDeiForecourt(builder:FacultyBuilder,paving:T.MeshStandardMate
     tree.rotation.y=[1.35,-1.9,2.8][index];tree.scale.set(.65*scale,.95*scale,.65*scale);builder.layers.visual.add(tree);
     const body=new T.Mesh(colliderGeometry);body.scale.set(.65*scale,.95*scale,.65*scale);
     body.position.set(point[0],cantinaGardenFloor(point)+1.425*.95*scale,point[1]);
-    body.userData.deiForecourtTree=true;solids.add(body);
+    body.userData.deiForecourtTree=true;body.userData.treeTrunk=true;solids.add(body);
   });
 }
 

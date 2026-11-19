@@ -414,6 +414,8 @@ export const facultyBlueprint = {
   /** Patio frente al Bloque G, situado con el mural del ascensor como referencia. */
   blockGCourtyard: {
     addedTree: [30.4, 11] as Vec2,
+    /** Dimensiones estimadas; copa con retiro del ascensor a lo largo de todos los pisos. */
+    elevatorTree: { radius: .68, spread: 5.4, shaftClearance: .65 },
     planter: { center: [25.3, 21.1], size: [1.7, 1.7], angle: gridAngle } as Rect,
     sign: { center: [41, 14], size: [1.2, 0.1], angle: -Math.PI / 2 - Math.PI / 6 } as Rect,
     terrace: { center: [27.9, 15.9], size: [10.2, 6.6], angle: 0 } as Rect,
@@ -423,6 +425,8 @@ export const facultyBlueprint = {
     tables: [[25.45, 15.8], [30.3, 15.8]] as Vec2[],
     lamps: [[26.95, 17.3], [31.8, 17.3]] as Vec2[],
   },
+  /** Puntos iniciales estimados de la fauna; el paseo posterior no sigue rutas. */
+  campusCats: { spawns: [[25,14],[0,26],[65,-35]] as Vec2[], speed: [.45,.65] as const },
   picnic: [[14, 25.8], [19, 28.5], [14.5, 20], [19, 22]].map(([x, z]) => fromRect(cantina, [x, z])),
   /** Jardín de mesas y parrilla: distribución estimada según la foto del 18/11. */
   cantinaGarden: {

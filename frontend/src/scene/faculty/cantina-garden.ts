@@ -166,6 +166,7 @@ export function addCantinaGarden(builder: FacultyBuilder) {
     tree.position.set(point[0], cantinaGardenFloor(point), point[1]);
     tree.rotation.y = i === 0 ? 1.8 : -1.1; tree.scale.setScalar(scale); garden.add(tree);
     const trunk = new T.Mesh(new T.CylinderGeometry(.42 * scale, .57 * scale, 2.85 * scale, 10));
+    trunk.userData.treeTrunk=true;
     trunk.position.set(point[0], cantinaGardenFloor(point) + 1.425 * scale, point[1]); layers.solid.add(trunk);
   });
 
