@@ -1,3 +1,4 @@
+import {addCourtyardElevatorTree} from "../courtyard-elevator-tree";
 import { registerSeats } from "../seating";
 import * as T from "three";
 import { facultyToWorld, insidePolygon } from "../../data/campus-geometry";
@@ -227,7 +228,11 @@ export function addCantina(builder: FacultyBuilder) {
       // Remate continuo del parapeto sobre la cubierta baja.
       prism(kitchenRing(a, b, kitchenRadius + 0.035, kitchenRadius - 0.265), 3.7, 0.07, m.stone, false);
     }
-    prism(kitchenOutline, 3.35, 0.12, m.roof);
+    // La cubierta se apoya dentro de los 23 cm de muro; su canto no debe
+    // coincidir con la fachada curva ni competir con el material de ladrillo.
+    const kitchenRoof = Array.from({ length: kitchenSegments + 1 }, (_, i) =>
+      kitchenPoint(i * Math.PI / kitchenSegments, kitchenRadius - 0.115));
+    prism(kitchenRoof, 3.35, 0.12, m.roof);
     box(w + 0.4, 0.18, d - 1.8, 0, 5.3, -1.15, m.roof, true);
     // El paño izquierdo de ladrillo reduce la vidriera al sector de acceso real.
     const left = -w / 2 + 4.5, right = w / 2 - 0.4;
@@ -574,43 +579,9 @@ export function addCantina(builder: FacultyBuilder) {
     const bed = new T.Mesh(new T.CylinderGeometry(1, 1, 0.035, 40), earth);
     bed.scale.set(1.95, 1, 1.12); bed.position.set(treeX, 0.035, treeZ);
     bed.receiveShadow = true; layers.visual.add(bed);
-    const trunk = v3(treeX, 0, treeZ), fork = v3(treeX - 0.27, 4.3, treeZ - 0.12);
-    beam(trunk, fork, 0.115, bark);
-    const trunkCollider = new T.Mesh(unit);
-    trunkCollider.position.set(treeX - 0.12, 2.1, treeZ); trunkCollider.scale.set(0.26, 4.2, 0.26);
-    layers.solid.add(trunkCollider);
-    const noise = (n: number) => { const v = Math.sin(n * 127.1 + 71.3) * 43758.5453; return v - Math.floor(v); };
-    const leafGeometry = new T.IcosahedronGeometry(1, 0);
-    const leafMaterial = new T.MeshStandardMaterial({ color: "#d3d8ac", roughness: 1 });
-    const leafCount = 5600;
-    const leaves = new T.InstancedMesh(leafGeometry, leafMaterial, leafCount);
-    // Conservar instancias al combinar la geometría estática por material.
-    leaves.userData.keep = true; leaves.castShadow = true; leaves.receiveShadow = true;
-    const transform = new T.Object3D(), tint = new T.Color();
-    let leafIndex = 0;
-    for (let i = 0; i < 14; i++) {
-      const a = i * 2.39996, spread = 1.8 + noise(i + 3) * 1.9;
-      const base = fork.clone().add(v3(0, (i % 4) * 0.45, 0));
-      const tip = v3(treeX + Math.cos(a) * spread, 6.3 + noise(i + 40) * 2.1, treeZ + Math.sin(a) * spread * 0.82);
-      beam(base, tip, 0.035 + noise(i + 9) * 0.018, bark);
-      for (let j = 0; j < 5; j++) {
-        const t = 0.5 + j * 0.115;
-        const twig = base.clone().lerp(tip, t);
-        const tuft = twig.clone().add(v3(Math.cos(a + j * 1.8) * 0.65, 0.25 + noise(i * 5 + j) * 0.6, Math.sin(a + j * 1.8) * 0.65));
-        beam(twig, tuft, 0.012, bark);
-        for (let k = 0; k < 80; k++) {
-          const n = leafIndex++, angle = noise(n + 17) * Math.PI * 2;
-          const r = Math.sqrt(noise(n + 123)) * 0.85;
-          transform.position.copy(tuft).add(v3(Math.cos(angle) * r, (noise(n + 500) - 0.5) * 1.05, Math.sin(angle) * r));
-          transform.rotation.set(noise(n) * 3, noise(n + 7) * 6, noise(n + 11) * 3);
-          transform.scale.set(0.075 + noise(n + 83) * 0.055, 0.025, 0.035 + noise(n + 31) * 0.04);
-          transform.updateMatrix(); leaves.setMatrixAt(n, transform.matrix);
-          tint.setHSL(0.22 + noise(n + 8) * 0.035, 0.27 + noise(n + 21) * 0.2, 0.29 + noise(n + 92) * 0.2);
-          leaves.setColorAt(n, tint);
-        }
-      }
-    }
-    leaves.computeBoundingSphere(); layers.visual.add(leaves);
+    addCourtyardElevatorTree(layers.visual,layers.solid,{center:[treeX,treeZ],baseY:0,height:9,spread:3.8,name:"Árbol del alcorque de cantina"});
+    const noise = (n:number)=>{const v=Math.sin(n*127.1+71.3)*43758.5453;return v-Math.floor(v);};
+    const leafGeometry=new T.IcosahedronGeometry(1,0),transform=new T.Object3D();
     // Arbustos recortados a ambos lados, bajos como en la nueva referencia.
     const shrubs = new T.InstancedMesh(leafGeometry, m.leaves[1], 720);
     shrubs.userData.keep = true; shrubs.castShadow = true; shrubs.receiveShadow = true;

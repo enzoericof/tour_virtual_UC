@@ -1,5 +1,6 @@
 import * as T from "three";
 import { facultyBlueprint as plan, type Vec2 } from "../data/faculty-blueprint";
+import { addCourtyardElevatorTree } from "./courtyard-elevator-tree";
 
 const TAU = Math.PI * 2;
 type Point = [number, number, number];
@@ -88,51 +89,11 @@ export function addCourtyardVegetation(group: T.Object3D, colliders: T.Object3D)
   }
 
   function tree([x, z]: Vec2, y: number, height: number, spread: number, radius: number, forkRatio: number, spreading = false, roots = true) {
-    const base = new T.Vector3(x, y, z);
-    const fork = base.clone().add(new T.Vector3(-radius * 0.5, height * forkRatio, radius * 0.55));
-    const mid = base.clone().lerp(fork, 0.47).add(new T.Vector3(radius * 0.4, 0, -radius * 0.25));
-    branch(base, mid, radius, radius * 0.76);
-    branch(mid, fork, radius * 0.78, radius * 0.56);
-    obstacle([x, y + height * forkRatio / 2, z], [radius * 1.6, height * forkRatio, radius * 1.6]);
-    for (let i = 0; i < (roots ? (spreading ? 11 : 5) : 0); i++) {
-      const a = i * TAU / (spreading ? 11 : 5);
-      branch(base.clone().add(new T.Vector3(0, radius * 1.15, 0)),
-        base.clone().add(new T.Vector3(Math.cos(a) * radius * (spreading ? 3.1 : 2.25), 0.025, Math.sin(a) * radius * (spreading ? 3.1 : 2.25))),
-        radius * 0.34, 0.018);
-    }
-
-    const limbs = spreading ? 6 : 15, clusters = spreading ? 14 : 6, perCluster = 120;
-    const leaves = leafBatch(limbs * clusters * perCluster);
-    const at = new T.Vector3();
-    let index = 0;
-    for (let i = 0; i < limbs; i++) {
-      const a = i * 2.39996;
-      const reach = spread * ((spreading ? 0.48 : 0.26) + random() * 0.49);
-      const bend = base.clone().add(new T.Vector3(Math.cos(a) * reach * 0.48, height * (0.51 + random() * 0.14), Math.sin(a) * reach * 0.48));
-      const end = base.clone().add(new T.Vector3(Math.cos(a + 0.14) * reach, height * (0.68 + random() * 0.24), Math.sin(a + 0.14) * reach));
-      const thickness = radius * (0.18 + random() * 0.13);
-      branch(fork, bend, thickness, thickness * 0.62);
-      branch(bend, end, thickness * 0.65, 0.022);
-      for (let j = 0; j < clusters; j++) {
-        const start = bend.clone().lerp(end, 0.16 + j * (0.8 / (clusters - 1)));
-        const heading = a + (j % 2 ? -0.95 : 0.95);
-        const length = spread * (0.10 + random() * 0.13);
-        const tuft = start.clone().add(new T.Vector3(Math.cos(heading) * length, height * (0.025 + random() * 0.035), Math.sin(heading) * length));
-        branch(start, tuft, 0.025, 0.009);
-        for (let k = 0; k < perCluster; k++) {
-          const azimuth = random() * TAU, vertical = 2 * random() - 1;
-          const r = Math.cbrt(random()) * spread * 0.23;
-          const horizontal = Math.sqrt(1 - vertical * vertical) * r;
-          at.set(tuft.x + Math.cos(azimuth) * horizontal, tuft.y + vertical * r * 0.63, tuft.z + Math.sin(azimuth) * horizontal);
-          putLeaf(leaves, index++, at, 0.13 + random() * 0.14, 0.13 + (vertical + 1) * 0.043);
-        }
-      }
-    }
-    leaves.computeBoundingSphere();
+    addCourtyardElevatorTree(group, colliders, { center:[x,z], baseY:y, height, spread, radius, name:"Árbol del patio" });
   }
 
   tree(plan.tree1, 0.015, 10.5, 6.2, 0.74, 0.26, true);
-  tree(plan.blockGCourtyard.addedTree, 0.015, 10.2, 5.8, 0.68, 0.26, true, false);
+  addCourtyardElevatorTree(group, colliders);
   tree(plan.tree2, 0.015, 17.2, 7.3, 0.65, 0.34);
   tree(plan.tree3, 0.015, 10.1, 4.8, 0.48, 0.39);
   plan.courtyardTrees.forEach((point, index) => {

@@ -1,3 +1,4 @@
+import {addCourtyardElevatorTree, pruneTreeStructures} from "./courtyard-elevator-tree";
 import { registerSeats } from "./seating";
 import * as T from "three";
 import { friendshipMaterial, friendshipSign } from "./friendship-materials";
@@ -1456,29 +1457,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
           leaf.castShadow=true;layers.visual.add(leaf);
         }
       }
-      // Árbol de corteza pálida y copa verde, hasta la cota del segundo piso.
-      const paleBark = m.concrete.clone(); paleBark.color.set("#d6d0bb");
-      const greenLeaves = ["#416b2c", "#527e35", "#638d42"].map(color =>
-        new T.MeshStandardMaterial({color,roughness:1}));
-      const treeTop = 2 * H - floor;
-      beam(v3(0,.28,0),v3(.12,3.9,.06),.17,paleBark);
-      pole(.17,3.6,0,2.08,0,paleBark,true);
-      beam(v3(.12,3.9,.06),v3(.04,treeTop-.35,0),.095,paleBark);
-      for(let i=0;i<12;i++) {
-        const a=i*2.39996,y=3.5+(i%4)*.55;
-        const reach=.8+(i%3)*.16;
-        const tip=v3(Math.cos(a)*reach,Math.min(treeTop-.45,y+1),Math.sin(a)*reach);
-        beam(v3(.09,y,0),tip,.065,paleBark);
-        for(let j=0;j<3;j++) {
-          const leaves=new T.Mesh(new T.IcosahedronGeometry(1,1),greenLeaves[(i+j)%3]);
-          leaves.position.copy(tip).add(v3(Math.cos(a+j*2)*.25,j*.08,Math.sin(a+j*2)*.25));
-          leaves.scale.set(.52,.35,.46);
-          leaves.castShadow=true;leaves.receiveShadow=true;layers.visual.add(leaves);
-        }
-      }
-      const crown=new T.Mesh(new T.IcosahedronGeometry(1,1),greenLeaves[1]);
-      crown.position.set(.04,treeTop-.35,0);crown.scale.set(.55,.35,.5);
-      crown.castShadow=true;crown.receiveShadow=true;layers.visual.add(crown);
+      addCourtyardElevatorTree(layers.visual,layers.solid,{center:[0,0],baseY:.28,height:6.7,spread:1.6,name:"Árbol del cantero del patio"});
     },floor);
     // Cartel azul sobre dos postes, al borde de acceso a la plaza.
     frame(plan.blockGCourtyard.sign,()=>{
@@ -1579,6 +1558,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
   const [treeX, treeZ] = plan.tree2;
   box(2.8, 0.45, 0.6, treeX + 3, 0.225, treeZ - 2.5, m.brick, true);
   box(2.4, 0.45, 0.6, treeX + 3, 0.225, treeZ - 5, m.brick, true);
+  pruneTreeStructures(group,colliders);
   mergeByMaterial(group);
   group.updateMatrixWorld(true); colliders.updateMatrixWorld(true);
   return { group, colliders, elevator };

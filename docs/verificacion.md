@@ -509,3 +509,45 @@ Ventanas y pilares (18/11): 66/66 pruebas aprobadas y compilación correcta. La 
 ### Caminero exterior del LED — 19/11/2026
 
 Frontend: 67/67 pruebas aprobadas y compilación correcta. Las pruebas verifican que los caminos nuevos no corten edificios ni salgan del terreno, cuatro árboles fuera de la circulación, material de pavimento compartido con el caminero existente, piso completo a todo el ancho de los dos empalmes y la horquilla, carpas sobre ambos trazados y postes fuera de las losas y del cruce. Revisión en navegador desde arriba y a nivel peatonal: losas, juntas, cubiertas, uniones y distribución de árboles. Captura local `.local/dei-new-covered-path-and-trees.jpg`, fuera de Git. Sin cambios de backend ni pruebas multijugador en esta tarea.
+
+
+## Pasillos con piso ilustrado (19/11/2026)
+
+68 pruebas frontend y compilación TypeScript/Vite correctas sobre main c905cc1, incluyendo los aportes recientes de ascensor y DEI. Se sustituyó únicamente el acabado de galleryFloor y granite; la construcción y sus UV mantienen las dimensiones y colisiones. Chrome: vista local aislada del pasillo del tercer piso con el motor y modelo reales; franjas alineadas, superficie rosada uniforme y áridos dibujados, sin manchas ni iluminación de la foto. La vista no inicia sesión ni conecta presencia. No se modificó backend ni Neon.
+
+
+## Fachada curva de la torre: superposición de superficies (19/11/2026)
+
+Una prueba con rayos reprodujo dos materiales ocupando la misma superficie exterior entre top+0,08 y top+0,26: canto blanco de la losa y ladrillo del parapeto. Falló antes de la corrección. La losa conserva su volumen de colisión y su tapa horizontal; el canto exterior queda revestido únicamente por ladrillo. La comprobación cubre ambos semicírculos, cinco ángulos y tres alturas, además de la superficie superior y colisión de la cubierta.
+
+Después del cambio pasaron las 68 pruebas frontend y el build TypeScript/Vite. En Chrome se revisó el arco superior de la torre con iluminación nocturna, sin los fragmentos claros sobre el ladrillo. Vista local aislada con la escena real (.local/tower-preview.html); sin sesión ni presencia y sin cambios de backend.
+
+
+### Árbol junto al ascensor — 19/11/2026
+
+69/69 pruebas frontend aprobadas y compilación TypeScript/Vite correcta. La prueba de escena recorre los triángulos del tronco y las ramas y las cajas transformadas de todas las hojas: no intersectan la caja del ascensor ampliada 60 cm, desde el suelo hasta sobre la cubierta. También comprueba base conservada, porte, follaje y mapas PBR; la prueba de recursos verifica formato, licencias, hashes y presupuesto conjunto menor a 1,2 MiB. El código usa 65 cm de retiro.
+
+Revisión en navegador del modelo completo: corteza cercana, copa, contornos de hojas, bifurcaciones y separación del mural. Vista interior de la misma cabina desplazada de 0 a 10,5 m y con cámara giratoria: no aparece vegetación. La revisión visual utiliza una página local de diagnóstico, fuera de Git; no repite la autenticación. Se conserva la prueba existente de movimiento, apertura y transporte del jugador. Capturas locales `.local/tree-elevator-cabin.jpg` y `.local/tree-elevator-final.png`. Sin cambios de API, base de datos ni autenticación.
+
+
+### Árboles frondosos y gatos — 19/11/2026
+
+Prueba de fauna: cinco minutos simulados con semilla reproducible verifican tres gatos, cambios de rumbo, pausas, desplazamiento, apoyo en el piso, paredes y límites. La prueba de escena exige más de 14.000 hojas en el árbol del ascensor y conserva la comprobación de separación de la caja. La vegetación usa materiales compartidos y detalle por distancia en el perímetro. Revisión visual local de copas, pelajes, articulaciones y paseo en el patio, usando el mismo modelo y colisiones del campus. Las vistas de diagnóstico y capturas quedan en `.local/`, fuera de Git.
+
+Resultado final: 70/70 pruebas aprobadas, compilación TypeScript/Vite correcta y diferencias sin errores de espacio. Vistas cercanas guardadas como `.local/campus-cats-final.png` y `.local/trees-dense-final.png`; paseo comprobado en el patio con colisiones reales. El índice de colisión estático se comparte con el visitante para evitar duplicar su construcción.
+
+
+### Cobertura central y distante — 19/11/2026
+
+La prueba de escena exige más de 2.500 hojas en el centro de la copa, además de comprobar que ningún triángulo de rama ni hoja invada el prisma del ascensor con margen. La revisión visual incluye el centro del árbol, la vista general del perímetro y las tres anatomías de gato con pelaje negro completo. Las seis texturas de vegetación conservan licencia y hashes y permanecen dentro del presupuesto total de 1,2 MiB. Capturas de diagnóstico fuera de Git.
+
+Resultado de esta revisión: 70/70 pruebas aprobadas y compilación TypeScript/Vite correcta. Revisados en navegador el centro de la copa, el perímetro a distancia y los gatos con el nuevo paso y pelaje negro. Capturas `.local/dark-dense-trees.png`, `.local/dense-perimeter-final.png` y `.local/realistic-cats-black-final.png`. Vite conserva una advertencia de tamaño de bloque; sin errores de compilación.
+
+
+## Cocina semicircular de cantina: captura del usuario (19/11/2026)
+
+La captura de la franja gris interrumpida corresponde a la cocina de cantina y no a la torre de baños. Se reprodujo visualmente el mismo arco, ventana y marquesina en .local/kitchen-preview.html antes de modificarlo. El canto de la cubierta a 3,35-3,47 m coincidía con el radio exterior de ladrillo, de 3,4 m. La cubierta ahora se retranquea 11,5 cm, quedando apoyada dentro de los 23 cm de pared, con tapa, cara inferior y colisión conservadas; el remate exterior de 3,7 m mantiene su posición.
+
+Una regresión por rayos falló antes del cambio al encontrar dos materiales en la fachada. Después pasó en siete segmentos y tres alturas; también comprueba cierre y colisión superior de la cocina. Pasaron las 68 pruebas frontend y el build TypeScript/Vite. Comparación en Chrome de la misma vista nocturna antes/después: manchas reproducidas y posteriormente ausentes, sin cambiar ángulo, ventana ni remate.
+
+Integración posterior con 794f526 (árboles y gatos): 70/70 pruebas y compilación correctas; se conservaron ambos aportes en cantina y en la prueba de escena. El build advierte que el paquete Three.js integrado supera ligeramente 700 kB; no impide compilar.

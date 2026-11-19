@@ -550,3 +550,22 @@ Fotos del interior y del frente de planta baja, más dos de los murales, con sus
 - **Frente:** el armario de maniobra (0,45 m) y el marco ocupan 1,785 m, centrados en la caja de 2,5 m. Por eso el vano queda 0,28 m al oeste del eje, como ya indicaba `IMG_5694`. Indicador de dirección arriba del montante derecho y botonera de llamada con indicador «PB» a 0,9 m, como en la foto. El armario solo se fotografió en planta baja y no se repite en los demás pisos (pendiente de confirmar).
 - **Funcionamiento:** las puertas tardan 2,3 s, el tiempo de la grabación de apertura. Al llegar, la cabina se detiene 0,6 s con el gong antes de abrir. Los botones de abrir y cerrar de la botonera funcionan; el de alarma es solo visual. Suenan las puertas al abrir y al cerrar (el cierre reutiliza la grabación de apertura), el gong al llegar y el motor durante el viaje, más fuerte con la velocidad. El sonido sale de la cabina y se atenúa con la distancia.
 - **Murales:** al rodear la torre, el mural del lápiz queda entre los otros dos. En `cara este.jpeg`, el de los cascos lo tiene a su derecha; en `IMG_5727`, el de la computadora lo tiene a su izquierda. Por eso los cascos van al oeste y la computadora al este, y el usuario lo confirmó. El hormigón del patio ya no pasa por dentro de la caja: tapaba el piso de la cabina en planta baja.
+
+
+### Árbol junto al ascensor — 19/11/2026
+
+El ejemplar del patio en (30,4;11) conserva la base, sin raíces superficiales. Su colisión sigue sobre el tronco y se ajusta a su perfil curvo. Se sustituye el tronco segmentado por una superficie curva con ensanchamiento al pie, surcos y ramas cónicas; la copa tiene hojas individuales curvadas y tres variantes de contorno. El radio del tronco (0,68 m), el alcance de copa (5,4 m) y el retiro (0,65 m) se declaran en `blockGCourtyard.elevatorTree`; son estimaciones visuales. La poda excluye el prisma completo de la caja del ascensor, ampliado por ese retiro, tanto para la superficie de las ramas como para el contorno transformado de cada hoja. No depende de la altura instantánea de la cabina. Se conserva la secuencia aleatoria de los demás árboles y del seto para mantener sus formas. El mismo modelo se utiliza desde la vista general y durante el recorrido.
+
+
+### Árboles unificados y fauna — 19/11/2026
+
+La copa del árbol del ascensor aumenta de 120 a 220 hojas por variante y grupo, con grupos de 1,05–1,50 m y más profundidad vertical. El mismo generador se aplica al patio, cantina, canteros, LED y perímetro, conservando centros y adaptando alturas. Los materiales PBR se comparten. Al completar la facultad, una poda adicional recorta ramas y hojas contra los sólidos altos, incluyendo columnas y copias giradas; la caja del ascensor conserva su retiro específico. En el perímetro se comparten plantillas y se reduce la cantidad de hojas a partir de 35 m.
+
+Tres gatos domésticos de pelo corto, con pelajes gris, naranja y negro con blanco. Sus posiciones iniciales estimadas y velocidades (0,45–0,65 m/s) están en `facultyBlueprint.campusCats`. Cada uno elige rumbos y pausas al azar sin rutas ni puntos de destino fijos. Comprueban suelo, altura de escalón, paredes, muebles, otros gatos y límite del campus; patas y cola se animan durante el paseo. Usan el mismo índice de colisión del visitante y consideran las puertas cerradas. Son fauna visual local: cada navegador simula su propio paseo; no se transmite su posición por la conexión multijugador.
+
+
+### Copas cerradas, tonos oscuros y gatos — 19/11/2026
+
+El follaje individual pasa a 280 hojas por variante y grupo. Quince grupos interiores, entre 6 y 7,8 m en la plantilla, cierran el centro de la copa; se conservan los recortes contra el ascensor y otros sólidos. La corteza compartida toma marrón oscuro y las hojas verde oscuro con menos emisión de luz. Los árboles del perímetro usan la misma densidad cercana. Desde 18 m usan tarjetas con 36 hojas agrupadas y un umbral de alfa menor, para conservar la cobertura al reducirse a pocos píxeles. El detalle lejano usa planos simples y materiales/geometrías compartidos.
+
+Los gatos tienen un torso continuo que une grupa, lomo, pecho y cuello; cabeza y orejas más pequeñas, hocico del color del pelaje, cola horizontal y paso de cuatro tiempos con dos articulaciones por pata. El tercer gato es negro completo, con ojos verde amarillentos y sin pecho ni patas blancas. El relieve del pelo se separa de las rayas de color para evitar el aspecto de estrías en relieve.

@@ -4,6 +4,35 @@ export function random() {
   seed = (seed * 1664525 + 1013904223) >>> 0;
   return seed / 4294967296;
 }
+/** Granito rosado ilustrado: áridos simples y franja recta, sin fotografía ni relieve. */
+function galleryFinish(striped: boolean) {
+  const canvas = document.createElement("canvas"); canvas.width = canvas.height = 256;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#ac827b"; ctx.fillRect(0, 0, 256, 256);
+  let state = 2931;
+  const next = () => { state = (Math.imul(state, 1664525) + 1013904223) >>> 0; return state / 4294967296; };
+  const tones = ["#bc9890", "#b38b82", "#98766f", "#c5a49a"];
+  for (let i = 0; i < 150; i++) {
+    const x = next() * 256, y = next() * 256, w = 1.2 + next() * 2.2, h = 0.9 + next() * 1.8;
+    ctx.fillStyle = tones[i % tones.length];
+    // Repetición continua, incluso para las pequeñas piezas que cruzan un borde.
+    for (const dx of [-256, 0, 256]) for (const dy of [-256, 0, 256]) {
+      ctx.beginPath(); ctx.moveTo(x + dx - w, y + dy);
+      ctx.lineTo(x + dx - w * 0.2, y + dy - h);
+      ctx.lineTo(x + dx + w, y + dy - h * 0.25);
+      ctx.lineTo(x + dx + w * 0.4, y + dy + h);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+  if (striped) {
+    ctx.fillStyle = "#4c5053"; ctx.fillRect(118, 0, 20, 256);
+    ctx.fillStyle = "#656366"; ctx.fillRect(118, 0, 1, 256); ctx.fillRect(137, 0, 1, 256);
+  }
+  const map = new T.CanvasTexture(canvas);
+  map.wrapS = map.wrapT = T.RepeatWrapping; map.colorSpace = T.SRGBColorSpace; map.anisotropy = 8;
+  return tiled(map, striped ? [1.25, 1.25] : [0.9, 0.9], { roughness: 0.88, metalness: 0 });
+}
+
 function texture(kind: "tile" | "concrete") {
   const c = document.createElement("canvas");
   c.width = c.height = 512;
@@ -242,8 +271,8 @@ export function makeMaterials(grass: T.MeshStandardMaterial) {
     brick: scanMaterial("ladrillo", { roughness: 0.95 }),
     concrete: scanMaterial("hormigon", { roughness: 0.92 }),
     // Franjas cada cuarto de módulo (5 m / 4), como en el escaneo (5,14 m / 4).
-    galleryFloor: scanMaterial("granito-franja", { roughness: 0.55 }, [1.25, 1.25]),
-    granite: scanMaterial("granito", { roughness: 0.6 }),
+    galleryFloor: galleryFinish(true),
+    granite: galleryFinish(false),
     louver: scanMaterial("lamas", { roughness: 0.65, metalness: 0.15, side: T.DoubleSide }),
     roofUnder: scanMaterial("chapa-cubierta", { roughness: 0.85 }),
     tile: tiled(texture("tile"), [1.6, 1.6], { roughness: 0.7 }),

@@ -171,3 +171,24 @@ Para el suelo, `00.44.49.jpeg` guía la pequeña plataforma junto a la ventana; 
 La vista `00.44.49.jpeg` también guía el pequeño volumen rojizo del rincón; `00.50.05.jpeg` guía el depósito rectangular con dos respiraderos. Se construyen con geometría y materiales propios, sin reproducir manchas ni desgaste y sin importar los originales al repositorio.
 
 Fotos del usuario: `WhatsApp Image 2026-11-19 at 00.44.48 (2).jpeg`, `WhatsApp Image 2026-11-19 at 00.44.49.jpeg`, `WhatsApp Image 2026-11-19 at 00.44.48 (1).jpeg` y `WhatsApp Image 2026-11-19 at 00.50.05.jpeg`. Guían ventanas, franjas, pilares, desagües, mesada y equipamiento de los laboratorios. Se interpretan proporciones, sin medidas nuevas relevadas. Por instrucción del usuario se conserva el color del modelo y no se reproduce desgaste. Los originales permanecen fuera del repositorio y no se usan como texturas.
+
+### Acabado ilustrado de los pasillos (19/11/2026)
+
+Por indicación del usuario, galleryFloor y granite usan ahora un mosaico dibujado por código en materials.ts: base rosada uniforme, áridos geométricos discretos, acabado mate y franjas rectas oscuras cada 1,25 m. Los rellanos comparten la misma paleta sin franja. Se conservan la orientación, fase y dimensiones de las UV existentes. Son dos CanvasTexture de 256 × 256; las texturas extraídas del escaneo permanecen como referencia histórica y ya no se aplican a estos dos materiales.
+
+
+### Árbol junto al ascensor — 19/11/2026
+
+La captura `codex-clipboard-1871ccca-e4c9-4b31-b8cf-ebc49deb61d7.png` identifica el árbol que atravesaba la caja. No se incorpora el original al repositorio. La corteza utiliza [Bark Brown 02](https://polyhaven.com/a/bark_brown_02), de Rob Tuytel / Poly Haven, licencia [CC0](https://polyhaven.com/license), con mapas de color, normal OpenGL y rugosidad de 1K. Las hojas utilizan [Leaf Set 001](https://ambientcg.com/a/LeafSet001), de Lennart Demes / ambientCG, licencia [CC0](https://docs.ambientcg.com/license/), con color, opacidad y normal OpenGL. El proveedor clasifica estas hojas como una aproximación, no como un escaneo fotogramétrico. La especie no se determina con estas texturas.
+
+`scripts/prepare-courtyard-tree-assets.py` descarga los originales en `.local/tree-sources/`, combina la opacidad con el color de las hojas, retira 1 px del borde del alfa y exporta cinco WebP a `public/assets/vegetation/` (aproximadamente 1,06 MiB en total). Requiere Python y Pillow; ejecución desde la raíz: `python scripts/prepare-courtyard-tree-assets.py`. Procedencia, licencia y hashes de originales y derivados registrados en `public/assets/sources.json`. Las nervaduras se ven sobre geometrías curvadas; la copa y las ramas se construyen en el proyecto.
+
+
+### Gatos del campus — 19/11/2026
+
+Modelos propios construidos en `campus-cats.ts`: cuerpo, cabeza, orejas, ojos con pupila vertical, hocico, bigotes, extremidades articuladas y cola curva. Pelajes de pelo corto y patrones atigrados generados con Canvas; no se descargaron modelos ni se utilizaron fotografías externas como texturas. El acabado de todos los árboles reutiliza los cinco mapas de vegetación CC0 documentados arriba.
+
+
+### Referencia anatómica de los gatos — 19/11/2026
+
+Se consultó la fotografía lateral de un gato negro publicada en [ねこのきもち / Benesse](https://cat.benesse.ne.jp/withcat/content/?id=45164), especialmente proporción del cuerpo, pecho, extremidades y cola horizontal. Se usa únicamente como referencia visual: no se incorpora la foto ni se usa como textura. Modelo y pelajes siguen siendo propios. `leaves-cluster.webp` se deriva de 36 recortes del mapa Leaf Set 001 CC0; su preparación está integrada en `prepare-courtyard-tree-assets.py` y su procedencia está en `sources.json`.

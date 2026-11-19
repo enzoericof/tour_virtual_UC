@@ -1,4 +1,4 @@
-import { Box3, PerspectiveCamera, Ray, Raycaster, Vector2, Vector3 } from "three";
+import { Box3, Matrix4, PerspectiveCamera, Ray, Raycaster, Triangle, Vector2, Vector3 } from "three";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
 import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
@@ -54,6 +54,42 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       const y = civilFloor(civilApron.center[0] + side * (civilApron.size[0] / 2 - civilApron.bevel / 2), civilApron.center[1]);
       assert.ok(Math.abs(y - (0.008 + civilApron.height) / 2) < 0.003, "El bisel tiene superficie ascendente por ambos lados");
     }
+    // Verifica superficies reales, no solo centros de ramas o la posición de la base.
+    const elevatorTree = group.getObjectByName("Árbol junto al ascensor");
+    assert.ok(elevatorTree, "El árbol del ascensor está en el mismo modelo del recorrido");
+    const [ex, ez] = plan.elevator.center, [ew, ed] = plan.elevator.size;
+    const protectedShaft = new Box3(new Vector3(ex - ew / 2 - .6, -1, ez - ed / 2 - .6),
+      new Vector3(ex + ew / 2 + .6, 30, ez + ed / 2 + .6));
+    const triangle = new Triangle(), matrix = new Matrix4(), instance = new Matrix4(), leafBounds = new Box3();
+    let leafCount = 0, centralLeaves = 0;
+    elevatorTree.traverse(mesh => {
+      if (!mesh.isMesh) return;
+      if (mesh.isInstancedMesh) {
+        mesh.geometry.computeBoundingBox();
+        for (let i = 0; i < mesh.count; i++) {
+          mesh.getMatrixAt(i, instance); matrix.multiplyMatrices(mesh.matrixWorld, instance);
+          leafBounds.copy(mesh.geometry.boundingBox).applyMatrix4(matrix);
+          assert.ok(!protectedShaft.intersectsBox(leafBounds), "Ninguna hoja invade el ascensor ni su margen");
+          const center=leafBounds.getCenter(new Vector3());
+          if(Math.hypot(center.x-elevatorTree.position.x,center.z-elevatorTree.position.z)<1.6 && center.y>5.8 && center.y<8.8)centralLeaves++;
+        }
+        leafCount += mesh.count;
+      } else {
+        const p = mesh.geometry.attributes.position, index = mesh.geometry.index;
+        for (let i = 0; i < (index?.count ?? p.count); i += 3) {
+          for (const [offset, vertex] of [[0, triangle.a], [1, triangle.b], [2, triangle.c]])
+            vertex.fromBufferAttribute(p, index ? index.getX(i + offset) : i + offset).applyMatrix4(mesh.matrixWorld);
+          assert.ok(!protectedShaft.intersectsTriangle(triangle), "Ninguna rama cruza la caja durante el viaje");
+        }
+        assert.ok(mesh.material.map && mesh.material.normalMap && mesh.material.roughnessMap,
+          "La corteza tiene color, relieve y rugosidad");
+      }
+    });
+    assert.ok(centralLeaves>2500,"El centro de la copa tiene cobertura, no solo las puntas");
+    assert.ok(leafCount > 14000, "La separación del ascensor conserva una copa frondosa");
+    assert.ok(new Box3().setFromObject(elevatorTree).max.y > 8, "Se conserva el porte del árbol");
+    assert.ok(Math.hypot(elevatorTree.position.x - plan.blockGCourtyard.addedTree[0],
+      elevatorTree.position.z - plan.blockGCourtyard.addedTree[1]) < 1e-6, "La base conserva su ubicación");
     const garden = group.getObjectByName("Jardín de mesas y parrilla de cantina");
     assert.ok(garden, "Se construye el jardín de cantina");
     assert.equal(garden.children.filter(o => o.userData.gardenTable).length, 4, "Hay cuatro conjuntos completos de mesas y asientos");
@@ -108,6 +144,56 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     assert.ok(meshes > 100, "The complete scene was built");
     assert.ok(grassReceivers > 0, "The garden is present in the rendered scene");
     assert.ok(colliders.children.length > 0, "Walkable collision geometry was built");
+    // Cocina semicircular de cantina: la cubierta baja queda dentro del muro de ladrillo.
+    {
+      const radius = 3.4, centerZ = 2.8, halfWidth = plan.cantina.size[0] / 2;
+      const elevation = PLAZA_LEVEL - 0.45;
+      for (const segment of [2, 7, 12, 17, 22, 27, 30]) {
+        const angle = (segment + 0.5) * Math.PI / 40;
+        const radial = new Vector2(-Math.sin(angle), Math.cos(angle));
+        const face = [-halfWidth + radial.x * radius, centerZ + radial.y * radius];
+        const outside = fromRect(plan.cantina, [face[0] + radial.x * 0.5, face[1] + radial.y * 0.5]);
+        const inside = fromRect(plan.cantina, face);
+        const direction = new Vector3(inside[0] - outside[0], 0, inside[1] - outside[1]).normalize();
+        for (const rise of [0.01, 0.06, 0.11]) {
+          const hits = new Raycaster(new Vector3(outside[0], elevation + 3.35 + rise, outside[1]), direction, 0, 0.54).intersectObject(group, true);
+          assert.ok(hits.length, "La cocina conserva su fachada curva");
+          assert.equal(new Set(hits.map(hit => hit.object.material)).size, 1,
+            `La cubierta no aflora en la fachada de cantina, segmento ${segment}, altura ${rise}`);
+          assert.deepEqual(hits[0].object.material.userData.tile, [1.08, 1.184]);
+        }
+      }
+      const interior = fromRect(plan.cantina, [-halfWidth - 1.7, centerZ]);
+      const above = new Vector3(interior[0], elevation + 3.6, interior[1]);
+      assert.ok(new Raycaster(above, new Vector3(0, -1, 0), 0, 0.2).intersectObject(group, true).length,
+        "La cubierta de cocina sigue cerrada");
+      assert.ok(new Raycaster(above, new Vector3(0, -1, 0), 0, 0.2).intersectObject(colliders, true).length,
+        "La cubierta de cocina conserva su colisión");
+    }
+    // El canto de la losa no debe competir con el ladrillo de la fachada curva.
+    {
+      const { center: [cx, cz], core, radiusX, radius } = plan.tower;
+      const roof = (block1.levels - 1) * FLOOR_HEIGHT + 4.1;
+      for (const side of [-1, 1]) for (const angle of [-0.65, -0.3, 0, 0.5, 1.1]) {
+        const outward = new Vector3(side * Math.cos(angle) / radiusX, 0, Math.sin(angle) / radius).normalize();
+        for (const rise of [0.08, 0.18, 0.26]) {
+          const face = new Vector3(cx + side * (core / 2 + radiusX * Math.cos(angle)), roof + rise, cz + radius * Math.sin(angle));
+          const hits = new Raycaster(face.clone().addScaledVector(outward, 0.5), outward.clone().negate(), 0, 0.54).intersectObject(group, true);
+          assert.ok(hits.length, "El parapeto mantiene su fachada exterior");
+          assert.equal(new Set(hits.map(hit => hit.object.material)).size, 1,
+            `Una sola superficie exterior en el arco ${side}/${angle}, altura ${rise}`);
+          assert.deepEqual(hits[0].object.material.userData.tile, [1.08, 1.184], "El acabado exterior sigue siendo ladrillo");
+        }
+      }
+      for (const side of [-1, 1]) {
+        const above = new Vector3(cx + side * (core / 2 + 2), roof + 0.5, cz);
+        const down = new Vector3(0, -1, 0);
+        assert.ok(new Raycaster(above, down, 0, 0.25).intersectObject(group, true).length,
+          "La cubierta conserva su superficie superior");
+        assert.ok(new Raycaster(above, down, 0, 0.25).intersectObject(colliders, true).length,
+          "La losa conserva su colisión superior");
+      }
+    }
     const { roof: galleryRoof, smallSteps } = plan.plazaGallery;
     const [stepX, stepZ] = smallSteps.center, [dx, dz] = smallSteps.direction;
     for (const side of [-1, 0, 1]) {
