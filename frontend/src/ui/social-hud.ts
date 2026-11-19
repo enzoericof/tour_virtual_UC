@@ -8,6 +8,7 @@ import {
   type SocialAction,
 } from "../services/social";
 import type { TourShell } from "./tour-shell";
+import { icon } from "./icons";
 import "./social-hud.css";
 
 export function mountSocialHud(
@@ -16,18 +17,18 @@ export function mountSocialHud(
   shell: TourShell,
   userId?: number,
 ) {
-  const root = document.createElement("section");
+  const root = document.createElement("dialog");
   root.id = "campus-chat";
-  root.className = "campus-chat hidden";
+  root.className = "campus-chat tour-panel";
   root.setAttribute("aria-label", "Chat grupal del campus");
-  root.innerHTML = `<header><strong>Campus</strong><span class="chat-state">Chat grupal</span><span class="chat-key">Enter</span></header>
+  root.innerHTML = `<header><div><strong>Chat del campus</strong><span class="chat-state">Chat grupal</span></div><button type="button" class="icon-btn chat-close" aria-label="Cerrar chat">${icon("close")}</button></header>
     <button type="button" class="chat-older hidden">Cargar mensajes anteriores</button>
     <div class="campus-chat-log" role="log" aria-live="polite" aria-relevant="additions" tabindex="0"></div>
-    <form class="campus-chat-form hidden"><label class="sr-only" for="campus-message">Mensaje para todo el campus</label>
-    <input id="campus-message" maxlength="500" autocomplete="off" placeholder="Escribí para todo el campus…" required>
-    <button type="submit">Enviar</button></form><p class="chat-feedback" role="status">Enter para escribir · E para gestos</p>`;
+    <form class="campus-chat-form"><label class="sr-only" for="campus-message">Mensaje para todo el campus</label>
+    <input id="campus-message" maxlength="500" autocomplete="off" placeholder="Escribí para todo el campus…" required autofocus>
+    <button type="submit" class="primary">Enviar</button></form><p class="chat-feedback" role="status"></p>`;
   const choices = document.createElement("dialog");
-  choices.className = "social-dialog";
+  choices.className = "social-dialog tour-panel";
   choices.setAttribute("aria-labelledby", "social-title");
   choices.innerHTML =
     '<h2 id="social-title"></h2><p class="social-description"></p><div class="social-options"></div><button type="button" class="social-dismiss">Volver al recorrido</button>';
@@ -52,8 +53,7 @@ export function mountSocialHud(
   let sending: string | null = null,
     sendTimer = 0,
     historyTimer = 0;
-  let freshTimer = 0,
-    impulseAt = 0,
+  let impulseAt = 0,
     dialogAction = "";
   engine.social.now = () => presence.now();
   engine.remotePlayers.now = () => presence.now();
@@ -65,11 +65,6 @@ export function mountSocialHud(
       shell.toast((e as Error).message);
       return false;
     }
-  }
-  function showFresh() {
-    root.classList.remove("chat-idle");
-    window.clearTimeout(freshTimer);
-    freshTimer = window.setTimeout(() => root.classList.add("chat-idle"), 8000);
   }
   const rows = new Map<string, HTMLParagraphElement>();
   const timeFormat = new Intl.DateTimeFormat("es-PY", {
@@ -108,7 +103,7 @@ export function mountSocialHud(
         time.textContent = timeFormat.format(m.sentAt);
         const author = document.createElement("strong");
         author.textContent = m.name + ":";
-        author.style.color = `hsl(${((m.userId * 0.618033988749895) % 1) * 360} 70% 77%)`;
+        row.classList.toggle("chat-own", m.userId === userId);
         const text = document.createElement("span");
         text.textContent = m.text;
         row.append(time, author, text);
@@ -130,7 +125,7 @@ export function mountSocialHud(
     feedback.textContent = historyPending
       ? "Cargando historial…"
       : "No se pudo conectar al chat.";
-    // La consulta solo se dispara después de abrir con Enter durante el recorrido.
+    // El historial se consulta únicamente al abrir el chat o pedir otra página.
     if (historyPending) feedback.textContent = "Cargando historial…";
     window.clearTimeout(historyTimer);
     if (historyPending)
@@ -138,35 +133,34 @@ export function mountSocialHud(
         historyPending = false;
         older.disabled = false;
         feedback.textContent =
-          "El historial tardó demasiado. Cerrá y volvé a abrir con Enter.";
+          "El historial tardó demasiado. Cerrá el chat y volvé a abrirlo.";
       }, 10000);
   }
-  function closeChat(resume = false) {
+  function closeChat() {
     expanded = false;
     historyPending = false;
     history.clear();
     cursor = undefined;
     more = false;
     window.clearTimeout(historyTimer);
-    root.classList.remove("chat-expanded");
-    form.classList.add("hidden");
+    root.close();
     older.classList.add("hidden");
     document.body.classList.remove("social-open");
-    feedback.textContent = "Enter para escribir · E para gestos";
+    feedback.textContent = "";
     render();
-    showFresh();
-    if (resume) engine.startWalking();
   }
   function openChat() {
-    if (!engine.walker.enabled || shell.dialog.open || choices.open) return;
+    if (expanded || shell.dialog.open || choices.open) return;
+    if (!engine.walker.enabled) {
+      shell.toast("Iniciá el recorrido para usar el chat.");
+      return;
+    }
     engine.pause();
     expanded = true;
     history.clear();
     cursor = undefined;
     document.body.classList.add("social-open");
-    root.classList.add("chat-expanded");
-    root.classList.remove("chat-idle");
-    form.classList.remove("hidden");
+    root.showModal();
     render();
     input.focus();
     loadHistory();
@@ -280,22 +274,20 @@ export function mountSocialHud(
     if (event.type === "chat.message" && typeof event.message === "object") {
       const message = event.message;
       if (sending === message.text && message.userId === userId) {
-        input.value = "";
+        if (input.value.trim() === sending) input.value = "";
         sending = null;
         window.clearTimeout(sendTimer);
-        feedback.textContent = "Enter para enviar · Esc para cerrar";
+        feedback.textContent = "";
       }
       if (!recent.has(message.id) && message.sentAt > presence.now() - 300000) {
         recent.set(message.id, message);
         render();
-        showFresh();
         engine.social.audio.play("message", 0.28);
       }
     } else if (event.type === "chat.recent") {
       for (const message of event.messages ?? [])
         recent.set(message.id, message);
       render();
-      showFresh();
     } else if (event.type === "chat.history" && expanded) {
       window.clearTimeout(historyTimer);
       const before = !!cursor;
@@ -306,7 +298,7 @@ export function mountSocialHud(
       historyPending = false;
       older.disabled = false;
       older.classList.toggle("hidden", !more);
-      feedback.textContent = "Enter para enviar · Esc para cerrar";
+      feedback.textContent = "";
       render(before);
     } else if (event.type === "social.action" && event.action) {
       const action = event.action;
@@ -372,6 +364,11 @@ export function mountSocialHud(
     }
   };
   older.onclick = () => loadHistory(cursor);
+  root.querySelector<HTMLButtonElement>(".chat-close")!.onclick = () => closeChat();
+  root.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeChat();
+  });
   window.addEventListener(
     "keydown",
     (event) => {
@@ -382,30 +379,12 @@ export function mountSocialHud(
         return;
       }
       if (
-        event.code !== "Enter" ||
-        event.repeat ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.altKey ||
-        event.isComposing
-      )
-        return;
-      if (expanded) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        if (input.value.trim()) form.requestSubmit();
-        else closeChat(true);
-        return;
-      }
-      if (
-        !engine.walker.active &&
-        event.target instanceof Element &&
-        event.target.closest(
-          "input,textarea,select,button,[contenteditable],dialog",
-        )
-      )
-        return;
-      if (engine.walker.enabled && !shell.dialog.open && !choices.open) {
+        event.code !== "KeyC" || expanded || event.repeat ||
+        event.ctrlKey || event.metaKey || event.altKey || event.isComposing ||
+        (event.target instanceof Element &&
+          event.target.closest("input,textarea,select,[contenteditable],dialog"))
+      ) return;
+      if (!shell.dialog.open && !choices.open) {
         event.preventDefault();
         event.stopImmediatePropagation();
         openChat();
@@ -414,12 +393,7 @@ export function mountSocialHud(
     { capture: true },
   );
   new MutationObserver(() => {
-    root.classList.toggle(
-      "hidden",
-      !document.body.classList.contains("in-tour"),
-    );
     if (!engine.walker.enabled) {
-      if (expanded) closeChat();
       if (choices.open) closeChoices();
       pending = null;
     }
@@ -443,9 +417,5 @@ export function mountSocialHud(
       notice.textContent = `${pending.from === presence.self ? "Esperando a " + pending.toName : "Invitación de " + pending.fromName} · ${Math.max(0, Math.ceil((pending.expiresAt - presence.now()) / 1000))} s`;
   }, 1000);
   render();
-  showFresh();
-  return {
-    hint: () =>
-      shell.toast("Entrá al recorrido y presioná Enter para abrir el chat."),
-  };
+  return { open: openChat };
 }

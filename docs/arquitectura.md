@@ -38,7 +38,7 @@ El mismo WebSocket autenticado `/ws/presence` transporta mensajes JSON sociales 
 | --- | --- |
 | `social.sync` | Devuelve `chat.recent` con los últimos cinco minutos en RAM y las interacciones actuales. No consulta el archivo del chat. Se envía al aparecer en el recorrido y al reconectar. |
 | `chat.send` | `{text}`; difunde `chat.message` con `message: {id, userId, name, text, sentAt}`. Texto mostrado mediante `textContent`. |
-| `chat.history` | Solo lo pide la interfaz abierta con Enter. Cursores opcionales `before` (milisegundos) y `beforeId` (UUID). Devuelve hasta 50 mensajes archivados, más recientes primero, y `more`. Paginación por `(sent_at, id)`. |
+| `chat.history` | Solo lo pide el chat abierto con C o desde la cuenta. Cursores opcionales `before` (milisegundos) y `beforeId` (UUID). Devuelve hasta 50 mensajes archivados, más recientes primero, y `more`. Paginación por `(sent_at, id)`. |
 | `social.request` | `{kind, target?}`; tipos `high-five`, `hold-hands`, `ok`, `peace`, `ragdoll`. Las parejas exigen otra cuenta, cercanía ≤1,9 m, altura compatible, orientación y disponibilidad de ambos. |
 | `social.respond` | `{id, accept}`; solo el destinatario puede aceptar/rechazar una invitación pendiente. Se vuelve a validar cercanía al aceptar. |
 | `social.cancel` | `{id}`; solo participantes. El cliente cancela si las anclas de la animación no tienen paso o espacio libre. |

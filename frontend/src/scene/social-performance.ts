@@ -16,8 +16,6 @@ export class SocialPerformance {
   private focus = new T.Vector3();
   private offset = new T.Vector3();
   private ray = new T.Ray();
-  private lastFoot = new T.Vector3();
-  private steps = 0;
   now = () => Date.now();
   onCancel = (_id: string) => {};
   onImpulse = (_id: string, _direction: string) => {};
@@ -151,16 +149,7 @@ export class SocialPerformance {
         .copy(this.focus)
         .addScaledVector(this.offset, clearance);
       this.camera.lookAt(this.focus);
-    } else {
-      const distance = this.walker.body.end.distanceTo(this.lastFoot);
-      if (this.walker.active && this.walker.grounded && distance < 1)
-        this.steps += distance;
-      if (this.steps > 0.9) {
-        this.steps = 0;
-        this.audio.play("footsteps", 0.2, 0.95 + Math.random() * 0.1);
-      }
     }
-    this.lastFoot.copy(this.walker.body.end);
   }
   pose(): Pose | null {
     if (!this.active || !this.avatar) return null;

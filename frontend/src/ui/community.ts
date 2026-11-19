@@ -107,7 +107,10 @@ export function mountCommunity(
     ? mountSocialHud(engine, presence, shell, user?.id)
     : undefined;
   function openChat() {
-    socialHud?.hint();
+    closeDialog();
+    document.querySelector("#tour-account")?.classList.add("hidden");
+    document.querySelector("#account-btn")?.setAttribute("aria-expanded", "false");
+    socialHud?.open();
   }
 
   const accountButton = element<HTMLButtonElement>("#account-btn");

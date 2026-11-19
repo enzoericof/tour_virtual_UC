@@ -1,4 +1,4 @@
-type Sound = "message" | "ragdoll-impact" | "footsteps";
+type Sound = "message" | "ragdoll-impact";
 /** Se desbloquea con un gesto del usuario; cada impacto modula volumen y tono. */
 export class SocialAudio {
   private context?: AudioContext;
@@ -7,7 +7,7 @@ export class SocialAudio {
   unlock = () => {
     this.context ??= new AudioContext();
     void this.context.resume().catch(() => {});
-    for (const name of ["message", "ragdoll-impact", "footsteps"] as Sound[])
+    for (const name of ["message", "ragdoll-impact"] as Sound[])
       this.load(name);
   };
   private load(name: Sound) {
@@ -48,9 +48,7 @@ export class SocialAudio {
         0,
         name === "ragdoll-impact"
           ? Math.min(0.38, buffer.duration)
-          : name === "footsteps"
-            ? Math.min(0.22, buffer.duration)
-            : buffer.duration,
+          : buffer.duration,
       );
       source.onended = () => {
         source.disconnect();

@@ -1,6 +1,13 @@
 # Verificación (versión 0.1.0)
 
-## Chat grupal, avatares y gestos — 19/11/2026
+## Ajuste de controles y estilo del chat - 19/11/2026
+
+- Se retira el audio de pasos, su descarga y el cálculo de pasos por cuadro. Se conservan las notificaciones y los impactos.
+- C abre el chat durante el recorrido, Enter envía y Esc cierra en pausa. El acceso de la cuenta abre el mismo diálogo. Cerrado no muestra mensajes ni indicaciones sobre la escena. Se reutilizan los colores y controles de `tour-panel` también para los gestos.
+- Chrome con componentes reales y presencia simulada local: apertura con C desde un botón enfocado, foco en el campo, escritura con la letra c, envío y confirmación, Esc, Enter sin abrir el chat y reapertura mediante su API. Revisada la disposición horizontal del campo y el botón. No se probó una conversación entre dos cuentas en producción ni se modificó el backend.
+- Frontend: 78 pruebas y compilación de producción aprobadas. Persisten los avisos de HMR ocupado en las pruebas y del bloque compartido de Three.js mayor a 700 kB.
+
+## Chat grupal, avatares y gestos - 19/11/2026
 
 - Frontend: 78 pruebas aprobadas y compilación de producción con Node 24.22.3. Se cubren el corte exacto de cinco minutos, conservación de mensajes ante un fallo de archivo, colisiones del ragdoll, impulsos, contacto de manos, expiraciones tardías y mantenimiento de OK/paz durante cuadros con valores constantes. Vite avisa que el bloque compartido de Three.js supera 700 kB (unos 714 kB; 180 kB comprimidos); no impide compilar.
 - Backend: `sh ./mvnw -B -Dtest=PresenceSocketTest,SocialServiceTest verify` aprobó 12 pruebas y generó el JAR con JDK 25 y objetivo Java 21. Las pruebas usan dobles: identidad asignada por sesión, destinatario exclusivo para aceptar, proximidad/orientación, rechazos y límites, archivo a los 300000 ms, reintento sin pérdida y ausencia de consultas periódicas de tablas cuando no hay visitantes ni mensajes pendientes.

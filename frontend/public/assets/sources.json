@@ -511,14 +511,6 @@
       "license": "Licencia pendiente de confirmar; recurso aportado por el usuario",
       "bytes": 183528,
       "sha256": "85e60c920c533e5d15b1634c9c06d69875d23333097464aa425df2979a083941"
-    },
-    {
-      "asset": "audio/footsteps.mp3",
-      "source": "footstepasfasf.mp3",
-      "author": "Archivo aportado por el usuario",
-      "license": "Licencia pendiente de confirmar; recurso aportado por el usuario",
-      "bytes": 42039,
-      "sha256": "97e9dada48192f25cd97e0d4ce7b4542177c4c7979f758d4914fdd049d92241e"
     }
   ]
 }
