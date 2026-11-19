@@ -48,6 +48,31 @@ Cuando publiques el frontend compilado, configurá su servidor para reenviar `/a
 
 La biblioteca, los paneles informativos y el chat del visor están pendientes de integración con el backend actual. [Arquitectura y contratos](docs/arquitectura.md#aporte-campus-backend).
 
+## Todo con Docker
+
+Como alternativa al inicio manual, el proyecto puede correr completo —PostgreSQL, backend y frontend— con Docker Compose. No hace falta instalar JDK, Maven, Node ni usar Neon.
+
+Requisitos: Docker Engine con el plugin Compose (en Windows o macOS, Docker Desktop). La primera ejecución necesita Internet para descargar imágenes y dependencias.
+
+```sh
+docker compose up --build
+```
+
+Abrí `http://127.0.0.1:5173/` para el visor y `http://127.0.0.1:5173/editor.html` para el editor. La API queda disponible en `http://127.0.0.1:8080/api/health`.
+
+**Las credenciales de PostgreSQL se definen en `compose.yaml`**, en `POSTGRES_USER` y `POSTGRES_PASSWORD` (por defecto `campus` y `campus`). No son las credenciales de Neon ni de un servidor externo: el contenedor de PostgreSQL crea la base `TP_INFO3` y ese usuario en el primer arranque. Flyway crea las tablas al iniciar el backend. La base local arranca vacía, así que hay que registrar una cuenta desde el visor.
+
+Para convertir esa cuenta en administradora:
+
+```sh
+docker compose exec db psql -U campus -d TP_INFO3 \
+  -c "UPDATE usuarios SET rol = 2, carrera = NULL WHERE correo = 'tu@correo';"
+```
+
+Los datos se guardan en el volumen `pgdata`. Para detener sin borrarlos, usá `docker compose down`; para borrarlos también, `docker compose down -v`. Si se cambian las credenciales en `compose.yaml` después del primer arranque, hay que borrar el volumen o cambiarlas dentro de la base.
+
+Las credenciales por defecto son solo para desarrollo local; no deben usarse en un servidor público. Guía completa y solución de problemas: [Todo el proyecto en Docker](docs/docker-local.md).
+
 ## Editor de mapa 3D
 Con el frontend en marcha, abrí `/editor.html` con una cuenta administradora. Para una prueba local sin backend, usá `/editor.html?local=1`. El editor guarda las colocaciones en el navegador y permite exportarlas o importarlas en JSON. [Modelos del editor](frontend/editor-models/LEEME.txt).
 
@@ -57,6 +82,7 @@ Desde `frontend/`, ejecutá `npm test` y `npm run build`. Para verificar el back
 ## Documentación
 
 - [Despliegue académico en Vercel Hobby y Neon](docs/despliegue-vercel.md)
+- [Todo el proyecto en Docker (rama local)](docs/docker-local.md)
 - [Arquitectura y API](docs/arquitectura.md)
 - [Referencias y recursos del modelo](docs/referencias.md)
 - [Pendientes del proyecto](docs/pendientes.md)
