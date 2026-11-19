@@ -370,3 +370,6 @@ Asientos: cámara a altura sentada, aviso E para sentarse/levantarse y retorno a
 
 
 19/11/2026: comprobada la fachada curva superior de la torre de baños en modo nocturno. Se retiró el canto blanco coplanar oculto tras el ladrillo; ya no aparecen manchas triangulares claras. Tapa y colisión de la cubierta conservadas. Regresión por rayos en docs/verificacion.md.
+
+
+19/11/2026: localizada la captura del usuario en la cocina semicircular de cantina. Comparación nocturna del mismo encuadre antes/después en Chrome: desaparece la franja gris fragmentada bajo el remate, que se conserva. Cubierta retranqueada dentro del muro, ventana y marquesina sin cambios.

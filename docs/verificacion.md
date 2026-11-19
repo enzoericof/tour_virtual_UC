@@ -510,3 +510,12 @@ Resultado final: 70/70 pruebas aprobadas, compilación TypeScript/Vite correcta 
 La prueba de escena exige más de 2.500 hojas en el centro de la copa, además de comprobar que ningún triángulo de rama ni hoja invada el prisma del ascensor con margen. La revisión visual incluye el centro del árbol, la vista general del perímetro y las tres anatomías de gato con pelaje negro completo. Las seis texturas de vegetación conservan licencia y hashes y permanecen dentro del presupuesto total de 1,2 MiB. Capturas de diagnóstico fuera de Git.
 
 Resultado de esta revisión: 70/70 pruebas aprobadas y compilación TypeScript/Vite correcta. Revisados en navegador el centro de la copa, el perímetro a distancia y los gatos con el nuevo paso y pelaje negro. Capturas `.local/dark-dense-trees.png`, `.local/dense-perimeter-final.png` y `.local/realistic-cats-black-final.png`. Vite conserva una advertencia de tamaño de bloque; sin errores de compilación.
+
+
+## Cocina semicircular de cantina: captura del usuario (19/11/2026)
+
+La captura de la franja gris interrumpida corresponde a la cocina de cantina y no a la torre de baños. Se reprodujo visualmente el mismo arco, ventana y marquesina en .local/kitchen-preview.html antes de modificarlo. El canto de la cubierta a 3,35-3,47 m coincidía con el radio exterior de ladrillo, de 3,4 m. La cubierta ahora se retranquea 11,5 cm, quedando apoyada dentro de los 23 cm de pared, con tapa, cara inferior y colisión conservadas; el remate exterior de 3,7 m mantiene su posición.
+
+Una regresión por rayos falló antes del cambio al encontrar dos materiales en la fachada. Después pasó en siete segmentos y tres alturas; también comprueba cierre y colisión superior de la cocina. Pasaron las 68 pruebas frontend y el build TypeScript/Vite. Comparación en Chrome de la misma vista nocturna antes/después: manchas reproducidas y posteriormente ausentes, sin cambiar ángulo, ventana ni remate.
+
+Integración posterior con 794f526 (árboles y gatos): 70/70 pruebas y compilación correctas; se conservaron ambos aportes en cantina y en la prueba de escena. El build advierte que el paquete Three.js integrado supera ligeramente 700 kB; no impide compilar.

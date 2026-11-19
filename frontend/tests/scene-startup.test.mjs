@@ -123,6 +123,32 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     assert.ok(meshes > 100, "The complete scene was built");
     assert.ok(grassReceivers > 0, "The garden is present in the rendered scene");
     assert.ok(colliders.children.length > 0, "Walkable collision geometry was built");
+    // Cocina semicircular de cantina: la cubierta baja queda dentro del muro de ladrillo.
+    {
+      const radius = 3.4, centerZ = 2.8, halfWidth = plan.cantina.size[0] / 2;
+      const elevation = PLAZA_LEVEL - 0.45;
+      for (const segment of [2, 7, 12, 17, 22, 27, 30]) {
+        const angle = (segment + 0.5) * Math.PI / 40;
+        const radial = new Vector2(-Math.sin(angle), Math.cos(angle));
+        const face = [-halfWidth + radial.x * radius, centerZ + radial.y * radius];
+        const outside = fromRect(plan.cantina, [face[0] + radial.x * 0.5, face[1] + radial.y * 0.5]);
+        const inside = fromRect(plan.cantina, face);
+        const direction = new Vector3(inside[0] - outside[0], 0, inside[1] - outside[1]).normalize();
+        for (const rise of [0.01, 0.06, 0.11]) {
+          const hits = new Raycaster(new Vector3(outside[0], elevation + 3.35 + rise, outside[1]), direction, 0, 0.54).intersectObject(group, true);
+          assert.ok(hits.length, "La cocina conserva su fachada curva");
+          assert.equal(new Set(hits.map(hit => hit.object.material)).size, 1,
+            `La cubierta no aflora en la fachada de cantina, segmento ${segment}, altura ${rise}`);
+          assert.deepEqual(hits[0].object.material.userData.tile, [1.08, 1.184]);
+        }
+      }
+      const interior = fromRect(plan.cantina, [-halfWidth - 1.7, centerZ]);
+      const above = new Vector3(interior[0], elevation + 3.6, interior[1]);
+      assert.ok(new Raycaster(above, new Vector3(0, -1, 0), 0, 0.2).intersectObject(group, true).length,
+        "La cubierta de cocina sigue cerrada");
+      assert.ok(new Raycaster(above, new Vector3(0, -1, 0), 0, 0.2).intersectObject(colliders, true).length,
+        "La cubierta de cocina conserva su colisión");
+    }
     // El canto de la losa no debe competir con el ladrillo de la fachada curva.
     {
       const { center: [cx, cz], core, radiusX, radius } = plan.tower;
