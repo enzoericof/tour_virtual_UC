@@ -30,7 +30,7 @@ export class TourEngine {
   readonly orbit: OrbitControls;
   readonly walker: Walker;
   readonly social: SocialPerformance;
-  onSocialMenu = (_player:Player|null,_canSit:boolean)=>{};
+  onSocialMenu = (_player: Player | null) => {};
   readonly campus = createCampus();
   readonly cats: CampusCats;
   private readonly entranceDoors = new EntranceDoors(this.campus.group);
@@ -130,11 +130,7 @@ export class TourEngine {
     this.seatHint.className = "seat-hint";
     this.seatHint.setAttribute("role", "status");
     container.append(this.seatHint);
-    window.addEventListener("keydown", event => {
-      if (event.code !== "KeyE" || event.repeat || event.ctrlKey || event.metaKey || event.altKey || !this.walker.active) return;
-      event.preventDefault();
-      this.interact();
-    });
+    window.addEventListener("keydown", event => this.interactionKey(event));
     this.walker.onInteract = () => {
       const p = this.nearest();
       if (p) this.onLocation(p);
@@ -184,12 +180,18 @@ export class TourEngine {
     });
     this.animate();
   }
-  private interact() {
-    if(this.social.busy)return;
-    if(this.seated){this.leaveSeat();return;}
-    const player=this.nearPlayer();
-    if(player){this.onSocialMenu(player,false);return;}
-    this.onSocialMenu(null,Boolean(this.nearSeat()));
+  private interactionKey(event: KeyboardEvent) {
+    if (!["KeyE", "KeyG"].includes(event.code) || event.repeat || event.ctrlKey || event.metaKey || event.altKey
+      || event.isComposing || !this.walker.active || this.social.busy) return;
+    if (event.target instanceof Element && event.target.closest("input,textarea,select,[contenteditable],dialog")) return;
+    event.preventDefault();
+    if (event.code === "KeyG") {
+      this.onSocialMenu(this.nearPlayer());
+    } else if (this.seated) {
+      this.leaveSeat();
+    } else {
+      this.sit();
+    }
   }
   private nearSeat() {
     if (this.seated || this.elevatorPassenger) return null;
@@ -272,9 +274,8 @@ export class TourEngine {
     if (now >= this.nextSeatHint) {
       this.nextSeatHint = now + 100;
       const available = this.walker.active ? this.nearSeat() : null;
-      const player=this.nearPlayer();
       this.seatHint.textContent = !this.walker.active ? '' : this.social.busy ? 'Interacción en curso · Esc para pausar'
-        : this.seated ? 'E · Levantarse' : player ? `E · Interactuar con ${player.name}` : available ? 'E · Gestos y sentarse' : 'E · Gestos   ·   Enter · Chat';
+        : this.seated ? 'E · Levantarse' : available ? 'E · Sentarse' : '';
     }
     this.updateElevator(elapsed);
     this.social.update(dt);

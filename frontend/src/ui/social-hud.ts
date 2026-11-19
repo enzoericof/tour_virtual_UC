@@ -31,7 +31,7 @@ export function mountSocialHud(
   choices.className = "social-dialog tour-panel";
   choices.setAttribute("aria-labelledby", "social-title");
   choices.innerHTML =
-    '<h2 id="social-title"></h2><p class="social-description"></p><div class="social-options"></div><button type="button" class="social-dismiss">Volver al recorrido</button>';
+    `<header class="social-header"><h2 id="social-title"></h2><button type="button" class="icon-btn social-close" aria-label="Cerrar gestos">${icon("close")}</button></header><p class="social-description"></p><div class="social-options"></div><button type="button" class="secondary social-dismiss">Volver al recorrido</button>`;
   const notice = document.createElement("div");
   notice.className = "social-pending hidden";
   notice.setAttribute("role", "status");
@@ -178,7 +178,7 @@ export function mountSocialHud(
     b.onclick = act;
     return b;
   }
-  function menu(target: Player | null, canSit = false) {
+  function menu(target: Player | null) {
     if (!engine.social.canPerform()) {
       shell.toast("Ponete de pie en un lugar estable para hacer un gesto.");
       return;
@@ -208,13 +208,6 @@ export function mountSocialHud(
             closeChoices(true);
         }),
       );
-    if (!target && canSit)
-      options.append(
-        button("Sentarse", () => {
-          engine.sit();
-          closeChoices(true);
-        }),
-      );
     document.body.classList.add("social-open");
     choices.showModal();
   }
@@ -242,16 +235,16 @@ export function mountSocialHud(
     document.body.classList.add("social-open");
     choices.showModal();
   }
-  choices.querySelector<HTMLButtonElement>(".social-dismiss")!.onclick = () => {
+  function dismissChoices(resume = false) {
     if (dialogAction)
       send({ type: "social.respond", id: dialogAction, accept: false });
-    closeChoices(true);
-  };
+    closeChoices(resume);
+  }
+  choices.querySelector<HTMLButtonElement>(".social-dismiss")!.onclick = () => dismissChoices(true);
+  choices.querySelector<HTMLButtonElement>(".social-close")!.onclick = () => dismissChoices();
   choices.addEventListener("cancel", (event) => {
     event.preventDefault();
-    if (dialogAction)
-      send({ type: "social.respond", id: dialogAction, accept: false });
-    closeChoices();
+    dismissChoices();
   });
   shell.dialog.addEventListener("toggle", () => {
     if (

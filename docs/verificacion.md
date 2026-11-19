@@ -1,5 +1,12 @@
 # Verificación (versión 0.1.0)
 
+## Gestos con G y retiro del aviso permanente - 19/11/2026
+
+- Retirado del motor 3D el aviso «E · Gestos · Enter · Chat». El indicador de asientos solo aparece junto a una plaza disponible o al estar sentado. C abre el chat, G abre los gestos e interacciones y E permite sentarse o levantarse.
+- El diálogo de gestos usa el material compartido de `tour-panel`, sus fuentes, bordes y botones. Se agrega cierre con el icono habitual y se actualiza Ayuda con G, C y E.
+- Chrome: revisados G, cierre con Esc, C, escritura de g en el chat sin activar gestos y Ayuda con los controles actualizados. Se usaron el componente real del diálogo y el manejador real de teclas con un motor simulado; no se probó multijugador en producción.
+- Pruebas automáticas: 81 aprobadas, incluidos tres casos nuevos sobre G, E y aislamiento al escribir, pausar o mantener modificadores. Compilación de producción aprobada. El paquete compilado no contiene los avisos antiguos de gestos/chat.
+
 ## Ajuste de controles y estilo del chat - 19/11/2026
 
 - Se retira el audio de pasos, su descarga y el cálculo de pasos por cuadro. Se conservan las notificaciones y los impactos.

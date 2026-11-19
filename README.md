@@ -91,13 +91,13 @@ En el editor, **Eliminar objetos** activa el borrado por clic de los modelos col
 
 En el visor principal, **Más opciones → Eliminar objeto** permite señalar pilares y soportes verticales del escenario. Se marca la pieza y se pide confirmación; cancelar no modifica el mapa. **Restaurar objetos eliminados** recupera las piezas y sus colisiones. Los borrados son locales a este navegador, no se publican al servidor. Otros elementos agrupados aún no admiten selección individual.
 
-En el recorrido, acercate y mirá un banco o silla: **E** abre los gestos y la opción **Sentarse**. **E** vuelve a levantarte. Cada banco tiene dos plazas y cada silla una. Sentado podés mirar alrededor; Esc pausa y conserva el asiento.
+En el recorrido, acercate y mirá un banco o silla: **E** permite sentarte y vuelve a levantarte. Cada banco tiene dos plazas y cada silla una. Sentado podés mirar alrededor; Esc pausa y conserva el asiento.
 
 ## Chat, avatares y gestos
 
 Durante el recorrido, **C** abre el chat y libera el mouse; **Enter** envía y **Esc** cierra dejando el recorrido en pausa. También se abre desde «Chat del campus» en la cuenta. Cerrado no ocupa la pantalla ni muestra indicaciones de teclas, tampoco se abre al recibir mensajes. Usa el mismo material, tipografía y controles que el menú. No hay susurros. Los mensajes recientes permanecen cinco minutos; después el servidor los archiva en PostgreSQL. El historial se consulta solo al abrir el chat y permite cargar páginas anteriores.
 
-El avatar tiene un color automático estable por cuenta. Mirá a otro visitante a menos de 1,9 m y presioná **E**: podés invitarlo a **chocar los cinco** o **tomarse de las manos y saltar**. Puede aceptar o rechazar; la invitación vence a los 12 segundos. Se necesita estar de pie, fuera del ascensor, a la misma altura y en un lugar despejado. Sin alguien en la mira, **E** abre **OK**, **paz** y **caerse**; junto a un asiento también permite **Sentarse**.
+El avatar tiene un color automático estable por cuenta. Mirá a otro visitante a menos de 1,9 m y presioná **G**: podés invitarlo a **chocar los cinco** o **tomarse de las manos y saltar**. Puede aceptar o rechazar; la invitación vence a los 12 segundos. Se necesita estar de pie, fuera del ascensor, a la misma altura y en un lugar despejado. Sin alguien en la mira, **G** abre **OK**, **paz** y **caerse**. **E** queda reservado para sentarte o levantarte. Los atajos figuran en Ayuda; no se muestra un aviso permanente de gestos y chat sobre la escena.
 
 Los gestos se muestran temporalmente con una cámara exterior. Al caerte, el cuerpo tiene gravedad, articulaciones y contactos con pisos, paredes, mobiliario del editor y puertas; los impactos activan fragmentos del MP3 según su fuerza. **WASD** y **Espacio** aplican impulsos mientras dura la caída. Al terminar se busca un punto cercano donde levantarse sin atravesar sólidos. Caminar no reproduce sonidos de pasos.
 
