@@ -487,6 +487,38 @@
       "processing": "36 recortes del mapa de hojas, agrupados con semilla 827 para el detalle lejano.",
       "bytes": 43518,
       "sha256": "848900a83d4739306950e5344a534462d13b9dd7a05181c1347b8f1309940d28"
+    },
+    {
+      "asset": "avatar/campus-person.glb",
+      "source": "scripts/blender/campus_person.py",
+      "author": "Modelo y animaciones originales del proyecto",
+      "license": "Creación original del proyecto; sin licencia de reutilización general declarada",
+      "bytes": 216716,
+      "sha256": "05016579229a82fb6af614880b99ad3a25038f1354e5afe92449e73131b04d68"
+    },
+    {
+      "asset": "audio/message.mp3",
+      "source": "universfield-message-notification-199577.mp3",
+      "author": "Archivo aportado por el usuario; atribución del nombre: Universfield",
+      "license": "Licencia pendiente de confirmar; recurso aportado por el usuario",
+      "bytes": 50991,
+      "sha256": "7a520887e33c4b594a80abae43c972358f693e44b11b0ea15eb9797843545390"
+    },
+    {
+      "asset": "audio/ragdoll-impact.mp3",
+      "source": "gmod-ragdoll-physics-breaking.mp3",
+      "author": "Archivo aportado por el usuario",
+      "license": "Licencia pendiente de confirmar; recurso aportado por el usuario",
+      "bytes": 183528,
+      "sha256": "85e60c920c533e5d15b1634c9c06d69875d23333097464aa425df2979a083941"
+    },
+    {
+      "asset": "audio/footsteps.mp3",
+      "source": "footstepasfasf.mp3",
+      "author": "Archivo aportado por el usuario",
+      "license": "Licencia pendiente de confirmar; recurso aportado por el usuario",
+      "bytes": 42039,
+      "sha256": "97e9dada48192f25cd97e0d4ce7b4542177c4c7979f758d4914fdd049d92241e"
     }
   ]
 }

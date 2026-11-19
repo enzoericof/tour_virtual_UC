@@ -39,6 +39,8 @@ Agregar estos valores en **Settings → Environment Variables** del proyecto ant
 | `SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE` | `3`, para limitar conexiones por instancia |
 | `SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE` | `0` |
 
+Para el chat entre instancias, usar el host directo de PostgreSQL, sin `-pooler` ni pooler en modo transacción: LISTEN/NOTIFY necesita una conexión persistente. El listener reserva una conexión del pool mientras hay visitantes o mensajes pendientes; mantener al menos dos conexiones (la recomendación de tres deja dos para API, presencia y archivo). Las instancias vacías cierran el listener y omiten consultas periódicas de acciones. La migración V11 se aplica automáticamente al iniciar el backend.
+
 `DB_URL` debe comenzar con `jdbc:postgresql://`; no copiar una URL `postgresql://usuario:password@host/...` sin adaptarla. Separar usuario y contraseña en sus variables. La **API key de Neon no es necesaria** para esta aplicación: Spring se conecta por JDBC, no por la API administrativa de Neon.
 
 Para el primer arranque usar una rama/base de Neon prevista para la demostración. Flyway aplica automáticamente las migraciones pendientes al arrancar: no conectar a una base ajena ni usar credenciales de producción para previews. Si ya hay datos, respaldarlos y revisar la compatibilidad de las migraciones antes de arrancar. Limitar las credenciales al entorno Production; habilitar Preview solo con una rama/base de pruebas independiente y su propio origen permitido.

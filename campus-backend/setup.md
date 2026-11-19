@@ -206,6 +206,10 @@ La aplicación se conecta a `TP_INFO3` y Flyway ejecuta las migraciones pendient
 | V5 | Catálogo de materias de las mallas curriculares aportadas por el equipo |
 | V6 | Relación entre trabajos y materias |
 | V7 | Materia obligatoria para cada trabajo |
+| V8 | Apariencia histórica, conservada por compatibilidad |
+| V9 | Sesiones JDBC y presencia compartida |
+| V10 | Máximo global de diez plazas |
+| V11 | Archivo de chat y consentimiento de interacciones |
 
 En una base nueva, Flyway aplica todas en orden. En una base existente, solo aplica las pendientes. También crea `flyway_schema_history`, que registra las versiones aplicadas.
 
@@ -314,8 +318,8 @@ Tras reiniciar el backend, iniciar sesión nuevamente. Las cuentas y trabajos pe
 
 El arranque descrito corresponde a usuarios, sesiones, materias y trabajos del backend actual. La subida de imágenes y video, el alta controlada de administradores y la adaptación del frontend Three.js todavía están pendientes. Tener la tabla de archivos no significa que exista una API de subida.
 
-Para probar las cuentas y la presencia multijugador, iniciá también el frontend según el [README](../README.md#inicio-con-multijugador). La biblioteca del visor, los paneles y el chat todavía usan los contratos del servidor anterior.
+Para probar las cuentas y la presencia multijugador, iniciá también el frontend según el [README](../README.md#inicio-con-multijugador). La biblioteca y los paneles todavía usan los contratos del servidor anterior. El chat grupal y los gestos ya usan el WebSocket autenticado de presencia; V11 agrega el archivo de mensajes y el consentimiento de interacciones.
 
-La configuración actual mantiene CSRF deshabilitado y está orientada al desarrollo local; el arranque de esta guía no equivale a una configuración de despliegue público.
+La configuración mantiene la protección CSRF en las escrituras REST y exige sesión y origen permitido para el WebSocket. El arranque de esta guía no sustituye la configuración HTTPS del despliegue público.
 
 Esta guía no ejecuta pruebas ni cambia la configuración: describe cómo preparar y arrancar el backend existente.

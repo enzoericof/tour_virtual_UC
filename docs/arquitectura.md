@@ -8,7 +8,7 @@ Vite apunta al backend en `http://127.0.0.1:8080` por defecto. Para usar otra di
 
 | Capa | Contenido |
 | --- | --- |
-| Frontend `frontend/src` | Three.js directo, TypeScript estricto, Vite. `data/` (catálogo `places.ts`, geografía), `scene/`, `navigation/` (cápsula, colisiones, gravedad), `services/` (`api.ts` REST, `chat.ts` STOMP), `ui/`. Un único modelo de CyT para todas las visitas; sin cargador de escenas GLB. |
+| Frontend `frontend/src` | Three.js directo, TypeScript estricto, Vite. `data/` (catálogo `places.ts`, geografía), `scene/`, `navigation/` (cápsula, colisiones, gravedad), `services/` (`api.ts` REST, `presence.ts` WebSocket, `social.ts` DTO de chat y gestos), `ui/`. Un único modelo procedural de CyT para todas las visitas; avatares articulados en GLB. |
 | Backend `campus-backend/` | Autenticación y sesiones, materias, trabajos y presencia multijugador. |
 | Datos | PostgreSQL con JPA y Flyway (`ddl-auto=validate`). |
 
@@ -20,15 +20,39 @@ Vite apunta al backend en `http://127.0.0.1:8080` por defecto. Para usar otra di
 
 El commit `9c5d019` retiró `backend/`. Sus contratos históricos de contenido y chat se conservan más abajo y su código sigue en `fd95f87`. Los archivos de Docker y Compose de ese módulo también quedaron en el historial. La ejecución actual se describe en [la guía del backend](../campus-backend/setup.md).
 
-`campus-backend` compila con su propio Maven Wrapper y apunta a PostgreSQL local `TP_INFO3` con `DB_USER` y `DB_PASSWORD`. Expone `/api/materias` y `/api/trabajos` con listado paginado por materia y operaciones para el propietario o un administrador. La biblioteca, los paneles y el chat del visor siguen usando los contratos anteriores. [Tareas pendientes](pendientes.md).
+`campus-backend` compila con su propio Maven Wrapper y apunta a PostgreSQL local `TP_INFO3` con `DB_USER` y `DB_PASSWORD`. Expone `/api/materias` y `/api/trabajos` con listado paginado por materia y operaciones para el propietario o un administrador. La biblioteca y los paneles siguen usando los contratos anteriores. El chat y los gestos usan el protocolo actual de presencia. [Tareas pendientes](pendientes.md).
 
 ## Usuarios, sesiones y multijugador en campus-backend
 
-El visor usa `/api/auth/registro`, `/api/auth/login`, `/api/auth/me` y `/api/auth/logout`. Las escrituras requieren el token de `GET /api/auth/csrf`. El inicio de sesión rota el identificador de la sesión existente y restaura la identidad de Spring Security a través de la cookie HttpOnly. La tabla `usuarios` guarda los perfiles. V8 agrega `skin` con valor inicial `azul` para cuentas previas. Los valores admitidos son `azul`, `verde`, `terracota` y `violeta`.
+El visor usa `/api/auth/registro`, `/api/auth/login`, `/api/auth/me` y `/api/auth/logout`. Las escrituras requieren el token de `GET /api/auth/csrf`. El inicio de sesión rota el identificador de la sesión existente y restaura la identidad de Spring Security a través de la cookie HttpOnly. La tabla `usuarios` guarda los perfiles. V8 conserva la apariencia histórica. Desde el 19/11/2026 la respuesta de cuenta y presencia asigna `skin` como hexadecimal RGB calculado por `AvatarColor` a partir del id de cuenta; no hay selector ni se acepta un color enviado por el cliente.
 
 `/ws/presence` es un WebSocket JSON autenticado con la sesión HTTP. Spring admite el mismo origen y los orígenes adicionales enumerados en `CAMPUS_FRONTEND_ORIGINS`, separados por comas. La configuración del proxy para el equipo está en el [inicio con multijugador](../README.md#inicio-con-multijugador). El cliente envía posición de los pies, orientación y marcha en coordenadas del mundo hasta 10 Hz cuando cambian; quieto manda un ping cada cinco segundos. La respuesta identifica la conexión propia y contiene la lista de avatares visibles. El servidor asigna nombre e identidad y carga la apariencia guardada. El visor interpola el movimiento. Al volver a la vista general, desconectarse o cerrar sesión se retira el avatar. Las posiciones son efímeras y el ascensor todavía se simula por cliente.
 
 Las rutas `/api/v1` y el chat STOMP de las secciones siguientes pertenecen al módulo retirado. El multijugador conecta las cuentas y la presencia del recorrido al backend actual.
+
+## Chat grupal y gestos
+
+El mismo WebSocket autenticado `/ws/presence` transporta mensajes JSON sociales con `type`. Solo se procesan para una plaza admitida, visible y con sesión validada recientemente. No se agregó una ruta pública ni se deshabilitó CSRF en REST. El origen de WebSocket sigue validándose en el handshake. El nombre, identidad, color, ids y tiempos los asigna el servidor. Mensajes limitados a 500 caracteres y un envío por segundo por cuenta e instancia; comandos con separación mínima de 150 ms por conexión. No hay mensajes privados.
+
+| Cliente → servidor | Datos y comportamiento |
+| --- | --- |
+| `social.sync` | Devuelve `chat.recent` con los últimos cinco minutos en RAM y las interacciones actuales. No consulta el archivo del chat. Se envía al aparecer en el recorrido y al reconectar. |
+| `chat.send` | `{text}`; difunde `chat.message` con `message: {id, userId, name, text, sentAt}`. Texto mostrado mediante `textContent`. |
+| `chat.history` | Solo lo pide la interfaz abierta con Enter. Cursores opcionales `before` (milisegundos) y `beforeId` (UUID). Devuelve hasta 50 mensajes archivados, más recientes primero, y `more`. Paginación por `(sent_at, id)`. |
+| `social.request` | `{kind, target?}`; tipos `high-five`, `hold-hands`, `ok`, `peace`, `ragdoll`. Las parejas exigen otra cuenta, cercanía ≤1,9 m, altura compatible, orientación y disponibilidad de ambos. |
+| `social.respond` | `{id, accept}`; solo el destinatario puede aceptar/rechazar una invitación pendiente. Se vuelve a validar cercanía al aceptar. |
+| `social.cancel` | `{id}`; solo participantes. El cliente cancela si las anclas de la animación no tienen paso o espacio libre. |
+| `social.impulse` | `{id, direction}`; direcciones `forward/back/left/right/up`. El servidor exige una caída activa del propio visitante; difunde el impulso. |
+
+`social.action` contiene `action: {id, kind, from, to, fromName, toName, fromPose, toPose, status, startedAt, expiresAt}`. Las invitaciones pendientes solo se muestran a sus participantes. Los gestos aceptados se difunden a quienes recorren el campus, con el mismo inicio y duración. Las invitaciones duran 12 s; los gestos duran entre 3 y 6,5 s. Se anulan al vencer o desaparecer un participante. `social.error` comunica errores al emisor. Los eventos incluyen `serverNow` para compensar diferencias del reloj del navegador.
+
+La migración V11 agrega `campus_chat_archive` y `campus_social_actions`. El chat reciente vive en `RecentChat`, sin INSERT antes de cumplir 300000 ms. Una tarea cada segundo archiva los vencidos y los elimina de RAM solo después de guardar. Si falla PostgreSQL se retienen para reintentar, pero se ocultan de la ventana reciente; el límite de 10000 mensajes en memoria evita crecimiento ilimitado. El archivo es idempotente por UUID. Un reinicio simultáneo de todas las instancias pierde los mensajes aún recientes: es el límite deliberado del almacenamiento en RAM.
+
+`SocialRelay` usa PostgreSQL LISTEN/NOTIFY para comunicar instancias sin persistir el contenido reciente. Cada instancia con visitantes mantiene una copia RAM y puede archivar de forma idempotente. Al quedar sin visitantes conserva los mensajes pendientes de archivo, deja de incorporar mensajes nuevos y cierra el listener cuando se vacía esa RAM. Sin visitantes se omiten las consultas periódicas de acciones; una instancia vacía no mantiene la base activa con sondeos. Al conectar el listener solicita una copia de la ventana reciente a las instancias disponibles. Necesita una conexión PostgreSQL directa y persistente (sin pooler en modo transacción); reserva una conexión del pool. No es una cola durable: una interrupción del listener puede perder eventos en vivo; reconectar recupera la ventana que conserve otra instancia. Los cambios de consentimiento se serializan mediante transacción y bloqueo asesor en PostgreSQL.
+
+El avatar se genera en Blender con `scripts/blender/campus_person.py`: jerarquía articulada y clips `Idle/Walk/HighFive/HoldHandsJump/OK/Peace/Fall` dentro de un GLB de unos 212 KiB. `Avatar` comparte geometrías y materiales fijos; cada usuario tiene su material de camiseta, mezclador e interpolación. Las manos de parejas se ajustan con cinemática inversa. Durante los gestos se usa una cámara exterior con comprobación de oclusión y se inmoviliza la navegación; Esc mantiene la pausa y los diálogos liberan el mouse.
+
+`Ragdoll` simula 15 partículas a paso fijo de 1/120 s, enlaces de longitud, gravedad, fricción y restitución. Consulta los mismos octrees del caminante, incluidos el editor y las barreras activas. Los impactos físicos activan y modulan el sonido; los impulsos se validan y transmiten. Cada cliente simula visualmente el cuerpo con su geometría local: no es física autoritativa del servidor y puede diferir si los mapas locales difieren. Al finalizar se comprueba dónde puede ponerse de pie. La reproducción del audio se desbloquea con el gesto de comenzar/continuar el recorrido.
 
 ## API REST `/api/v1`
 
@@ -56,7 +80,7 @@ Convenciones: JSON; errores `{"message": "..."}`; cookie de sesión `JSESSIONID`
 - `placeId` solo se valida por formato, no contra `places.ts`. Los paneles iniciales (Flyway) cubren `acceso`, `laboratorio`, `pasillo-p3`, `aula-p3`, `cantina-cyt` y `patio`; el resto de los espacios no tiene panel hasta que un administrador lo cree.
 - Roles: registro crea `USER`. `ADMIN` se crea al arrancar con `ADMIN_EMAIL` y `ADMIN_PASSWORD` (≥12 caracteres, ≤72 bytes) solo si el correo no existe. Contraseñas con BCrypt (coste 12).
 
-## Chat (STOMP sobre WebSocket)
+## Chat histórico retirado (STOMP sobre WebSocket)
 
 | Paso | Detalle |
 | --- | --- |
@@ -68,11 +92,11 @@ Broker en memoria: una sola instancia de backend, sin historial.
 
 ## No incluido en esta versión
 
-Historial de chat, subida de archivos, agente IA y despliegue público.
+Subida de archivos y agente IA. El historial de chat pertenece al protocolo actual descrito en Chat grupal y gestos.
 
 ## Presencia compartida y cupo
 
-V9 agrega Spring Session JDBC y campus_presence para compartir sesiones y avatares entre instancias de Vercel. V10 reserva un máximo global de 10 plazas de recorrido mediante una transacción con bloqueo asesor de PostgreSQL y una restricción única por plaza. Cada visita admitida ocupa una plaza, también en vista general; la pantalla de acceso no ocupa ninguna. El servidor envía los jugadores de todas las instancias y toma las skins actuales de usuarios. Las posiciones caducan después de 20 segundos sin actualizarse y se retiran al salir o cerrar sesión. El cliente solicita join antes de descargar o construir el visor. El servidor reserva una plaza con la misma transacción global y confirma con {"admitted":true}; si no queda lugar cierra con 4001. El cliente muestra Recorrido completo y un botón para reintentar manualmente, sin bucle automático ni acceso al 3D. La cuenta permanece recordada.
+V9 agrega Spring Session JDBC y campus_presence para compartir sesiones y avatares entre instancias de Vercel. V10 reserva un máximo global de 10 plazas de recorrido mediante una transacción con bloqueo asesor de PostgreSQL y una restricción única por plaza. Cada visita admitida ocupa una plaza, también en vista general; la pantalla de acceso no ocupa ninguna. El servidor envía los jugadores de todas las instancias y calcula el color estable a partir del id de cuenta. Las posiciones caducan después de 20 segundos sin actualizarse y se retiran al salir o cerrar sesión. El cliente solicita join antes de descargar o construir el visor. El servidor reserva una plaza con la misma transacción global y confirma con {"admitted":true}; si no queda lugar cierra con 4001. El cliente muestra Recorrido completo y un botón para reintentar manualmente, sin bucle automático ni acceso al 3D. La cuenta permanece recordada.
 
 Los mensajes de movimiento reemplazan la última posición del visitante en memoria. join reserva la plaza en PostgreSQL antes de abrir el visor; la primera posición solo inicia la aparición del avatar. Cada ciclo del servidor sincroniza todas las posiciones locales, consulta las posiciones globales y verifica las sesiones con una única operación SQL. La sentencia usa RETURNING para incluir los cambios de ese mismo ciclo en la respuesta. Así, la cantidad de viajes a la base por ciclo se mantiene constante al aumentar los jugadores. Al perder una plaza durante una interrupción se cierra la conexión con error de servidor para activar la reconexión del cliente. Los errores de persistencia durante la admisión se propagan al manejador WebSocket para registrarlos y cerrar la conexión.
 
@@ -102,14 +126,14 @@ La cookie `JSESSIONID` usa Path=/, HttpOnly, SameSite=Lax y duración de 30 día
 
 Se retiraron Eliminar objeto y Restaurar objetos eliminados del menú público del recorrido, sus manejadores de selección y confirmación, y el registro y aplicación de borrados locales. La clave histórica `cyt-scene-removals-v1` ya no se lee: el campus vuelve a construirse completo con sus colisiones. Se quitaron las exclusiones del agrupado de mallas que solo necesitaba la selección para borrar. No se modifican las coordenadas ni las dimensiones del modelo.
 
-Mi cuenta ya no ofrece selector ni guardado de apariencia; también se retiraron `PUT /api/auth/skin`, el servicio de cambio y la actualización de apariencia en presencia. La columna existente de la base y las paletas se conservan para mostrar los avatares ya guardados. La bienvenida ya no anuncia personalización.
+Mi cuenta ya no ofrece selector ni guardado de apariencia; también se retiraron `PUT /api/auth/skin`, el servicio de cambio y la actualización de apariencia en presencia. La columna existente y las paletas históricas se conservan por compatibilidad; desde el 19/11/2026 el color visible se deriva del id de cuenta. La bienvenida ya no anuncia personalización.
 
 
 ## Duración de la visita y cuenta recordada
 
 La visita multijugador y la cuenta recordada tienen ciclos distintos. `services/visit-lifecycle.ts` termina la visita tras 180000 ms sin teclado, mouse o rueda. Pings, snapshots, renderizado y foco no reinician ese plazo. Se comprueba también al volver de una pestaña oculta; una entrada tardía no revive una visita vencida. `pagehide` termina la visita al cerrar, navegar o recargar. `pageshow.persisted` fuerza el acceso de nuevo si el navegador restaura un documento desde su caché.
 
-Finalizar la visita envía leave si el WebSocket está abierto, detiene sus temporizadores y reconexión, cierra el socket, desconecta chat y pausa los controles. Al vencer por inactividad se recarga el documento para liberar escena y manejadores; un aviso temporal en sessionStorage explica la salida. No contiene identidad ni contraseñas. El cierre WebSocket retira la presencia en el servidor; ante un corte abrupto sigue existiendo la caducidad de respaldo del backend.
+Finalizar la visita envía leave si el WebSocket está abierto, detiene sus temporizadores y reconexión, cierra el socket que comparte con el chat, limpia las interacciones y pausa los controles. Al vencer por inactividad se recarga el documento para liberar escena y manejadores; un aviso temporal en sessionStorage explica la salida. No contiene identidad ni contraseñas. El cierre WebSocket retira la presencia en el servidor; ante un corte abrupto sigue existiendo la caducidad de respaldo del backend.
 
 La cookie de cuenta de 30 días se conserva al finalizar una visita, para ofrecer Continuar sin volver a pedir contraseña. No equivale a invalidar la autenticación persistente del servidor. Usar otra cuenta y Cerrar sesión sí invalidan esa autenticación mediante logout con CSRF. Las otras pestañas no se cierran al terminar una visita individual. El acceso al recorrido requiere una cuenta validada; no existe entrada como invitado. Cerrar sesión también finaliza el recorrido y vuelve al acceso.
 

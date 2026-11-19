@@ -46,7 +46,7 @@ En el backend, configurá `CAMPUS_FRONTEND_ORIGINS=http://127.0.0.1:5173,http://
 
 Cuando publiques el frontend compilado, configurá su servidor para reenviar `/api` y `/ws` al backend, con soporte de WebSocket para `/ws`. Si el frontend tiene otro dominio, agregá su origen HTTPS a `CAMPUS_FRONTEND_ORIGINS`.
 
-La biblioteca, los paneles informativos y el chat del visor están pendientes de integración con el backend actual. [Arquitectura y contratos](docs/arquitectura.md#aporte-campus-backend).
+La biblioteca y los paneles informativos están pendientes de integración con el backend actual. El chat grupal y las interacciones usan el WebSocket de presencia. [Arquitectura y contratos](docs/arquitectura.md#chat-grupal-y-gestos).
 
 ## Todo con Docker
 
@@ -91,4 +91,14 @@ En el editor, **Eliminar objetos** activa el borrado por clic de los modelos col
 
 En el visor principal, **Más opciones → Eliminar objeto** permite señalar pilares y soportes verticales del escenario. Se marca la pieza y se pide confirmación; cancelar no modifica el mapa. **Restaurar objetos eliminados** recupera las piezas y sus colisiones. Los borrados son locales a este navegador, no se publican al servidor. Otros elementos agrupados aún no admiten selección individual.
 
-En el recorrido, acercate y mirá un banco o silla: **E** permite sentarte y volver a levantarte. Cada banco tiene dos plazas y cada silla una. Sentado podés mirar alrededor; Esc pausa y conserva el asiento.
+En el recorrido, acercate y mirá un banco o silla: **E** abre los gestos y la opción **Sentarse**. **E** vuelve a levantarte. Cada banco tiene dos plazas y cada silla una. Sentado podés mirar alrededor; Esc pausa y conserva el asiento.
+
+## Chat, avatares y gestos
+
+Durante el recorrido, el chat grupal aparece arriba a la izquierda y se desvanece por inactividad. Los mensajes nuevos lo vuelven a mostrar y reproducen el sonido aportado. **Enter** libera el mouse, abre el campo para escribir y consulta el historial; **Enter** envía el texto y, si el campo está vacío, vuelve a capturar el mouse. **Esc** cierra el chat y deja el recorrido en pausa. No hay susurros. El chat cerrado muestra solo los últimos cinco minutos; después de ese plazo el servidor archiva los mensajes en PostgreSQL. El historial anterior aparece solo al abrir con Enter y permite cargar páginas anteriores.
+
+El avatar tiene un color automático estable por cuenta. Mirá a otro visitante a menos de 1,9 m y presioná **E**: podés invitarlo a **chocar los cinco** o **tomarse de las manos y saltar**. Puede aceptar o rechazar; la invitación vence a los 12 segundos. Se necesita estar de pie, fuera del ascensor, a la misma altura y en un lugar despejado. Sin alguien en la mira, **E** abre **OK**, **paz** y **caerse**; junto a un asiento también permite **Sentarse**.
+
+Los gestos se muestran temporalmente con una cámara exterior. Al caerte, el cuerpo tiene gravedad, articulaciones y contactos con pisos, paredes, mobiliario del editor y puertas; los impactos activan fragmentos del MP3 según su fuerza. **WASD** y **Espacio** aplican impulsos mientras dura la caída. Al terminar se busca un punto cercano donde levantarse sin atravesar sólidos. Los pasos usan la tercera grabación aportada y solo suenan al desplazarse sobre suelo.
+
+El modelo y sus siete clips se regeneran con Blender: `blender --background --python /ruta/absoluta/al/repositorio/scripts/blender/campus_person.py`. El GLB ya está versionado: no hace falta instalar Blender en la nube. [Protocolo y límites](docs/arquitectura.md#chat-grupal-y-gestos).

@@ -15,6 +15,7 @@ export class Walker {
   private velocity = new T.Vector3();
   private keys = new Set<string>();
   private ground = false;
+  frozen = false;
   private spawn = new T.Vector3();
   enabled = false;
   private captureRequest = 0;
@@ -77,6 +78,18 @@ export class Walker {
   }
   /** Índice estático compartido con la fauna del campus, sin duplicar geometría. */
   get collisionWorld() { return this.world; }
+  get grounded() { return this.ground; }
+  sphereCollision(sphere: T.Sphere) {
+    let result = this.world.sphereIntersect(sphere);
+    const edition = this.editorWorld.sphereIntersect(sphere);
+    if (edition && (!result || edition.depth > result.depth)) result = edition;
+    for (const barrier of this.barriers) {
+      if (!barrier.blocked()) continue;
+      const hit = barrier.world.sphereIntersect(sphere);
+      if (hit && (!result || hit.depth > result.depth)) result = hit;
+    }
+    return result;
+  }
   blocksDynamicSphere(sphere:T.Sphere) {
     return Boolean(this.editorWorld.sphereIntersect(sphere)) || this.barriers.some(b=>b.blocked() && Boolean(b.world.sphereIntersect(sphere)));
   }
@@ -93,8 +106,19 @@ export class Walker {
     this.barriers.push({ world: new Octree().fromGraphNode(mesh), blocked });
   }
   obstructs(ray: T.Ray, distance: number) {
-    const hit = this.world.rayIntersect(ray);
-    return hit !== false && hit.distance < distance - 0.015;
+    return this.rayDistance(ray,distance) < distance - .015;
+  }
+  rayDistance(ray:T.Ray,max:number) {
+    let nearest=max;
+    const solid=this.world.rayIntersect(ray),edition=this.editorWorld?.rayIntersect(ray);
+    if(solid)nearest=Math.min(nearest,solid.distance);
+    if(edition)nearest=Math.min(nearest,edition.distance);
+    for (const barrier of this.barriers) {
+      if(!barrier.blocked())continue;
+      const hit=barrier.world.rayIntersect(ray);
+      if(hit)nearest=Math.min(nearest,hit.distance);
+    }
+    return nearest;
   }
   private collision(body: Capsule) {
     const collision = this.world.capsuleIntersect(body);
@@ -180,7 +204,7 @@ export class Walker {
     else this.onLockChange(false);
   }
   update(dt: number) {
-    if (!this.enabled || !this.active) return;
+    if (!this.enabled || !this.active || this.frozen) return;
     const forward = new T.Vector3();
     this.camera.getWorldDirection(forward);
     forward.y = 0;

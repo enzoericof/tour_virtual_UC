@@ -1,14 +1,152 @@
-// Run against a disposable local instance: node tests/chat.integration.mjs.
-import assert from 'node:assert/strict';
-import WebSocket from 'ws';
-import {Client} from '@stomp/stompjs';
-const base=process.env.TEST_BASE_URL??'http://127.0.0.1:8080';
-const origin=process.env.TEST_ORIGIN??'http://127.0.0.1:5173';
-async function session(name){
- let cookie='';let csrf;
- async function call(route,method='GET',body){const r=await fetch(base+'/api/v1'+route,{method,headers:{...(cookie?{Cookie:cookie}:{}),...(csrf?{[csrf.headerName]:csrf.token}:{}),'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const c=r.headers.getSetCookie();if(c.length)cookie=c.map(v=>v.split(';')[0]).join('; ');assert.ok(r.ok,`${route}: ${r.status} ${r.ok?'':await r.text()}`);return r.status===204?null:r.json();}
- csrf=await call('/auth/csrf');const email=`${name}-${Date.now()}@example.test`;const password='synthetic-test-only-password';await call('/auth/register','POST',{name,email,password});await call('/auth/login','POST',{email,password});csrf=await call('/auth/csrf');return {call,csrf,cookie,name};
+// Prueba optativa contra una base desechable. Crea dos cuentas y no elimina datos.
+// TEST_BASE_URL=http://127.0.0.1:8080 CHAT_TEST_ALLOW_MUTATION=yes node tests/chat.integration.mjs
+// CHAT_TEST_WAIT_ARCHIVE=yes agrega la espera real de cinco minutos.
+import assert from "node:assert/strict";
+import WebSocket from "ws";
+if (
+  process.env.CHAT_TEST_ALLOW_MUTATION !== "yes" ||
+  !process.env.TEST_BASE_URL
+)
+  throw new Error(
+    "Indicá TEST_BASE_URL de un entorno desechable y CHAT_TEST_ALLOW_MUTATION=yes.",
+  );
+const base = process.env.TEST_BASE_URL,
+  origin = process.env.TEST_ORIGIN ?? "http://127.0.0.1:5173";
+const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+async function session(nombre) {
+  const cookies = new Map();
+  let csrf;
+  async function call(route, method = "GET", body) {
+    const response = await fetch(base + "/api/auth" + route, {
+      method,
+      headers: {
+        Cookie: [...cookies].map(([k, v]) => `${k}=${v}`).join("; "),
+        "Content-Type": "application/json",
+        ...(csrf ? { [csrf.headerName]: csrf.token } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    for (const raw of response.headers.getSetCookie()) {
+      const value = raw.split(";")[0],
+        at = value.indexOf("=");
+      cookies.set(value.slice(0, at), value.slice(at + 1));
+    }
+    assert.ok(response.ok, `${route}: ${response.status}`);
+    return response.status === 204 ? null : response.json();
+  }
+  csrf = await call("/csrf");
+  const correo = `social-${nombre}-${crypto.randomUUID()}@example.test`,
+    password = "synthetic-test-password";
+  await call("/registro", "POST", {
+    nombre,
+    apellido: "Prueba",
+    correo,
+    password,
+    carrera: 1,
+  });
+  await call("/login", "POST", { correo, password });
+  csrf = await call("/csrf");
+  return { call, cookie: [...cookies].map(([k, v]) => `${k}=${v}`).join("; ") };
 }
-const a=await session('Prueba-A'),b=await session('Prueba-B');const received=[];const clients=[];
-function connect(s){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('WebSocket timed out')),10000);const c=new Client({webSocketFactory:()=>new WebSocket(base.replace('http','ws')+'/ws',{headers:{Cookie:s.cookie,Origin:origin}}),connectHeaders:{[s.csrf.headerName]:s.csrf.token},reconnectDelay:0});clients.push(c);c.onStompError=f=>{clearTimeout(timer);reject(new Error(f.headers.message));};c.onWebSocketError=e=>{clearTimeout(timer);reject(new Error(String(e.message)));};c.onConnect=()=>{c.subscribe('/topic/campus',m=>received.push({client:s.name,message:JSON.parse(m.body)}));clearTimeout(timer);resolve(c);};c.activate();});}
-try{const ca=await connect(a);await connect(b);await new Promise(r=>setTimeout(r,150));ca.publish({destination:'/app/chat',body:JSON.stringify({text:'Mensaje de prueba de integración'})});const deadline=Date.now()+5000;while(received.length<2&&Date.now()<deadline)await new Promise(r=>setTimeout(r,50));assert.equal(received.length,2);assert.ok(received.every(x=>x.message.name==='Prueba-A'&&x.message.text==='Mensaje de prueba de integración'));console.log('PASS: dos sesiones autenticadas reciben el mensaje STOMP con identidad del servidor.');}finally{await Promise.all(clients.map(c=>c.deactivate()));await a.call('/auth/logout','POST');await b.call('/auth/logout','POST');}
+async function connect(session, pose) {
+  const events = [];
+  const socket = new WebSocket(base.replace(/^http/, "ws") + "/ws/presence", {
+    headers: { Cookie: session.cookie, Origin: origin },
+  });
+  socket.on("message", (data) => events.push(JSON.parse(String(data))));
+  const wait = async (predicate) => {
+    const until = Date.now() + 10000;
+    while (Date.now() < until) {
+      const index = events.findIndex(predicate);
+      if (index >= 0) return events.splice(index, 1)[0];
+      await pause(25);
+    }
+    throw new Error("No llegó el evento esperado");
+  };
+  await new Promise((resolve, reject) => {
+    socket.once("open", resolve);
+    socket.once("error", reject);
+  });
+  socket.send("join");
+  await wait((e) => e.admitted);
+  socket.send(JSON.stringify(pose));
+  const snapshot = await wait((e) => e.players?.some((p) => p.id === e.self));
+  const heartbeat = setInterval(
+    () => socket.readyState === 1 && socket.send("ping"),
+    4000,
+  );
+  return {
+    socket,
+    wait,
+    id: snapshot.self,
+    send: (data) => socket.send(JSON.stringify(data)),
+    close: () => {
+      clearInterval(heartbeat);
+      socket.close();
+    },
+  };
+}
+const sessions = [],
+  peers = [];
+try {
+  sessions.push(await session("Ana"), await session("Beto"));
+  peers.push(
+    await connect(sessions[0], { x: 0, y: 0, z: 0, yaw: 0, walking: false }),
+    await connect(sessions[1], {
+      x: 0,
+      y: 0,
+      z: -1.3,
+      yaw: Math.PI,
+      walking: false,
+    }),
+  );
+  const [a, b] = peers;
+  await pause(300);
+  a.send({
+    type: "chat.send",
+    text: "Mensaje grupal de integración",
+    name: "Identidad falsa",
+  });
+  const event = await a.wait((e) => e.type === "chat.message");
+  await b.wait(
+    (e) => e.type === "chat.message" && e.message.id === event.message.id,
+  );
+  assert.equal(event.message.name, "Ana Prueba");
+  await pause(250);
+  a.send({ type: "chat.history" });
+  const early = await a.wait((e) => e.type === "chat.history");
+  assert.ok(!early.messages.some((m) => m.id === event.message.id));
+  await pause(250);
+  a.send({ type: "social.request", kind: "high-five", target: b.id });
+  const request = await b.wait(
+    (e) => e.type === "social.action" && e.action.status === "pending",
+  );
+  await pause(250);
+  a.send({ type: "social.respond", id: request.action.id, accept: true });
+  await a.wait((e) => e.type === "social.error");
+  b.send({ type: "social.respond", id: request.action.id, accept: true });
+  const active = await a.wait(
+    (e) => e.type === "social.action" && e.action.status === "active",
+  );
+  const other = await b.wait(
+    (e) => e.type === "social.action" && e.action.status === "active",
+  );
+  assert.equal(active.action.startedAt, other.action.startedAt);
+  assert.equal(active.action.id, request.action.id);
+  if (process.env.CHAT_TEST_WAIT_ARCHIVE === "yes") {
+    const remaining = event.message.sentAt + 302000 - Date.now();
+    // Esperas cortas conservan la posibilidad de interrumpir la prueba.
+    for (let left = remaining; left > 0; left -= 1000)
+      await pause(Math.min(1000, left));
+    a.send({ type: "chat.history" });
+    const archived = await a.wait((e) => e.type === "chat.history");
+    assert.ok(archived.messages.some((m) => m.id === event.message.id));
+  }
+  console.log(
+    "PASS: chat autenticado, identidad del servidor, sin archivo temprano y consentimiento exclusivo del destinatario.",
+  );
+} finally {
+  for (const peer of peers) peer.close();
+  for (const session of sessions)
+    await session.call("/logout", "POST").catch(() => {});
+}

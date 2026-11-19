@@ -57,3 +57,18 @@ test("A capture granted after pausing is immediately released", async () => {
   walker.walk(); walker.pause(); grant(); await Promise.resolve();
   assert.equal(walker.active, false);
 });
+
+test("Ragdoll contacts and sight rays include the static scene, editor and active doors", () => {
+  const {walker}=setup();
+  const ground=new T.Mesh(new T.BoxGeometry(5,.1,5));ground.position.y=-.05;ground.updateMatrixWorld();walker.setWorld(ground);
+  const wall=new T.Mesh(new T.BoxGeometry(.2,2,2));wall.position.set(1,1,0);wall.updateMatrixWorld();walker.setEditorWorld(wall);
+  assert.ok(walker.sphereCollision(new T.Sphere(new T.Vector3(0,.1,0),.2)));
+  assert.ok(walker.sphereCollision(new T.Sphere(new T.Vector3(.85,1,0),.2)));
+  assert.ok(walker.rayDistance(new T.Ray(new T.Vector3(0,1,0),new T.Vector3(1,0,0)),3)<1);
+  let closed=false;
+  const door=new T.Mesh(new T.BoxGeometry(1,2,.1));door.position.set(0,1,-.5);door.updateMatrixWorld();walker.addBarrier(door,()=>closed);
+  const ray=new T.Ray(new T.Vector3(0,1,0),new T.Vector3(0,0,-1));
+  assert.equal(walker.rayDistance(ray,2),2);
+  closed=true;assert.ok(walker.rayDistance(ray,2)<.5);
+  assert.ok(walker.sphereCollision(new T.Sphere(new T.Vector3(0,1,-.42),.2)));
+});

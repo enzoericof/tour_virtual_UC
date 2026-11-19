@@ -36,6 +36,9 @@ public class PresenceConfig implements WebSocketConfigurer {
         return scheduler("presence-db-");
     }
 
+    @Bean public ThreadPoolTaskScheduler socialRelayScheduler() { return scheduler("social-relay-"); }
+    @Bean public ThreadPoolTaskScheduler socialArchiveScheduler() { return scheduler("social-archive-"); }
+
     private static ThreadPoolTaskScheduler scheduler(String prefix) {
         var scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(1);

@@ -64,20 +64,37 @@ public class PresenceSocket extends TextWebSocketHandler {
     private final UsuarioService users;
     private final ObjectMapper json;
     private final PresenceStore store;
+    private final SocialService social;
     private volatile PresenceStore.Exchange shared = new PresenceStore.Exchange(List.of(), Set.of());
     private final Set<String> departed = ConcurrentHashMap.newKeySet();
     private volatile long lastExchange;
     private volatile long lastChange;
 
-    public PresenceSocket(UsuarioService users, ObjectMapper json, PresenceStore store) {
+    public PresenceSocket(UsuarioService users, ObjectMapper json, PresenceStore store, SocialService social) {
         this.users = users;
         this.json = json;
         this.store = store;
+        this.social = social;
+        social.bind(this::publishSocial,()->!peers.isEmpty());
+    }
+
+    private void publishSocial(List<String> recipients, Object event) {
+        var tree = (tools.jackson.databind.node.ObjectNode) json.valueToTree(event);
+        tree.put("serverNow", System.currentTimeMillis());
+        String payload = json.writeValueAsString(tree);
+        long now = System.nanoTime();
+        for (Peer peer : peers.values()) {
+            if (peer.player == null || peer.player.hidden() || now - lastExchange > 5_000_000_000L
+                || !shared.sessions().contains(peer.sessionId) || now - peer.lastSeen > INACTIVE
+                || (!recipients.isEmpty() && !recipients.contains(peer.id))) continue;
+            try { peer.socket.sendMessage(new TextMessage(payload)); }
+            catch (IOException | RuntimeException e) { departed.add(peer.id); }
+        }
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession socket) throws IOException {
-        socket.setTextMessageSizeLimit(512);
+        socket.setTextMessageSizeLimit(4096);
         Principal principal = socket.getPrincipal();
         if (principal == null || !(socket.getAttributes().get("httpSession") instanceof HttpSession session)) {
             socket.close(CloseStatus.POLICY_VIOLATION);
@@ -85,8 +102,8 @@ public class PresenceSocket extends TextWebSocketHandler {
         }
         try {
             var user = users.obtenerActivo(principal.getName());
-            skins.putIfAbsent(user.getId(), user.getSkin());
-            peers.put(socket.getId(), new Peer(socket, session, user.getId(), user.getNombre()));
+            skins.putIfAbsent(user.getId(), AvatarColor.forUser(user.getId()));
+            peers.put(socket.getId(), new Peer(socket, session, user.getId(), user.getNombre() + " " + user.getApellido()));
         } catch (RuntimeException e) {
             socket.close(CloseStatus.POLICY_VIOLATION);
         }
@@ -98,6 +115,19 @@ public class PresenceSocket extends TextWebSocketHandler {
         if (peer == null) return;
         long now = System.nanoTime();
         String body = message.getPayload();
+        if (body.startsWith("{")) {
+            try {
+                var command = json.readTree(body);
+                if (command.has("type")) {
+                    if (peer.player != null && !peer.player.hidden() && shared.sessions().contains(peer.sessionId)
+                        && now - lastExchange <= 5_000_000_000L) {
+                        peer.lastSeen = now;
+                        social.handle(peer.id, peer.userId, peer.name, command);
+                    }
+                    return;
+                }
+            } catch (RuntimeException ignored) { return; }
+        }
         if (body.equals("join")) {
             peer.lastSeen = now;
             if (peer.player == null) {

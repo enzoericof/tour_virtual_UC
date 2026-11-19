@@ -192,3 +192,9 @@ Modelos propios construidos en `campus-cats.ts`: cuerpo, cabeza, orejas, ojos co
 ### Referencia anatómica de los gatos — 19/11/2026
 
 Se consultó la fotografía lateral de un gato negro publicada en [ねこのきもち / Benesse](https://cat.benesse.ne.jp/withcat/content/?id=45164), especialmente proporción del cuerpo, pecho, extremidades y cola horizontal. Se usa únicamente como referencia visual: no se incorpora la foto ni se usa como textura. Modelo y pelajes siguen siendo propios. `leaves-cluster.webp` se deriva de 36 recortes del mapa Leaf Set 001 CC0; su preparación está integrada en `prepare-courtyard-tree-assets.py` y su procedencia está en `sources.json`.
+
+## Avatar y audio social — 19/11/2026
+
+- Modelo original del proyecto: [generador Blender](../scripts/blender/campus_person.py), sin modelos ni texturas de terceros. Exporta [campus-person.glb](../frontend/public/assets/avatar/campus-person.glb) con jerarquía de articulaciones, dedos y siete clips. El color de la camiseta se cambia por cuenta en el visor.
+- Audio aportado directamente por el usuario: `universfield-message-notification-199577.mp3` (nombre del archivo atribuye Universfield), `gmod-ragdoll-physics-breaking.mp3` y `footstepasfasf.mp3`. Copiados sin modificar como `audio/message.mp3`, `audio/ragdoll-impact.mp3` y `audio/footsteps.mp3`. No se deduce una licencia de publicación/reutilización de sus nombres; queda pendiente confirmar su procedencia y licencia completa.
+- Tamaños, hashes SHA-256 y procedencia registrados en [sources.json](../frontend/public/assets/sources.json). La caída reproduce fragmentos del audio como respuesta a contactos físicos, y los pasos se disparan al caminar sobre un apoyo.

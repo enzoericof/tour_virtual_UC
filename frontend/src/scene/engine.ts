@@ -3,6 +3,7 @@ import { collectSeats, occupiedSeat, type Seat } from "./seating";
 import type { Player } from "../services/presence";
 import * as T from "three";
 import { RemotePlayers } from "./remote-players";
+import { SocialPerformance } from './social-performance';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CABIN, ElevatorMotion, type ElevatorButton, type ElevatorDoor } from "./elevator";
 import { ElevatorAudio } from "./elevator-audio";
@@ -28,6 +29,8 @@ export class TourEngine {
   readonly renderer: T.WebGLRenderer;
   readonly orbit: OrbitControls;
   readonly walker: Walker;
+  readonly social: SocialPerformance;
+  onSocialMenu = (_player:Player|null,_canSit:boolean)=>{};
   readonly campus = createCampus();
   readonly cats: CampusCats;
   private readonly entranceDoors = new EntranceDoors(this.campus.group);
@@ -101,6 +104,8 @@ export class TourEngine {
     this.walker = new Walker(this.camera, this.canvas);
     this.walker.onCaptureError = (message) => this.onError(message);
     this.walker.setWorld(this.campus.colliders);
+    this.social = new SocialPerformance(this.scene,this.camera,this.walker,this.remotePlayers,
+      ()=>Boolean(this.seated)||this.elevatorPassenger||this.insideElevator(),message=>this.onError(message));
     this.cats = new CampusCats(this.walker.collisionWorld,Math.random,sphere=>this.walker.blocksDynamicSphere(sphere));
     this.scene.add(this.cats.group);
     this.entranceDoors.register(this.walker);
@@ -128,8 +133,7 @@ export class TourEngine {
     window.addEventListener("keydown", event => {
       if (event.code !== "KeyE" || event.repeat || event.ctrlKey || event.metaKey || event.altKey || !this.walker.active) return;
       event.preventDefault();
-      if (this.seated) this.leaveSeat();
-      else this.sit();
+      this.interact();
     });
     this.walker.onInteract = () => {
       const p = this.nearest();
@@ -180,6 +184,13 @@ export class TourEngine {
     });
     this.animate();
   }
+  private interact() {
+    if(this.social.busy)return;
+    if(this.seated){this.leaveSeat();return;}
+    const player=this.nearPlayer();
+    if(player){this.onSocialMenu(player,false);return;}
+    this.onSocialMenu(null,Boolean(this.nearSeat()));
+  }
   private nearSeat() {
     if (this.seated || this.elevatorPassenger) return null;
     let best: Seat | null = null, distance = 1.65;
@@ -199,7 +210,7 @@ export class TourEngine {
     }
     return best;
   }
-  private sit() {
+  sit() {
     const seat = this.nearSeat();
     if (!seat) return;
     this.seatReturn.copy(this.walker.body.end).add(new T.Vector3(0, -1.5, 0));
@@ -214,6 +225,7 @@ export class TourEngine {
   }
   /** El desempate por id evita que dos clientes con la misma instantánea conserven una plaza. */
   receiveSeating(players: Player[], self?: string) {
+    this.social.setSelf(players.find(p=>p.id===self)??null);
     this.occupied.clear();
     for (const player of players) {
       if (player.id === self) continue;
@@ -225,6 +237,23 @@ export class TourEngine {
         this.onError("Otro visitante ocupó ese lugar. Elegí otro asiento.");
       }
     }
+  }
+  /** Selección por mira y distancia, con oclusión por los sólidos del escenario. */
+  private nearPlayer():Player|null {
+    if(!this.walker.active)return null;
+    const origin=this.walker.body.end;
+    const direction=new T.Vector3();this.camera.getWorldDirection(direction);
+    let best:Player|null=null, nearest=1.9;
+    for(const player of this.remotePlayers.players){
+      const feetY=origin.y-1.5;
+      if(Math.abs(player.y-feetY)>=.65)continue;
+      const target=new T.Vector3(player.x,player.y+1.3,player.z),delta=target.sub(origin),distance=delta.length();
+      if(distance>=nearest||distance<.3)continue;
+      const ray=new T.Ray(origin.clone(),delta.normalize());
+      if(direction.dot(ray.direction)<.9||this.walker.obstructs(ray,distance))continue;
+      nearest=distance;best=player;
+    }
+    return best;
   }
   private resize(container: HTMLElement) {
     const { width, height } = container.getBoundingClientRect();
@@ -243,9 +272,12 @@ export class TourEngine {
     if (now >= this.nextSeatHint) {
       this.nextSeatHint = now + 100;
       const available = this.walker.active ? this.nearSeat() : null;
-      this.seatHint.textContent = !this.walker.active ? "" : this.seated ? "E · Levantarse" : available ? "E · Sentarse" : "";
+      const player=this.nearPlayer();
+      this.seatHint.textContent = !this.walker.active ? '' : this.social.busy ? 'Interacción en curso · Esc para pausar'
+        : this.seated ? 'E · Levantarse' : player ? `E · Interactuar con ${player.name}` : available ? 'E · Gestos y sentarse' : 'E · Gestos   ·   Enter · Chat';
     }
     this.updateElevator(elapsed);
+    this.social.update(dt);
     if (this.orbit.enabled) this.orbit.update();
     // Far views need depth precision for ground, paving and grass surfaces.
     const near = this.orbit.enabled && this.current === "campus"
@@ -350,6 +382,7 @@ export class TourEngine {
     return target ? new T.Vector3(...facultyToWorld(target)) : spawn.clone().add(new T.Vector3(-8, 1.5, -3));
   }
   startWalking() {
+    this.social.audio.unlock();
     if (this.current === "campus") this.campus.setDetail(true);
     if (!this.walker.enabled) {
       this.walker.teleport(this.spawn);
@@ -360,6 +393,7 @@ export class TourEngine {
     this.walker.walk();
   }
   overview() {
+    if(this.social.busy)this.social.clear();
     this.leaveSeat();
     this.elevatorPassenger = false;
     this.walker.pause();
@@ -394,6 +428,7 @@ export class TourEngine {
     this.walker.pause();
   }
   go(place?: Place) {
+    if(this.social.busy)this.social.clear();
     this.elevatorPassenger = false;
     this.pause();
     this.walker.enabled = false;
@@ -505,6 +540,7 @@ export class TourEngine {
   }
   playerPose() {
     if (!this.walker.enabled) return null;
+    const socialPose=this.social.pose();if(socialPose)return socialPose;
     const { x, y, z } = this.camera.position;
     if (this.seated) this.playerDirection.copy(this.seated.forward);
     else this.camera.getWorldDirection(this.playerDirection);

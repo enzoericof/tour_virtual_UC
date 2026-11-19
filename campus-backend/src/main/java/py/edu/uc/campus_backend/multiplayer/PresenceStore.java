@@ -62,13 +62,13 @@ public class PresenceStore {
                 UNION ALL
                 SELECT p.* FROM campus_presence p WHERE NOT EXISTS (SELECT 1 FROM updated u WHERE u.id = p.id)
             )
-            SELECT 'player' AS kind, NULL::text AS session_id, p.pose, u.skin
+            SELECT 'player' AS kind, NULL::text AS session_id, p.pose, u.id AS user_id
             FROM visible p JOIN usuarios u ON u.id = p.user_id
             JOIN spring_session s ON s.session_id = p.session_id
             WHERE p.updated_at > clock_timestamp() - interval '20 seconds'
               AND s.expiry_time > ? AND u.activo = true AND s.principal_name = u.correo
             UNION ALL
-            SELECT 'session', s.session_id, NULL::jsonb, NULL::text
+            SELECT 'session', s.session_id, NULL::jsonb, NULL::bigint
             FROM spring_session s JOIN usuarios u ON u.correo = s.principal_name
             WHERE s.session_id IN (SELECT jsonb_array_elements_text(?::jsonb))
               AND s.expiry_time > ? AND u.activo = true
@@ -77,7 +77,7 @@ public class PresenceStore {
                     sessions.add(row.getString("session_id"));
                 } else {
                     var p = json.readValue(row.getString("pose"), PresenceSocket.Player.class);
-                    players.add(new PresenceSocket.Player(p.id(), p.name(), row.getString("skin"),
+                    players.add(new PresenceSocket.Player(p.id(), p.name(), AvatarColor.forUser(row.getLong("user_id")),
                         p.x(), p.y(), p.z(), p.yaw(), p.walking(), p.at(), p.hidden()));
                 }
             }, json.writeValueAsString(updates), System.currentTimeMillis(),
