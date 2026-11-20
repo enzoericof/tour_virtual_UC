@@ -742,3 +742,5 @@ Acceso norte frente a Kampus Print: reconstrucción aproximada según las tres f
 ### Ventanas ciegas de Bedelía — 20/11/2026
 
 Bedelía no se recorre ni se va a abrir, así que sus ventanales dejan de mostrar el interior sin cambiar de aspecto: los tres del frente (los dos paños amplios de los retiros y el de Recepción) y el del muro hacia el pasillo cubierto. Cada uno conserva el vidrio transparente, la perfilería azul, la barra blanca y las rejas inclinadas, y suma un panel ciego dentro del espesor del muro, 7 cm detrás del vidrio, con el material oscuro ya usado para cerrar sus accesos (`sealedGlass`). La pieza no sobresale del muro, no tiene colisión propia —el vidrio ya cierra el vano— y no altera cotas, circulación ni el paso a pie. La vitrina del CECYT mantiene su vidrio transparente sobre la galería.
+
+Se retira además la hoja de vidrio batiente que quedaba abierta en el acceso de Sala de profesores. El vano conserva el marco azul, el rótulo y el panel ciego; el retiro del acceso queda libre de batientes y sin colisión agregada.

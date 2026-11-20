@@ -1099,7 +1099,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
     frame({center:[recessedX-.12,0],size:[1.4,.1],angle:-Math.PI/2},()=>{
       for(const x of [-.7,.7]) box(.05,2.5,.06,x,1.25,0,blueFrame);
       box(1.4,.05,.06,0,2.5,0,blueFrame);
-      box(.025,2.4,.9,.7,1.2,-.45,m.glass,true);
+      // Sin hoja abierta: el vano queda cerrado por el panel ciego, con su marco y su rótulo.
       sign("SALA DE PROFESORES",0,2.75,-.04,1.2,Math.PI);
     });
     box(.24,2.6,1.48,recessedX,1.3,0,sealedGlass,true);
