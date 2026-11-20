@@ -2,7 +2,7 @@ name: Deploy de main cada 4 horas
 
 on:
   schedule:
-    - cron: '30 3,7,11,15,19,23 * * *'
+    - cron: '45 3,7,11,15,19,23 * * *'
       timezone: America/Asuncion
   workflow_dispatch:
     inputs:

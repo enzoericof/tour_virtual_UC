@@ -79,7 +79,7 @@ for (const [name, options, pattern] of [
 });
 
 test('Solo tiene disparadores programados/manuales y permisos de lectura', () => {
-  assert.match(workflow, /cron: '30 3,7,11,15,19,23 \* \* \*'/);
+  assert.match(workflow, /cron: '45 3,7,11,15,19,23 \* \* \*'/);
   assert.match(workflow, /timezone: America\/Asuncion/);
   assert.doesNotMatch(workflow, /^  (push|pull_request):/m);
   assert.match(workflow, /contents: read/);
