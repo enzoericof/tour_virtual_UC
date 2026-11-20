@@ -585,21 +585,20 @@ const gGallery = add(gRect.center, [Z, -blockG.depth / 2]);
 const at = (p: Vec2, y: number): [number, number, number] => [p[0], y, p[1]];
 /** Altura de llegada de los puntos sobre la plataforma. */
 const onPlatform = PLAZA_LEVEL + 0.15;
-/** Centro, en x del plano, del aula `index` (desde el oeste) del nivel `level` del Bloque 1: los puntos
- * interiores siguen al reparto de las aulas sin caer sobre un tabique. */
-function roomCenter(level: number, index: number) {
-  const { from, walls, to } = facultyBlueprint.rooms.main[level], bounds = [from, ...walls, to];
-  return b1x + (bounds[index] + bounds[index + 1]) / 2;
-}
-const lab = roomCenter(0, 2), classroom = roomCenter(3, 2);
+/** Puerta, en x del plano, del aula `index` (desde el oeste) del nivel `level` del Bloque 1. Las puertas
+ * de las aulas están cerradas: los puntos de visita quedan en la galería, frente a ellas. */
+const roomDoorX = (level: number, index: number) => b1x + facultyBlueprint.rooms.main[level].doors[index];
+const labDoor = roomDoorX(0, 2), classroomDoorAt = roomDoorX(3, 2);
+/** Z del plano de la pared de las puertas y de donde se para el visitante frente a ellas (a 1,8 m, en la galería). */
+const doorFaceZ = half.z - block1.gallery, doorStandZ = doorFaceZ + 1.8;
 
 export const facultyVisitPoints: Record<string, [number, number, number]> = {
   // Rellano junto a la cabecera este: la bodega bajo la escalera, el ascensor y la galería de planta
   // baja, como en la foto IMG_5706.
   acceso: at(add(stairTopMidpoint, [X, 0.9]), onPlatform),
-  laboratorio: [-7.5, 0.1, -2.2],
+  laboratorio: [labDoor, 0.1, doorStandZ],
   "pasillo-p3": [3, 10.5, 4.75],
-  "aula-p3": [classroom, 10.5, -1.5],
+  "aula-p3": [classroomDoorAt, 10.5, doorStandZ],
   "cantina-cyt": at(fromRect(cantina, [-2.5, 21]), onPlatform),
   bedelia: at(add(bedeliaFacade, [Z, 1]), onPlatform),
   // Boca del pasillo entre Manfred y Bedelía, como en las fotos IMG_5685 e IMG_5686.
@@ -618,8 +617,8 @@ export const facultyVisitPoints: Record<string, [number, number, number]> = {
 /** Hacia dónde mira el visitante al llegar (si falta, se usa una dirección por defecto). */
 export const facultyVisitTargets: Record<string, [number, number, number]> = {
   acceso: [facultyBlueprint.elevator.center[0], 1.4, half.z + 0.5],
-  laboratorio: [lab - 4, 1.2, -2.2],
-  "aula-p3": [classroom, 11.2, -6],
+  laboratorio: [labDoor, 1.5, doorFaceZ],
+  "aula-p3": [classroomDoorAt, 12, doorFaceZ],
   "cantina-cyt": at(cantinaFacade, PLAZA_LEVEL + 1.8),
   "plaza-abierta": at(cantinaFacade, PLAZA_LEVEL + 1.8),
   bedelia: at(bedeliaFacade, PLAZA_LEVEL + 1.6),

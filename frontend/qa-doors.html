@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="es"><head><meta charset="UTF-8" /><title>QA puertas (temporal)</title></head>
+<body style="margin:0;background:#000">
+<div id="v" style="width:1280px;height:800px"></div>
+<script type="module">
+import * as T from "three";
+import { TourEngine } from "/src/scene/engine.ts";
+import { facultyToWorld } from "/src/data/campus-geometry.ts";
+import { facultyBlueprint as plan, facultyVisitPoints, facultyVisitTargets, fromRect } from "/src/data/faculty-blueprint.ts";
+const engine = new TourEngine(document.getElementById("v"));
+window.qa = { engine, T, facultyToWorld, plan, facultyVisitPoints, facultyVisitTargets, fromRect };
+</script></body></html>

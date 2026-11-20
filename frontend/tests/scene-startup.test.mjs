@@ -1,7 +1,7 @@
 import { manfredRampSection, manfredStairZ } from "../src/data/faculty-blueprint.ts";
 import { Box3, BoxGeometry, Mesh, Matrix4, PerspectiveCamera, Ray, Raycaster, Triangle, Vector2, Vector3 } from "three";
 import {facultyPose,insidePolygon} from "../src/data/campus-geometry.ts";
-import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
+import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, blockG, classroomDoor, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
 import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { laboratoryGroundDetails } from "../src/data/faculty-annexes.ts";
@@ -738,6 +738,40 @@ test("The complete faculty scene starts with the current blueprint and valid geo
           assert.ok((backPassage.x - towerX) * side > 3.1, `Passage behind the sink wall on level ${level}`);
         }
       }
+    }
+    // Aulas de los dos bloques: puertas siempre cerradas (ni un rayo ni el Walker las cruzan) y vidrios
+    // de las hojas polarizados.
+    const classBlocks = [["main", plan.main, block1, 1, classroomDoor.width / 2 + classroomDoor.frame],
+      ["block2", plan.block2, blockG, -1, 0.5]];
+    for (const [key, rect, block, front, opening] of classBlocks) {
+      const zWall = front * (block.depth / 2 - block.gallery);
+      const through = (x, z) => fromRect(rect, [x, zWall + front * z]);
+      plan.rooms[key].forEach(({ doors }, level) => doors.forEach((d) => {
+        assert.equal(doors.length, 6, "Una puerta por aula");
+        for (const k of [-1, -0.5, 0, 0.5, 1]) for (const h of [0.3, 0.8, 1.3, 1.8]) {
+          const [px, pz] = through(d + k * (opening - 0.05), 0.6), [qx, qz] = through(d + k * (opening - 0.05), -0.6);
+          const from = new Vector3(px, level * FLOOR_HEIGHT + h, pz), to = new Vector3(qx, level * FLOOR_HEIGHT + h, qz);
+          const ray = new Raycaster(from, to.clone().sub(from).normalize(), 0, from.distanceTo(to));
+          assert.ok(ray.intersectObject(colliders, true).length,
+            `${key}, nivel ${level}: la puerta en x=${d.toFixed(2)} está cerrada a ${h} m`);
+        }
+        // Vidrio de las hojas (Bloque 1) o del montante (Bloque G): polarizado.
+        const panes = key === "main" ? [[d - classroomDoor.width / 4, classroomDoor.windowSill + classroomDoor.window / 2],
+          [d + classroomDoor.width / 4, classroomDoor.windowSill + classroomDoor.window / 2]] : [[d, 2.45]];
+        for (const [x, h] of panes) {
+          const [px, pz] = through(x, 0.6), [qx, qz] = through(x, -0.6);
+          const from = new Vector3(px, level * FLOOR_HEIGHT + h, pz), to = new Vector3(qx, level * FLOOR_HEIGHT + h, qz);
+          const [hit] = new Raycaster(from, to.clone().sub(from).normalize(), 0, from.distanceTo(to)).intersectObject(group, true);
+          assert.equal(hit?.object.material.name, "Vidrio polarizado", `${key}, nivel ${level}: el vidrio de la puerta es polarizado`);
+        }
+      }));
+      const d = plan.rooms[key][0].doors[2], [ax, az] = through(d, 1.2), [bx, bz] = through(d, -3);
+      walker.teleport(new Vector3(ax, 0.035, az));
+      camera.lookAt(camera.position.clone().add(new Vector3(bx - ax, 0, bz - az)));
+      walker.keys = new Set(["KeyW"]);
+      for (let i = 0; i < 90; i++) walker.update(1 / 60);
+      walker.keys.clear();
+      assert.ok(Math.hypot(camera.position.x - ax, camera.position.z - az) < 1.1, `${key}: el visitante no atraviesa la puerta cerrada`);
     }
     // Salir de la galería del Bloque 1 hacia el rellano sin chocar con el retorno lateral.
     walker.teleport(new Vector3(35.9, 0.035, 4.75));

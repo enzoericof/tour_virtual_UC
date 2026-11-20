@@ -37,7 +37,7 @@ type BlockSpec = {
   label: (level: number) => string;
   /** Aulas de cada nivel; donde terminan antes del extremo del bloque solo sigue la galería. */
   rooms: (level: number) => Rooms;
-  /** Puerta de cada aula: doble (Bloque 1, `classroomDoor`) o de una hoja de 1 m. */
+  /** Puerta de cada aula, siempre cerrada: doble (Bloque 1, `classroomDoor`) o de una hoja de 1 m. */
   door: "double" | "single";
   /** Ventana en el muro de cabecera del último recinto, con hueco real en el ladrillo. */
   endWindow?: { level: number; z: number; width: number; sill: number; height: number };
@@ -238,27 +238,27 @@ export function createFaculty(grass = makeGrassMaterial()) {
     layers.visual = previous;
   }
 
-  /** Puerta doble de aula (IMG_5639) centrada en x = d, en la pared z cuya galería queda hacia `front`.
-   * Vista desde la galería: hoja izquierda fija, con la ventana cuadrada; la derecha, abierta hacia el
-   * aula, deja el paso. Marco con montante de dos paños. Devuelve la altura del marco. */
-  function doubleDoor(d: number, y: number, z: number, front: number) {
+  /** Puerta doble de aula (IMG_5639) centrada en x = d, en la pared z. Las dos hojas están cerradas y
+   * con colisión: las aulas no se pueden visitar. Cada hoja lleva la ventana cuadrada de 45 cm; esas
+   * ventanas y los dos paños del montante son de vidrio polarizado. Devuelve la altura del marco. */
+  function doubleDoor(d: number, y: number, z: number) {
     const { width: w, height: h, frame: f, window: win, windowSill: sill, transom: t } = classroomDoor;
-    const leaf = w / 2, top = h + t + 2 * f, left = -front, mat = m.door;
+    const leaf = w / 2, top = h + t + 2 * f, mat = m.door;
     for (const side of [-1, 1]) box(f, top, 0.12, d + side * (w + f) / 2, y + top / 2, z, mat, true);
     box(w, f, 0.12, d, y + top - f / 2, z, mat);
     box(w, f, 0.1, d, y + h + f / 2, z, mat);
     box(f, t, 0.1, d, y + h + f + t / 2, z, mat);
-    for (const side of [-1, 1]) box((w - f) / 2, t, 0.02, d + side * (w + f) / 4, y + h + f + t / 2, z, m.glass, true);
-    // Hoja fija, cerrada, con la ventana de 45 cm desde 1,30 m.
-    const xl = d + (left * leaf) / 2, lw = leaf - 0.01, jamb = (lw - win) / 2;
-    box(lw, sill, 0.05, xl, y + sill / 2, z, mat, true);
-    box(lw, h - sill - win, 0.05, xl, y + (h + sill + win) / 2, z, mat, true);
-    for (const side of [-1, 1]) box(jamb, win, 0.05, xl + side * (win + jamb) / 2, y + sill + win / 2, z, mat, true);
-    box(win, win, 0.02, xl, y + sill + win / 2, z, m.glass, true);
-    // Hoja de abrir, girada sobre su bisagra (en el marco derecho) hacia el aula.
-    const hinge = d - left * leaf, swing = 1.45;
-    box(lw, h, 0.05, hinge + left * Math.cos(swing) * leaf / 2, y + h / 2, z - front * Math.sin(swing) * leaf / 2, mat, false,
-      { rotation: -swing });
+    for (const side of [-1, 1]) box((w - f) / 2, t, 0.02, d + side * (w + f) / 4, y + h + f + t / 2, z, m.polarized, true);
+    // Hojas cerradas, con la ventana polarizada de 45 cm desde 1,30 m, y un cubrejunta que cierra la unión central.
+    box(0.03, h, 0.07, d, y + h / 2, z, mat, true);
+    const lw = leaf - 0.01, jamb = (lw - win) / 2;
+    for (const side of [-1, 1]) {
+      const xl = d + (side * leaf) / 2;
+      box(lw, sill, 0.05, xl, y + sill / 2, z, mat, true);
+      box(lw, h - sill - win, 0.05, xl, y + (h + sill + win) / 2, z, mat, true);
+      for (const jambSide of [-1, 1]) box(jamb, win, 0.05, xl + jambSide * (win + jamb) / 2, y + sill + win / 2, z, mat, true);
+      box(win, win, 0.02, xl, y + sill + win / 2, z, m.polarized, true);
+    }
     return top;
   }
   /** Cartel con el número del aula sobre la puerta (IMG_5639): dos placas verticales unidas en una
@@ -401,15 +401,14 @@ export function createFaculty(grass = makeGrassMaterial()) {
       }
       doors.forEach((d, i) => {
         if (s.door === "single") {
-          box(1, 0.6, 0.05, d, y + 2.45, zWall, m.glass);
+          // Hoja cerrada y con colisión; el montante de encima, de vidrio polarizado.
+          box(1, 0.6, 0.05, d, y + 2.45, zWall, m.polarized, true);
           box(1.04, 0.08, 0.22, d, y + 2.15, zWall, m.metal);
-          const hinge = d - 0.48, swing = 1.2;
-          box(0.95, 2.1, 0.05, hinge + Math.cos(swing) * 0.475, y + 1.05, zWall - front * Math.sin(swing) * 0.475, m.metal, false,
-            { rotation: front * swing });
+          box(1, 2.1, 0.05, d, y + 1.05, zWall, m.metal, true);
           return;
         }
         // Puerta doble con montante; encima, ladrillo hasta el dintel y el prisma con el número del aula.
-        const frameTop = doubleDoor(d, y, zWall, front);
+        const frameTop = doubleDoor(d, y, zWall);
         box(2 * opening, 2.85 - frameTop, 0.2, d, y + (2.85 + frameTop) / 2, zWall, m.brick, true);
         const label = s.roomSign?.(level, i);
         if (label) roomSign(label, d, y + frameTop + 0.14, zWall + front * 0.1, front);
@@ -423,7 +422,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
         box(w, 1, 0.2, xc, y + 0.5, zBack, m.brick, true);
         box(w, hw - 2.7, 0.2, xc, y + 2.7 + (hw - 2.7) / 2, zBack, m.brick, true);
         for (const px of [x0 + 0.3, x1 - 0.3]) box(0.6, 1.7, 0.2, px, y + 1.85, zBack, m.brick, true);
-        box(w - 1.2, 1.7, 0.05, xc, y + 1.85, zBack, m.glass, true);
+        box(w - 1.2, 1.7, 0.05, xc, y + 1.85, zBack, m.polarized, true);
         for (let k = 1; k < 4; k++) box(0.05, 1.7, 0.09, x0 + 0.6 + (k * (w - 1.2)) / 4, y + 1.85, zBack, m.metal);
         box(w - 1.2, 0.05, 0.09, xc, y + 2.1, zBack, m.metal);
         if (s.rearScreens) {
@@ -470,7 +469,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
           y + (hw + window.sill + window.height) / 2, zRooms, m.brick, true);
         for (const [p, q] of [[lo, left], [right, hi]])
           box(0.24, window.height, q - p, x, y + window.sill + window.height / 2, (p + q) / 2, m.brick, true);
-        box(0.035, window.height, window.width, x, y + window.sill + window.height / 2, window.z, m.glass, true);
+        box(0.035, window.height, window.width, x, y + window.sill + window.height / 2, window.z, m.polarized, true);
         for (const z of [left, window.z, right]) box(0.27, window.height + 0.08, 0.055, x,
           y + window.sill + window.height / 2, z, m.white);
         for (const h of [window.sill, window.sill + window.height])

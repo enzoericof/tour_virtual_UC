@@ -310,6 +310,9 @@ export function makeMaterials(grass: T.MeshStandardMaterial) {
       roughness: 0.28,
       metalness: 0.35,
     }),
+    // Vidrio polarizado de las aulas: azul verdoso oscuro y sin transparencia, para que no se vea el interior.
+    // Poca metalicidad: sin mapa de entorno, un metal oscuro se dibuja negro y parece un hueco.
+    polarized: new T.MeshStandardMaterial({ name: "Vidrio polarizado", color: "#3a5964", metalness: 0.15, roughness: 0.14 }),
     wood: new T.MeshStandardMaterial({ color: "#b4532f", roughness: 0.8 }),
     bark: new T.MeshStandardMaterial({ color: "#594b39", roughness: 1 }),
     leaves: [0x536b36, 0x617942, 0x788c4c, 0x405d35].map(

@@ -84,7 +84,7 @@ test("Classroom double doors of Bloque 1 follow IMG_5639 and the team's measurem
   assert.equal(classroomDoor.window, 0.45);
   assert.equal(classroomDoor.windowSill, 1.3);
   assert.ok(classroomDoor.windowSill + classroomDoor.window < classroomDoor.height, "Window inside the fixed leaf");
-  assert.ok(classroomDoor.width / 2 - 0.01 > 2 * 0.28 + 0.2, "The opening leaf leaves room for the walker (radius 0.28 m)");
+  assert.ok(classroomDoor.width / 2 - 0.01 > 2 * 0.28 + 0.2, "Each closed leaf is wide enough to seal the doorway for the walker (radius 0.28 m)");
   assert.ok(classroomDoor.height + classroomDoor.transom + 2 * classroomDoor.frame < 2.85, "Transom below the lintel");
 });
 
@@ -289,6 +289,16 @@ test("Annexes and visit points stay in the faculty site", () => {
   assert.equal(facultyVisitPoints["piso-2"][1], 7);
   assert.equal(facultyVisitPoints["pasillo-p3"][1], 10.5);
   assert.equal(facultyVisitPoints["aula-p3"][1], 10.5);
+  // Las puertas de las aulas están cerradas: laboratorio y aula se visitan desde la galería, frente a su puerta.
+  const gallery = [half.z - block1.gallery, half.z];
+  for (const [id, level] of [["laboratorio", 0], ["aula-p3", 3]]) {
+    const [x, y, z] = facultyVisitPoints[id], door = plan.main.center[0] + plan.rooms.main[level].doors[2];
+    assert.ok(z > gallery[0] + 0.6 && z < gallery[1] - 0.6, `${id}: en la galería, sin pisar la pared ni la baranda`);
+    assert.ok(close(x, door), `${id}: frente a la puerta de su aula`);
+    assert.ok(close(y, level * FLOOR_HEIGHT, 0.2), `${id}: en el nivel de su aula`);
+    const [tx, , tz] = facultyVisitTargets[id];
+    assert.ok(close(tx, door) && close(tz, gallery[0]), `${id}: mira hacia la puerta cerrada`);
+  }
   assert.ok(facultyVisitPoints["cantina-cyt"][0] > facultyVisitPoints.patio[0]);
   assert.ok(insidePolygon([facultyVisitPoints.banos[0], facultyVisitPoints.banos[2]], towerOutline()),
     "The toilets visit point is inside the tower");

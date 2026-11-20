@@ -32,7 +32,7 @@ const originalPlaces: Place[] = [
     category: "Ciencia & tecnología",
     floor: "Planta baja · Bloque 1",
     description:
-      "Laboratorios de planta baja del Bloque 1, dentro del modelo de la facultad. Las fotografías sirven como referencia; el interior es aproximado.",
+      "Laboratorios de planta baja del Bloque 1, vistos desde la galería: las puertas están cerradas y los vidrios son polarizados, por lo que el interior no se visita. Las fotografías sirven como referencia.",
     position: [-14, 0, -5],
     photo: "IMG_5653",
     photos: ["IMG_5653", "IMG_5649", "IMG_5655", "IMG_5663"],
@@ -56,7 +56,7 @@ const originalPlaces: Place[] = [
     category: "Espacios de aprendizaje",
     floor: "Piso 3 · Bloque 1",
     description:
-      "Aula del tercer piso del Bloque 1. Se visita dentro del modelo construido; distribución y mobiliario aproximados, pendientes de validar con el equipo.",
+      "Aula del tercer piso del Bloque 1, vista desde la galería frente a su puerta cerrada, con los vidrios polarizados: el interior no se visita. Distribución y mobiliario, pendientes de validar con el equipo.",
     position: [5, 10.5, -7],
     photo: "IMG_5635",
     photos: ["IMG_5635", "IMG_5634", "IMG_5636"],
