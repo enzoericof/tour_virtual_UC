@@ -11,7 +11,8 @@ function visit() {
   return { target, document, reasons, monitor, advance: value => now = value, tick: () => tick(), cancelled: () => cancelled };
 }
 
-test('Tres minutos sin actividad terminan la visita una sola vez', () => {
+test('Quince minutos sin actividad terminan la visita una sola vez', () => {
+  assert.equal(visitIdleMs, 15 * 60 * 1000);
   const v = visit();
   v.advance(visitIdleMs - 1); v.tick(); assert.deepEqual(v.reasons, []);
   v.advance(visitIdleMs); v.tick(); v.tick();
@@ -23,9 +24,9 @@ test('Teclado, mouse y rueda mantienen el recorrido; las actualizaciones de red 
   for (const [index, event] of ['keydown', 'mousemove', 'pointerdown', 'wheel'].entries()) {
     v.advance((index + 1) * 100000); v.target.dispatchEvent(new Event(event)); v.tick();
   }
-  v.advance(579999); v.target.dispatchEvent(new Event('message')); v.tick();
+  v.advance(400000 + visitIdleMs - 1); v.target.dispatchEvent(new Event('message')); v.tick();
   assert.deepEqual(v.reasons, []);
-  v.advance(580000); v.tick(); assert.deepEqual(v.reasons, ['idle']);
+  v.advance(400000 + visitIdleMs); v.tick(); assert.deepEqual(v.reasons, ['idle']);
 });
 
 test('Volver a una pestaña inactiva no revive la visita caducada', () => {

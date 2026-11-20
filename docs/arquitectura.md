@@ -131,7 +131,7 @@ Mi cuenta ya no ofrece selector ni guardado de apariencia; también se retiraron
 
 ## Duración de la visita y cuenta recordada
 
-La visita multijugador y la cuenta recordada tienen ciclos distintos. `services/visit-lifecycle.ts` termina la visita tras 180000 ms sin teclado, mouse o rueda. Pings, snapshots, renderizado y foco no reinician ese plazo. Se comprueba también al volver de una pestaña oculta; una entrada tardía no revive una visita vencida. `pagehide` termina la visita al cerrar, navegar o recargar. `pageshow.persisted` fuerza el acceso de nuevo si el navegador restaura un documento desde su caché.
+La visita multijugador y la cuenta recordada tienen ciclos distintos. `services/visit-lifecycle.ts` termina la visita tras 900000 ms (15 minutos) sin teclado, mouse o rueda. Pings, snapshots, renderizado y foco no reinician ese plazo. Se comprueba también al volver de una pestaña oculta; una entrada tardía no revive una visita vencida. `pagehide` termina la visita al cerrar, navegar o recargar. `pageshow.persisted` fuerza el acceso de nuevo si el navegador restaura un documento desde su caché.
 
 Finalizar la visita envía leave si el WebSocket está abierto, detiene sus temporizadores y reconexión, cierra el socket que comparte con el chat, limpia las interacciones y pausa los controles. Al vencer por inactividad se recarga el documento para liberar escena y manejadores; un aviso temporal en sessionStorage explica la salida. No contiene identidad ni contraseñas. El cierre WebSocket retira la presencia en el servidor; ante un corte abrupto sigue existiendo la caducidad de respaldo del backend.
 

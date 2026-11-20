@@ -1,5 +1,5 @@
 export type VisitEnd = "idle" | "pagehide";
-export const visitIdleMs = 3 * 60 * 1000;
+export const visitIdleMs = 15 * 60 * 1000;
 
 type Options = {
   target?: EventTarget;
@@ -54,7 +54,7 @@ export function consumeVisitEnd(): string {
   try {
     const reason = sessionStorage.getItem(reasonKey);
     sessionStorage.removeItem(reasonKey);
-    return reason === "idle" ? "El recorrido se cerró tras 3 minutos sin actividad."
+    return reason === "idle" ? "El recorrido se cerró tras 15 minutos sin actividad."
       : reason === "full" ? "El recorrido está completo: hay 10 personas conectadas. Reintentá cuando se libere un lugar." : "";
   } catch { return ""; }
 }
