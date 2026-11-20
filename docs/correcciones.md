@@ -113,3 +113,16 @@ Incoherencias halladas al contrastar los documentos con el código y las pruebas
 - El README citaba un desnivel de 1,40 m para la plataforma. La cota del modelo es de 0,90 m, indicada en `PLAZA_LEVEL` y en [Coordenadas y pisos](base-geografica.md#coordenadas-y-pisos).
 - La guía geográfica indicaba que los escaneos todavía eran escenas independientes. El recorrido se construye con el modelo común y usa las texturas derivadas de los escaneos.
 - La [revisión visual](../design-qa.md) resume las comprobaciones por sector. La bitácora desplegable conserva el detalle de las revisiones anteriores.
+
+## 19/11/2026 — ascensor
+
+| Documento | Incorrecto | Correcto | Fuente de verdad |
+| --- | --- | --- | --- |
+| Fotos aportadas, pedido original | `cara este.jpeg` (mural de los cascos) como cara este, y la cara oeste con el mural de `IMG_5727` | Los cascos van en la cara oeste y la computadora (`IMG_5727`) en la este. Al rodear la torre, el mural del lápiz (sur) tiene los cascos a su izquierda y la computadora a su derecha | `cara este.jpeg`, `IMG_5727` y `cara sur.jpeg`; confirmación del usuario |
+| `base-geografica.md` | «Es un volumen: no se puede usar» | La cabina funciona en los cuatro niveles (`ElevatorMotion`); desde el 19/11 también con sonido | `scene/elevator.ts`, `scene/engine.ts` |
+| `pendientes.md` | «Hoy el ascensor del Bloque 1 es solo un volumen» | Ídem | Ídem |
+
+
+### 19/11/2026 — Ubicación del defecto de renderizado de la captura
+
+La fachada curva con ventana horizontal y marquesina suspendida es la cocina de cantina. Se identificó inicialmente como torre de baños y se corrigió allí otra superposición real, sin resolver la captura. La revisión posterior reprodujo el defecto exacto en cantina y retranqueó su cubierta dentro del muro. La verificación correspondiente está en docs/verificacion.md.

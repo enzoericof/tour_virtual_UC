@@ -1,5 +1,108 @@
 # Verificación (versión 0.1.0)
 
+## Consumo del índice de colisiones - 19/11/2026
+
+- La auditoría anterior de buffers geométricos no medía los objetos del índice de colisiones. Se detectó que el `Octree` de Three.js, con sus 16 niveles y 8 triángulos por hoja predeterminados, reproducía referencias de las caras grandes y solapadas en millones de celdas.
+- Comparación local controlada sobre el mismo modelo `b82d570`, después de GC y con 88.098 triángulos únicos en ambos casos:
+
+| Métrica | Configuración anterior | Configuración acotada |
+| --- | ---: | ---: |
+| Nodos del índice | 2.252.488 | 52.258 |
+| Referencias a triángulos | 7.635.389 | 559.291 |
+| Heap JavaScript tras construir escena e índice | 1.985,42 MB | 143,30 MB |
+| RSS del proceso de medición | 2.386,61 MB | 513,52 MB |
+
+- Se centraliza la construcción del índice con `maxLevel=6` y `trianglesPerLeaf=16`. Se aplica al campus, colocaciones del editor y barreras dinámicas. Se conservan todos los triángulos y sus coordenadas: la subdivisión solo selecciona candidatos y las comprobaciones finales siguen siendo exactas. Al reconstruir se conserva el objeto que comparten caminante y gatos.
+- Se incorporó main `32770ac` antes de validar. Con ese edificio adicional se midieron 88.558 triángulos únicos, 53.209 nodos y 144,88 MB de heap. En una muestra local de cápsula más rayo sobre los puntos de visita: mediana 0,0121 ms y percentil 95 de 0,0811 ms. Son mediciones sintéticas de consultas, no FPS del navegador.
+- Chrome: carga visual del campus completo con la configuración de producción; se observaron 53.209 nodos, los 88.558 triángulos y aproximadamente 230 MB de heap JavaScript en la vista local. Esto no representa el total de la pestaña: excluye parte de texturas, buffers de GPU y gastos del navegador. No se usaron cuentas ni la base de producción.
+- Pasaron 87 pruebas y el build de producción, incluidos rayos contrastados con el modelo, contactos de esfera/cápsula en piso/pared/escalón, reconstrucción del índice y referencia compartida. La prueba de campus verifica que no se pierden triángulos y que el índice queda por debajo de 150.000 nodos; se mantienen el recorrido por baños, pisos y ascensor y las pruebas de gatos, asientos y multijugador.
+
+## Encuentro de pisos junto a cantina - 19/11/2026
+
+- Los rayos sobre el modelo real detectaron dos acabados distintos exactamente a 0,905 m: el hormigón del patio de Maquetas y el piso genérico de la plataforma. También había polígonos repetidos entre las piezas de la plaza.
+- Se recorta el acabado genérico contra la huella del patio y las piezas ya pavimentadas. Los recortes aceptan contornos cóncavos y cortes que cruzan los bordes. Se mantienen las texturas, orientación de juntas, bases y colisiones, sin elevar los pisos ni aplicar desplazamientos de profundidad.
+- Pasaron 84 pruebas y la compilación de producción. Se comprueban áreas con cortes interiores, exteriores, solapados, contornos cóncavos y bordes compartidos. En tres puntos del encuentro real se verifica un único acabado de hormigón a 0,905 m y apoyo transitable a 0,90 m. Se mantienen las pruebas de geometría, pasillos, escaleras y memoria del follaje.
+- Chrome: revisión visual del frente completo de cantina y el encuentro de hormigón y baldosas desde una cámara local a altura peatonal. Se conserva el mosaico del acceso y el suelo continuo, sin el cruce coplanar de materiales. La vista local no usa cuentas ni conecta al backend.
+
+## Árbol de cantina y memoria del perímetro - 19/11/2026
+
+- Se restaura exactamente el bloque del árbol del alcorque de la cantina anterior a `794f526`: tronco esbelto, ramas y 5.600 hojas geométricas. Se mantienen el alcorque, arbustos, ubicación y colisión originales, y los demás cambios del equipo.
+- El perímetro tenía 210 árboles con dos niveles de detalle. `InstancedMesh.clone()` copiaba matrices y colores para cada ejemplar: aproximadamente 12,45 millones de instancias entre ambos niveles. Ahora solo se copia la jerarquía y sus transformaciones exteriores; las matrices y colores locales inmutables se comparten, igual que geometrías y materiales. Se conserva la cantidad de árboles, hojas, forma y distancia de cambio de detalle.
+- Medición local construyendo el modelo real, sumando cada `ArrayBuffer` único de geometrías, índices y atributos de instancias, en MB decimales:
+
+| Datos retenidos | Antes | Después |
+| --- | ---: | ---: |
+| Contexto exterior completo | 949,15 MB | 7,55 MB |
+| Escena completa | 1.066,66 MB | 121,24 MB |
+| Proceso Node después de GC (RSS orientativo) | 1.467,45 MB | 517,82 MB |
+
+- Los 73 recursos de `frontend/public` sumaban 12,15 MB. Esta cifra no es el tráfico inicial ni incluye los paquetes compilados: diferencia tamaño de archivos de memoria de ejecución. Tampoco las cifras de buffers equivalen al total de una pestaña de Chrome, que incluye texturas decodificadas, GPU, colisiones y otros gastos del navegador.
+- Chrome: campus completo y árbol restaurado revisados en una vista local sin autenticar ni conectar a la base. En esa vista, la instrumentación de `bufferData` registró 34,88 MB de buffers gráficos asignados, 147 geometrías y 33 texturas; el consumo depende de qué objetos se hayan dibujado. No se midieron FPS ni memoria total del proceso del navegador.
+- Pasaron las 81 pruebas y la compilación de producción. La prueba de escena comprueba ambos niveles de detalle, límites válidos para el descarte fuera de cámara, doce buffers únicos compartidos para matrices/colores y un presupuesto inferior a 8 MB para el follaje del perímetro. Se contrastó el bloque del árbol restaurado con el original de Git.
+
+## Gestos con G y retiro del aviso permanente - 19/11/2026
+
+- Retirado del motor 3D el aviso «E · Gestos · Enter · Chat». El indicador de asientos solo aparece junto a una plaza disponible o al estar sentado. C abre el chat, G abre los gestos e interacciones y E permite sentarse o levantarse.
+- El diálogo de gestos usa el material compartido de `tour-panel`, sus fuentes, bordes y botones. Se agrega cierre con el icono habitual y se actualiza Ayuda con G, C y E.
+- Chrome: revisados G, cierre con Esc, C, escritura de g en el chat sin activar gestos y Ayuda con los controles actualizados. Se usaron el componente real del diálogo y el manejador real de teclas con un motor simulado; no se probó multijugador en producción.
+- Pruebas automáticas: 81 aprobadas, incluidos tres casos nuevos sobre G, E y aislamiento al escribir, pausar o mantener modificadores. Compilación de producción aprobada. El paquete compilado no contiene los avisos antiguos de gestos/chat.
+
+## Ajuste de controles y estilo del chat - 19/11/2026
+
+- Se retira el audio de pasos, su descarga y el cálculo de pasos por cuadro. Se conservan las notificaciones y los impactos.
+- C abre el chat durante el recorrido, Enter envía y Esc cierra en pausa. El acceso de la cuenta abre el mismo diálogo. Cerrado no muestra mensajes ni indicaciones sobre la escena. Se reutilizan los colores y controles de `tour-panel` también para los gestos.
+- Chrome con componentes reales y presencia simulada local: apertura con C desde un botón enfocado, foco en el campo, escritura con la letra c, envío y confirmación, Esc, Enter sin abrir el chat y reapertura mediante su API. Revisada la disposición horizontal del campo y el botón. No se probó una conversación entre dos cuentas en producción ni se modificó el backend.
+- Frontend: 78 pruebas y compilación de producción aprobadas. Persisten los avisos de HMR ocupado en las pruebas y del bloque compartido de Three.js mayor a 700 kB.
+
+## Chat grupal, avatares y gestos - 19/11/2026
+
+- Frontend: 78 pruebas aprobadas y compilación de producción con Node 24.22.3. Se cubren el corte exacto de cinco minutos, conservación de mensajes ante un fallo de archivo, colisiones del ragdoll, impulsos, contacto de manos, expiraciones tardías y mantenimiento de OK/paz durante cuadros con valores constantes. Vite avisa que el bloque compartido de Three.js supera 700 kB (unos 714 kB; 180 kB comprimidos); no impide compilar.
+- Backend: `sh ./mvnw -B -Dtest=PresenceSocketTest,SocialServiceTest verify` aprobó 12 pruebas y generó el JAR con JDK 25 y objetivo Java 21. Las pruebas usan dobles: identidad asignada por sesión, destinatario exclusivo para aceptar, proximidad/orientación, rechazos y límites, archivo a los 300000 ms, reintento sin pérdida y ausencia de consultas periódicas de tablas cuando no hay visitantes ni mensajes pendientes.
+- Blender 5.3 exportó el GLB de 216716 bytes con siete clips y articulaciones de dedos. Una prueba carga el GLB real y verifica su tamaño, altura, nombres de nodos y animaciones. Los tres MP3 se copiaron desde los archivos aportados y sus hashes quedaron en el catálogo de procedencia.
+- Chromium: revisión con los componentes reales de navegación, chat, avatares y física en una escena pequeña de suelo/pared, con WebSocket y cuentas simulados y archivos servidos mediante intercepción del navegador. No se inició un servidor HTTP, backend, Docker ni PostgreSQL. Comprobados Enter/Escribir/Enviar/Esc, historial consultado solo al abrir, HTML tratado como texto, notificación de audio, aceptación y rechazo, high five, manos y salto, OK, paz, caída, impulso y recuperación. El audio de la caída se disparó por tres impactos físicos; la recuperación encontró un punto libre. No se escuchó por parlantes.
+- Capturas locales fuera de Git: `output/playwright/social-{recent,history,consent,high-five,hands-jump,ok,peace,ragdoll}.png`. La escena completa cargó sin errores JavaScript, pero el render continuo con GPU por software resultó demasiado lento para completar allí la revisión; las capturas sociales corresponden a la escena pequeña, no al campus completo.
+- Pendiente de aceptación en la nube: aplicar V11 al iniciar el backend, probar el archivo/historial con PostgreSQL real durante cinco minutos, dos cuentas y dos instancias, y la caída en las escaleras y rampas reales. No se ejecutaron la prueba de contexto ni las pruebas de integración de PostgreSQL; no se modificó la base nativa. La prueba optativa `frontend/tests/chat.integration.mjs` exige un entorno desechable explícito y puede esperar el archivo real con `CHAT_TEST_WAIT_ARCHIVE=yes`.
+- Publicación: se conserva el filtro de `vercel.json`; solo los commits de `enzoericof` disparan despliegue automático. Subir un commit de otro autor a main no confirma publicación.
+
+## Detalles de suelo de Civil — 19/11/2026
+
+Pasaron las 68 pruebas y la compilación de producción. La prueba de arranque de escena comprueba por rayos descendentes el apoyo de cada rejilla y registro en tres puntos, la altura de la plataforma y la pendiente de sus dos bordes laterales. Las rejillas tienen una tapa de colisión continua para no introducir huecos entre barras. Persisten avisos del puerto HMR 24678 ocupado durante las pruebas, sin fallos. No se realizó revisión visual ni recorrido manual con cápsula; la apertura externa del navegador había sido denegada en la etapa anterior. No se cambió la cota general del patio ni la conexión previa entre el patio elevado y el sendero lateral.
+
+## Volumen del rincón y depósito de Civil — 19/11/2026
+
+Pasaron las 68 pruebas del frontend y `npm run build`. El proceso de pruebas avisó que el puerto HMR 24678 estaba ocupado, sin fallos en las pruebas. Comprobación adicional sobre los colliders de la escena completa: tres líneas paralelas a altura de torso atraviesan el paso lateral sin obstáculos; el frente del volumen rojizo y el frente y lateral del depósito interceptan los rayos de colisión. Esto no sustituye un recorrido con cápsula ni la inspección visual. La revisión en Edge quedó pendiente: el navegador no inició dentro del aislamiento y no se autorizó ejecutarlo fuera. No se generaron capturas nuevas ni se modificaron los procesos de desarrollo del usuario.
+
+## Actualización de main conservando los laboratorios — 19/11/2026
+
+Integrados los cambios remotos hasta `c905cc1`, incluidos el ascensor y el acceso al DEI. Recuperados los cambios locales de volúmenes, patio, hormigón y fachadas de los laboratorios desde un stash completo con archivos nuevos. Los conflictos de importaciones y documentación se combinaron conservando ambos aportes. Pasaron las 68 pruebas, `npm run build` y la comprobación de marcadores de conflicto. El archivo de detalles de fachadas coincide con el respaldo. No se realizó una nueva revisión visual de esta integración.
+
+## Ascensor con fotos y sonido — 19/11/2026
+
+- Pasaron las 68 pruebas del frontend y la compilación de producción, sin avisos de tamaño: el bloque de three.js queda en 697 kB, porque el sonido usa Web Audio directo. La prueba de la escena comprueba la cabina de 1,1 × 1,4 m y que sus paredes frenan al visitante. También comprueba el vano libre con las puertas abiertas, la hoja rápida que recorre el doble que la lenta, los tiempos de apertura (2,3 s) y la pausa de llegada. Además, el botón de cerrar, el indicador de la cabina, los tres murales distintos y el orden viaje → gong → puertas. Una prueba nueva verifica el tamaño y la procedencia de los 14 recursos del ascensor.
+- Revisión en Chromium sin ventana (WebGL por software) con una página temporal que arma `TourEngine` sin iniciar sesión, porque el backend no estaba activo. Se revisaron el frente de planta baja y del primer piso, las puertas abiertas, el interior hacia el fondo, la botonera y la puerta, el piso y los tres murales desde el sur, el este y el oeste. Sin errores de página. Capturas locales fuera de Git.
+- Sonido en el mismo navegador: el contexto queda activo, los tres MP3 se decodifican (3,3 s, 2,49 s y 7,2 s). En un viaje de un piso suenan, en orden, el motor (su volumen sigue la velocidad), el gong al detenerse y las puertas al abrir. No se escuchó por parlantes.
+- No se recorrió a pie con el mouse capturado ni con el backend real.
+
+## Detalles de los laboratorios de Civil — 19/11/2026
+
+Pasaron las 66 pruebas del frontend y `npm run build`. Revisión de dos vistas de la geometría completa en Edge headless (rincón posterior y lateral), sin errores JavaScript. Capturas locales: `output/laboratorios-rincon.png` y `output/laboratorios-lateral.png`. La cápsula de navegación tuvo paso libre en 36 muestras del lateral frente a los nuevos equipos y la mesada; la última muestra junto al extremo hacia cantina registró contacto, por lo que la conexión completa y el recorrido manual siguen pendientes. Se mantuvieron las huellas, alturas principales y el material de ladrillo; Git conserva el estado de resolución pendiente de la integración anterior.
+
+## Integración de cambios locales de Maquetas — 19/11/2026
+
+Se actualizó `main` hasta `6381cfb` y se recuperaron los cambios locales del patio, el hormigón y los volúmenes de Maquetas. Los conflictos en los dos constructores de escena se resolvieron conservando también las fachadas de DEI–LED y los senderos entrantes. Pasaron las 66 pruebas del frontend, `npm run build` y la revisión de marcadores de conflicto. La suite avisó de un puerto HMR ocupado y terminó con código 0. Revisión visual de la integración pendiente; no se ejecutaron pruebas del backend.
+
+## Acabado del hormigón de Maquetas — 18/11/2026
+
+Pasaron las 53 pruebas de `npm test` y `npm run build`. La suite avisó que el puerto HMR 24678 estaba ocupado, pero terminó con código 0. El cambio se limita al material y las coordenadas UV del piso del patio. La revisión visual de este acabado queda pendiente: Edge no pudo iniciarse en el entorno restringido y no se autorizó ejecutarlo fuera de él.
+
+## Muro posterior de Maquetas — 18/11/2026
+
+Pasaron las 53 pruebas de `npm test` y la compilación `npm run build`. Se comprobó numéricamente que la cara exterior del muro posterior coincide con el eje de la última columna del pasillo y se revisó la alineación en un render de `createFaculty` en Edge headless. El frente hacia cantina mantiene su ubicación y longitud de 14,17 m. El recorrido manual por el caminero posterior queda pendiente.
+
+## Piso del patio de Maquetas — 18/11/2026
+
+Pasaron las 53 pruebas de `npm test` y `npm run build` desde `frontend/`. Las pruebas emitieron un aviso de puerto HMR 24678 ocupado y finalizaron con código 0. Se renderizó la geometría de `createFaculty` en Edge headless con una cámara de revisión hacia el patio. Se comprobó visualmente el recorte del pavimento junto a cantina. Ocho rayos verticales sobre la colisión confirmaron apoyo en accesos, circulación y jardín, con 5 mm de diferencia entre ambas superficies. Las comprobaciones corresponden a geometría y apoyo estático; el recorrido manual completo queda pendiente. Distribución y aproximaciones en [Geografía y reconstrucción](base-geografica.md#piso-junto-a-cantina--14112026).
+
 ## Refactor del visor y del servidor — 15/11/2026
 
 Pasaron las 40 pruebas del frontend y la compilación de producción. La comparación de la escena antes y después del refactor confirmó la equivalencia de las mallas y las colisiones. El backend pasó `mvn verify` con Java 21 y PostgreSQL 17.4 en una base temporal sobre la que se aplicaron las ocho migraciones. La prueba de contexto verifica el arranque de Spring Boot. [Revisión en navegador](../design-qa.md).
@@ -410,3 +513,161 @@ Comprobaciones numéricas locales de la geometría, sin ejecutar la suite bloque
 ## Dos escalones fundidos en el remate — 19/11/2026
 
 Comprobación numérica del piso aislado: sin huecos ni coordenadas inválidas; dos contrahuellas y 0,30 m de desnivel total; altura remanente de ambas contrahuellas al terminar la rampa: cero. Separación mínima de las sillas respecto a la huella: 0,547 m. Revisada una proyección rasterizada de las mallas generadas para comprobar ausencia de canal y continuidad del remate. Compilación correcta. La proyección no sustituye una revisión del navegador completo; la suite integral sigue sin ejecutarse por el bloqueo previamente documentado.
+
+
+## Fluidez con consumo limitado (17/11/2026)
+
+Se separaron los planificadores de difusión y sincronización. Nuevas pruebas de backend: una consulta bloqueada no detiene el envío de posiciones locales; no se repite la misma instantánea en cada tick; en reposo se omiten consultas antes del latido; la revocación cierra la conexión y la baja del último visitante se elimina. Una cuarta prueba ejecutó las consultas reales de PresenceStore contra PostgreSQL 17 aislado en 127.0.0.1:55433/tour_fluidity: diez plazas, rechazo del undécimo, marcas temporales conservadas, reutilización de plaza y caducidad de sesión. Las cuatro pasaron. No se usaron credenciales ni datos de Neon.
+
+Se compiló el código Java y se ejecutaron esas cuatro pruebas con Maven 3.9.12 instalado y un POM temporal que omitía únicamente el starter de Spring Session JDBC, ausente en la caché y bloqueado para descarga desde este entorno. No equivale a Maven verify del proyecto completo ni verifica el arranque de Spring Session o dos instancias HTTP/WebSocket reales. El POM versionado conserva la dependencia. Queda pendiente esa verificación completa y la medición en Vercel.
+
+Frontend: 50 pruebas y compilación TypeScript/Vite correctas. La prueba temporal de movimiento usa paquetes alternados de 280/320 ms durante seis segundos y comprueba que no existan frenadas ni saltos de cada paquete; también prueba duplicados, giro corto, teletransporte y predicción limitada. Revisión visual en Chrome de diez avatares con ese intervalo, detención desde el botón y ausencia de errores visibles. La página .local/motion-preview.html es una herramienta local ignorada por Git. No constituye una medición multijugador de producción.
+
+
+## Acceso, sesión y menús (18/11/2026)
+
+53 pruebas frontend y build correctos. Las tres pruebas nuevas comprueban restauración mediante una sola petición autenticada por cookie, distinción entre sesión vencida y fallo de red, y cierre con CSRF seguido de cuenta no autenticada.
+
+Revisión en Chrome contra frontend 5186 y backend local 18085, con PostgreSQL aislado en 55433/tour_account y una cuenta ficticia: acceso visible antes de instanciar el visor; pestañas de ingreso/registro; login; recuperación automática de la cuenta después de recargar; tema claro y oscuro del panel de cuenta, con el mismo degradado calculado que la barra. Prueba HTTP: cookie Path=/, Max-Age=2592000, HttpOnly, SameSite=Lax; dos consultas /me autenticadas y 401 después de cerrar sesión. Se usó el JAR local previamente compilado con la configuración de sesión actual: valida el flujo servlet y la cookie persistente, pero no el almacén JDBC compartido de producción. Falta comprobar en Vercel la sesión entre instancias y después de cerrar/reabrir completamente el navegador. No se usó Neon ni credenciales reales.
+
+Comprobación adicional en navegador: abrir otra pestaña recupera la cuenta; cerrar sesión y recargar vuelve a la bienvenida; invitado entra sin cuenta y el botón Ingresar abre el formulario con un clic. Se conserva un estado de carga visible mientras se construye el escenario.
+
+El intento de Maven Wrapper verify no pudo iniciar porque el Wrapper no logra resolver el directorio .m2 de este entorno. La validación HTTP descrita se hizo con el JAR local y la configuración de sesión actual, no reemplaza verify completo.
+
+
+## Falso bloqueo en PC (18/11/2026)
+
+Retirada la condición que clasificaba como móvil cualquier dispositivo con pointer:coarse sin any-pointer:fine. También puede cumplirse en PCs Windows y laptops táctiles. La regresión comprueba inicio normal con esas señales y 0, 1 o 10 puntos táctiles; se conserva el bloqueo explícito de Android, iPhone e iPad. No se pudo medir directamente qué señales informó la PC de la captura; el código confirma que esa combinación provocaba el falso bloqueo.
+
+
+## Retiro de borrado y personalización (18/11/2026)
+
+54 pruebas frontend y compilación TypeScript/Vite correctas, incluida la construcción del escenario y sus colisiones. Las clases Java compilaron y las tres pruebas PresenceSocketTest pasaron con el POM temporal sin el starter de sesión no disponible, ya descrito arriba. La consulta de presencia conserva las apariencias existentes; se retiró la acción que las modificaba. La persistencia de borrados locales dejó de aplicarse. No se cambiaron datos en Neon.
+
+Revisión en Chrome con los componentes reales de menú y una cuenta ficticia en una página local aislada: Más opciones ya no contiene borrado/restauración; Mi cuenta ya no contiene selector ni guardado de ropa. La página de prueba no abre conexiones reales ni está incluida en la compilación.
+
+### LED y caminero del jardín — 18/11/2026
+
+Revisión en navegador con vistas cercanas de fachada y sendero: ventanas visibles detrás de la franja central azul, ladrillo libre arriba y abajo, tramos de pavimento con juntas abiertas y bordes ondulados. Comprobación automatizada del trazado para evitar edificios; pruebas del frontend y compilación satisfactorias.
+
+Corrección posterior del 18/11: revisión cercana de ambos laterales y del caminero desde arriba. Prueba de colisión confirma el cierre del antiguo acceso y un paso libre de 60 cm centrado en la puerta nueva. Pasaron las 54 pruebas del frontend y la compilación.
+
+Caminero elevado del LED (18/11): vistas en navegador a nivel peatonal y desde arriba confirman cantos expuestos, juntas, separación y empalme con la carpa. La prueba de escena comprueba espesor y colisión superior/lateral de las losas; las 54 pruebas del frontend y la compilación pasaron.
+
+Unión del piso bajo carpa con LED (18/11): revisión en navegador desde el propio piso y desde arriba; material continuo y sin parche de losas superpuestas. La prueba de escena comprueba que las losas quedan fuera de la senda cubierta y que los vértices del encuentro comparten su altura. Pasaron las 54 pruebas del frontend y la compilación.
+
+Losas separadas bajo carpa (18/11): revisión frontal y lateral en navegador confirma piezas independientes con cantos y juntas abiertas. La prueba de escena exige volumen en cada losa, conserva las cotas de piso transitable y comprueba mediante rayos que no exista una superficie continua cerrando las juntas. Pasaron las 54 pruebas del frontend y la compilación.
+
+Uniones y canales (18/11): vistas en navegador de la pieza en T, del giro final y de la sección abierta de las canaletas. Rayos comprueban la cobertura a todo el ancho de la unión y la ausencia de tapas superpuestas tanto en la T como en el giro. Se conservan las juntas reales y la pendiente. Pasaron las 54 pruebas y la compilación.
+
+Ramal, apoyos y seto (18/11): revisión en navegador del piso hacia Bloque G, los postes junto a canales y la franja vegetal desde arriba. La prueba de escena confirma losas y pieza de unión en el ramal y exige espacio libre de canaleta bajo el centro y el contorno de los apoyos principales. Pasaron las 54 pruebas del frontend y la compilación.
+
+Seto según foto (18/11): vista cercana en navegador confirma copa rectangular de hojas pequeñas y troncos visibles con bifurcación; emplazamiento en L conservado. Pruebas del frontend y compilación satisfactorias.
+
+## Visita de tres minutos, elección de cuenta y carga (18/11/2026)
+
+61 pruebas frontend y compilación TypeScript/Vite correctas, incluyendo los cambios de jardín y camineros de 7fc6796. Se agregaron pruebas con reloj controlado para el límite exacto de 180000 ms, actividad de teclado/mouse/rueda, mensajes de red que no reinician el plazo, retorno de una pestaña oculta, pagehide idempotente y primer movimiento tardío. Otra prueba verifica leave, cierre del WebSocket, cancelación de temporizadores y ausencia de reconexión al terminar el recorrido. Durante la suite aparecieron avisos del puerto HMR 24678 ocupado; ninguna prueba falló.
+
+En Chrome, con API y WebSocket locales simulados en 18086 y Vite en 5188: ingreso con cuenta ficticia, capa de Validando tu cuenta y Preparando el campus 3D, recarga que vuelve a elegir cuenta, y Continuar sin contraseña. Las métricas pasaron de una conexión activa a cero tras recargar (un leave), sin nuevo login automático; Continuar abrió otra conexión manteniendo un solo login. Usar otra cuenta ejecutó logout y mostró el formulario; una segunda identidad se abrió correctamente. Son pruebas del flujo cliente y cierre de presencia, sin Neon ni credenciales reales; no equivalen a verificar autenticación compartida en producción.
+
+El build separa el acceso del motor 3D: el módulo tour-runtime y Three.js se solicitan después de la elección. El indicador es indeterminado y no muestra porcentajes ficticios. Se conserva la cuenta mediante la cookie existente; finalizar el recorrido no invalida esa autenticación persistente.
+
+
+## Acceso exclusivo con cuenta (18/11/2026)
+
+Retirada la entrada como invitado y sus estilos. La apertura del 3D exige una cuenta validada y conexión disponible; cerrar sesión detiene presencia y chat y vuelve al acceso. Se mantiene la elección explícita de la cuenta recordada y la opción de usar otra.
+
+61 pruebas frontend y compilación TypeScript/Vite correctas. En Chrome con la API local simulada: acceso con solo Iniciar sesión/Crear cuenta, formulario de registro visible, ingreso con identidad ficticia y Cerrar sesión que vuelve al formulario sin visor ni acceso invitado. Sin credenciales reales ni cambios en Neon.
+
+LED, lateral derecho según fotos (18/11): revisión en navegador del frente, acercamiento de rejas/equipos y ángulo del acceso posterior. La prueba de escena comprueba el cierre de la puerta metálica central, la colisión de las ventanas, el acceso abierto del fondo y el paso al corredor interior tras cerrar la cabecera posterior con ladrillo. Las 55 pruebas frontend y la compilación pasaron. Geometría estimada de las fotos, pendiente de medición en el sitio.
+
+
+## Cupo antes de cargar el campus (18/11/2026)
+
+66 pruebas frontend y build TypeScript/Vite correctos. Cinco pruebas nuevas cubren admisión pendiente hasta confirmación del servidor, rechazo 4001 sin reconexión automática, plazo de 15 segundos sin confirmación, hide que conserva el cupo y rechazo de una reconexión que devuelve al acceso.
+
+Las cinco pruebas PresenceSocketTest y PresenceStoreTest pasaron (6 casos, sin omisiones). PostgreSQL desechable local en 127.0.0.1:55433/tour_fluidity comprueba diez admisiones, rechazo de la undécima, liberación y dos solicitudes concurrentes al último lugar (solo una aceptada), conservación de la reserva hidden y revocación de sesión. El servidor de prueba se detuvo al terminar; no se usó Neon. El Wrapper volvió a fallar al localizar .m2; se ejecutó Maven 3.9.12 ya instalado con Java 21, caché y POM temporal sin el starter de sesión no disponible, como en verificaciones anteriores. No es una ejecución íntegra del POM original.
+
+Chrome con API/WebSocket simulados locales: tras iniciar sesión, rechazo por cupo completo muestra el panel Recorrido completo con logo, fuentes compartidas y Volver a intentar, sin visor. Las métricas confirman una sola conexión rechazada y ninguna activa mientras espera; no hay reintento automático. Al liberar cupo en la simulación, el botón vuelve a la elección de cuenta, Continuar no pide contraseña y la confirmación admitted abre el escenario y la barra de controles. Estas pruebas visuales son del cliente, separadas de las pruebas reales de PostgreSQL; no simulan diez cuentas reales en producción.
+### Jardín y parrilla de cantina — 18/11/2026
+
+Frontend: 61/61 pruebas aprobadas y compilación correcta. La comprobación de escena verifica tres árboles apoyados en el terreno, cuatro conjuntos, dieciséis plazas para sentarse y colisiones de tableros a la altura visible. Revisión en navegador de la escena completa desde el jardín y desde arriba: separación de caminero y cerco, bases sobre la pendiente, corteza y muebles, azulejos, puerta entreabierta, rejilla, ceniza y mesa auxiliar. Captura local `.local/garden-final.jpg`, fuera de Git. No se repitió el recorrido completo por los otros edificios ni la prueba multijugador. Sin cambios de autenticación ni credenciales versionadas.
+
+Ajuste posterior: 61/61 pruebas aprobadas y build correcto con las cuatro mesas perforadas, dieciséis sillas y la distribución agrupada. Revisión visual cercana de las perforaciones, respaldos y apoyos; parrilla desplazada y diagonal sin campana verde. Captura local `.local/garden-furniture-adjusted.jpg`.
+
+### Mesas con banquitos — 18/11/2026
+
+Compilación y 61/61 pruebas aprobadas. Revisados en navegador los cuatro conjuntos de mesa rectangular y dos bancos largos, sin respaldos, con tapas perforadas, colisiones y apoyo sobre el jardín. Captura local `.local/garden-benches-final.jpg`.
+
+### Entrada del LED en ampliación baja — 18/11/2026
+
+66/66 pruebas frontend aprobadas y compilación correcta. La prueba de escena comprueba el cierre del acceso anterior, el paso libre por la nueva puerta hasta el corredor y el giro hacia el volumen principal, el piso continuo y la altura libre. Las pruebas de plano verifican que la huella ampliada no invada las llegadas ni los caminos. Revisión visual en navegador de fachada y nicho de entrada, marquesina, carpa y macetas. Captura local `.local/led-entrance-wing.jpg`, fuera de Git. Medidas estimadas; no se repitió el recorrido completo por el resto de la facultad.
+
+Entrada de blindex (18/11): compilación correcta y 66/66 pruebas aprobadas. La prueba de escena verifica cuatro paños transparentes (dos fijos y dos hojas), dos pilares de sección cuadrada de 28 cm, profundidad del pasillito, paso libre, piso y conexión al volumen principal. Revisión visual cercana de la entrada completa en navegador. Captura local `.local/led-blindex-passage.jpg`.
+
+Entrada frontal detallada (18/11): 66/66 pruebas y compilación aprobadas. La escena comprueba dos faldones centrados con el vidrio, dos pilares frontales y dos interiores, plataformas laterales elevadas, cuatro paños transparentes y el paso libre hasta el corredor y el LED. Revisión visual en navegador desde debajo de la carpa, comparando techo, frontón, vigas, rejas, baldositas, cordones, macetas y trepadoras con la fotografía. Captura local `.local/led-entry-photo-reference.jpg`. Sin nuevas pruebas de backend ni del resto de los edificios.
+
+Corrección de la entrada del DEI (18/11): verificación de la cota común y el recorte de losas en el empalme, embaldosado hasta las paredes y material de ladrillo compartido por identidad con el DEI. La prueba de escena comprueba una única hoja de blindex oscuro, barrera física del cierre, apertura por proximidad desde exterior e interior y cierre al alejarse. Revisión visual de puerta cerrada y abriéndose, laterales pavimentados y encuentro del caminero desde arriba. Capturas locales `.local/dei-entry-corrected.jpg` y `.local/dei-paving-joined.jpg`.
+
+Blindex al fondo (18/11): 66/66 pruebas aprobadas y compilación correcta. Rayos verifican la desaparición de los paños de ladrillo y ventanas de la antigua línea y la presencia del nuevo cierre vidriado en la línea del fondo. Comprobadas dos hojas, traslación a lados opuestos sin rotación, colisión al cerrar, apertura desde ambos lados y conexión al corredor. Revisado en navegador cerrado, abriéndose desde el exterior y desde el interior. Captura local `.local/dei-deeper-sliding-doors.jpg`.
+
+Ventanas y pilares (18/11): 66/66 pruebas aprobadas y compilación correcta. La escena verifica dos ventanas laterales con rejas azules, dos pilares intermedios situados entre el frente y el cierre, adelanto del conjunto, ausencia de los muros interiores retirados y apertura de las dos hojas corredizas. Revisado en navegador el frente cerrado y el paso abierto. Captura local `.local/dei-blue-windows-pillars.jpg`.
+
+### Caminero exterior del LED — 19/11/2026
+
+Frontend: 67/67 pruebas aprobadas y compilación correcta. Las pruebas verifican que los caminos nuevos no corten edificios ni salgan del terreno, cuatro árboles fuera de la circulación, material de pavimento compartido con el caminero existente, piso completo a todo el ancho de los dos empalmes y la horquilla, carpas sobre ambos trazados y postes fuera de las losas y del cruce. Revisión en navegador desde arriba y a nivel peatonal: losas, juntas, cubiertas, uniones y distribución de árboles. Captura local `.local/dei-new-covered-path-and-trees.jpg`, fuera de Git. Sin cambios de backend ni pruebas multijugador en esta tarea.
+
+
+## Pasillos con piso ilustrado (19/11/2026)
+
+68 pruebas frontend y compilación TypeScript/Vite correctas sobre main c905cc1, incluyendo los aportes recientes de ascensor y DEI. Se sustituyó únicamente el acabado de galleryFloor y granite; la construcción y sus UV mantienen las dimensiones y colisiones. Chrome: vista local aislada del pasillo del tercer piso con el motor y modelo reales; franjas alineadas, superficie rosada uniforme y áridos dibujados, sin manchas ni iluminación de la foto. La vista no inicia sesión ni conecta presencia. No se modificó backend ni Neon.
+
+
+## Fachada curva de la torre: superposición de superficies (19/11/2026)
+
+Una prueba con rayos reprodujo dos materiales ocupando la misma superficie exterior entre top+0,08 y top+0,26: canto blanco de la losa y ladrillo del parapeto. Falló antes de la corrección. La losa conserva su volumen de colisión y su tapa horizontal; el canto exterior queda revestido únicamente por ladrillo. La comprobación cubre ambos semicírculos, cinco ángulos y tres alturas, además de la superficie superior y colisión de la cubierta.
+
+Después del cambio pasaron las 68 pruebas frontend y el build TypeScript/Vite. En Chrome se revisó el arco superior de la torre con iluminación nocturna, sin los fragmentos claros sobre el ladrillo. Vista local aislada con la escena real (.local/tower-preview.html); sin sesión ni presencia y sin cambios de backend.
+
+
+### Árbol junto al ascensor — 19/11/2026
+
+69/69 pruebas frontend aprobadas y compilación TypeScript/Vite correcta. La prueba de escena recorre los triángulos del tronco y las ramas y las cajas transformadas de todas las hojas: no intersectan la caja del ascensor ampliada 60 cm, desde el suelo hasta sobre la cubierta. También comprueba base conservada, porte, follaje y mapas PBR; la prueba de recursos verifica formato, licencias, hashes y presupuesto conjunto menor a 1,2 MiB. El código usa 65 cm de retiro.
+
+Revisión en navegador del modelo completo: corteza cercana, copa, contornos de hojas, bifurcaciones y separación del mural. Vista interior de la misma cabina desplazada de 0 a 10,5 m y con cámara giratoria: no aparece vegetación. La revisión visual utiliza una página local de diagnóstico, fuera de Git; no repite la autenticación. Se conserva la prueba existente de movimiento, apertura y transporte del jugador. Capturas locales `.local/tree-elevator-cabin.jpg` y `.local/tree-elevator-final.png`. Sin cambios de API, base de datos ni autenticación.
+
+
+### Árboles frondosos y gatos — 19/11/2026
+
+Prueba de fauna: cinco minutos simulados con semilla reproducible verifican tres gatos, cambios de rumbo, pausas, desplazamiento, apoyo en el piso, paredes y límites. La prueba de escena exige más de 14.000 hojas en el árbol del ascensor y conserva la comprobación de separación de la caja. La vegetación usa materiales compartidos y detalle por distancia en el perímetro. Revisión visual local de copas, pelajes, articulaciones y paseo en el patio, usando el mismo modelo y colisiones del campus. Las vistas de diagnóstico y capturas quedan en `.local/`, fuera de Git.
+
+Resultado final: 70/70 pruebas aprobadas, compilación TypeScript/Vite correcta y diferencias sin errores de espacio. Vistas cercanas guardadas como `.local/campus-cats-final.png` y `.local/trees-dense-final.png`; paseo comprobado en el patio con colisiones reales. El índice de colisión estático se comparte con el visitante para evitar duplicar su construcción.
+
+
+### Cobertura central y distante — 19/11/2026
+
+La prueba de escena exige más de 2.500 hojas en el centro de la copa, además de comprobar que ningún triángulo de rama ni hoja invada el prisma del ascensor con margen. La revisión visual incluye el centro del árbol, la vista general del perímetro y las tres anatomías de gato con pelaje negro completo. Las seis texturas de vegetación conservan licencia y hashes y permanecen dentro del presupuesto total de 1,2 MiB. Capturas de diagnóstico fuera de Git.
+
+Resultado de esta revisión: 70/70 pruebas aprobadas y compilación TypeScript/Vite correcta. Revisados en navegador el centro de la copa, el perímetro a distancia y los gatos con el nuevo paso y pelaje negro. Capturas `.local/dark-dense-trees.png`, `.local/dense-perimeter-final.png` y `.local/realistic-cats-black-final.png`. Vite conserva una advertencia de tamaño de bloque; sin errores de compilación.
+
+
+## Cocina semicircular de cantina: captura del usuario (19/11/2026)
+
+La captura de la franja gris interrumpida corresponde a la cocina de cantina y no a la torre de baños. Se reprodujo visualmente el mismo arco, ventana y marquesina en .local/kitchen-preview.html antes de modificarlo. El canto de la cubierta a 3,35-3,47 m coincidía con el radio exterior de ladrillo, de 3,4 m. La cubierta ahora se retranquea 11,5 cm, quedando apoyada dentro de los 23 cm de pared, con tapa, cara inferior y colisión conservadas; el remate exterior de 3,7 m mantiene su posición.
+
+Una regresión por rayos falló antes del cambio al encontrar dos materiales en la fachada. Después pasó en siete segmentos y tres alturas; también comprueba cierre y colisión superior de la cocina. Pasaron las 68 pruebas frontend y el build TypeScript/Vite. Comparación en Chrome de la misma vista nocturna antes/después: manchas reproducidas y posteriormente ausentes, sin cambiar ángulo, ventana ni remate.
+
+Integración posterior con 794f526 (árboles y gatos): 70/70 pruebas y compilación correctas; se conservaron ambos aportes en cantina y en la prueba de escena. El build advierte que el paquete Three.js integrado supera ligeramente 700 kB; no impide compilar.
+
+### Cabecera y lateral de CTA–DICIA — 19/11/2026
+
+Implementados el portón, marquesina y lámpara de cabecera, ventanas, puertas de vidrio y bajantes del lateral. Por indicación expresa del usuario, no se ejecutaron pruebas, compilación ni revisión en navegador para esta etapa. La revisión visual y de circulación queda a cargo del usuario.
+
+### Ajuste de puertas y altura de CTA–DICIA — 19/11/2026
+
+Se editaron las cotas de puertas, ventanas y rellanos y la altura de la nave según las capturas aportadas. Por instrucción del usuario no se ejecutaron pruebas, compilación ni revisión en navegador. La comprobación visual y del paso queda pendiente a su cargo.
+
+
+## Integración local de origin/main con Manfred — 19/11/2026
+
+Respaldo previo en backup/manfred-local-20261119 (8672ec7). Integrado origin/main hasta 39100d4, conservando las nuevas geometrías, pisos, rampita y cubierta de Manfred. Comprobación de contenido: manfred-hall.ts, manfred-floor.ts, manfred-details.ts y reception-garden.ts idénticos al respaldo local. El bloque del árbol de tronco esbelto, follaje instanciado y alcorque ovalado de cantina.ts permanece idéntico; se conserva también la llamada a addReceptionGarden. Se combinan los recortes locales de piso con la prioridad remota de acabados para evitar superposiciones. TypeScript y compilación Vite aprobados. No se ejecuta la suite completa por el bloqueo de telemetría documentado; revisión visual y backend no comprobados en esta integración. Cambios únicamente locales, sin push.

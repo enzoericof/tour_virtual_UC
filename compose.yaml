@@ -1,0 +1,49 @@
+name: tour-virtual-uc
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: TP_INFO3
+      POSTGRES_USER: ${POSTGRES_USER:-campus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-campus}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-campus} -d TP_INFO3"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  backend:
+    build:
+      context: ./campus-backend
+      dockerfile: Containerfile.vercel
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/TP_INFO3
+      DB_USER: ${POSTGRES_USER:-campus}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-campus}
+      PORT: 8080
+      CAMPUS_FRONTEND_ORIGINS: http://127.0.0.1:5173,http://localhost:5173
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 5
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 0
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Containerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  pgdata:

@@ -1,19 +1,23 @@
 import { pavementOutside } from "./faculty/pavement-cutout";
 import { addReceptionGarden } from "./faculty/reception-garden";
+import {addCourtyardElevatorTree, pruneTreeStructures} from "./courtyard-elevator-tree";
 import { registerSeats } from "./seating";
 import * as T from "three";
 import { friendshipMaterial, friendshipSign } from "./friendship-materials";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { brushedSteel, elevatorLabel, type ElevatorModel } from "./elevator";
 import { makeGrassMaterial, makeMaterials } from "./materials";
 import { addCourtyardVegetation } from "./courtyard-vegetation";
-import { addCantinaTree } from "./cantina-tree";
+import { addCantinaGarden } from "./faculty/cantina-garden";
 import { createFacultyBuilder, galleryTileOffset, type Range } from "./faculty/builder";
 import { addRestroomTower } from "./faculty/restroom-tower";
 import { addManfredHall } from "./faculty/manfred-hall";
 import { addCoveredPlazaSeating } from "./faculty/covered-plaza-seating";
 import { addCantina } from "./faculty/cantina";
+import { addGardenHedge } from "./faculty/garden-hedge";
+import { addWalkChannels } from "./faculty/walk-channels";
 import { addAnnexes } from "./faculty/annexes";
+import { addElevatorShaft } from "./faculty/elevator-shaft";
+import { addSegmentedGardenPath, makeGardenPaving, gardenJunctionReach, type WalkOptions } from "./faculty/garden-path";
 import {
   facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, ELEVATOR_LANDING_LEVEL, STEPS_RUN, rectCorners,
   manfredExitCutout, manfredOutline, elevatorStairEdge, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR, fromRect,
@@ -21,7 +25,7 @@ import {
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
 import { gardenHeight, gardenBounds, inCantina, coveredWalkSurface } from "../data/cantina-terrain";
-import { cantinaRearPaving, diciaWalkExtension } from "../data/faculty-annexes";
+import { cantinaRearCourtyard, coveredWalkPostInset, deiGardenPath, diciaWalkExtension, gardenWalkHedge } from "../data/faculty-annexes";
 
 type BlockSpec = {
   length: number; depth: number; levels: number; bay: number; margin: number; gallery: number;
@@ -55,18 +59,12 @@ type BlockSpec = {
 export function createFaculty(grass = makeGrassMaterial()) {
   const group = new T.Group(), colliders = new T.Group();
   const m = makeMaterials(grass);
-  const elevatorLevels = ["PB", "1", "2", "3"];
-  const displayLabel = (text: string) => elevatorLabel(text, "#ff5945", "#242522");
-  const elevator: ElevatorModel = {
-    stops: [], car: new T.Group(), carDoors: [], carButtons: [],
-    directionLabels: { idle: displayLabel(""), up: displayLabel("▲"), down: displayLabel("▼") },
-    floorLabels: elevatorLevels.map(displayLabel),
-  };
+  const gardenWalkMaterial = makeGardenPaving();
   const builder = createFacultyBuilder(group, colliders, m);
   const { layers, unit, box, pole, beam, v3, sign, frame, prism, pave, path, spans, ramp, glazing, slopedWall } = builder;
 
   /** Lona azul continua con caída leve entre apoyos y faldón festoneado. */
-  function fabricCover(curve: T.Curve<T.Vector3>, width: number, supports: number[], ridge = 0, ridgeAtStart = ridge) {
+  function fabricCover(curve: T.Curve<T.Vector3>, width: number, supports: number[], ridge = 0, ridgeAtStart = ridge, postOffset = width * 0.475) {
     const length = curve.getLength(), segments = Math.ceil(length / 0.12), across = 8;
     const positions: number[] = [], uv: number[] = [], indices: number[] = [];
     const at = (t: number, u: number) => {
@@ -109,7 +107,16 @@ export function createFaculty(grass = makeGrassMaterial()) {
         const peak = at(t, 0);
         beam(a, peak, 0.025, m.metal); beam(peak, b, 0.025, m.metal);
       } else beam(a, b, 0.025, m.metal);
-      for (const p of [a, b]) pole(0.035, p.y, p.x, p.y / 2, p.z, m.metal, true);
+      const center = curve.getPointAt(t);
+      for (const edge of [a, b]) {
+        const outward = edge.clone().sub(center).setY(0).normalize();
+        const p = edge.clone().addScaledVector(outward, postOffset - width * 0.475);
+        if (postOffset > width * 0.475) beam(edge, p, 0.025, m.metal);
+        const support = pole(0.035, p.y, p.x, p.y / 2, p.z, m.metal, true);
+        if (postOffset > width * 0.475) {
+          support.userData.walkCanopyPost = true; support.userData.keep = true;
+        }
+      }
     }
   }
   /** Baranda de barras horizontales, como la del escaneo, a lo largo de x. */
@@ -497,7 +504,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
   const st = plan.stair, step = st.run + st.landing;
   /** Descanso del nivel l (1..3): tramo de x donde la escalera se une a la galería. */
   const landingAt = (level: number): Range => [st.start - level * step, st.start - level * step + st.landing];
-  const [ex, ez] = plan.elevator.center, [ew, ed] = plan.elevator.size, tw = plan.tower, es = plan.eastStair;
+  const [ex] = plan.elevator.center, [ew] = plan.elevator.size, tw = plan.tower, es = plan.eastStair;
   const towerFront: Range = [tw.center[0] - tw.entry.halfWidth, tw.center[0] + tw.entry.halfWidth];
   const stairWest = es.x - es.width / 2, stairEast = es.x + es.width / 2, stairFoot = es.top - es.run;
   /** El Bloque 1 está corrido en el plano (cabecera este fija): tramo del plano → x de su marco. */
@@ -544,6 +551,13 @@ export function createFaculty(grass = makeGrassMaterial()) {
   });
 
 
+  // Ascensor de 2,5 × 2,5 m entre las dos últimas columnas de la galería, con murales en sus caras este,
+  // sur y oeste y la puerta hacia la galería (fotos del 19/11/2026). Se usa en los cuatro niveles.
+  const elevator = addElevatorShaft(builder, m, {
+    center: plan.elevator.center, size: plan.elevator.size, floorHeight: H,
+    top: (block1.levels - 1) * H + 4.1 + 0.9, mural: plan.elevator.mural,
+  });
+
   {
     // Escalera tipo Pompidou: tramo y descanso unido a la galería por piso, bajo una bóveda que
     // sigue la pisada (sube con los tramos y se aplana en los descansos).
@@ -569,135 +583,6 @@ export function createFaculty(grass = makeGrassMaterial()) {
       for (const x of [xl + 0.15, xe, xs - 0.15]) for (const z of [z0 - 0.02, z1 + 0.02])
         beam(v3(x, tread(x), z), v3(x, spring(x), z), 0.04, m.steel);
     }
-    // Ascensor de 2,5 × 2,5 m entre dos columnas: caja revocada en crema con murales en sus caras este,
-    // sur y oeste hasta la mitad superior entre el primer y el segundo piso; puertas con marco azul hacia
-    // la galería (IMG_5706, IMG_5694). Por ahora las tres caras repiten el único mural fotografiado (IMG_5727).
-    const shaftTop = (block1.levels - 1) * H + 4.1 + 0.9, muralHeight = plan.elevator.mural - 0.1;
-    const zd = ez - ed / 2;
-    const wall = 0.14, doorWidth = 1.12, doorHeight = 2.14;
-    const brushed = brushedSteel();
-    const blueFinish = m.concrete.clone();
-    blueFinish.color.set("#47689a");
-    blueFinish.bumpMap = blueFinish.map;
-    blueFinish.bumpScale = 0.014;
-    const landingSteel = brushed.clone();
-    landingSteel.color.set("#f3e5d2");
-    landingSteel.metalness = 0.28;
-    landingSteel.roughness = 0.36;
-    const notice = elevatorLabel("UC", "#29343a", "#e3e0d6");
-    box(ew, shaftTop, wall, ex, shaftTop / 2, ez + ed / 2 - wall / 2, m.render, true);
-    for (const side of [-1, 1]) {
-      box(wall, shaftTop, ed - wall, ex + side * (ew - wall) / 2, shaftTop / 2, ez + wall / 2, m.render, true);
-    }
-    const mural = new T.TextureLoader().load("/assets/photos/IMG_5727.webp");
-    mural.colorSpace = T.SRGBColorSpace; mural.offset.set(0.748, 0.279); mural.repeat.set(0.102, 0.497);
-    const muralMat = new T.MeshStandardMaterial({ map: mural, roughness: 0.9 });
-    for (const [dx, dz, width] of [[1, 0, ed], [0, 1, ew], [-1, 0, ed]] as const) {
-      const panel = new T.Mesh(new T.PlaneGeometry(width - 0.06, muralHeight), muralMat);
-      panel.position.set(ex + dx * (ew / 2 + 0.01), 0.1 + muralHeight / 2, ez + dz * (ed / 2 + 0.01));
-      panel.rotation.y = Math.atan2(dx, dz); layers.visual.add(panel);
-    }
-    const roundButton = new T.CylinderGeometry(0.064, 0.064, 0.018, 24);
-    roundButton.rotateX(-Math.PI / 2);
-    const { position, normal, uv } = roundButton.attributes;
-    for (let i = 0; i < position.count; i++) {
-      if (normal.getZ(i) < -0.5) uv.setXY(i, 0.5 - position.getX(i) / 0.128, 0.5 + position.getY(i) / 0.128);
-    }
-    const button = (label: string, x: number, y: number, z: number, destination: number | null) => {
-      const mesh = new T.Mesh(roundButton, elevatorLabel(label, "#eeeee7", "#353838"));
-      mesh.position.set(x, y, z);
-      mesh.userData.keep = true;
-      layers.visual.add(mesh);
-      return { mesh, destination };
-    };
-    const callPlate = new T.MeshStandardMaterial({ color: "#838688", metalness: 0.36, roughness: 0.52 });
-    for (let level = 0; level < block1.levels; level++) {
-      const y = level * H;
-      const height = level === block1.levels - 1 ? shaftTop - y : H;
-      const jamb = (ew - doorWidth) / 2;
-      for (const side of [-1, 1]) {
-        box(jamb - 0.006, doorHeight, wall, ex + side * (doorWidth + jamb - 0.006) / 2,
-          y + doorHeight / 2, zd + wall / 2, blueFinish, true);
-        const trimWidth = side < 0 ? 0.25 : 0.36;
-        box(trimWidth, doorHeight, 0.07, ex + side * (doorWidth + trimWidth) / 2,
-          y + doorHeight / 2, zd - 0.02, landingSteel);
-      }
-      box(ew - 0.012, height - doorHeight, wall, ex, y + (height + doorHeight) / 2, zd + wall / 2, blueFinish, true);
-      box(doorWidth + 0.61, 0.19, 0.07, ex + 0.055, y + doorHeight + 0.095, zd - 0.02, landingSteel);
-      box(doorWidth + 0.61, 0.026, 0.076, ex + 0.055, y + doorHeight + 0.195, zd - 0.02, m.metal);
-      box(0.17, 0.24, 0.006, ex + doorWidth / 2 + 0.18, y + 1.74, zd - 0.059, notice);
-      const doors = [-1, 1].map(side => {
-        const closedX = ex + side * doorWidth / 4;
-        const mesh = box(doorWidth / 2 - 0.009, doorHeight - 0.035, 0.065, closedX, y + doorHeight / 2, zd + 0.055, landingSteel);
-        mesh.userData.keep = true;
-        return { mesh, closedX, offset: side * doorWidth / 2 };
-      });
-      const barrier = new T.Mesh(unit);
-      barrier.position.set(ex, y + doorHeight / 2, zd + 0.055);
-      barrier.scale.set(doorWidth, doorHeight, 0.07);
-      barrier.visible = false;
-      barrier.userData.keep = true;
-      layers.visual.add(barrier);
-      box(doorWidth, 0.06, 0.15, ex, y, zd + 0.068, brushed, true);
-      const floor = new T.Mesh(unit);
-      floor.scale.set(ew - 0.28, 0.12, ed - 0.14);
-      floor.position.set(ex, y - 0.03, ez + 0.07);
-      floor.visible = false;
-      floor.userData.keep = true;
-      layers.visual.add(floor);
-
-      // Desde la galería, el montante de la derecha corresponde a -X.
-      const panelX = ex - doorWidth / 2 - 0.125;
-      const arrows = level === 0 ? ["▲"] : level === elevatorLevels.length - 1 ? ["▼"] : ["▲", "▼"];
-      const plateHeight = arrows.length === 2 ? 0.56 : 0.39;
-      box(0.19, plateHeight, 0.024, panelX, y + 1.14, zd - 0.062, callPlate);
-      const buttons = arrows.map((arrow, i) =>
-        button(arrow, panelX, y + (arrows.length === 2 ? 1.13 - i * 0.16 : 1.08), zd - 0.084, null));
-      const floorDisplay = box(0.114, 0.083, 0.016, panelX,
-        y + (arrows.length === 2 ? 1.32 : 1.25), zd - 0.080, elevator.floorLabels[0]);
-      floorDisplay.userData.keep = true;
-      box(0.12, 0.29, 0.024, panelX, y + 1.91, zd - 0.062, landingSteel);
-      const directionDisplay = box(0.095, 0.146, 0.016, panelX, y + 1.93, zd - 0.079, elevator.directionLabels.idle);
-      directionDisplay.userData.keep = true;
-      elevator.stops.push({ buttons, doors, barrier, floor, floorDisplay, directionDisplay });
-    }
-
-    // Una sola cabina visual recorre el hueco. Las puertas exteriores pertenecen a cada piso.
-    const car = elevator.car;
-    layers.visual.add(car);
-    car.position.set(ex, 0, ez);
-    const landingGroup = layers.visual;
-    layers.visual = car;
-    const carPanel = (w: number, h: number, d: number, x: number, y: number, z: number, mat: T.Material) => {
-      const mesh = box(w, h, d, x, y, z, mat);
-      mesh.userData.keep = true;
-      return mesh;
-    };
-    carPanel(ew - 0.28, 0.12, ed - 0.14, 0, -0.03, 0.07, m.granite);
-    carPanel(ew - 0.28, 0.12, ed - 0.18, 0, 2.41, 0.08, brushed);
-    carPanel(0.95, 0.022, 0.34, 0, 2.335, 0, m.white);
-    carPanel(ew - 0.30, 2.32, 0.07, 0, 1.19, ed / 2 - 0.20, brushed);
-    carPanel(ew - 0.45, 0.045, 0.075, 0, 0.97, ed / 2 - 0.29, brushed);
-    for (const side of [-1, 1]) {
-      const sideWidth = (ew - 0.28 - doorWidth) / 2;
-      carPanel(sideWidth, 2.32, 0.06, side * (doorWidth + sideWidth) / 2, 1.19, -ed / 2 + 0.24, brushed);
-      carPanel(0.07, 2.32, ed - 0.36, side * (ew / 2 - 0.19), 1.19, 0.03, brushed);
-      const closedX = side * doorWidth / 4;
-      const mesh = carPanel(doorWidth / 2 - 0.009, doorHeight - 0.035, 0.052,
-        closedX, doorHeight / 2, -ed / 2 + 0.175, brushed);
-      elevator.carDoors.push({ mesh, closedX, offset: side * doorWidth / 2 });
-    }
-    // Botonera centrada en la pared izquierda al entrar, a media altura.
-    const insidePanelX = ew / 2 - 0.25;
-    carPanel(0.035, 0.79, 0.24, insidePanelX, 1.12, 0.08, brushed);
-    elevatorLevels.forEach((label, destination) => {
-      const control = button(label, insidePanelX - 0.035, 0.85 + destination * 0.18, 0.08, destination);
-      control.mesh.rotation.y = Math.PI / 2;
-      elevator.carButtons.push(control);
-    });
-    layers.visual = landingGroup;
-    box(ew + 0.3, 1.1, ed + 0.3, ex, shaftTop + 0.55, ez, m.white);
-
     // ---- Cabecera este: planta baja y primer piso retraídos bajo los pisos 2 y 3 ----
     const ee = plan.eastEnd, rp = ee.ramp, [groundEnd] = ee.roomsEnd;
     // Columnas que sostienen los pisos 2 y 3 donde planta baja y primer piso se retraen.
@@ -810,21 +695,37 @@ export function createFaculty(grass = makeGrassMaterial()) {
 
   // ---- Plataforma a 0,90 m: plaza techada, cuadrado, Bedelía, cantina, Sala Manfred y cabecera este ----
 
+  const pavedPlatform: (readonly Vec2[])[] = [];
   for (const [i, outline] of plan.platform.entries()) {
-    // La explanada nunca invade la sala, aunque cambien su posición o tamaño.
+    // Preservar huecos de Manfred y escalera, y aplicar la prioridad remota de acabados.
     for (const piece of pavementOutside(outline, manfredOutline()).flatMap(p=>pavementOutside(p,manfredExitCutout))) {
-      prism(piece, 0, PLAZA_LEVEL, m.concrete);
-      pave(piece, i === 0 ? m.tile : m.stone, PLAZA_LEVEL + (i === 0 ? 0.008 : 0.005));
+      prism(piece,0,PLAZA_LEVEL,m.concrete);
+      pave(piece,i===0?m.tile:m.stone,PLAZA_LEVEL+(i===0?.008:.005),false,[0,0],
+        [cantinaRearCourtyard.paving,...pavedPlatform]);
+      pavedPlatform.push(piece);
     }
   }
-  // Remate continuo contra Bedelía, sin dejar la cuña de césped junto a la escalera.
   for(const piece of pavementOutside(plan.northPassageLanding,manfredExitCutout)) {
     prism(piece,0,PLAZA_LEVEL,m.concrete);
-    pave(piece,m.stone,PLAZA_LEVEL+.005);
+    pave(piece,m.stone,PLAZA_LEVEL+.005,false,[0,0],[cantinaRearCourtyard.paving,...pavedPlatform]);
+    pavedPlatform.push(piece);
   }
-  // Continuación del mismo piso gris por el fondo y lateral de cantina.
-  prism(cantinaRearPaving, 0, PLAZA_LEVEL, m.concrete, true);
-  pave(cantinaRearPaving, m.stone, PLAZA_LEVEL + 0.005);
+  // Circulación frente a Maquetas y jardín enrasado junto a cantina.
+  prism(cantinaRearCourtyard.paving, 0, PLAZA_LEVEL, m.concrete, true);
+  const rearPaving = pave(cantinaRearCourtyard.paving, m.maquetasConcrete, PLAZA_LEVEL + 0.005);
+  // Orientar las juntas con las fachadas del patio, conservando la huella y su colisión.
+  const rearPositions = rearPaving.geometry.attributes.position;
+  const rearUV = rearPaving.geometry.attributes.uv;
+  const [concreteTileX, concreteTileZ] = m.maquetasConcrete.userData.tile as number[];
+  const patioCos = Math.cos(plan.cantina.angle), patioSin = Math.sin(plan.cantina.angle);
+  for (let i = 0; i < rearPositions.count; i++) {
+    const dx = rearPositions.getX(i) - plan.cantina.center[0];
+    const dz = rearPositions.getZ(i) - plan.cantina.center[1];
+    rearUV.setXY(i, (dx * patioCos + dz * patioSin) / concreteTileX,
+      (-dx * patioSin + dz * patioCos) / concreteTileZ);
+  }
+  const rearGarden = prism(cantinaRearCourtyard.garden, 0, PLAZA_LEVEL + 0.005, m.grass);
+  rearGarden.castShadow = false;
 
   // La galería y el sendero comparten cota de piso terminado.
   const bedeliaPavingTop = 0.012;
@@ -857,7 +758,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
       const x = -half + i * roofLength / (2 * bays);
       const arch = new T.Mesh(rib, steel); arch.position.set(x, axisY - 0.025, 0); layers.visual.add(arch);
       if (i % 2 === 0) {
-        const postX = T.MathUtils.clamp(x, -half + 0.05, half + diciaWalkExtension - 0.05);
+        const postX = T.MathUtils.clamp(x, -half + coveredWalkPostInset, half + diciaWalkExtension - coveredWalkPostInset);
         for (const side of [-1, 1]) {
           const z = side * (span - 0.045);
           const foot = postX <= half ? bedeliaPavingTop
@@ -1290,7 +1191,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
 
   addCantina(builder);
 
-  addAnnexes(builder, officeBrick, passageTile, annexPavingHeight);
+  addAnnexes(builder, officeBrick, passageTile, annexPavingHeight, gardenWalkMaterial);
 
   // ---- Caminos entre áreas comunes ----
   const galleryEdge = block1.depth / 2;
@@ -1301,17 +1202,24 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     if (index === 0) {
       // Hormigón contiguo a la galería, más angosto del lado del césped.
       const [start, , end] = p;
-      pave([
-        [start[0] - 0.06, galleryEdge], [end[0], galleryEdge],
-        [end[0], lawnEdge], [start[0] - 0.06, lawnEdge],
-      ], courtyardConcrete, 0.049);
+      // Sin hormigón dentro de la caja del ascensor: la cabina tiene su propio piso.
+      const x0 = Math.min(start[0] - 0.06, end[0]), x1 = Math.max(start[0] - 0.06, end[0]);
+      const [shaftX, shaftZ] = plan.elevator.center, [shaftW, shaftD] = plan.elevator.size;
+      const sx0 = Math.max(x0, shaftX - shaftW / 2), sx1 = Math.min(x1, shaftX + shaftW / 2);
+      const strip = (a: number, b: number, c: number, d: number) => {
+        if (b - a > 0.01 && d - c > 0.01) pave([[a, c], [b, c], [b, d], [a, d]], courtyardConcrete, 0.049);
+      };
+      strip(x0, sx0, galleryEdge, lawnEdge);
+      strip(sx1, x1, galleryEdge, lawnEdge);
+      strip(sx0, sx1, galleryEdge, shaftZ - shaftD / 2);
+      strip(sx0, sx1, shaftZ + shaftD / 2, lawnEdge);
     } else if (index === 2) {
       // Termina junto a la terraza: se retira el brazo transversal sobrante.
       path(p.slice(0, 2));
     } else if (index === 6) {
       // El enlace desde el toldo hasta la plaza ya tiene peldaños y piso propio.
       path(p.slice(1));
-    } else if (index !== 3) {
+    } else if (index !== 3 && index !== 4) {
       // El tramo bajo el caminero tiene su propio pavimento.
       path(p);
     }
@@ -1395,32 +1303,22 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     const bendCurve = new T.CubicBezierCurve3(bend, guide, tangent, merge);
     curve.add(bendCurve);
     const approachWidth = 1.7;
-    function ribbon(c: T.Curve<T.Vector3>, width: number, mat: T.Material, collide: boolean, skirt = false) {
-      const positions: number[] = [], uvs: number[] = [], indices: number[] = [];
-      const sideMaterial = m.stone.clone(); sideMaterial.side = T.DoubleSide;
-      const count = 48;
-      for (let i = 0; i <= count; i++) {
-        const t = i / count, p = c.getPoint(t), tangent = c.getTangent(t);
-        const side = v3(-tangent.z, 0, tangent.x).normalize().multiplyScalar(width / 2);
-        for (const sign of [-1, 1]) {
-          const q = p.clone().addScaledVector(side, sign); positions.push(q.x, q.y, q.z);
-          const tile = mat.userData.tile as number[] | undefined;
-          uvs.push(tile ? q.x / tile[0] : (sign + 1) / 2, tile ? q.z / tile[1] : t * 5);
+    function segmentedCurve(c: T.Curve<T.Vector3>, width: number, name: string, options: WalkOptions = {}) {
+      const samples = c.getPoints(Math.max(48, Math.ceil(c.getLength() / 0.35)));
+      const points: Vec2[] = samples.map(p => [p.x, p.z]);
+      const height = ([x, z]: Vec2) => {
+        let nearest = Infinity, y = samples[0].y;
+        for (let i = 1; i < samples.length; i++) {
+          const a = samples[i - 1], b = samples[i], dx = b.x - a.x, dz = b.z - a.z;
+          const t = T.MathUtils.clamp(((x - a.x) * dx + (z - a.z) * dz) / (dx * dx + dz * dz), 0, 1);
+          const distance = (x - a.x - dx * t) ** 2 + (z - a.z - dz * t) ** 2;
+          if (distance < nearest) { nearest = distance; y = T.MathUtils.lerp(a.y, b.y, t); }
         }
-        if (i < count) { const k = i * 2; indices.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
-      }
-      const geo = new T.BufferGeometry(); geo.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
-      geo.setAttribute("uv", new T.Float32BufferAttribute(uvs, 2)); geo.setIndex(indices); geo.computeVertexNormals();
-      // El orden izquierda/derecha debe producir normales hacia arriba para la colisión.
-      if (geo.attributes.normal.getY(0) < 0) flipFaces(geo);
-      const mesh = new T.Mesh(geo, mat); mesh.receiveShadow = true; mesh.castShadow = !collide; layers.visual.add(mesh);
-      if (collide) layers.solid.add(new T.Mesh(geo));
-      if (skirt) for (const side of [0, 1]) for (let i = 0; i < count; i++) {
-        const k = (i * 2 + side) * 3, j = ((i + 1) * 2 + side) * 3;
-        const a = v3(positions[k], positions[k + 1], positions[k + 2]), b = v3(positions[j], positions[j + 1], positions[j + 2]);
-        const wall = new T.BufferGeometry().setFromPoints([a,b,a.clone().setY(0),b,b.clone().setY(0),a.clone().setY(0)]);
-        wall.computeVertexNormals(); layers.visual.add(new T.Mesh(wall,sideMaterial));
-      }
+        return y;
+      };
+      addSegmentedGardenPath(builder, points, height, gardenWalkMaterial,
+        { ...options, width, finishedHeight: true, name });
+      return { points, height };
     }
     // Los empalmes comparten aristas con el granito y con el resto del sendero.
     function joinPaving(a: T.Vector3, b: T.Vector3, c: T.Vector3, d: T.Vector3, material: T.Material) {
@@ -1435,29 +1333,9 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       layers.visual.add(mesh);
       layers.solid.add(new T.Mesh(geometry));
     }
-    const bendTangent = bendCurve.getTangent(0);
-    const bendSide = v3(bendTangent.z, 0, -bendTangent.x).normalize().multiplyScalar(approachWidth / 2);
     const approachLeft = startX - approachWidth / 2, approachRight = startX + approachWidth / 2;
-    joinPaving(v3(approachLeft, start.y, startZ), bend.clone().sub(bendSide),
-      bend.clone().add(bendSide), v3(approachRight, start.y, startZ), m.accessStone);
-    ribbon(bendCurve, approachWidth, m.accessStone, true, true);
-    // Adoquines junto al toldo; el resto del sendero es hormigón liso.
-    const approachLength = curve.getLength();
-    const paverTones = ["#a29f94", "#c1b9a9", "#b1ad9f"].map(color => {
-      const material = m.accessStone.clone();
-      material.color.set(color);
-      return material;
-    });
-    for (let distance = approachLength - 2.45; distance < approachLength - 0.24; distance += 0.27) {
-      const t = distance / approachLength;
-      const p = curve.getPointAt(t), tangent = curve.getTangentAt(t), side = v3(-tangent.z, 0, tangent.x).normalize();
-      for (const offset of [-0.53, -0.265, 0, 0.265, 0.53]) {
-        const q = p.clone().addScaledVector(side,offset);
-        const material = paverTones[Math.round(distance / 0.27 + offset / 0.265 + 2) % paverTones.length];
-        const disc = pole(0.13, 0.012, q.x, q.y + 0.01, q.z, material);
-        disc.quaternion.setFromUnitVectors(v3(0,1,0), side.clone().cross(tangent).normalize());
-      }
-    }
+    segmentedCurve(new T.LineCurve3(start, bend), approachWidth, "Acceso segmentado a la carpa");
+    segmentedCurve(bendCurve, approachWidth, "Curva segmentada de la carpa");
     // La lona arranca plana dentro del canto de la losa y forma la cumbrera hacia el caminero.
     const [stepX, stepZ] = g.smallSteps.center;
     const attachment = v3(stepX, g.roof + 0.08, stepZ).addScaledVector(direction, -0.12);
@@ -1479,13 +1357,30 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       pave([[left, landingZ - 0.025], [left, landingZ], [right, landingZ], [right, landingZ - 0.025]],
         edgeBand, ELEVATOR_LANDING_LEVEL + 0.003);
     }
-    ribbon(walk, width, m.accessStone, true, true);
-    ribbon(new T.LineCurve3(walkEnd,v3(55,endHeight,37)), width, m.accessStone, true);
+    const gardenJoinDistance = v3(deiGardenPath[0][0] - ax, 0, deiGardenPath[0][1] - az).dot(direction);
+    const fullWalk = new T.CurvePath<T.Vector3>();
+    fullWalk.add(walk);
+    fullWalk.add(new T.LineCurve3(walkEnd, v3(55, endHeight, 37)));
+    fullWalk.add(new T.LineCurve3(v3(55, endHeight, 37), v3(30, endHeight, 50)));
+    const { junction, end } = plan.blockGAwning;
+    const branchT = v3(junction[0] - ax, 0, junction[1] - az).dot(direction) / Math.hypot(bx - ax, bz - az);
+    const branchFloorStart = walk.getPoint(branchT), branchFloorEnd = v3(end[0], 0.05, end[1]);
+    const branchCurve = new T.LineCurve3(branchFloorStart, branchFloorEnd);
+    const branchPoints: Vec2[] = [[branchFloorStart.x, branchFloorStart.z], end];
+    const branchHeight = ([x, z]: Vec2) => {
+      const dx = end[0] - branchFloorStart.x, dz = end[1] - branchFloorStart.z;
+      const t = T.MathUtils.clamp(((x - branchFloorStart.x) * dx + (z - branchFloorStart.z) * dz) / (dx * dx + dz * dz), 0, 1);
+      return T.MathUtils.lerp(branchFloorStart.y, branchFloorEnd.y, t);
+    };
+    const coveredPaving = segmentedCurve(fullWalk, width, "Caminero bajo carpa", {
+      junctionAt: gardenJoinDistance, junctionBranch: { points: deiGardenPath, ground: annexPavingHeight },
+      junctions: [{ at: branchT * walk.getLength(), points: branchPoints, width: 2.25,
+        height: branchHeight, label: "Bloque G" }],
+    });
     const roof = new T.LineCurve3(canopyFoot,v3(bx,2.5,bz));
     const bays = Math.ceil(roof.getLength() / 4.5);
-    fabricCover(roof, canopyWidth, Array.from({length:bays + 1},(_,i)=>i / bays), canopyRidge);
+    fabricCover(roof, canopyWidth, Array.from({length:bays + 1},(_,i)=>i / bays), canopyRidge, canopyRidge, 1.28);
     // El ramal se une a la lona existente y desemboca en el eje de la galería del Bloque G.
-    const { junction, end } = plan.blockGAwning;
     const junctionPoint = v3(junction[0], 0, junction[1]);
     const junctionT = junctionPoint.sub(walkStart).dot(direction) / Math.hypot(bx - ax, bz - az);
     const branchStart = roof.getPoint(junctionT);
@@ -1495,16 +1390,17 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     fabricCover(branchRoof, canopyWidth,
       Array.from({ length: branchBays }, (_, i) => (i + 1) / branchBays), canopyRidge);
     // El piso arranca en el empalme real de la cubierta, cubriendo la junta.
-    path([[branchStart.x, branchStart.z], end], 2.25);
-    // Bordes del caminero y juntas transversales: pavimento angosto entre jardines.
-    for (const offset of [-0.85, 0.85]) {
-      const side = v3(-(bz-az),0,bx-ax).normalize().multiplyScalar(offset);
-      for (let i=0; i<30; i++) {
-        if (offset > 0 && Math.abs(i + 0.5 - junctionDistance) < approachWidth / 2 + 0.5) continue;
-        const a=walk.getPoint(i/30).add(side), b=walk.getPoint((i+1)/30).add(side);
-        beam(a.clone().add(v3(0,0.025,0)),b.clone().add(v3(0,0.025,0)),0.035,m.stone);
-      }
-    }
+    segmentedCurve(branchCurve, 2.25, "Ramal segmentado al Bloque G", { startDistance: gardenJunctionReach });
+    const normal = v3(-direction.z, 0, direction.x);
+    const gardenSide = Math.sign(v3(deiGardenPath[1][0] - deiGardenPath[0][0], 0,
+      deiGardenPath[1][1] - deiGardenPath[0][1]).dot(normal));
+    const branchSide = Math.sign(v3(end[0] - branchStart.x, 0, end[1] - branchStart.z).dot(normal));
+    addWalkChannels(builder, coveredPaving.points, coveredPaving.height, width, [
+      { side: gardenSide, from: gardenJoinDistance - 1.5, to: gardenJoinDistance + 1.5 },
+      { side: branchSide, from: junctionT * walk.getLength() - 1.4, to: junctionT * walk.getLength() + 1.4 },
+      { side: 1, from: junctionDistance - 1.2, to: junctionDistance + 1.2 },
+    ]);
+    addGardenHedge(builder, gardenWalkHedge, point => gardenHeight(...inCantina(point)));
     // Macizos bajos de sansevierias flanqueando la salida, sin invadir los peldaños.
     const leafGeo = new T.BufferGeometry().setFromPoints([
       v3(-0.065,0,0),v3(0.065,0,0),v3(0.015,0.95,0.08)]);
@@ -1512,6 +1408,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     const leafMat = new T.MeshStandardMaterial({color: '#455d3c',side:T.DoubleSide,roughness:1});
     const lateral=v3(-(bz-az),0,bx-ax).normalize();
     // Fila exterior de hojas siguiendo el giro de la foto y dejando libre el empalme.
+    const approachLength = curve.getLength();
     for (let distance = 1; distance < approachLength - 1.1; distance += 0.31) {
       const t = distance / approachLength;
       const tangent = curve.getTangent(t);
@@ -1574,29 +1471,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
           leaf.castShadow=true;layers.visual.add(leaf);
         }
       }
-      // Árbol de corteza pálida y copa verde, hasta la cota del segundo piso.
-      const paleBark = m.concrete.clone(); paleBark.color.set("#d6d0bb");
-      const greenLeaves = ["#416b2c", "#527e35", "#638d42"].map(color =>
-        new T.MeshStandardMaterial({color,roughness:1}));
-      const treeTop = 2 * H - floor;
-      beam(v3(0,.28,0),v3(.12,3.9,.06),.17,paleBark);
-      pole(.17,3.6,0,2.08,0,paleBark,true);
-      beam(v3(.12,3.9,.06),v3(.04,treeTop-.35,0),.095,paleBark);
-      for(let i=0;i<12;i++) {
-        const a=i*2.39996,y=3.5+(i%4)*.55;
-        const reach=.8+(i%3)*.16;
-        const tip=v3(Math.cos(a)*reach,Math.min(treeTop-.45,y+1),Math.sin(a)*reach);
-        beam(v3(.09,y,0),tip,.065,paleBark);
-        for(let j=0;j<3;j++) {
-          const leaves=new T.Mesh(new T.IcosahedronGeometry(1,1),greenLeaves[(i+j)%3]);
-          leaves.position.copy(tip).add(v3(Math.cos(a+j*2)*.25,j*.08,Math.sin(a+j*2)*.25));
-          leaves.scale.set(.52,.35,.46);
-          leaves.castShadow=true;leaves.receiveShadow=true;layers.visual.add(leaves);
-        }
-      }
-      const crown=new T.Mesh(new T.IcosahedronGeometry(1,1),greenLeaves[1]);
-      crown.position.set(.04,treeTop-.35,0);crown.scale.set(.55,.35,.5);
-      crown.castShadow=true;crown.receiveShadow=true;layers.visual.add(crown);
+      addCourtyardElevatorTree(layers.visual,layers.solid,{center:[0,0],baseY:.28,height:6.7,spread:1.6,name:"Árbol del cantero del patio"});
     },floor);
     // Cartel azul sobre dos postes, al borde de acceso a la plaza.
     frame(plan.blockGCourtyard.sign,()=>{
@@ -1692,24 +1567,12 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     }
   }
 
-  for (const [x, z] of plan.picnic) {
-    const dx = x - plan.cantina.center[0], dz = z - plan.cantina.center[1], a = plan.cantina.angle;
-    const lx = dx * Math.cos(a) + dz * Math.sin(a), lz = -dx * Math.sin(a) + dz * Math.cos(a);
-    const y = lx >= gardenBounds.minX && lx <= gardenBounds.maxX && lz >= gardenBounds.minZ && lz <= gardenBounds.maxZ
-      ? gardenHeight(lx, lz) : 0;
-    box(2.5, 0.06, 1, x, y + 0.77, z, m.metal);
-    for (const dz of [-0.85, 0.85]) {
-      registerSeats(layers.visual, 2.7, x, y + 0.43, z + dz, dz < 0 ? 1 : -1);
-      box(2.7, 0.08, 0.42, x, y + 0.43, z + dz, m.blue);
-      for (const dx of [-0.9, 0.9]) pole(0.035, 0.75, x + dx, y + 0.38, z + dz * 0.5);
-    }
-  }
+  addCantinaGarden(builder);
   addCourtyardVegetation(layers.visual, layers.solid);
   const [treeX, treeZ] = plan.tree2;
   box(2.8, 0.45, 0.6, treeX + 3, 0.225, treeZ - 2.5, m.brick, true);
   box(2.4, 0.45, 0.6, treeX + 3, 0.225, treeZ - 5, m.brick, true);
-  // Árbol personalizado de la cantina / mesas
-  addCantinaTree(layers.visual, layers.solid, plan.cantinaTree, plan.platform.some((p) => insidePolygon(plan.cantinaTree, p)) ? PLAZA_LEVEL : 0);
+  pruneTreeStructures(group,colliders);
   mergeByMaterial(group);
   group.updateMatrixWorld(true); colliders.updateMatrixWorld(true);
   return { group, colliders, elevator };
@@ -1729,7 +1592,7 @@ function mergeByMaterial(root: T.Group) {
   const inverse = root.matrixWorld.clone().invert();
   const buckets = new Map<T.Material, Map<number, T.BufferGeometry[]>>(), merged: T.Object3D[] = [];
   root.traverse((o) => {
-    if (!(o instanceof T.Mesh) || o instanceof T.InstancedMesh || o.userData.keep || o.userData.removalLabel || Array.isArray(o.material)
+    if (!(o instanceof T.Mesh) || o instanceof T.InstancedMesh || o.userData.keep || Array.isArray(o.material)
       || o.material.transparent) return;
     let geo = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()) as T.BufferGeometry;
     for (const name of Object.keys(geo.attributes)) if (!["position", "normal", "uv"].includes(name)) geo.deleteAttribute(name);

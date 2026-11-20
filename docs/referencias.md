@@ -8,14 +8,17 @@ El Drive del equipo se consultó **solo para lectura**. El «Bloque 2» de sus c
 | --- | --- | --- | --- |
 | Fotos WebP optimizadas | 37 | 8,8 MB | `frontend/public/assets/photos/` |
 | Texturas WebP derivadas del escaneo `pasillo-p3`: ladrillo, granito con y sin franja, hormigón, lamas y chapa de la cubierta | 6 | 48 KB (≤64 KB cada una, lo verifica `npm test`) | `frontend/public/assets/textures/` |
+| Ascensor: once texturas y murales WebP enderezados de fotos y tres sonidos MP3 recortados de grabaciones ([detalle](#ascensor--19112026)) | 14 | 410 KB (≤128 KB cada uno, lo verifica `npm test`) | `frontend/public/assets/ascensor/` |
 
-Total de recursos servidos ≈ 8,9 MB. `frontend/public/assets/sources.json` registra para los 43 recursos el origen, el hash del original y el hash y tamaño del derivado. No se incluyen los originales ni el escaneo de persona (sin usar).
+Total de recursos servidos ≈ 9,3 MB. `frontend/public/assets/sources.json` registra para los 57 recursos el origen, el hash del original y el hash y tamaño del derivado. No se incluyen los originales ni el escaneo de persona (sin usar).
 
 ## Preparación
 
 `scripts/prepare-assets.py` (dependencias en `scripts/requirements-assets.txt`) lee las copias locales de Drive sin modificarlas, convierte las imágenes a WebP; ya no exporta escaneos GLB navegables. `npm test` comprueba que cada foto referenciada en `places.ts` exista.
 
 `scripts/extract-scan-textures.py` (mismas dependencias) lee el escaneo del pasillo sin modificarlo, lo alinea con su eje y rasteriza vistas ortográficas de zonas limpias de pared, piso, dintel, lamas y cubierta; compensa la iluminación, vuelve repetibles los bordes y escribe las texturas, `textures/textures.json` (tamaño real que cubre cada repetición) y sus entradas en `sources.json`. Se generaron desde el original de Drive (textura de 8192 px). Las lamas se ven a contraluz desde la galería: se llevó su color medio al gris azulado de las fotos tomadas desde el patio.
+
+`scripts/prepare-elevator-assets.py` (mismas dependencias y `ffmpeg`) lee las fotos y grabaciones del ascensor sin modificarlas, desde la carpeta que se le indique. Endereza cada superficie con una homografía a partir de esquinas marcadas en la foto, borra calcomanías y objetos delante e interpola los huecos, y vuelve repetibles el acero y el revoque azul. Recorta, filtra y normaliza los sonidos, y convierte el zumbido del viaje en un bucle sin costuras. Escribe los derivados y sus entradas en `sources.json`.
 
 ## Git
 
@@ -137,3 +140,65 @@ Las tres capturas c0bf5aaa, 34b1d5fe y e7eb9449 muestran el acceso a los baños 
 ### Plaza de la Amistad: fotos del usuario, 14/11/2026
 
 Referencias aportadas en el chat: `codex-clipboard-a9c726cc-006e-4e97-814b-ceb20d564918.jpg`, `codex-clipboard-1b970d6a-b108-4232-bdc8-489a6cb1f9c3.jpg`, `codex-clipboard-ee1918e0-60d4-488f-92a0-dce2133db67b.jpg`, `codex-clipboard-f6713ff1-5166-4985-9c64-c7b59079115a.jpg` y `codex-clipboard-db9abaa4-ad82-4c77-8db4-07e34a0b4a9b.jpg`. Acabados procedurales interpretados visualmente: baldosas, piezas circulares, tierra, pintura azul, hojas nervadas y corteza. El cartel se recrea con texto legible; no es una reproducción fotográfica exacta.
+
+### LED, lateral derecho — 18/11/2026
+
+Dos fotografías aportadas por Horacio en el chat, identificadas como codex-clipboard-4603ba68-5bd5-441d-b5c6-b460d19ee81e y codex-clipboard-f94b3e79-5906-43cb-8e26-d8b16f60e1f0. Referencias de lamas, rejas, equipos, estructura metálica, puertas y entorno inmediato. No se incorporan los originales al repositorio ni se usan como textura; la reconstrucción se genera con geometría y materiales del proyecto.
+
+## Ascensor — 19/11/2026
+
+Fotos y grabaciones del ascensor del Bloque 1 aportadas por el usuario el 19/11/2026. Los originales quedan fuera del repositorio; los derivados y su procedencia (hash del original y del derivado) están en `sources.json`.
+
+| Original | Uso |
+| --- | --- |
+| `ascensor fondo.jpeg` | Pared del fondo enderezada. Se borran las calcomanías, el afiche de un evento con la foto de una persona y el pasamanos, que se modela aparte. Las paredes laterales repiten sus paneles y el acero repetible sale de un panel limpio |
+| `ascensor piso.jpeg` | Piso de granito negro con guarda clara, enderezado a 1,1 × 1,4 m. Confirma la proporción de la cabina y el lado al que se recogen las hojas |
+| `ascensor panel izquierda foto 2.jpeg` | Placa de la botonera, enderezada desde sus cuatro tornillos, con la posición de indicador y pulsadores. Avisos de OTIS (control de mantenimiento y recomendaciones) y afiche del PCOE de la universidad |
+| `ascensor panel izquierda.jpeg`, `ascensor derecha.jpeg` | Referencia de la ubicación de la botonera y los avisos, del techo y de las juntas. No se usan como textura |
+| `ascensor puerta.jpeg` | Frente de planta baja: marco y hojas de acero, armario de maniobra, revoque azul repetible e indicadores. Fija el vano de 0,82 × 2 m y los montantes |
+| `cara este.jpeg` | Mural de los cascos, enderezado. Se borran el carro de limpieza, el lampazo y el borde tapado por el edificio. Va en la **cara oeste** (ver [correcciones](correcciones.md#19112026--ascensor)) |
+| `cara sur.jpeg` | Mural del lápiz, enderezado. Donde había hojas de árbol se redibujan las figuras planas de la parte alta |
+| `Ascensor abriendose.m4a` | Puertas: del arranque del motor (0,1 s) al golpe de tope (2,3–2,5 s). Fija el tiempo de apertura y también se usa al cerrar |
+| `Sonido ascensor llegó.m4a` | Gong de llegada (tonos de 1,26 y 1,05 kHz), sin el ruido grave de pasos y voces |
+| `Ascensor subiendo y llegando.m4a` | Zumbido del motor: un tramo estable de 7 s en bucle. El gong y la apertura del final ya están en las otras grabaciones |
+
+Los audios se analizaron con espectrogramas y envolventes de nivel para ubicar cada evento. El recorte no se comprobó escuchando por parlantes.
+
+### Laboratorios de Civil detrás de cantina — 19/11/2026
+
+Para el suelo, `00.44.49.jpeg` guía la pequeña plataforma junto a la ventana; `00.50.05.jpeg` y `00.44.48 (1).jpeg` guían rejillas y registros. Se aproximan medidas y distribución, manteniendo el material de hormigón existente.
+
+La vista `00.44.49.jpeg` también guía el pequeño volumen rojizo del rincón; `00.50.05.jpeg` guía el depósito rectangular con dos respiraderos. Se construyen con geometría y materiales propios, sin reproducir manchas ni desgaste y sin importar los originales al repositorio.
+
+Fotos del usuario: `WhatsApp Image 2026-11-19 at 00.44.48 (2).jpeg`, `WhatsApp Image 2026-11-19 at 00.44.49.jpeg`, `WhatsApp Image 2026-11-19 at 00.44.48 (1).jpeg` y `WhatsApp Image 2026-11-19 at 00.50.05.jpeg`. Guían ventanas, franjas, pilares, desagües, mesada y equipamiento de los laboratorios. Se interpretan proporciones, sin medidas nuevas relevadas. Por instrucción del usuario se conserva el color del modelo y no se reproduce desgaste. Los originales permanecen fuera del repositorio y no se usan como texturas.
+
+### Acabado ilustrado de los pasillos (19/11/2026)
+
+Por indicación del usuario, galleryFloor y granite usan ahora un mosaico dibujado por código en materials.ts: base rosada uniforme, áridos geométricos discretos, acabado mate y franjas rectas oscuras cada 1,25 m. Los rellanos comparten la misma paleta sin franja. Se conservan la orientación, fase y dimensiones de las UV existentes. Son dos CanvasTexture de 256 × 256; las texturas extraídas del escaneo permanecen como referencia histórica y ya no se aplican a estos dos materiales.
+
+
+### Árbol junto al ascensor — 19/11/2026
+
+La captura `codex-clipboard-1871ccca-e4c9-4b31-b8cf-ebc49deb61d7.png` identifica el árbol que atravesaba la caja. No se incorpora el original al repositorio. La corteza utiliza [Bark Brown 02](https://polyhaven.com/a/bark_brown_02), de Rob Tuytel / Poly Haven, licencia [CC0](https://polyhaven.com/license), con mapas de color, normal OpenGL y rugosidad de 1K. Las hojas utilizan [Leaf Set 001](https://ambientcg.com/a/LeafSet001), de Lennart Demes / ambientCG, licencia [CC0](https://docs.ambientcg.com/license/), con color, opacidad y normal OpenGL. El proveedor clasifica estas hojas como una aproximación, no como un escaneo fotogramétrico. La especie no se determina con estas texturas.
+
+`scripts/prepare-courtyard-tree-assets.py` descarga los originales en `.local/tree-sources/`, combina la opacidad con el color de las hojas, retira 1 px del borde del alfa y exporta cinco WebP a `public/assets/vegetation/` (aproximadamente 1,06 MiB en total). Requiere Python y Pillow; ejecución desde la raíz: `python scripts/prepare-courtyard-tree-assets.py`. Procedencia, licencia y hashes de originales y derivados registrados en `public/assets/sources.json`. Las nervaduras se ven sobre geometrías curvadas; la copa y las ramas se construyen en el proyecto.
+
+
+### Gatos del campus — 19/11/2026
+
+Modelos propios construidos en `campus-cats.ts`: cuerpo, cabeza, orejas, ojos con pupila vertical, hocico, bigotes, extremidades articuladas y cola curva. Pelajes de pelo corto y patrones atigrados generados con Canvas; no se descargaron modelos ni se utilizaron fotografías externas como texturas. El acabado de todos los árboles reutiliza los cinco mapas de vegetación CC0 documentados arriba.
+
+
+### Referencia anatómica de los gatos — 19/11/2026
+
+Se consultó la fotografía lateral de un gato negro publicada en [ねこのきもち / Benesse](https://cat.benesse.ne.jp/withcat/content/?id=45164), especialmente proporción del cuerpo, pecho, extremidades y cola horizontal. Se usa únicamente como referencia visual: no se incorpora la foto ni se usa como textura. Modelo y pelajes siguen siendo propios. `leaves-cluster.webp` se deriva de 36 recortes del mapa Leaf Set 001 CC0; su preparación está integrada en `prepare-courtyard-tree-assets.py` y su procedencia está en `sources.json`.
+
+## Avatar y audio social — 19/11/2026
+
+- Modelo original del proyecto: [generador Blender](../scripts/blender/campus_person.py), sin modelos ni texturas de terceros. Exporta [campus-person.glb](../frontend/public/assets/avatar/campus-person.glb) con jerarquía de articulaciones, dedos y siete clips. El color de la camiseta se cambia por cuenta en el visor.
+- Audio aportado directamente por el usuario: `universfield-message-notification-199577.mp3` (nombre del archivo atribuye Universfield), `gmod-ragdoll-physics-breaking.mp3`. Copiados sin modificar como `audio/message.mp3` y `audio/ragdoll-impact.mp3`. No se deduce una licencia de publicación/reutilización de sus nombres; queda pendiente confirmar su procedencia y licencia completa.
+- Tamaños, hashes SHA-256 y procedencia registrados en [sources.json](../frontend/public/assets/sources.json). La caída reproduce fragmentos del audio como respuesta a contactos físicos, sin reproducir pasos al caminar.
+
+### Edificio frente a Civil, junto al pasillo — 19/11/2026
+
+Referencias aportadas por el usuario: `WhatsApp Image 2026-11-19 at 16.45.07 (1).jpeg` (cabecera y portón), `16.45.07.jpeg` y `16.45.06 (3).jpeg` (lateral y pasillo), `16.45.06 (2).jpeg` (puerta de vidrio) y `16.45.04 (2).jpeg` (acceso del Taller de Maquetas y Prototipos). La captura `Captura de pantalla 2026-11-19 213139.png` identifica el bloque actualmente denominado `cta-dicia`. Los originales permanecen fuera del repositorio. Se interpretan formas y proporciones, reutilizando el material de Civil sin añadir desgaste ni copiar reflejos de las fotografías.

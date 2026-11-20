@@ -1,5 +1,5 @@
 {
-  "provenance": "Referencias aportadas por el equipo mediante Drive, leídas el 30/10/2026. Originales sin modificar. Uso en este trabajo práctico; no se declara una licencia de reutilización general.",
+  "provenance": "Referencias aportadas por el equipo mediante Drive, leídas el 30/10/2026. Originales sin modificar. Uso en este trabajo práctico; no se declara una licencia de reutilización general para esas referencias. Los recursos externos con licencia abierta se identifican individualmente mediante source, author, license y licenseUrl.",
   "assets": [
     {
       "source": "Bedelía\\IMG_5686.HEIC",
@@ -307,6 +307,210 @@
       "derivation": "Ortofoto del escaneo con iluminación compensada y bordes repetibles (scripts/extract-scan-textures.py)",
       "bytes": 3520,
       "sha256": "26b72b2c617c5125226cc0a1bb35ce05bbc268a1730c026daf2c30209a962076"
+    },
+    {
+      "source": "Fotos del ascensor (19/11/2026)\\ascensor fondo.jpeg",
+      "sourceSha256": "ae38757561fc832aa5ba082b02a86c414e6e8e78e1709a98914b56dab3a174aa",
+      "asset": "ascensor/pared-fondo.webp",
+      "derivation": "Pared del fondo enderezada, sin calcomanías, afiche ni pasamanos (scripts/prepare-elevator-assets.py)",
+      "bytes": 18036,
+      "sha256": "3996f1be430ea583f272487bb0cb486859b7c6fa715996753c22a2f0bc0889f3"
+    },
+    {
+      "source": "Fotos del ascensor (19/11/2026)\\ascensor fondo.jpeg",
+      "sourceSha256": "ae38757561fc832aa5ba082b02a86c414e6e8e78e1709a98914b56dab3a174aa",
+      "asset": "ascensor/pared-lateral.webp",
+      "derivation": "Cinco paneles de la pared del fondo para las paredes laterales (scripts/prepare-elevator-assets.py)",
+      "bytes": 22706,
+      "sha256": "94a4cadeffeb44fbc97675d1f762a184cc0422fd4cf0c253aabd2e78bd69ac00"
+    },
+    {
+      "source": "Fotos del ascensor (19/11/2026)\\ascensor fondo.jpeg",
+      "sourceSha256": "ae38757561fc832aa5ba082b02a86c414e6e8e78e1709a98914b56dab3a174aa",
+      "asset": "ascensor/acero.webp",
+      "derivation": "Panel de acero inoxidable sin juntas, repetible (scripts/prepare-elevator-assets.py)",
+      "bytes": 2840,
+      "sha256": "d8e75c2be4e730af94b03135d8e845609874eb140841a80d36a3a567615eddb5"
+    },
+    {
+      "source": "Fotos del ascensor (19/11/2026)\\ascensor piso.jpeg",
+      "sourceSha256": "84b0ff950142bd33144c0e0e8a605ca96c12e2155d55924f47306f49be9af8ec",
+      "asset": "ascensor/piso.webp",
+      "derivation": "Piso de granito con guarda enderezado a 1,1 × 1,4 m (scripts/prepare-elevator-assets.py)",
+      "bytes": 65548,
+      "sha256": "dae152a1c23cf88f0cbf71f32868eddcc2606e7cc039c38143766c5961dae09a"
+    },
+    {
+      "source": "Fotos del ascensor (19/11/2026)\\ascensor panel izquierda foto 2.jpeg",
+      "sourceSha256": "046059733f95457fad273b7da16a5404a6c028fbc7e64d59fb7575bdd9e6bd1e",
+      "asset": "ascensor/botonera.webp",
+      "derivation": "Placa de la botonera enderezada desde sus cuatro tornillos (scripts/prepare-elevator-assets.py)",
+      "bytes": 8344,
+      "sha256": "ae67ec80bcc0fb8e70f22d81dc318aaee902f809a6c57e45b34958b1af280645"
+    },
+    {
+      "source": "Fotos del ascensor (19/11/2026)\\ascensor panel izquierda foto 2.jpeg",
+      "sourceSha256": "046059733f95457fad273b7da16a5404a6c028fbc7e64d59fb7575bdd9e6bd1e",
+      "asset": "ascensor/avisos.webp",
+      "derivation": "Avisos de OTIS y afiche del PCOE enderezados (scripts/prepare-elevator-assets.py)",
+      "bytes": 19960,
+      "sha256": "d18087634b2e1ae00d9bec06496499d3f644500366affbeaf5481e3f879ff40d"
+    },
+    {
+      "source": "Fotos del ascensor (19/11/2026)\\ascensor puerta.jpeg",
+      "sourceSha256": "4ed66e8a5c0accbedae9c1924e719fe01e1a888d82ac3a158b30d82a2123d999",
+      "asset": "ascensor/frente.webp",
+      "derivation": "Marco y hojas exteriores de planta baja enderezados (scripts/prepare-elevator-assets.py)",
+      "bytes": 20358,
+      "sha256": "d047861c3ce9dc4238357efc159a7571fc2fb2a75887f83faadb5659e51179c8"
+    },
+    {
+      "source": "Fotos del ascensor (19/11/2026)\\ascensor puerta.jpeg",
+      "sourceSha256": "4ed66e8a5c0accbedae9c1924e719fe01e1a888d82ac3a158b30d82a2123d999",
+      "asset": "ascensor/armario.webp",
+      "derivation": "Armario de maniobra de acero junto a la puerta de planta baja (scripts/prepare-elevator-assets.py)",
+      "bytes": 13228,
+      "sha256": "b532dc01d00bbc8b55dde6f5f5af80f574267990a8b24dc6726b0e42575f85b9"
+    },
+    {
+      "source": "Fotos del ascensor (19/11/2026)\\ascensor puerta.jpeg",
+      "sourceSha256": "4ed66e8a5c0accbedae9c1924e719fe01e1a888d82ac3a158b30d82a2123d999",
+      "asset": "ascensor/revoque-azul.webp",
+      "derivation": "Revoque azul texturado, repetible (0,4 m) (scripts/prepare-elevator-assets.py)",
+      "bytes": 13652,
+      "sha256": "979dc23a7b7db117df5c82d1b022acf235d07a94ce71dc3739fd81a8aec3792d"
+    },
+    {
+      "source": "Fotos del ascensor (19/11/2026)\\cara este.jpeg",
+      "sourceSha256": "a78375d61f5f7dbf602f1fdd2ffa32fd9db5ca3335e88568aca1b119bfc9cba2",
+      "asset": "ascensor/mural-oeste.webp",
+      "derivation": "Mural de los cascos (cara oeste), enderezado a 2,44 × 6,4 m y sin objetos delante (scripts/prepare-elevator-assets.py)",
+      "bytes": 30538,
+      "sha256": "a3faeb836faafef0864fcbade008afd38c2df996ea49cac6cc719c26f27d324a"
+    },
+    {
+      "source": "Fotos del ascensor (19/11/2026)\\cara sur.jpeg",
+      "sourceSha256": "dd481f64325f4cb196b896001a53700da54ffb4d5ff03b312c64506409dbda58",
+      "asset": "ascensor/mural-sur.webp",
+      "derivation": "Mural del lápiz (cara sur), enderezado a 2,44 × 6,4 m y sin objetos delante (scripts/prepare-elevator-assets.py)",
+      "bytes": 45616,
+      "sha256": "55ffc43133fdd88df1c097b903832ca8e0bf6e14498cc251f2385d77302d4c90"
+    },
+    {
+      "source": "Grabaciones del ascensor (19/11/2026)\\Ascensor abriendose.m4a",
+      "sourceSha256": "40b8d669d00435845162365d7c0b8cf009b3347044fbf495b97136460573437a",
+      "asset": "ascensor/puertas.mp3",
+      "derivation": "Apertura de puertas recortada, filtrada y normalizada (scripts/prepare-elevator-assets.py)",
+      "bytes": 40481,
+      "sha256": "ae580cab669deccd2f40466b639afcc5b9cb679e038450984984cff8d2fff84f"
+    },
+    {
+      "source": "Grabaciones del ascensor (19/11/2026)\\Sonido ascensor llegó.m4a",
+      "sourceSha256": "68bc26c8ac8e6e00a0cd8dd6c349628073a8f1c4e7d32010592482e37b37b26e",
+      "asset": "ascensor/llegada.mp3",
+      "derivation": "Gong de llegada sin el ruido grave de fondo (scripts/prepare-elevator-assets.py)",
+      "bytes": 30764,
+      "sha256": "1adbc90e864e89c682a2ebd46c69320e6a9dc5cb11390d92e877a887301e7aef"
+    },
+    {
+      "source": "Grabaciones del ascensor (19/11/2026)\\Ascensor subiendo y llegando.m4a",
+      "sourceSha256": "7496ff6e5822800303f0ec4cb88ac1b50fa98c91f46a5e6c3ba7eb547fd9cc21",
+      "asset": "ascensor/viaje.mp3",
+      "derivation": "Zumbido del viaje en bucle sin costuras (scripts/prepare-elevator-assets.py)",
+      "bytes": 87188,
+      "sha256": "a99a4e4862ca23e06877dd4ce261a86021f66407f257411be0ac5b5ac010974c"
+    },
+    {
+      "source": "https://polyhaven.com/a/bark_brown_02",
+      "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_diff_1k.jpg",
+      "author": "Rob Tuytel / Poly Haven",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "sourceSha256": "920fa0bed0c9d78c1d530e99795113afd532d7db746de440f4a85d7c83ed0f1a",
+      "asset": "vegetation/bark-color.webp",
+      "bytes": 394842,
+      "sha256": "2589fa1197596d420aa4485dca0ff735ef959332b6a77a8028026127a487637b"
+    },
+    {
+      "source": "https://polyhaven.com/a/bark_brown_02",
+      "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_nor_gl_1k.jpg",
+      "author": "Rob Tuytel / Poly Haven",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "sourceSha256": "0d5e691e8ad8bcd093a3587887fda2a6b4a948b5708a4f256f7919584c6eb857",
+      "asset": "vegetation/bark-normal.webp",
+      "bytes": 418956,
+      "sha256": "4c44e7c2c3e3f70404070e1c38c26aabcb40fe594eeee8c1ed821fb695c0c761"
+    },
+    {
+      "source": "https://polyhaven.com/a/bark_brown_02",
+      "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_rough_1k.jpg",
+      "author": "Rob Tuytel / Poly Haven",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "sourceSha256": "68125592de36e15bae7aa6db85c4d135aeb7e5653199ba226483a70f6d69837d",
+      "asset": "vegetation/bark-roughness.webp",
+      "bytes": 184624,
+      "sha256": "2f07d09c0205c1026ad7efa43718d1b448cf7f3993ba53d5b29a0376b1796a71"
+    },
+    {
+      "source": "https://ambientcg.com/a/LeafSet001",
+      "download": "https://ambientcg.com/get?file=LeafSet001_1K-JPG.zip",
+      "author": "Lennart Demes / ambientCG",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://docs.ambientcg.com/license/",
+      "sourceSha256": "8ed9935aa00f0d0a1b8671db4406e424fb4b41f1d2f290971d14968280a52199",
+      "asset": "vegetation/leaves-color.webp",
+      "processing": "Color: saturación ×1,25, brillo ×1,3, alfa erosionado 1 px. Normal OpenGL sin modificar.",
+      "bytes": 70614,
+      "sha256": "476c32d19f434d431c4fd6fad459b56c4c2419fb1a73c21a1f3f83ed75f4fd2e"
+    },
+    {
+      "source": "https://ambientcg.com/a/LeafSet001",
+      "download": "https://ambientcg.com/get?file=LeafSet001_1K-JPG.zip",
+      "author": "Lennart Demes / ambientCG",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://docs.ambientcg.com/license/",
+      "sourceSha256": "8ed9935aa00f0d0a1b8671db4406e424fb4b41f1d2f290971d14968280a52199",
+      "asset": "vegetation/leaves-normal.webp",
+      "processing": "Color: saturación ×1,25, brillo ×1,3, alfa erosionado 1 px. Normal OpenGL sin modificar.",
+      "bytes": 38260,
+      "sha256": "e9fe429c11f5b435366f4f11d8d864a2fdcd59f911ce2652f0e72d1b712a04a4"
+    },
+    {
+      "asset": "vegetation/leaves-cluster.webp",
+      "source": "https://ambientcg.com/a/LeafSet001",
+      "author": "Lennart Demes / ambientCG",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://docs.ambientcg.com/license/",
+      "sourceSha256": "476c32d19f434d431c4fd6fad459b56c4c2419fb1a73c21a1f3f83ed75f4fd2e",
+      "processing": "36 recortes del mapa de hojas, agrupados con semilla 827 para el detalle lejano.",
+      "bytes": 43518,
+      "sha256": "848900a83d4739306950e5344a534462d13b9dd7a05181c1347b8f1309940d28"
+    },
+    {
+      "asset": "avatar/campus-person.glb",
+      "source": "scripts/blender/campus_person.py",
+      "author": "Modelo y animaciones originales del proyecto",
+      "license": "Creación original del proyecto; sin licencia de reutilización general declarada",
+      "bytes": 216716,
+      "sha256": "05016579229a82fb6af614880b99ad3a25038f1354e5afe92449e73131b04d68"
+    },
+    {
+      "asset": "audio/message.mp3",
+      "source": "universfield-message-notification-199577.mp3",
+      "author": "Archivo aportado por el usuario; atribución del nombre: Universfield",
+      "license": "Licencia pendiente de confirmar; recurso aportado por el usuario",
+      "bytes": 50991,
+      "sha256": "7a520887e33c4b594a80abae43c972358f693e44b11b0ea15eb9797843545390"
+    },
+    {
+      "asset": "audio/ragdoll-impact.mp3",
+      "source": "gmod-ragdoll-physics-breaking.mp3",
+      "author": "Archivo aportado por el usuario",
+      "license": "Licencia pendiente de confirmar; recurso aportado por el usuario",
+      "bytes": 183528,
+      "sha256": "85e60c920c533e5d15b1634c9c06d69875d23333097464aa425df2979a083941"
     }
   ]
 }

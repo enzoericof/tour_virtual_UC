@@ -16,20 +16,22 @@ test('Los diez avatares interpolan posiciones y giros recibidos sin recrearse', 
     const { RemotePlayers } = await server.ssrLoadModule('/src/scene/remote-players.ts');
     const { Scene } = await import('three');
     const scene = new Scene();
-    const remote = new RemotePlayers(scene);
+    let now = 0;
+    const remote = new RemotePlayers(scene, () => now);
     const initial = Array.from({ length: 10 }, (_, index) => ({
       id: String(index), name: 'Visitante ' + index, skin: 'azul',
       x: index * 3, y: 0, z: 10, yaw: 0, walking: false,
     }));
     remote.receive(initial);
     const avatars = [...scene.children];
-    remote.receive(initial.map(player => ({ ...player, x: player.x + 2, y: 0.3, z: 11, yaw: 1, walking: true })));
-    remote.update(1 / 60);
+    now = 100;
+    remote.receive(initial.map(player => ({ ...player, x: player.x + 2, y: 0.3, z: 11, yaw: 1, walking: false })));
+    for (let frame = 0; frame < 12; frame++) { now += 1000 / 60; remote.update(1 / 60); }
     avatars.forEach((avatar, index) => {
       assert.ok(avatar.position.x > index * 3 && avatar.position.x < index * 3 + 2);
       assert.ok(avatar.rotation.y > 0 && avatar.rotation.y < 1);
     });
-    for (let frame = 0; frame < 60; frame++) remote.update(1 / 60);
+    for (let frame = 0; frame < 90; frame++) { now += 1000 / 60; remote.update(1 / 60); }
     avatars.forEach((avatar, index) => {
       assert.equal(scene.children[index], avatar);
       assert.ok(Math.abs(avatar.position.x - (index * 3 + 2)) < 0.001);

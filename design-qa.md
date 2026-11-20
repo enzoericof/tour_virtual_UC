@@ -360,3 +360,32 @@ Rampa trasladada al extremo indicado junto al muro derecho; filas separadas 40 c
 Onda invertida y suavizada según trazo rojo; mobiliario desplazado 25 cm hacia acceso. Compilación y pruebas completas correctas. Revisada captura del ajuste de curva en Chrome; sin validación manual de recorrido.
 
 Escalinata lateral de cantina: contorno quebrado revisado en captura aérea de Chrome, diagonal larga y chaflán final visibles. Sin errores JavaScript; build y 48 pruebas aprobadas.
+
+
+17/11/2026: revisión local de diez avatares con snapshots espaciados 280–320 ms en .local/motion-preview.html. Se renderizan, animan y detienen con el botón de prueba. No se realizó una sesión de usuarios reales en Vercel; la continuidad se verifica además mediante simulación temporal automatizada.
+
+
+18/11/2026: bienvenida con acceso previo al visor, formulario reutilizado, sesión recuperada tras recarga en Chrome. Cuenta revisada en claro y oscuro; el fondo calculado del diálogo coincide con la barra principal. Biblioteca y ayuda heredan el mismo material; sin rediseñar la escena. Entorno y límites de la prueba en docs/verificacion.md.
+
+18/11/2026: botón «Esc · Pausar» con el mismo fondo translúcido, esquinas y tipografía que «E · Sentarse», mediante estilos compartidos. Conserva su acción de pausa y su posición. Pasaron las 53 pruebas del frontend y la compilación de producción. Revisión visual pendiente: Chrome no pudo conectarse al servidor local durante la comprobación.
+
+
+18/11/2026: comprobados los menús del recorrido sin Eliminar/Restaurar objetos y cuenta sin selector de ropa en .local/menu-removal-preview.html, con cuenta ficticia y sin backend real. Pruebas del escenario y build correctos.
+
+
+18/11/2026: acceso compacto con logo, panel y tipografías compartidos, sin hero ni eslogan. Revisados en Chrome el formulario inicial, la elección de cuenta recordada y la transición con logo, giro y barra indeterminada durante validación/construcción del 3D. Cuenta ficticia y servidor local simulado; condiciones detalladas en docs/verificacion.md.
+
+
+18/11/2026: revisado en Chrome el panel Recorrido completo con logo UC, tarjeta y fuentes compartidas; texto de 10 personas y reintento manual sin escena 3D. API/WebSocket simulados. Tras liberar una plaza, se conserva la elección de cuenta y abre el campus. Detalles en docs/verificacion.md.
+
+
+19/11/2026: ascensor rehecho con las fotos del usuario. Revisado en Chromium sin ventana, en 1280 × 800, con una página temporal sin cuenta. El frente de planta baja coincide con la foto: armario de maniobra, marco y hojas de acero, indicador de dirección y botonera con «PB» sobre revoque azul. El primer piso tiene el mismo frente sin armario. Puertas abiertas con la cabina detrás. Interior con paneles de acero y sus reflejos, guarda de granito, pasamanos, avisos y botonera con indicador «P8», como el real. Murales: lápiz al sur, computadora al este y cascos al oeste, con los mismos vecinos que en las fotos. Corregidos durante la revisión: el hormigón del patio tapaba el piso de la cabina y una rendija dejaba ver el revoque junto a las hojas. Sin errores de página. Detalle en docs/verificacion.md.
+
+
+19/11/2026: revisado el pasillo del tercer piso en Chrome con la escena real. Piso rosado mate, pequeños áridos geométricos y franjas oscuras regulares, integrado con las formas del modelo. Se conserva la distribución original. Vista local .local/gallery-preview.html, excluida del build.
+
+
+19/11/2026: comprobada la fachada curva superior de la torre de baños en modo nocturno. Se retiró el canto blanco coplanar oculto tras el ladrillo; ya no aparecen manchas triangulares claras. Tapa y colisión de la cubierta conservadas. Regresión por rayos en docs/verificacion.md.
+
+
+19/11/2026: localizada la captura del usuario en la cocina semicircular de cantina. Comparación nocturna del mismo encuadre antes/después en Chrome: desaparece la franja gris fragmentada bajo el remate, que se conserva. Cubierta retranqueada dentro del muro, ventana y marquesina sin cambios.

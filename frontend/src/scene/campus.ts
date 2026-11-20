@@ -1,4 +1,3 @@
-import { createSceneRemovals } from "./scene-removals";
 import * as T from "three";
 import { createFaculty } from "./faculty-reconstruction";
 import { createCampusContext } from "./campus-context";
@@ -28,6 +27,5 @@ export function createCampus() {
   }
   setDetail(false);
   group.updateMatrixWorld(true); colliders.updateMatrixWorld(true);
-  const removals = createSceneRemovals(group);
-  return { removals, group, colliders, boundary: context.boundary, elevator: faculty.elevator, setDetail };
+  return { group, colliders, boundary: context.boundary, elevator: faculty.elevator, setDetail };
 }

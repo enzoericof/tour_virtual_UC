@@ -1,4 +1,5 @@
 import * as T from "three";
+import { addCourtyardElevatorTree } from "./courtyard-elevator-tree";
 import { layout } from "../data/campus-geometry";
 import { createCampusRock, createRockMist } from "./campus-rock";
 
@@ -84,45 +85,33 @@ function addPerimeterTrees(group: T.Group, edge: number[][], y: number) {
     remaining -= length;
   }
 
-  const trunkShape = new T.CylinderGeometry(0.11, 0.23, 1, 6);
-  const crownShape = new T.IcosahedronGeometry(1, 2);
-  const tips = crownShape.attributes.position;
-  for (let i = 0; i < tips.count; i++) {
-    const x = tips.getX(i), y = tips.getY(i), z = tips.getZ(i);
-    const relief = 1 + 0.09 * Math.sin(11 * x + 4 * z) * Math.cos(9 * y - 5 * z);
-    tips.setXYZ(i, x * relief, y * relief, z * relief);
-  }
-  crownShape.computeVertexNormals();
-  const trunks = new T.InstancedMesh(trunkShape, new T.MeshStandardMaterial({ color: "#564638", roughness: 1 }), trees.length);
-  const lobes = 7;
-  const crowns = new T.InstancedMesh(crownShape, new T.MeshStandardMaterial({ roughness: 1 }), trees.length * lobes);
-  trunks.name = "Troncos del perímetro";
-  crowns.name = "Copas del perímetro";
-  const dummy = new T.Object3D(), color = new T.Color();
-  trees.forEach(({ x, z, height, spread, narrow }, index) => {
-    dummy.rotation.set(0, 0, 0);
-    dummy.position.set(x, y + height * 0.25, z);
-    dummy.scale.set(height * 0.18, height * 0.5, height * 0.18);
-    dummy.updateMatrix();
-    trunks.setMatrixAt(index, dummy.matrix);
-
-    const hue = 0.21 + random() * 0.055, tone = 0.22 + random() * 0.11;
-    const heading = random() * 2 * Math.PI;
-    for (let i = 0; i < lobes; i++) {
-      const angle = heading + i * 2.4;
-      const radial = i === 0 ? 0 : spread * (0.45 + random() * 0.32) * (narrow ? 0.65 : 1);
-      const rise = i === 0 ? 0.79 : 0.48 + random() * 0.23;
-      const size = spread * (i === 0 ? 0.67 : 0.48 + random() * 0.26);
-      dummy.position.set(x + Math.cos(angle) * radial, y + height * rise, z + Math.sin(angle) * radial);
-      dummy.rotation.set(0, angle, 0);
-      dummy.scale.set(size, size * (narrow ? 1.55 : 0.94), size * 0.9);
-      dummy.updateMatrix();
-      const slot = index * lobes + i;
-      crowns.setMatrixAt(slot, dummy.matrix);
-      crowns.setColorAt(slot, color.setHSL(hue, 0.39, tone + (rise - 0.52) * 0.26, T.SRGBColorSpace));
-    }
+  const templates = new T.Group();
+  const near = addCourtyardElevatorTree(templates,new T.Group(),{center:[0,0],baseY:0,protectShaft:false,leavesPerTuft:280});
+  const far = addCourtyardElevatorTree(templates,new T.Group(),{center:[0,0],baseY:0,protectShaft:false,leavesPerTuft:24,distant:true});
+  trees.forEach(({x,z,height,spread},index)=>{
+    const tree = new T.LOD(); tree.name = "Árbol del perímetro"; tree.userData.realisticTree=true;
+    tree.position.set(x,y,z);tree.rotation.y=index*2.39996;
+    tree.scale.set(spread/5.4,height/10,spread/5.4);
+    tree.addLevel(copyTreeTemplate(near),0);tree.addLevel(copyTreeTemplate(far),18);group.add(tree);
   });
-  trunks.computeBoundingSphere();
-  crowns.computeBoundingSphere();
-  group.add(trunks, crowns);
+}
+
+/** Las copias del perímetro solo cambian su transformación exterior.
+ * Comparten las matrices y colores inmutables de las hojas, también en la GPU.
+ * InstancedMesh.clone() duplicaría esos buffers para cada árbol y cada nivel.
+ */
+function copyTreeTemplate(source: T.Object3D): T.Object3D {
+  if (source instanceof T.InstancedMesh) {
+    const copy = new T.InstancedMesh(source.geometry, source.material, 0);
+    T.Mesh.prototype.copy.call(copy, source, false);
+    copy.instanceMatrix = source.instanceMatrix;
+    copy.instanceColor = source.instanceColor;
+    copy.count = source.count;
+    copy.boundingBox = source.boundingBox?.clone() ?? null;
+    copy.boundingSphere = source.boundingSphere?.clone() ?? null;
+    return copy;
+  }
+  const copy = source.clone(false);
+  for (const child of source.children) copy.add(copyTreeTemplate(child));
+  return copy;
 }

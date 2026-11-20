@@ -3,6 +3,7 @@
 @import "./ui/tour-hud.css";
 @import "./ui/tour-content.css";
 @import "./ui/tour-dialogs.css";
+@import "./ui/tour-theme.css";
 
 @media (min-width: 1600px) {
   .place-card img {
@@ -61,16 +62,21 @@
 .game-pointer { display: none; pointer-events: none; position: fixed; left: 50%; top: 50%; width: 4px; height: 4px; transform: translate(-50%, -50%); border-radius: 50%; background: #fffdf5b0; box-shadow: 0 0 2px #173d32; z-index: 5; }
 body.is-walking .game-pointer { display: block; }
 body.is-walking { cursor: none; }
+.pause-tour, .seat-hint {
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: #15242de8;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 400;
+  text-shadow: none;
+}
 .pause-tour {
   display: flex;
   align-items: center;
   gap: 7px;
   min-height: 44px;
-  padding: 0;
-  font-weight: inherit;
-  text-shadow: inherit;
 }
-.pause-tour kbd { padding: 3px 5px; border: 1px solid #fff9; border-radius: 4px; background: transparent; }
 .tour-panel button:focus-visible { outline-offset: 2px; }
 @media (max-width: 500px) {
   .tour-toolbar .tour-icon, .tour-toolbar #overview { width: 44px; padding: 0; }
@@ -113,7 +119,6 @@ body.is-walking { cursor: none; }
 
 #register-fields { display: grid; gap: 0.75rem; padding: 0; margin: 0; border: 0; }
 #register-fields.hidden { display: none; }
-#skin-form { margin: 1rem 0; }
 
-.seat-hint { position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%); padding: 10px 18px; border-radius: 12px; background: #15242de8; color: white; pointer-events: none; z-index: 5; }
+.seat-hint { position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 5; }
 .seat-hint:empty { display: none; }

@@ -4,6 +4,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 const root=new URL('../public/assets/',import.meta.url);
+test('Tree PBR textures keep their public license, provenance and download budget',()=>{
+ const entries=JSON.parse(fs.readFileSync(new URL('sources.json',root),'utf8')).assets
+  .filter(entry=>entry.asset.startsWith('vegetation/'));
+ assert.equal(entries.length,6,'Bark PBR, individual leaves and dense distant leaf groups');
+ let bytes=0;
+ for(const entry of entries){
+  const data=fs.readFileSync(new URL(entry.asset,root));bytes+=data.length;
+  assert.equal(data.toString('ascii',0,4),'RIFF');assert.equal(data.toString('ascii',8,12),'WEBP');
+  assert.equal(entry.license,'CC0-1.0');assert.ok(entry.source.startsWith('https://'));
+  assert.equal(entry.sha256,crypto.createHash('sha256').update(data).digest('hex'));
+ }
+ assert.ok(bytes<1.2*1024*1024,'All six tree textures stay below 1.2 MiB');
+});
 test('Every referenced photograph is available in the prepared asset bundle',()=>{
  const source=fs.readFileSync(new URL('../src/data/places.ts',import.meta.url),'utf8');
  const names=[...new Set(source.match(/IMG_\d+/g))];
@@ -32,4 +45,17 @@ test('Scan-derived textures exist, stay small and match their tile sizes and pro
   assert.equal(entry.sha256,crypto.createHash('sha256').update(data).digest('hex'),`${name}: run scripts/extract-scan-textures.py again`);
  }
  for(const[,name]of materials.matchAll(/scanMaterial\("([a-z-]+)"/g))assert.ok(catalogue[name],name);
+});
+test('Elevator textures, murals and recordings exist, stay small and keep their provenance',()=>{
+ const sources=JSON.parse(fs.readFileSync(new URL('sources.json',root),'utf8')).assets;
+ const shaft=fs.readFileSync(new URL('../src/scene/faculty/elevator-shaft.ts',import.meta.url),'utf8');
+ const audio=fs.readFileSync(new URL('../src/scene/elevator-audio.ts',import.meta.url),'utf8');
+ const names=new Set([...[...shaft.matchAll(/photo\("([a-z-]+)"/g)].map(m=>`ascensor/${m[1]}.webp`),
+  ...[...audio.matchAll(/\/assets\/(ascensor\/[a-z-]+\.mp3)/g)].map(m=>m[1])]);
+ assert.equal(names.size,14,'Eleven images and three sounds');
+ for(const name of names){
+  const data=fs.readFileSync(new URL(name,root));assert.ok(data.length<128*1024,name);
+  const entry=sources.find(a=>a.asset===name);assert.ok(entry,`${name} has no provenance entry`);
+  assert.equal(entry.sha256,crypto.createHash('sha256').update(data).digest('hex'),`${name}: run scripts/prepare-elevator-assets.py again`);
+ }
 });

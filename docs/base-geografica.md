@@ -44,7 +44,7 @@ Medidas que faltan tomar en el Bloque 1:
 | Estructura | Diámetro de las columnas (0,5 m), voladizo de 1 m en cada extremo, ancho de las pilastras (0,45 m) | Interpretación |
 | Escalera Pompidou | Arranque a 18 m de la esquina SE, ancho de 2,4 m, tramo de 6 m y descanso de 3 m | Capturas y elección del equipo |
 | Cabecera este | Retiro de planta baja (5,05 m) y primer piso (3,05 m), rampa (1,6 m y su pendiente), bodega, rellano rosado y escalones de la galería | Interpretación de fotos |
-| Ascensor | Fondo de la caja (2,5 m, igual al frente) y altura de los murales (6,5 m) | Interpretación |
+| Ascensor | Fondo de la caja (2,5 m, igual al frente), altura de los murales (6,5 m), alto de la cabina (2,25 m) y de la puerta (2 m), armario de maniobra solo en planta baja | Interpretación; la planta de la cabina (1,1 × 1,4 m) sale de la placa «8 personas, 630 kg» y de la guarda del piso enderezado |
 | Cara este | Tamaño de los títulos y de las bandas de hormigón | Estimación de fotos |
 
 Sectores estimados al 03/11 (posiciones y tamaños de capturas y fotos): Bloque G (65 × 12 m y su ubicación a 11 m y 11,1 m del Bloque 1), plaza techada (15 × 10 m y su corrimiento de 6,5 m), altura de la plataforma (0,9 m), cuadrado descubierto, Bedelía, cantina y su interior, Sala Manfred, DEI–LED y los demás anexos, caminos, árboles y estacionamiento.
@@ -70,7 +70,7 @@ Hasta el 31/10/2026 el plano se registraba sobre la imagen aérea anotada con `p
 | Escalera de la galería de planta baja a la plaza (01/11) | Como prolongar la escalera existente hasta la galería | Ocho escalones del ancho de la galería (2,5 m) que continúan su extremo este hasta la plataforma, junto al ascensor |
 | Cuadrado descubierto | — | Entre la plaza techada (oeste), Bedelía (norte) y la cantina (este); 22 × 15 m adoptados (retiro visual de 5 m de la cantina pedido por Horacio el 02/11/2026, pendiente de medición) |
 | Escalera del Bloque 1 | Arranca a 20 m de la esquina SE; la bóveda sigue a la escalera y se aplana en los descansos (01/11). Más grande y un poco más al este (01/11) | Tipo Pompidou, por fuera de la galería, de 2,4 m y arrancando a 18 m de la esquina SE (ancho y corrimiento elegidos por el equipo): un tramo por piso hacia la torre, cada uno con descanso unido a la galería; llega al tercer piso. Sentido confirmado por el equipo. Tramo de 6 m (veinte peldaños de 30 cm) y descanso de 3 m: suman 9 m, dos módulos de 4,5 m, y cada descanso llega a la galería entre dos columnas (hasta el 02/11, 6,5 + 3,5 m con columnas cada 2,5 m). Una sola bóveda de chapa, a 2,3 m de la pisada, sube con cada tramo y se aplana en cada descanso |
-| Ascensor del Bloque 1 | 2 × 2 m, a 4 m de la misma esquina; su recubrimiento son tres murales distintos que llegan a la mitad superior entre el primer y el segundo piso (01/11). Va 1,5 m más al este y es algo más grande (01/11) | 2,5 × 2,5 m entre las dos últimas columnas de la galería (el equipo confirmó ese módulo el 02/11): centro a 3,25 m de la esquina, entre la esquina y la escalera, del lado de la galería; recorre todos los niveles. Caja revocada en crema, como en las fotos del 02/11, con murales en las caras este, sur y oeste hasta 6,5 m; por ahora los tres repiten el único fotografiado (`IMG_5727`). Puertas con marco azul hacia la galería (`IMG_5706`); en el primer piso dan a la llegada de la escalera de la plaza (`IMG_5694`). Es un volumen: no se puede usar |
+| Ascensor del Bloque 1 | 2 × 2 m, a 4 m de la misma esquina; su recubrimiento son tres murales distintos que llegan a la mitad superior entre el primer y el segundo piso (01/11). Va 1,5 m más al este y es algo más grande (01/11) | 2,5 × 2,5 m entre las dos últimas columnas de la galería (el equipo confirmó ese módulo el 02/11): centro a 3,25 m de la esquina, entre la esquina y la escalera, del lado de la galería; recorre todos los niveles. Caja revocada en crema, como en las fotos del 02/11, con tres murales distintos hasta 6,5 m: este, la computadora (`IMG_5727`); sur, el lápiz; oeste, los cascos (fotos del 19/11/2026). Frente de revoque azul hacia la galería (`IMG_5706`); en el primer piso da a la llegada de la escalera de la plaza (`IMG_5694`). Cabina usable en los cuatro niveles; detalle en [Ascensor según las fotos del 19/11/2026](#ascensor-según-las-fotos-del-19112026) |
 | Sala Manfred (integración del 05/11) | Se conserva la distribución local del usuario junto al pasillo y Bedelía (Área administrativa) | Base de 12 × 9 m, con prolongaciones del frente poligonal definidas en `bulgedOutline`; posición, orientación y contorno locales. Material mate claro y perfilería azul de la versión remota. Puerta abierta recuperada de la versión del compañero y adaptada al paño diagonal hacia la rampa |
 | Torre de baños | Dos semicírculos, 10 m de punta a punta. Salen de un rectángulo central. En planta baja, un cuadrado sobresale 2 m al sur. Vistos desde el edificio, a la derecha hombres y a la izquierda mujeres en todos los pisos (01/11) | Extremo oeste, con dos alas curvas ensanchadas horizontalmente. Entrando desde la galería, hombres al oeste y mujeres al este. Anexo de 8 × 8 m con portón (`IMG_5646`) |
 | Media sombra | Sobre las barandas azules | Lamas en las galerías del Bloque 1, de 2,1 a 3,1 m sobre cada piso; dos paños por módulo de 4,5 m (02/11) |
@@ -348,7 +348,7 @@ La franja gris contigua a la galería roja del Bloque 1 se angosta de 4,60 a 3,5
 
 La mesa del patio incorpora una silla azul en la cabecera. Se amplían las sansevierias del borde hasta aproximadamente 1,2 m de alto. Tres pilares de hormigón de 42 cm de lado, con colisión, suben desde el piso hasta el extremo exterior de los tres descansos de la escalera.
 
-El ascensor del Bloque 1 conserva su posición y sus murales laterales. La cara hacia la galería tiene revoque azul y dos hojas de acero cepillado por piso. Se abre un acceso de 1,12 m a la cabina en los cuatro niveles. La silla azul queda en la cabecera opuesta de la mesa del patio.
+El ascensor del Bloque 1 conserva su posición y sus murales laterales. La cara hacia la galería tiene revoque azul y dos hojas de acero cepillado por piso (frente y cabina rehechos con las fotos del 19/11/2026, más abajo). La silla azul queda en la cabecera opuesta de la mesa del patio.
 
 ### Patio frente al Bloque G
 
@@ -362,6 +362,12 @@ La cabina del Bloque 1 recorre el hueco vertical con una sola botonera interior 
 
 El indicador superior exterior señala el sentido de marcha. La placa gris inferior reúne el visor del piso de la cabina y los pulsadores circulares. En la pared izquierda interior, los botones circulares se ordenan en una columna con PB abajo y 3 arriba.
 ### Fachadas detrás de la cantina — 12/11/2026
+
+Detalles del 19/11/2026: las fotos del equipo identifican estos volúmenes como laboratorios de Civil; se mantiene el id histórico `lab-maquetas`. Se agregan una ventana posterior y tres laterales al bloque bajo, una superior y otra de celosías al lateral alto expuesto, franjas grises, pilastras, aleros, canaletas, bajantes, dos condensadoras, mesada de tres huecos, tuberías y luminarias. `laboratoryDetails` reúne las medidas estimadas en metros; `laboratory-facades.ts` construye los detalles usando el ladrillo y el color existentes, sin desgaste añadido. Se conservan las huellas y los portones. Depósito, cilindro, pequeño volumen rojizo, cantina y árboles quedan fuera de esta etapa.
+
+El bloque bajo se acorta desde atrás 4 m respecto del alto, según la foto posterior aportada por el usuario (`codex-clipboard-e5a1852b-f580-4106-ae2f-92888aeaf570.png`). Profundidades del modelo: 11,05 m y 15,05 m respectivamente; retiro estimado, pendiente de medición. La huella en L, el piso, los muros y las colisiones dejan un rincón abierto y parte del lateral alto expuesta. El frente hacia cantina conserva sus portones y longitud total.
+
+Corrección del 18/11/2026 según la captura del usuario. La cara exterior del muro posterior de Maquetas se alinea con el eje de la última columna del pasillo techado. La profundidad del edificio pasa de 18,40 a 15,05 m, calculada a partir de la columna existente, y se ajustan cubierta, piso, colisiones y caminero posterior mediante su huella. El frente hacia cantina conserva su posición y longitud de 14,17 m. La nueva profundidad es un ajuste del modelo, pendiente de medición en el lugar.
 
 La foto del 11/11 a las 18:26 muestra el frente de ladrillo del Área de Ensayo de Materiales, con un cuerpo alto y otro bajo, franjas oscuras y portones metálicos. Se tomó como referencia de forma para Maquetas. Las alturas, la pendiente y la distribución de los portones son aproximaciones visuales. El 12/11 se retiró del recorrido el Laboratorio de Ingeniería situado detrás de la cantina. El cuerpo bajo de Maquetas se prolonga hacia ese terreno. El equipo indicó una longitud total de 1417 cm para el frente de Maquetas hacia la cantina. De izquierda a derecha, la nave alta ocupa 9,50 m y el cuerpo bajo ocupa 4,67 m. Esta distribución entre cuerpos es aproximada.
 ### Fachada trasera del Bloque 1
@@ -394,6 +400,10 @@ Confirmado por el usuario: desplazar únicamente la cantina hacia la izquierda d
 ### Piso junto a cantina — 14/11/2026
 
 Se prolonga el pavimento gris de la plaza en L: franja entre el fondo de cantina y el frente de Maquetas, y franja lateral hasta el pasillo de Bedelía. Límites derivados de las huellas actuales; sin mover edificios. Misma cota de la plataforma y acabado gris existente.
+
+Actualización del 18/11/2026, primera etapa del patio de Maquetas. Las fotos del usuario `WhatsApp Image 2026-11-18 at 13.49.12.jpeg` y `WhatsApp Image 2026-11-18 at 13.49.12 (1).jpeg` muestran un jardín junto a cantina y pavimento frente a los portones. Se recorta la extensión gris para incorporar esa franja de césped enrasada, con colisión transitable. Se estiman 4 m de circulación frente a Maquetas, una entrada ensanchada desde el pasillo techado y 2 m de paso en el extremo opuesto. Estas anchuras requieren validación. Las fachadas, los arbustos y los árboles corresponden a etapas posteriores.
+
+Acabado del piso (18/11/2026): hormigón gris cálido mate con árido fino, manchas suaves y juntas orientadas con las fachadas. Textura procedural propia de 1024 px en `materials.ts`, interpretada de las mismas fotos, sin incorporar sus sombras ni modificar los originales. Repetición de 8 × 6 m con paños estimados de 4 × 3 m; no son medidas relevadas. Material exclusivo del pavimento de este patio, con la huella, altura y colisión existentes.
 
 ### Plaza de la Amistad — 14/11/2026
 
@@ -530,3 +540,140 @@ Se retira por completo la rampa rectangular independiente y sus paredes laterale
 ### Cubierta cuadrangular de Manfred — 19/11/2026
 
 La cubierta se separa del contorno hexagonal del recinto: cuatro lados rectos y esquinas en escuadra, siguiendo la terminación azul indicada por el usuario. Su envolvente local es de 15,1 × 12,973 m e incluye el cerramiento exterior existente. No cambian sala, mobiliario, piso, muros ni acceso. El techo y su cielorraso comparten el nuevo contorno.
+
+### Ajuste provisional de DEI–LED — 18/11/2026
+
+El DEI–LED se acerca a la cantina y su cabecera se alinea con la fachada, según la línea azul indicada por Horacio. Corrección posterior: la separación se mide desde el extremo de la escalera de la terraza lateral, dejando 3 m adicionales de césped; así se conservan la cubierta, las mesas y las sillas. El ala LED, DA/CAP, DAS y DG acompaña el ajuste junto con el enlace cerrado; se adaptan los caminos y el mapa. Ubicación y separación estimadas, pendientes de confirmación visual y medición.
+
+### LED junto a la cantina: foto del jardín — 18/11/2026
+
+Según la fotografía aportada por Horacio, la cabecera orientada al jardín se representa como un muro ciego de ladrillo visto, más alto que la cantina, con una franja de parasoles azules en el lateral hacia ella. Altura, profundidad y longitud del paño son estimaciones visuales de una sola imagen, no medidas relevadas. Se mantiene la alineación de la cabecera, la terraza de la cantina, el jardín de separación y la conexión con las oficinas.
+
+### Fachadas y sendero del LED — 18/11/2026
+
+Por indicación de Horacio, los laterales largos del DEI–LED se cierran con celosías azules, conservando los accesos y la cabecera ciega de ladrillo. Se añade un caminero de 1,6 m desde la galería azul, a lo largo de la fachada exterior, con adoquines circulares grises inspirados en la foto. Trazado, dimensiones y textura aproximados.
+
+### Corrección de celosías y caminero del LED — 18/11/2026
+
+La franja de lamas ocupa Y = 2 a 5,2 m, dejando 2 m de ladrillo arriba y abajo. Se elimina el respaldo opaco y se recuperan ventanas detrás, con lamas finas cada 34 cm. El caminero incorpora quiebres suaves, placas de unos 1,8 m con juntas de unos 11 cm, bordes ondulados y hormigón gris con círculos y desgaste. Se mantiene el ancho aproximado de 1,6 m y la unión con la galería azul. Son estimaciones de las fotos aportadas, no medidas de campo.
+
+### LED: laterales y giro del caminero — 18/11/2026
+
+Corrección de Horacio: el lateral hacia cantina queda cerrado con ladrillo detrás de las celosías, sin puerta ni ventanas. El lateral opuesto recibe ventanas de aproximadamente 1,15 × 0,85 m entre Y = 0,70 y 1,55 m, bajo la franja azul. La puerta exterior se traslada cerca del fondo, en el mismo lateral; su llegada y vano de colisión se actualizan. Se conserva la conexión interior con el ala de oficinas. El caminero se interna en el jardín y rodea la esquina del LED siguiendo el nuevo trazo rojo. Distancias aproximadas interpretadas de las capturas.
+
+### Volumen del caminero del LED — 18/11/2026
+
+El sendero deja de ser una superficie plana: cada tramo tiene tapa y cantos de hormigón, con aproximadamente 14 cm de volumen y apoyo por debajo del terreno. La colisión usa el mismo volumen visible. El empalme inicial conserva la cota del caminero bajo carpa y pasa gradualmente a la losa elevada. El tramo paralelo al LED se aleja 75 cm adicionales; el quiebre también se separa de la esquina. Textura de hormigón con círculos gastados, poros y desconchones; mapa de relieve independiente del color. Dimensiones y acabado interpretados de las fotos.
+
+### Pavimento bajo carpa y unión al LED — 18/11/2026
+
+El tramo principal bajo carpa, su prolongación y su acceso curvo comparten el material de hormigón circular del sendero del LED. Las coordenadas de textura se calculan sobre el plano de facultad para mantener el patrón continuo. La primera losa del ramal se recorta contra el borde de la senda cubierta, conservando su altura y eliminando tapas superpuestas; se interrumpe el bordillo en ese acceso.
+
+### Losas separadas bajo carpa — 18/11/2026
+
+Corrección expresa de Horacio: se retira la cinta de piso continua bajo la carpa y se reconstruye con el mismo generador de losas volumétricas del sendero del LED. Hay juntas abiertas, cantos y bordes ondulados reales. También se segmentan el acceso curvo y la prolongación. Se conservan la pendiente y las alturas de conexión; la unión lateral queda sobre una pieza completa. Se retiran los bordillos continuos y se rebaja el terreno inmediato para exponer los cantos y el fondo de las juntas. Esta corrección sustituye el cambio exclusivamente de material del registro anterior.
+
+### Uniones y canales del camino bajo carpa — 18/11/2026
+
+El tramo hasta (55, 37) y su continuación hasta (30, 50) se construyen como un único trazado de losas con esquinas a inglete; se retira el último piso liso genérico. El encuentro con el sendero del LED pasa a ser una pieza en T que recibe el ramal, sin losas superpuestas. Canaletas abiertas de hormigón de unos 29 cm de ancho a ambos lados del trazado desde la plaza techada hasta detrás del Bloque G, con fondo oscuro y cortes en los accesos. El caminero del jardín del LED conserva sus laterales sin canales. Dimensiones aproximadas a partir de la referencia visual.
+
+### Ramal al Bloque G, apoyos y seto puntual — 18/11/2026
+
+Se reemplaza el piso liso bajo el ramal de carpa hacia la galería del Bloque G por losas volumétricas separadas, con una pieza en T en la unión. Los apoyos del tramo principal se desplazan a 1,28 m del eje, fuera de las canaletas, unidos a la cubierta con prolongaciones metálicas cortas. Se añade un seto de verde claro de unos 1,7 m de altura exclusivamente sobre la L marcada por Horacio junto al empalme del sendero del LED. La franja se define en faculty-annexes.ts y conserva los pasos libres. Dimensiones interpretadas de las capturas.
+
+### Seto según foto de referencia — 18/11/2026
+
+La foto de Horacio sustituye las copas redondeadas anteriores por una copa continua podada en bloque rectangular, hojas pequeñas verdes claras y troncos separados bifurcados visibles desde el suelo hasta unos 80 cm. La copa alcanza aproximadamente 1,8 m; se conserva exclusivamente la franja en L ya indicada. Dimensiones estimadas de la imagen.
+
+### Lateral derecho del LED según dos fotografías — 18/11/2026
+
+Las fotos aportadas por Horacio reemplazan el lateral genérico: pantalla de lamas horizontales gris azuladas entre 3,75 y 5,65 m, bastidor exterior con diagonales superiores y apoyos, siete ventanas con rejas diagonales, puerta metálica central cerrada y acceso abierto al fondo. Se añaden ocho equipos de aire con ventiladores, rejillas, escuadras, cajas y bajadas, cinco reflectores, remates de ladrillo y mástil con tensores. Cantero angosto con plantas de hojas en roseta, vereda con interrupciones de acceso, árbol de copa redondeada, macetas y papelera azul. Carpa azul junto al extremo posterior según el segundo ángulo. Distribución, alturas y profundidades son estimaciones visuales, no medidas relevadas. La puerta central se modela cerrada; el acceso del fondo sigue siendo el punto de visita del DEI y conserva la conexión al corredor de oficinas. Las fuentes originales permanecen fuera del repositorio.
+
+### Jardín de mesas y parrilla de cantina — 18/11/2026
+
+Se conservan el árbol original y los accesos, y se completa el sector con otros dos árboles y cuatro conjuntos de mesas y asientos (dos mesas con bancos y dos con cuatro sillas de herrería). La parrilla se sitúa dentro del jardín, separada del cerco verde y del caminero. Tiene base de obra, ladrillo expuesto, encimera con azulejos, puertas metálicas gastadas —una entreabierta—, hogar con ceniza, rejilla, campana verde y mesa auxiliar. Posiciones y dimensiones estimadas a partir de la fotografía aportada por Horacio, pendientes de medición. Las patas y bases se ajustan a `gardenHeight`; corteza, pintura, revoque y hollín usan texturas procedurales propias. Las copias de los árboles comparten geometrías y materiales.
+
+Corrección posterior del jardín: los tres árboles y los cuatro conjuntos se agrupan en el mismo sector. Las cuatro mesas y sus dieciséis sillas pasan a ser de herrería negra, con chapa microperforada en tableros y asientos, respaldo de rombos y apoyabrazos. La parrilla se desplaza 4 m hacia la izquierda en el marco de cantina y se gira aproximadamente 34 grados adicionales hacia ese lado; se retira por completo la campana verde. Se conserva el ajuste de patas y base al terreno. Distribución estimada según la nueva referencia del usuario.
+
+### Mesas con banquitos — ajuste del 18/11/2026
+
+Los cuatro conjuntos del jardín pasan a ser mesas rectangulares de metal oscuro con dos banquitos alargados sin respaldo, según la última fotografía. Las tapas de mesas y bancos conservan perforaciones que permiten ver a través, con tamaño uniforme en metros. Se mantienen la distribución agrupada, las dieciséis plazas, las patas ajustadas al terreno y la parrilla girada sin la campana verde.
+
+### Prolongación y entrada del LED — 18/11/2026
+
+Según la nueva foto, se agrega un cuerpo bajo de unos 8 × 5,7 m a la derecha del paño alto del DEI–LED, manteniendo la posición y las medidas de ese volumen. Cubierta a unos 3,7 m y fachada retraída 1,6 m respecto de las lamas; entrada de 1,9 m en un nicho de 1,15 m, con marco oscuro, hoja recogida, paño fijo de vidrio, marquesina de chapa, ventanilla alta con reja, macetas y vereda. Se cierra la puerta anterior, se desplaza la carpa junto a la ampliación y se prolonga el sendero hasta el acceso nuevo. La huella del anexo y su llegada incluyen el cuerpo añadido. La puerta conecta con el corredor de oficinas y, por el vano existente, con el LED. Dimensiones interpretadas de la fotografía, pendientes de medición.
+
+### Entrada de blindex y pasillito del LED — 18/11/2026
+
+El cierre del acceso se retranquea otros 1,45 m: quedan 2,60 m de pasillo cubierto antes del vidrio. Todo el frente del nicho es blindex, de 3,40 m de ancho, con dos paños fijos y dos hojas vidriadas recogidas hacia adentro, herrajes discretos y tiradores. Se retiran la hoja opaca y las barras verticales. Dos pilares cuadrados de ladrillo visto, de 28 × 28 cm, enmarcan el cierre. El pavimento del pasillito continúa hasta el umbral sin interrumpir el giro al corredor. Medidas estimadas de las indicaciones del usuario.
+
+### Entrada frontal del LED según fotografía detallada — 18/11/2026
+
+Se sustituye la marquesina aislada y la carpa lateral por una lona azul a dos aguas longitudinal, centrada con el pasillito y el blindex, con bastidor y luminaria lineal en la cumbrera. El pórtico queda abierto en los laterales, con dos pilares frontales y dos junto al vidrio, zócalos de terracota, frontón triangular de ladrillo claro envejecido y vigas visibles. Se añaden ventanas laterales altas con rejas, puerta lateral de madera y fondo de puertas interiores con avisos. El cierre de blindex mantiene paños fijos, hojas recogidas y banda traslúcida. El acceso central de baldositas de 2,15 m queda entre plataformas laterales elevadas a 20 cm, con macetas de barro, follaje y trepadoras. Texturas de ladrillo y baldositas procedurales propias, inspiradas en la foto aportada por Horacio; medidas estimadas, no relevadas.
+
+### Corrección de pisos, ladrillo y puerta del DEI — 18/11/2026
+
+El embaldosado ocupa todo el frente entre las paredes, cubriendo las franjas de pasto junto a las plataformas. El encuentro con el caminero comparte una línea de recorte: las losas terminan allí y el embaldosado arranca a la misma cota de 15 cm, con transición suave hasta 7,5 cm en la puerta. Se conservan las juntas del caminero y las plataformas elevadas de macetas. Fachada, pilares, zócalos y frontón del acceso usan exactamente el mismo material de ladrillo del DEI; se retira el ladrillo claro procedural. Se elimina la puerta de madera del fondo y se deja un solo cierre de blindex oscuro, parcialmente transparente, con paños laterales fijos y una única hoja de 1,40 m. La hoja permanece cerrada a distancia, se abre por proximidad desde ambos lados y recupera su barrera física al cerrar.
+
+### Blindex corredizo al fondo, sin paños interiores de ladrillo — 18/11/2026
+
+Se retiran completos los dos paños con ventanas que flanqueaban el paso hacia el corredor, dentro del ancho de la ampliación. También desaparecen los paños de la antigua línea de acceso. El cierre se traslada de Z = −1,80 a Z = 1,25 m del marco del LED, en la posición de los muros retirados. El mismo vidrio oscuro queda como único cierre de pared a pared, con paños laterales fijos y dos hojas centrales juntas, de 1,15 m cada una. Las hojas se deslizan a lados opuestos por proximidad, sin giro sobre bisagras. Se prolongan el piso, las plataformas y la cubierta del pasillito hasta la nueva posición, conservando el giro al interior del LED.
+
+### Ventanas azules y pilares intermedios del acceso — 18/11/2026
+
+Por la nueva indicación, el frente de blindex y ventanas se adelanta 1 m, de Z = 1,25 a 0,25 m. Se restituye una ventana alta de 0,82 × 2,35 m a cada costado, con marcos, barrotes y diagonales de metal azul inspirados en la foto. Las ventanas comparten el mismo plano del blindex; los antiguos muros interiores del corredor permanecen retirados. Se añaden dos pilares intermedios de ladrillo visto de 28 × 28 cm, uno a cada lado entre los pilares frontales y el cierre, y se alinean los posteriores con los laterales del blindex. Se conservan el vidrio oscuro, las dos hojas corredizas y la continuidad del pavimento.
+
+### Caminero techado y árboles frente al DEI — 19/11/2026
+
+Según las marcas rojas, se prolonga el caminero del jardín en forma de Y: dos ramales conectan con el trazado existente frente al DEI y se unen en un tramo hacia la franja arbolada del perímetro. Ancho de 1,60 m, mismo material de hormigón con piezas circulares, losas con volumen y juntas abiertas. Los dos empalmes comparten losas de unión y la horquilla tiene una pieza común, con los brazos recortados para evitar solapamientos. Cota de tapa 0,15 m y bases bajo el césped. La carpa azul de 2,25 m de ancho sigue los quiebres de los dos trazados, con aleros a 2,75 m y cumbrera 44 cm más alta; sus apoyos quedan fuera de las losas y del cruce. Se plantan cuatro árboles en los puntos azules, reutilizando geometrías y materiales, con variación de escala y giro. Trazado, longitudes y posiciones son estimaciones interpretadas de la captura, no medidas relevadas. No se amplía el perímetro del campus.
+
+### Volumen del rincón y depósito de Civil — 19/11/2026
+
+Detalles de suelo: `laboratoryGroundDetails` define dos rejillas (0,38 × 1,05 m junto al portón bajo y 0,55 × 0,65 m hacia el depósito), dos registros cerrados (0,62 × 0,62 m en el patio y 0,58 × 0,68 m sobre el sendero lateral) y una plataforma de 1,50 × 2 m bajo la ventana del rincón. Medidas y posiciones estimadas de las fotos, pendientes de confirmación. Rejillas y registros sobresalen como máximo 7 mm sobre sus pavimentos existentes: patio a 0,905 m y lateral a 0,05 m. La plataforma alcanza 12 cm, con un bisel visible de 18 cm en su contorno y colisión de la misma forma. Se reutiliza el hormigón del patio. Se conservan las alturas generales, los edificios y el césped; no se añaden árboles ni se abren pozos transitables bajo las rejillas.
+
+Dos piezas independientes definidas en `laboratoryOutbuildings`, en el marco local de Maquetas. El volumen rojizo del rincón mide aproximadamente 2,15 × 1,15 m y 1,75 m de alto, con tapa sobresaliente, celosía frontal y persiana lateral cerrada. El depósito rectangular se sitúa enfrente del lateral bajo, dejando 3,4 m entre ambos cuerpos; mide aproximadamente 3 × 2,6 m y 3,05 m de alto. Su frente hacia el patio tiene dos respiraderos circulares con aro de terracota y rejilla radial. Todas estas medidas y la ubicación son estimaciones visuales pendientes de confirmación. Se conserva el ladrillo existente y no se añade desgaste. El cilindro de las fotos pertenece a otro edificio y no forma parte del depósito. Se modelan únicamente los exteriores; no se inventa una puerta del depósito en caras sin referencia. Los árboles y demás detalles del patio quedan para las siguientes etapas.
+
+### Ascensor según las fotos del 19/11/2026
+
+Fotos del interior y del frente de planta baja, más dos de los murales, con sus derivados en `frontend/public/assets/ascensor/` ([referencias](referencias.md#ascensor--19112026)). El modelo está en `frontend/src/scene/faculty/elevator-shaft.ts`.
+
+- **Cabina:** 1,1 × 1,4 m, la de un OTIS de 8 personas y 630 kg según la placa de la botonera. Al enderezar la foto del piso con esa proporción, las cuatro franjas de la guarda de granito miden lo mismo (unos 10 cm). El alto interior de 2,25 m es una estimación. Paredes de cinco paneles de acero a los lados y cuatro al fondo, con rejillas arriba y perforaciones abajo. Pasamanos de aluminio en el fondo, a 0,9 m. Botonera en la pared izquierda al entrar, a mitad de la pared, con los avisos de OTIS y el afiche del PCOE en el primer panel.
+- **Puerta:** telescópica, de dos hojas que se recogen hacia el armario (+x). La foto del piso muestra las hojas apiladas de ese lado y el vano al ras de la pared derecha. El vano mide 0,82 × 2 m, con montantes de 0,29 m (lado del armario) y 0,205 m y un dintel de 0,21 m. Son medidas tomadas sobre la foto enderezada, con la altura de 2 m estimada. La hoja rápida recorre todo el vano y la lenta, la mitad.
+- **Frente:** el armario de maniobra (0,45 m) y el marco ocupan 1,785 m, centrados en la caja de 2,5 m. Por eso el vano queda 0,28 m al oeste del eje, como ya indicaba `IMG_5694`. Indicador de dirección arriba del montante derecho y botonera de llamada con indicador «PB» a 0,9 m, como en la foto. El armario solo se fotografió en planta baja y no se repite en los demás pisos (pendiente de confirmar).
+- **Funcionamiento:** las puertas tardan 2,3 s, el tiempo de la grabación de apertura. Al llegar, la cabina se detiene 0,6 s con el gong antes de abrir. Los botones de abrir y cerrar de la botonera funcionan; el de alarma es solo visual. Suenan las puertas al abrir y al cerrar (el cierre reutiliza la grabación de apertura), el gong al llegar y el motor durante el viaje, más fuerte con la velocidad. El sonido sale de la cabina y se atenúa con la distancia.
+- **Murales:** al rodear la torre, el mural del lápiz queda entre los otros dos. En `cara este.jpeg`, el de los cascos lo tiene a su derecha; en `IMG_5727`, el de la computadora lo tiene a su izquierda. Por eso los cascos van al oeste y la computadora al este, y el usuario lo confirmó. El hormigón del patio ya no pasa por dentro de la caja: tapaba el piso de la cabina en planta baja.
+
+
+### Árbol junto al ascensor — 19/11/2026
+
+El ejemplar del patio en (30,4;11) conserva la base, sin raíces superficiales. Su colisión sigue sobre el tronco y se ajusta a su perfil curvo. Se sustituye el tronco segmentado por una superficie curva con ensanchamiento al pie, surcos y ramas cónicas; la copa tiene hojas individuales curvadas y tres variantes de contorno. El radio del tronco (0,68 m), el alcance de copa (5,4 m) y el retiro (0,65 m) se declaran en `blockGCourtyard.elevatorTree`; son estimaciones visuales. La poda excluye el prisma completo de la caja del ascensor, ampliado por ese retiro, tanto para la superficie de las ramas como para el contorno transformado de cada hoja. No depende de la altura instantánea de la cabina. Se conserva la secuencia aleatoria de los demás árboles y del seto para mantener sus formas. El mismo modelo se utiliza desde la vista general y durante el recorrido.
+
+
+### Árboles unificados y fauna — 19/11/2026
+
+La copa del árbol del ascensor aumenta de 120 a 220 hojas por variante y grupo, con grupos de 1,05–1,50 m y más profundidad vertical. El mismo generador se aplica al patio, cantina, canteros, LED y perímetro, conservando centros y adaptando alturas. Los materiales PBR se comparten. Al completar la facultad, una poda adicional recorta ramas y hojas contra los sólidos altos, incluyendo columnas y copias giradas; la caja del ascensor conserva su retiro específico. En el perímetro se comparten plantillas y se reduce la cantidad de hojas a partir de 35 m.
+
+Tres gatos domésticos de pelo corto, con pelajes gris, naranja y negro con blanco. Sus posiciones iniciales estimadas y velocidades (0,45–0,65 m/s) están en `facultyBlueprint.campusCats`. Cada uno elige rumbos y pausas al azar sin rutas ni puntos de destino fijos. Comprueban suelo, altura de escalón, paredes, muebles, otros gatos y límite del campus; patas y cola se animan durante el paseo. Usan el mismo índice de colisión del visitante y consideran las puertas cerradas. Son fauna visual local: cada navegador simula su propio paseo; no se transmite su posición por la conexión multijugador.
+
+
+### Copas cerradas, tonos oscuros y gatos — 19/11/2026
+
+El follaje individual pasa a 280 hojas por variante y grupo. Quince grupos interiores, entre 6 y 7,8 m en la plantilla, cierran el centro de la copa; se conservan los recortes contra el ascensor y otros sólidos. La corteza compartida toma marrón oscuro y las hojas verde oscuro con menos emisión de luz. Los árboles del perímetro usan la misma densidad cercana. Desde 18 m usan tarjetas con 36 hojas agrupadas y un umbral de alfa menor, para conservar la cobertura al reducirse a pocos píxeles. El detalle lejano usa planos simples y materiales/geometrías compartidos.
+
+Los gatos tienen un torso continuo que une grupa, lomo, pecho y cuello; cabeza y orejas más pequeñas, hocico del color del pelaje, cola horizontal y paso de cuatro tiempos con dos articulaciones por pata. El tercer gato es negro completo, con ojos verde amarillentos y sin pecho ni patas blancas. El relieve del pelo se separa de las rayas de color para evitar el aspecto de estrías en relieve.
+
+### CTA–DICIA: cabecera y lateral junto al pasillo — 19/11/2026
+
+Se conserva el volumen aprobado: nave con techo a dos aguas, huella en L y ala posterior baja provisional. La mampostería usa el mismo material y color que Civil. Las fotos de las 16:45 guían un portón metálico gris de dos hojas en la cabecera, con nervaduras, tiradores, marquesina y lámpara mural. El lateral incorpora tres ventanas rectangulares, dos puertas dobles de vidrio con herrajes y tiradores, y tres bajantes junto a los pilares. Posiciones y dimensiones se definen en `diciaFacades` en metros estimados; no constituyen un relevamiento. Los vanos se descuentan de los muros; vidrios y portón se modelan cerrados con colisión, sin apertura automática en esta etapa. Se mantiene el acceso previo del ala posterior. Carteles, bancos, macetas y rejillas quedan pendientes del punto 5.
+
+### Ajuste de puertas y altura de CTA–DICIA — 19/11/2026
+
+Según las capturas del usuario, las puertas laterales pasan a tomar su cota del borde del pasillo: 0,912 m en el tramo original y la altura del pavimento sobre el terreno en la prolongación. Tiradores, hojas y ventanas se referencian a esa cota; se eleva la banda lateral para evitar que atraviese los vanos. Cada puerta incorpora un rellano de baldosas con colisión, enrasado con el umbral y adaptado a la pendiente hacia el pasillo, que tapa la franja de césped del acceso. El alero de la nave pasa a 4,05 m y la subida del frontón a 0,55 m: cumbrera a 4,60 m frente a los 4,20 m del arco del pasillo. Dimensiones aproximadas para la revisión del usuario; se conserva la implantación y el color.
+
+### Corrección de altura de la nave de CTA–DICIA — 19/11/2026
+
+La última indicación del usuario sustituye la reducción anterior: se eleva únicamente la nave con frontón, de alero 4,05 m a 4,80 m. La subida de cubierta permanece en 0,55 m, con cumbrera a 5,35 m. El ala posterior conserva sus 3,70 m y el pasillo mantiene su cubierta. Las cotas aprobadas de puertas, ventanas y rellanos no cambian. Ajuste estimado pendiente de revisión del usuario; no se ejecutaron pruebas, compilación ni navegador.
+
+### Portón en la cabecera opuesta de CTA–DICIA — 19/11/2026
+
+Por corrección del usuario, el conjunto de portón, marquesina y lámpara pasa de la cabecera x = −7 m a x = 17 m del marco local, orientado hacia el exterior (+x). El muro anterior queda cerrado con ladrillo y colisión; el nuevo vano sustituye el paño macizo de la nave alta. Se conservan las dimensiones del conjunto, las alturas aprobadas, el ala baja y las puertas laterales. Revisión a cargo del usuario, sin ejecutar pruebas, compilaciones ni navegador.

@@ -19,7 +19,7 @@ public record UsuarioResponse(
             usuario.getCorreo(),
             usuario.getRol(),
             usuario.getCarrera(),
-            usuario.getSkin()
+            py.edu.uc.campus_backend.multiplayer.AvatarColor.forUser(usuario.getId())
         );
     }
 }

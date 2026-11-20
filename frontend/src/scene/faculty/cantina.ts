@@ -246,7 +246,11 @@ export function addCantina(builder: FacultyBuilder) {
       // Remate continuo del parapeto sobre la cubierta baja.
       prism(kitchenRing(a, b, kitchenRadius + 0.035, kitchenRadius - 0.265), 3.7, 0.07, m.stone, false);
     }
-    prism(kitchenOutline, 3.35, 0.12, m.roof);
+    // La cubierta se apoya dentro de los 23 cm de muro; su canto no debe
+    // coincidir con la fachada curva ni competir con el material de ladrillo.
+    const kitchenRoof = Array.from({ length: kitchenSegments + 1 }, (_, i) =>
+      kitchenPoint(i * Math.PI / kitchenSegments, kitchenRadius - 0.115));
+    prism(kitchenRoof, 3.35, 0.12, m.roof);
     box(w + 0.4, 0.18, d - 1.8, 0, 5.3, -1.15, m.roof, true);
     // El paño izquierdo de ladrillo reduce la vidriera al sector de acceso real.
     const left = -w / 2 + 4.5, right = w / 2 - 0.4;
