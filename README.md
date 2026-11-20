@@ -79,6 +79,8 @@ Con el frontend en marcha, abrí `/editor.html` con una cuenta administradora. P
 ## Verificación
 Desde `frontend/`, ejecutá `npm test` y `npm run build`. Para verificar el backend, configurá PostgreSQL y ejecutá `.\mvnw.cmd verify` desde `campus-backend/` en PowerShell, o `sh ./mvnw verify` en Linux o macOS. [Registro de verificación](docs/verificacion.md).
 
+Para medir el heap JavaScript de la escena y sus colisiones después de liberar temporales, ejecutá `npm run measure:memory` desde `frontend/`. Incluye diez minutos simulados de gatos y separa heap, buffers y memoria del proceso. No requiere backend. Las condiciones y la comparación con el navegador están en el [registro de verificación](docs/verificacion.md).
+
 ## Documentación
 
 - [Despliegue académico en Vercel Hobby y Neon](docs/despliegue-vercel.md)

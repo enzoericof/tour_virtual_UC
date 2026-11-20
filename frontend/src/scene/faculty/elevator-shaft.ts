@@ -172,7 +172,7 @@ export function addElevatorShaft(builder: Builder, m: Materials, spec: ElevatorS
     panel.userData.keep = true;
     layers.visual.add(panel);
   }
-  box(ew + 0.3, 1.1, ed + 0.3, ex, spec.top + 0.55, ez, m.white);
+  box(ew + 0.3, 1.1, ed + 0.3, ex, spec.top + 0.55, ez, m.white, true);
 
   // ---- Pulsadores
   const roundButton = new T.CylinderGeometry(1, 1, 1, 28);

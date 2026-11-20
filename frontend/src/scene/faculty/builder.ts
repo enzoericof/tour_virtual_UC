@@ -1,5 +1,6 @@
 import * as T from "three";
 import { subtractPaving } from "./paving-cutouts";
+import { addRoofCollision } from "./roof-collision";
 import type { Rect, Vec2 } from "../../data/faculty-blueprint";
 import type { makeMaterials } from "../materials";
 
@@ -11,6 +12,10 @@ export function createFacultyBuilder(visual: T.Object3D, solid: T.Object3D, m: R
   const unit = new T.BoxGeometry(1, 1, 1);
   const cylinder = new T.CylinderGeometry(1, 1, 1, 14);
   const layers = { visual, solid };
+  const roofs: { mesh: T.Mesh; parent: T.Object3D }[] = [];
+  const solidRoof = (mesh: T.Mesh) => { roofs.push({ mesh, parent: layers.solid }); };
+  // Incorporar al terminar evita que las nuevas cubiertas alteren la poda de árboles.
+  const finishRoofs = () => { for (const {mesh,parent} of roofs) addRoofCollision(mesh,parent); roofs.length=0; };
 
   /** Coordenadas de textura en metros reales: las piezas vecinas continúan el mismo dibujo. */
   function planarUV(geo: T.BufferGeometry, tile: readonly number[], size: readonly number[],
@@ -159,7 +164,7 @@ export function createFacultyBuilder(visual: T.Object3D, solid: T.Object3D, m: R
     layers.solid.add(new T.Mesh(geo));
   }
 
-  return { m, layers, unit, box, pole, beam, v3, sign, frame, prism, pave, path, spans, ramp, glazing, slopedWall };
+  return { m, layers, unit, box, pole, beam, v3, sign, frame, prism, pave, path, spans, ramp, glazing, slopedWall, solidRoof, finishRoofs };
 }
 
 export type FacultyBuilder = ReturnType<typeof createFacultyBuilder>;

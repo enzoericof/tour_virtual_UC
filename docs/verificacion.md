@@ -692,3 +692,39 @@ Se compararon contra main la geometría de reconstrucción, `collision-world.ts`
 Maven Wrapper verify con Java 21 y PostgreSQL 17 desechable en 127.0.0.1:55433/tour_fluidity: 16 pruebas, cero errores, fallos u omisiones. Se omitió únicamente el reempaquetado del JAR porque el servidor local lo mantiene abierto; compilación y todas las pruebas se ejecutaron. Se detuvo la base desechable al finalizar. No se utilizaron credenciales de Neon para las pruebas. La advertencia existente del tamaño del bloque Three.js no impide compilar.
 
 Revisión en navegador del GLB con la mochila y ambas llamas cortas: encendido al recibir empuje y apagado al soltar, usando el código integrado. Captura `.local/sync-jetpack-flames-final.png`, fuera de Git. No se añaden accesos sin autenticación.
+
+
+### Cubiertas sólidas sin cambios visuales — 20/11/2026
+
+98 de 99 pruebas frontend correctas y compilación TypeScript/Vite aprobada. El único fallo sigue siendo la separación preexistente de Sala Manfred (`faculty-blueprint.test.mjs:261`), reproducida antes de este cambio y sin modificar aquí sus coordenadas ni tolerancias. La advertencia previa del tamaño de Three.js continúa sin impedir compilar.
+
+Las pruebas nuevas verifican rayos y cápsulas por ambas caras de una chapa inclinada y girada entre grupos distintos, preservación de posiciones/índices/material/color y contornos cóncavos con huecos. En la facultad completa se recorren muestras de los triángulos de cada nueva cubierta y se comprueba su colisión por ambos lados. El controlador real aterriza sobre el techo inclinado del Bloque 1, queda apoyado y se frena al empujar desde abajo. Pasan las verificaciones previas de puertas, pasos, escaleras, ascensor y paseo de gatos. Se mantiene la igualdad entre el número de triángulos del modelo físico y del índice espacial; el margen máximo corrige dos caras de borde que se perdían por redondeo.
+
+Comparación del modelo visible completo contra main 0759eb2: 967 mallas y 1.837.192 vértices en ambas versiones. Coincide el SHA-256 de geometrías, índices, normales, UV, matrices mundiales, sombras, materiales, colores, propiedades de texturas y datos de instancias: `6d03d1979b65951a8e0cc7b3416832d744b0effd66a3309fbf2d84266693d127`. La copia y el informe de comparación permanecen ignorados en `.local/`.
+
+Revisión de navegador en `.local/roof-review.html` con el Walker, Avatar y modelo reales: caída y apoyo sobre Bloque 1 a 15,80 m; apoyo sobre carpa LED a 3,19 m; empuje sostenido bajo esa lona detenido con los pies a 1,37 m. Captura del techo principal `.local/roof-main-solid-final.png`. La página de diagnóstico queda fuera de Git y no modifica la autenticación del producto. No se cambiaron backend ni datos.
+
+
+La revisión visual también confirmó apoyo estable sobre la bóveda de la galería a 4,20 m, siguiendo su arco y sin alterar su transparencia. Captura `.local/roof-vault-solid-final.png`.
+
+
+### Memoria con cubiertas sólidas y vértices compartidos — 20/11/2026
+
+Comparación en procesos Node 24 independientes, sobre el campus completo, después de tres recolecciones de basura. MB decimales de heap JavaScript, con el mismo mock de canvas, posiciones de gatos y semilla 197. La referencia es main 0759eb2; la variante inicial agrega únicamente las cubiertas; la final conserva esas cubiertas y comparte vértices de coordenadas exactamente iguales en el índice de colisiones.
+
+| Métrica | Main sin nuevas cubiertas | Cubiertas sin optimizar | Cubiertas optimizadas |
+| --- | ---: | ---: | ---: |
+| Heap de escena e índice | 141,44–141,49 MB | 154,03 MB | 125,94–127,39 MB |
+| Con gatos tras 1 minuto simulado | 152,81–152,86 MB | 165,41 MB | 137,32–138,77 MB |
+| Con gatos tras 10 minutos simulados | 152,90 MB | No medido | 137,35–138,80 MB |
+| Triángulos únicos | 91.091 | 112.477 | 112.477 |
+| Objetos Vector3 de los triángulos | 273.273 | 337.431 | 54.584 |
+| Nodos del índice | 54.180 | 57.064 | 57.064 |
+
+El mapa usado para compartir vértices existe solo durante la construcción y se libera al terminar. No redondea coordenadas, elimina caras ni simplifica la silueta. Se conservan los seis niveles, 16 triángulos por hoja y las comprobaciones geométricas de Three.js. La escena prueba que conserva todos sus triángulos y menos de un objeto de vértice por triángulo en promedio. La variación entre 1 y 10 minutos simulados fue de unos 0,034 MB en la variante optimizada, sin crecimiento apreciable. Estas medidas son de estado retenido después de GC, no de picos durante la carga.
+
+Se incorpora `npm run measure:memory` desde `frontend/` para repetir la medición actual sin cuentas, backend ni GPU. Informa heap, ArrayBuffers y RSS por separado, más la cantidad de nodos, referencias, triángulos y vértices. Los buffers de la escena pasaron de 128,86 a 129,08 MB: unos 0,22 MB adicionales por las cubiertas; no deben sumarse al heap y presentarse como si fueran la misma métrica. RSS y buffers externos no representan memoria JavaScript retenida.
+
+Comprobación adicional con TourEngine completo en Chrome, gatos y puertas activos, sin presencia remota ni GC forzado: antes, entre 235,9 y 261,7 MB observados después del segundo 10 hasta una captura a los 62 s; con cubiertas optimizadas, entre 224,0 y 249,6 MB hasta los 122 s. La lectura final fue 224,6 MB. `performance.memory` es un indicador aproximado del navegador y fluctúa con su GC; no es la misma medición controlada de ~143 MB ni la memoria total del proceso/GPU. El registro por accesibilidad queda en `.local/memory-browser-observations.md`; los benchmarks comparativos quedan fuera de Git en `.local/memory-roof-*.json`.
+
+Tras la optimización: 98/99 pruebas y compilación correctas. Pasan memoria estructural, rayos, cápsulas, reconstrucción/reutilización del índice, cubiertas por ambas caras, aterrizaje, puertas, ascensor y gatos. El único fallo continúa siendo la prueba preexistente de separación de Sala Manfred.

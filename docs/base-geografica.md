@@ -686,3 +686,17 @@ Espacio sostenido activa un empuje continuo de 30 m/s², sumado a gravedad de 18
 Los tres gatos eligen destinos aleatorios entre Bloque 1, Bloque G, plaza techada, cantina y patio interior, excluyendo los senderos perimetrales. La región se deriva del plano en `cat-roaming-area.ts`; las curvas de acceso usan los controles Bézier del caminero. `cat-navigation.ts` busca el paso libre más corto sobre pisos y obstáculos existentes. Cada gato hace pausas, gira antes de avanzar y vuelve a elegir destino si algo impide pasar. La fauna se simula localmente, sin posiciones sincronizadas entre navegadores.
 
 La integración conserva el sistema de colisiones y la geometría de main 4ed9d9a. Se descartó la propuesta local de completar superficies estructurales y de subir peldaños automáticamente; no se incorporan cambios propios a techos, paredes ni sólidos del escenario.
+
+
+### Cubiertas sólidas con la forma del modelo — 20/11/2026
+
+Las cubiertas que solo eran visibles ahora tienen colisión: cuatro aguas de Bloque 1 y Bloque G, bóvedas de escaleras y galería, plaza techada, Bedelía y dependencias posteriores, Manfred y sus pasillos, patio/marquesina/lucernario de cantina, carpas del caminero y del LED, aleros de laboratorios y remate de la caja del ascensor. Se mantienen los techos de anexos, DICIA, cocina y torre de baños que ya eran sólidos.
+
+Las cajas y prismas usan su volumen existente. Para las chapas, lonas y vidrios inclinados, `faculty/roof-collision.ts` utiliza los mismos vértices e índices transformados de la pieza visible, con caras en ambos sentidos. Sigue pendientes, curvas, entrantes, huecos y aleros; no sustituye sus contornos por cajas. Se incorpora al completar el modelo, después de la poda y antes de agrupar las mallas visibles, para conservar también el arbolado. No cambia cotas, colores, materiales ni diseño; no modifica puertas, paredes, escalones ni el controlador de vuelo.
+
+El índice de colisiones conserva seis niveles y 16 triángulos por hoja. Se amplía un centímetro su límite máximo, además del margen mínimo de Three.js: evita que el redondeo deje triángulos de borde fuera de las subdivisiones. Este margen solo afecta a las cajas de búsqueda, sin ampliar ni desplazar los sólidos.
+
+
+### Memoria de las cubiertas — 20/11/2026
+
+El índice reutiliza los Vector3 de coordenadas idénticas entre triángulos, incluidas las caras invertidas de las chapas. El conjunto conserva 112.477 triángulos y 57.064 nodos, pero usa 54.584 objetos de vértice frente a 337.431 sin compartir. La medición controlada de escena e índice queda en unos 126–127 MB de heap, inferior a los ~141 MB de la misma escena antes de las cubiertas; con gatos activos queda en unos 137–139 MB. No se modifica la geometría visible ni física. Procedimiento reproducible y contraste con Chrome en `verificacion.md`.

@@ -175,7 +175,7 @@ export function addAnnexes(
         annexWall(a, b, h, openings);
       }
       if (front && !isDei) {
-        if (!portal) box(3.2,0.12,1.4,cx,2.9,cz+0.6,m.concrete);
+        if (!portal) box(3.2,0.12,1.4,cx,2.9,cz+0.6,m.concrete,true);
         sign(annex.name.toUpperCase(),cx,portal ? 3.4 : 3.25,cz+0.13,portal ? 2.6 : Math.min(annex.rect.size[0]-1,9));
       }
     }
@@ -229,7 +229,7 @@ export function addAnnexes(
   // La galería exterior de oficinas continúa fuera del nuevo volumen cerrado.
   for (const points of annexCoveredPaths) for (let i=1;i<points.length;i++) {
     const [ax,az]=points[i-1], [bx,bz]=points[i], length=Math.hypot(bx-ax,bz-az);
-    box(2.3,0.14,length+0.2,(ax+bx)/2,3.05,(az+bz)/2,m.roof,false,{rotation:Math.atan2(bx-ax,bz-az)});
+    box(2.3,0.14,length+0.2,(ax+bx)/2,3.05,(az+bz)/2,m.roof,true,{rotation:Math.atan2(bx-ax,bz-az)});
     path([points[i-1],points[i]],2.3);
     const count=Math.ceil(length/4);
     for(let k=0;k<=count;k++) {

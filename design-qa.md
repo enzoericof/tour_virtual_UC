@@ -392,3 +392,6 @@ Escalinata lateral de cantina: contorno quebrado revisado en captura aérea de C
 
 
 20/11/2026: revisado el jetpack integrado sobre main 4ed9d9a: dos llamas pequeñas en las boquillas del avatar GLB y apagado al terminar el empuje. Se conservan los modelos y acabados de los gatos, con paseo interior comprobado en la escena real. Las colisiones del equipo permanecen intactas; no se integra la propuesta local de superficies sólidas. Captura ignorada `.local/sync-jetpack-flames-final.png`; resultados y fallo preexistente de Manfred en docs/verificacion.md.
+
+
+20/11/2026: cubiertas sólidas siguiendo la geometría visible, sin cambios de color ni diseño. Comparación completa contra main 0759eb2 con 967 mallas y 1.837.192 vértices: geometría, transformaciones y acabados idénticos. Revisados en navegador apoyo sobre Bloque 1, carpa azul LED y bóveda transparente; el empuje desde abajo se detiene ante la lona. Capturas ignoradas `.local/roof-main-solid-final.png` y `.local/roof-vault-solid-final.png`. Pruebas de superficies y resultado general en docs/verificacion.md.

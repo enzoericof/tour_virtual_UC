@@ -72,7 +72,7 @@ export function addLaboratoryFacades(builder: FacultyBuilder, annex: Annex, bric
   }
   function eave(width: number, height: number) {
     const overhang = detail.eaveProjection;
-    box(width + 0.12, 0.07, overhang + 0.12, 0, height + 0.03, -overhang / 2, roof);
+    box(width + 0.12, 0.07, overhang + 0.12, 0, height + 0.03, -overhang / 2, roof, true);
     // Canal abierto en U, compartido por los dos extremos del alero.
     box(width + 0.12, 0.035, 0.18, 0, height - 0.06, -overhang, drainage);
     for (const z of [-overhang - 0.09, -overhang + 0.09])

@@ -9,7 +9,7 @@ import type { FacultyBuilder } from "./builder";
 
 // Cantina: IMG_5714/5719/5720/5721, frente vidriado bajo marquesina suspendida.
 export function addCantina(builder: FacultyBuilder) {
-  const { layers, m, unit, box, pole, beam, v3, frame, prism, pave, ramp } = builder;
+  const { layers, m, unit, box, pole, beam, v3, frame, prism, pave, ramp, solidRoof } = builder;
   const { grass } = m;
   frame(plan.cantina, () => {
     const [w, d] = plan.cantina.size, front = d / 2;
@@ -166,7 +166,7 @@ export function addCantina(builder: FacultyBuilder) {
     box(5, 0.025, 14, patioX, 0.4625, 1, terrace);
     const canopyTop = 3.95;
     const patioRoof = box(5.7, 0.1, 13.5, patioX, canopyTop, 0.5, m.roof);
-    patioRoof.rotation.z = -0.035;
+    patioRoof.rotation.z = -0.035; solidRoof(patioRoof);
     for (const z of [-5.75, 0.5, 6.75]) {
       pole(0.055, 3.4, w / 2 + 4.65, 2.15, z, dark, true);
       box(5.4, 0.1, 0.09, patioX, 3.83, z, dark);
@@ -277,7 +277,7 @@ export function addCantina(builder: FacultyBuilder) {
       box(0.024, 1.46, 0.04, x, 5.04, front + 0.38, aluminum);
     for (const y of [4.32, 4.8, 5.28, 5.76]) box(w + 0.5, 0.018, 0.025, 0, y, front + 0.38, aluminum);
     const awning = box(w - 0.3, 0.12, 1.65, 0, 3.96, front + 1.03, terracotta);
-    awning.rotation.x = 0.12;
+    awning.rotation.x = 0.12; solidRoof(awning);
     box(w, 0.12, 0.12, 0, 3.82, front + 1.85, dark);
     for (let x = -w / 2 + 0.25; x <= w / 2; x += 3) {
       beam(v3(x, 5.75, front + 0.4), v3(x, 3.86, front + 1.85), 0.025, dark);
@@ -291,7 +291,7 @@ export function addCantina(builder: FacultyBuilder) {
     const ceiling = new T.MeshStandardMaterial({ color: "#303735", roughness: 0.92 });
     const interiorFloor = m.stone.clone(); interiorFloor.color.set("#dedbcd");
     box(w - 0.35, 0.025, d - 0.35, 0, 0.465, 0, interiorFloor);
-    box(w - 0.3, 0.09, d - 2.2, 0, 5.14, -1.1, ceiling);
+    box(w - 0.3, 0.09, d - 2.2, 0, 5.14, -1.1, ceiling, true);
     for (const x of [-5, -1.5, 2, 5.5, 8.6]) {
       box(0.11, 0.18, d - 2.2, x, 5.02, -1.1, dark);
       beam(v3(x, 5.08, 3.8), v3(x, 3.75, front), 0.045, dark);
@@ -300,7 +300,8 @@ export function addCantina(builder: FacultyBuilder) {
     const roofGlass = new T.MeshStandardMaterial({ color: "#bddad5", transparent: true, opacity: 0.24, roughness: 0.15, side: T.DoubleSide });
     const roofVertices = [v3(-w / 2 + 0.2, 5.08, 3.8), v3(w / 2 - 0.2, 5.08, 3.8), v3(-w / 2 + 0.2, 3.75, front), v3(w / 2 - 0.2, 3.75, front)];
     const roofGeo = new T.BufferGeometry().setFromPoints([roofVertices[0], roofVertices[2], roofVertices[1], roofVertices[1], roofVertices[2], roofVertices[3]]);
-    roofGeo.computeVertexNormals(); layers.visual.add(new T.Mesh(roofGeo, roofGlass));
+    roofGeo.computeVertexNormals();
+    const skylight = new T.Mesh(roofGeo, roofGlass); layers.visual.add(skylight); solidRoof(skylight);
     for (const x of [-3.6, 0.6, 4.8, 8]) {
       for (const z of [-2.9, 2.6]) beam(v3(x, 5, z), v3(x, 4.38, z), 0.008, aluminum);
       box(0.18, 0.08, 5.8, x, 4.4, -0.15, aluminum);

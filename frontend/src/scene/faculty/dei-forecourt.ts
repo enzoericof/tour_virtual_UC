@@ -81,7 +81,7 @@ export function addDeiForecourt(builder:FacultyBuilder,paving:T.MeshStandardMate
 }
 
 function addCanopy(builder:FacultyBuilder,points:readonly Vec2[],name:string,landing:Vec2[]) {
-  const {layers,box,pole,beam,v3,m}=builder;
+  const {layers,box,pole,beam,v3,m,solidRoof}=builder;
   const {total,at,corners}=pathSampler(points),half=plan.canopyWidth/2;
   const samples=[...new Set([0,total,...corners,...Array.from({length:Math.ceil(total/.30)},(_,i)=>Math.min(total,i*.30))])].sort((a,b)=>a-b);
   const positions:number[]=[],uv:number[]=[],indices:number[]=[];
@@ -96,7 +96,7 @@ function addCanopy(builder:FacultyBuilder,points:readonly Vec2[],name:string,lan
   const geo=new T.BufferGeometry();geo.setAttribute("position",new T.Float32BufferAttribute(positions,3));
   geo.setAttribute("uv",new T.Float32BufferAttribute(uv,2));geo.setIndex(indices);geo.computeVertexNormals();
   const roof=new T.Mesh(geo,m.awning);roof.name=name;roof.userData.deiForecourtCanopy=true;roof.userData.keep=true;
-  roof.castShadow=roof.receiveShadow=true;layers.visual.add(roof);
+  roof.castShadow=roof.receiveShadow=true;layers.visual.add(roof);solidRoof(roof);
   // Faldones y costuras siguen los mismos quiebres del piso.
   for(const side of [-1,1]) {
     const p:number[]=[],t:number[]=[],idx:number[]=[];

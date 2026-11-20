@@ -605,11 +605,40 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       body: new Capsule(new Vector3(), new Vector3(0, 1, 0), 0.28),
     });
     walker.setWorld(colliders);
+    // Las nuevas cubiertas físicas siguen sus triángulos exactos por ambas caras.
+    const roofBodies=[];colliders.traverse(o=>{if(o.userData.roofCollider)roofBodies.push(o);});
+    assert.ok(roofBodies.length>=30,'Incluye chapas de bloques, bóvedas, carpas, lucernario y marquesinas');
+    for(const body of roofBodies){
+      const position=body.geometry.attributes.position,index=body.geometry.index;
+      for(let i=0;i<index.count;i+=Math.max(6,Math.floor(index.count/30/6)*6)){
+        const triangle=new Triangle(...[0,1,2].map(k=>new Vector3().fromBufferAttribute(position,index.getX(i+k)).applyMatrix4(body.matrixWorld)));
+        if(triangle.getArea()<.003)continue;
+        const center=triangle.getMidpoint(new Vector3()),normal=triangle.getNormal(new Vector3());
+        for(const side of [-1,1]){
+          const ray=new Ray(center.clone().addScaledVector(normal,side*.05),normal.clone().multiplyScalar(-side));
+          const hit=walker.collisionWorld.rayIntersect(ray);
+          assert.ok(hit&&hit.distance<=.051,`${body.name} bloquea ambas caras en su superficie visible`);
+        }
+      }
+    }
+    // Caída real sobre el techo inclinado del Bloque 1 y empuje desde el último piso.
+    const roofX=plan.main.center[0],roofZ=plan.main.center[1];
+    const roofTop=new Raycaster(new Vector3(roofX,35,roofZ),new Vector3(0,-1,0),0,30).intersectObject(colliders,true)[0].point.y;
+    walker.teleport(new Vector3(roofX,30,roofZ));walker.keys=new Set();
+    for(let i=0;i<360;i++)walker.update(1/60);
+    assert.ok(Math.abs(camera.position.y-1.5-roofTop)<.06,'Aterriza encima de la cubierta y queda apoyado');
+    walker.teleport(new Vector3(roofX,roofTop-3,roofZ));walker.keys=new Set(['Space']);
+    for(let i=0;i<240;i++)walker.update(1/60);
+    assert.ok(camera.position.y<roofTop-.25,'El jetpack se detiene bajo la cara interior del techo');
+    walker.keys.clear();
     let collisionNodes=0;const indexedTriangles=new Set();
     function inspectCollision(tree){collisionNodes++;for(const triangle of tree.triangles)indexedTriangles.add(triangle);tree.subTrees.forEach(inspectCollision);}
     inspectCollision(walker.collisionWorld);
     let modelTriangles=0;colliders.traverse(o=>{if(o.isMesh)modelTriangles+=(o.geometry.index?.count??o.geometry.attributes.position.count)/3;});
     assert.equal(indexedTriangles.size,modelTriangles,"El presupuesto de memoria no elimina triángulos de colisión");
+    const indexedVertices=new Set();
+    for(const triangle of indexedTriangles)for(const point of [triangle.a,triangle.b,triangle.c])indexedVertices.add(point);
+    assert.ok(indexedVertices.size<modelTriangles,"Los vértices compartidos evitan tres objetos por cada triángulo");
     assert.ok(collisionNodes<150000,`El índice del campus conserva un tamaño acotado: ${collisionNodes} nodos`);
     const { center: [towerX, towerZ], radius, radiusX, core, entry: entrance, menSide } = plan.tower;
     const galleryEdge = block1.depth / 2;

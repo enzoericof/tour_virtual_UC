@@ -6,7 +6,7 @@ import type { FacultyBuilder } from "./builder";
 
 // Hexágono del plano: tres paños posteriores y tres hacia el acceso.
 export function addManfredHall(builder: FacultyBuilder) {
-  const { m, box, pole, sign, frame, prism, pave } = builder;
+  const { m, box, pole, sign, frame, prism, pave, solidRoof } = builder;
   frame(plan.manfred, () => {
     const [w,d] = plan.manfred.size, hw = 3.6;
     const outline = bulgedOutline(w,d,plan.manfred.bulge);
@@ -28,8 +28,8 @@ export function addManfredHall(builder: FacultyBuilder) {
     }
     // El techo sigue el contorno cuadrangular azul, no la forma de la sala.
     const roof=manfredRoofOutline();
-    prism(roof,hw,.22,m.concrete,false);
-    pave(roof,m.roofUnder,hw-.01);
+    prism(roof,hw,.22,m.concrete,true);
+    solidRoof(pave(roof,m.roofUnder,hw-.01));
 
     for(let i=0;i<outline.length;i++) {
       const a=outline[i], b=outline[(i+1)%outline.length];
@@ -78,7 +78,7 @@ export function addManfredHall(builder: FacultyBuilder) {
 
   // Cubiertas repuestas en el pasillo y el desembarco exterior.
   for(const polygon of [plan.corridor,plan.platform[2],plan.platform[3]])
-    prism(polygon,PLAZA_LEVEL+3.6,.2,m.concrete,false);
+    prism(polygon,PLAZA_LEVEL+3.6,.2,m.concrete,true);
   {
     const [a,b,c,d]=plan.corridor;
     for(const t of [.12,.32,.52,.72,.92]) {

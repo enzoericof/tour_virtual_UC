@@ -59,7 +59,7 @@ export function addDiciaFacades(builder: FacultyBuilder, height: number,
     }
     box(0.045, gate.height, 0.06, 0, cy, -0.065, darkFrame);
     box(gate.width + 0.55, 0.09, gate.canopyDepth, 0, gate.sill + gate.height + 0.25,
-      -gate.canopyDepth / 2 - 0.10, trim);
+      -gate.canopyDepth / 2 - 0.10, trim, true);
     for (const x of [-1.3, 1.3]) beam(v3(x, 2.70, -0.11), v3(x, 2.89, -0.57), 0.025, metal);
     // Lámpara mural sobre el lado izquierdo del portón.
     const lx = -2.05, ly = 3.55;

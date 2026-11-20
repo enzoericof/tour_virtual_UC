@@ -4,7 +4,7 @@ import type { FacultyBuilder } from "./builder";
 
 /** Acceso fotografiado, en el marco local de Bedelía y sobre su plataforma. */
 export function addReceptionGarden(b: FacultyBuilder) {
-  const { frame, box, beam, pole, v3, layers, m } = b;
+  const { frame, box, beam, pole, v3, layers, m, solidRoof } = b;
   const r = plan.reception;
   const metal = new T.MeshStandardMaterial({ color: "#303a38", roughness: .72, metalness: .4 });
   const roof = new T.MeshStandardMaterial({ color: "#51473f", roughness: .85, side: T.DoubleSide });
@@ -22,7 +22,7 @@ export function addReceptionGarden(b: FacultyBuilder) {
         v3(x0,height(x0),0),v3(x1,height(x1),0),v3(x1,height(x1),depth),
         v3(x0,height(x0),0),v3(x1,height(x1),depth),v3(x0,height(x0),depth),
       ]);shape.computeVertexNormals();
-      const panel = new T.Mesh(shape, roof);panel.castShadow=true;layers.visual.add(panel);
+      const panel = new T.Mesh(shape, roof);panel.castShadow=true;layers.visual.add(panel);solidRoof(panel);
       for (const z of [0,depth]) beam(v3(x0,height(x0),z),v3(x1,height(x1),z),.045,metal);
     }
     for (const x of [-half,0,half]) beam(v3(x,height(x),0),v3(x,height(x),depth),.035,metal);

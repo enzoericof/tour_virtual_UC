@@ -61,7 +61,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
   const m = makeMaterials(grass);
   const gardenWalkMaterial = makeGardenPaving();
   const builder = createFacultyBuilder(group, colliders, m);
-  const { layers, unit, box, pole, beam, v3, sign, frame, prism, pave, path, spans, ramp, glazing, slopedWall } = builder;
+  const { layers, unit, box, pole, beam, v3, sign, frame, prism, pave, path, spans, ramp, glazing, slopedWall, solidRoof } = builder;
 
   /** Lona azul continua con caída leve entre apoyos y faldón festoneado. */
   function fabricCover(curve: T.Curve<T.Vector3>, width: number, supports: number[], ridge = 0, ridgeAtStart = ridge, postOffset = width * 0.475) {
@@ -87,7 +87,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
     geometry.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
     geometry.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
     geometry.setIndex(indices); geometry.computeVertexNormals();
-    const cover = new T.Mesh(geometry, m.awning); cover.castShadow = cover.receiveShadow = true; layers.visual.add(cover);
+    const cover = new T.Mesh(geometry, m.awning); cover.castShadow = cover.receiveShadow = true; layers.visual.add(cover); solidRoof(cover);
     for (const side of [-1, 1]) {
       const vertices: number[] = [], coords: number[] = [], faces: number[] = [];
       for (let i = 0; i <= segments; i++) {
@@ -201,7 +201,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
     }
     const geo = new T.BufferGeometry(); geo.setAttribute("position", new T.Float32BufferAttribute(position, 3));
     geo.setIndex(index); geo.computeVertexNormals();
-    const mesh = new T.Mesh(geo, m.canopy); mesh.castShadow = true; layers.visual.add(mesh);
+    const mesh = new T.Mesh(geo, m.canopy); mesh.castShadow = true; layers.visual.add(mesh); solidRoof(mesh);
     // Arcos de acero cada 2,5 m.
     for (let k = 0, ribs = Math.ceil(Math.abs(x1 - x0) / 2.5); k <= ribs; k++) {
       const x = x0 + ((x1 - x0) * k) / ribs, arch = new T.Mesh(new T.TorusGeometry(r, 0.035, 5, 18, Math.PI), m.steel);
@@ -228,7 +228,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
     lower.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
     upper.setAttribute("uv", new T.Float32BufferAttribute(new Float32Array(faces.length / 3 * 2), 2));
     for (const [geo, mat] of [[upper, top], [lower, m.roofUnder]] as const) {
-      const mesh = new T.Mesh(geo, mat); mesh.castShadow = mesh.receiveShadow = true; layers.visual.add(mesh);
+      const mesh = new T.Mesh(geo, mat); mesh.castShadow = mesh.receiveShadow = true; layers.visual.add(mesh); solidRoof(mesh);
     }
     // Faldón perimetral.
     for (const s of [-1, 1]) {
@@ -750,7 +750,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
     const roof = new T.Mesh(sheet, new T.MeshStandardMaterial({
       color: "#718392", transparent: true, opacity: 0.76, side: T.DoubleSide, roughness: 0.38, depthWrite: false,
     }));
-    roof.position.set(diciaWalkExtension / 2, axisY, 0); layers.visual.add(roof);
+    roof.position.set(diciaWalkExtension / 2, axisY, 0); layers.visual.add(roof); solidRoof(roof);
     const rib = new T.TorusGeometry(radius, 0.025, 6, 24, 2 * halfAngle);
     rib.rotateZ(start); rib.rotateY(Math.PI / 2);
     const bays = Math.ceil(roofLength / 3.8);
@@ -1000,8 +1000,9 @@ export function createFaculty(grass = makeGrassMaterial()) {
     }
     const [w, n, e, s] = outline;
     const height = 4.6, roofY = PLAZA_LEVEL + height;
-    flipFaces(pave(outline, m.roofUnder, roofY - 0.02).geometry);
-    pave(outline, m.roof, roofY + 0.12, true);
+    const underside = pave(outline, m.roofUnder, roofY - 0.02);
+    flipFaces(underside.geometry); solidRoof(underside);
+    solidRoof(pave(outline, m.roof, roofY + 0.12, true));
     for (let i = 0; i < outline.length; i++) {
       const a = outline[i], b = outline[(i + 1) % outline.length];
       const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
@@ -1063,7 +1064,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
     box(w,.16,d,0,.02,0,m.stone,true);
     for(const [a,b] of [[-w/2,7.8],[10.2,w/2]])box(b-a,3.2,.2,(a+b)/2,1.6,-d/2,officeBrick,true);
     box(2.4,.9,.2,9,2.75,-d/2,officeBrick,true);
-    box(w+.8,.2,d+.8,0,3.4,0,m.concrete);
+    box(w+.8,.2,d+.8,0,3.4,0,m.concrete,true);
     // Interior diáfano solicitado: sin habitaciones, tabiques ni escritorios.
     // Dependencia curva posterior y sus dos recintos de enlace, sin atribuirle un uso no rotulado.
     const curved: Vec2[] = [[7.8,-5],[7.8,-7.1]];
@@ -1071,10 +1072,10 @@ export function createFaculty(grass = makeGrassMaterial()) {
     for(let i=0;i<=48;i++) {const a=Math.PI*.42+i/48*Math.PI*1.68;
       curved.push([9+3.5*(1+.2*Math.cos(2*a))*Math.cos(a),-10+3.1*(1+.2*Math.cos(2*a))*Math.sin(a)]);}
     curved.push([10.2,-7.1],[10.2,-5]);
-    prism(curved,-PLAZA_LEVEL,PLAZA_LEVEL+.03,m.stone,true);prism(curved,3.4,.18,m.concrete,false);
+    prism(curved,-PLAZA_LEVEL,PLAZA_LEVEL+.03,m.stone,true);prism(curved,3.4,.18,m.concrete,true);
     for(let i=1;i<curved.length;i++) {const a=curved[i-1],b=curved[i];
       box(Math.hypot(b[0]-a[0],b[1]-a[1]),3.2,.18,(a[0]+b[0])/2,1.6,(a[1]+b[1])/2,officeBrick,true,{rotation:-Math.atan2(b[1]-a[1],b[0]-a[0])});}
-    for(const x of [6,12]) {box(2.5,.12,2,x,.02,-6,m.stone,true);box(2.5,.18,2,x,3.4,-6,m.concrete);box(.15,3.2,2,x-1.25,1.6,-6,officeBrick,true);}
+    for(const x of [6,12]) {box(2.5,.12,2,x,.02,-6,m.stone,true);box(2.5,.18,2,x,3.4,-6,m.concrete,true);box(.15,3.2,2,x-1.25,1.6,-6,officeBrick,true);}
     // Muros laterales: el frente hacia Manfred incluye acceso de profesores y vitrina.
     for(const side of [-1,1]) {
       if(side===1)box(.2,3.2,d,side*w/2,1.6,0,officeBrick,true);
@@ -1146,7 +1147,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     }
     box(w,.12,.23,0,.06,z,m.metal);
     const depth=plan.bedeliaGalleryDepth;
-    box(w+1,.2,depth,0,3.4,z+depth/2,m.concrete);
+    box(w+1,.2,depth,0,3.4,z+depth/2,m.concrete,true);
     box(w+1,.05,depth,0,bedeliaPavingTop-.025,z+depth/2,m.stone,true);
     addReceptionGarden(builder);
     const gold = new T.MeshStandardMaterial({ color: "#c2a65a", metalness: 0.25, roughness: 0.45 });
@@ -1573,6 +1574,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
   box(2.8, 0.45, 0.6, treeX + 3, 0.225, treeZ - 2.5, m.brick, true);
   box(2.4, 0.45, 0.6, treeX + 3, 0.225, treeZ - 5, m.brick, true);
   pruneTreeStructures(group,colliders);
+  builder.finishRoofs();
   mergeByMaterial(group);
   group.updateMatrixWorld(true); colliders.updateMatrixWorld(true);
   return { group, colliders, elevator };

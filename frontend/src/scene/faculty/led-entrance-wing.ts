@@ -4,7 +4,7 @@ import type { FacultyBuilder } from "./builder";
 
 /** Acceso del LED según la foto frontal: galería, cantero de macetas, carpa y blindex. */
 export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandardMaterial) {
-  const { layers, box, pole, beam, v3, prism, m } = builder;
+  const { layers, box, pole, beam, v3, prism, m, solidRoof } = builder;
   const { minX, maxX, frontZ, backZ, height, recess, canopy } = wing;
   const [doorX, doorZ] = deiSideDoor.center, doorW = deiSideDoor.width, doorH = deiSideDoor.height;
   const centerX = (minX + maxX) / 2, width = maxX - minX;
@@ -176,7 +176,7 @@ export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandar
     ],3));
     roof.setAttribute("uv",new T.Float32BufferAttribute([0,0,0,tentEnd-tentStart,2,tentEnd-tentStart,2,0],2));
     roof.setIndex([0,1,2,0,2,3]);roof.computeVertexNormals();
-    const mesh=new T.Mesh(roof,fabric);mesh.name="Carpa azul alineada con entrada LED";mesh.userData.ledEntranceCanopy=true;mesh.userData.keep=true;layers.visual.add(mesh);
+    const mesh=new T.Mesh(roof,fabric);mesh.name="Carpa azul alineada con entrada LED";mesh.userData.ledEntranceCanopy=true;mesh.userData.keep=true;layers.visual.add(mesh);solidRoof(mesh);
     box(.025,.22,tentEnd-tentStart,edgeX,canopy.eave-.1,(tentEnd+tentStart)/2,fabric);
     beam(v3(edgeX,canopy.eave,tentStart),v3(edgeX,canopy.eave,tentEnd),.022,steel);
     for(const z of [tentStart,(tentStart+tentEnd)/2]) pole(.025,canopy.eave,edgeX,canopy.eave/2,z,steel,true);
