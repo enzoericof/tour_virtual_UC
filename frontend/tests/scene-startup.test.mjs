@@ -123,6 +123,33 @@ test("The complete faculty scene starts with the current blueprint and valid geo
         .intersectObject(colliders, true);
       assert.ok(hit && Math.abs(hit.point.y - floor - .78) < .06, "Cada mesa tiene colisión a la altura de su tablero");
     }
+    // Los tramos de ambos niveles y sus colisiones ocupan el ancho duplicado.
+    {
+      const gs=plan.blockGStair,entry=gs.start+gs.halfRun,arrival=gs.start-1.55-gs.halfRun;
+      assert.equal(gs.width,2.8,"El nuevo ancho duplica los 1,40 m anteriores");
+      const supports=[];group.traverse(o=>{if(o.userData.blockGStairSupport)supports.push(o);});
+      assert.equal(supports.length,3,"Cada descanso tiene su apoyo integrado");
+      for(const [id,lo,hi,top] of [["acceso",entry,entry+1.55,FLOOR_HEIGHT],
+        ["intermedio",gs.start-1.55,gs.start,FLOOR_HEIGHT*1.5],
+        ["llegada",arrival-1.55,arrival,FLOOR_HEIGHT*2]]) {
+        const support=supports.find(o=>o.userData.blockGStairSupport===id);assert.ok(support);
+        const p=support.getWorldPosition(new Vector3()),dx=p.x-plan.block2.center[0],dz=p.z-plan.block2.center[1],c=Math.cos(plan.block2.angle),s=Math.sin(plan.block2.angle);
+        const x=dx*c+dz*s,z=-dx*s+dz*c;
+        assert.ok(x-.16>lo&&x+.16<hi&&z-.16>-blockG.depth/2-gs.width&&z+.16<-blockG.depth/2,
+          "El pilar completo queda debajo de la planta del descanso");
+        assert.ok(Math.abs(p.y-support.scale.y/2)<1e-6,"El apoyo arranca en el suelo");
+        assert.ok(Math.abs(p.y+support.scale.y/2-(top-.24))<1e-6,"El pilar termina al tocar la cara inferior de su losa");
+        const probe=fromRect(plan.block2,[(lo+hi)/2,z+.4]);
+        const hit=new Raycaster(new Vector3(probe[0],top-.5,probe[1]),new Vector3(0,1,0),0,.6).intersectObject(colliders,true)[0];
+        assert.ok(hit&&Math.abs(hit.point.y-(top-.24))<.005,"La losa que sostiene existe en esa altura y posición");
+      }
+      for(const level of [0,1])for(const [from,to,base] of [[entry,gs.start,0],[gs.start-1.55,arrival,FLOOR_HEIGHT/2]])for(const inset of [.3,gs.width/2,gs.width-.3]) {
+        const x=(from+to)/2,z=-blockG.depth/2-inset,expected=level*FLOOR_HEIGHT+base+FLOOR_HEIGHT/4;
+        const p=fromRect(plan.block2,[x,z]);
+        const hit=new Raycaster(new Vector3(p[0],expected+.3,p[1]),new Vector3(0,-1,0),0,.6).intersectObject(colliders,true)[0];
+        assert.ok(hit&&Math.abs(hit.point.y-expected)<.015,"La rampa de colisión ocupa todo el ancho nuevo");
+      }
+    }
     const { group: context } = createCampusContext(grass);
     // El perímetro conserva sus árboles y ambos niveles sin copiar millones de matrices.
     const perimeter = context.children.filter(o => o.isLOD);
@@ -732,6 +759,20 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const apronMesh=group.getObjectByName("Embaldosado completo de entrada al DEI"),perimeterMesh=group.getObjectByName("Piso continuo del pasillo perimetral LED");
     assert.equal(apronMesh.material,perimeterMesh.material,"Entrada y pasillo usan un solo material de baldosines");
     assert.deepEqual(apronMesh.material.userData.tile,[1.2,1.2],"La escala de los cuadraditos se conserva en ambos pisos");
+    {
+      const gs=plan.blockGStair,entry=gs.start+gs.halfRun,arrival=gs.start-1.55-gs.halfRun,z=-blockG.depth/2-gs.width/2;
+      const route=[[entry+.6,z,0],[gs.start-.7,z,FLOOR_HEIGHT/2],[arrival-.6,z,FLOOR_HEIGHT],
+        [arrival-.6,-4.7,FLOOR_HEIGHT],[entry+.7,-4.7,FLOOR_HEIGHT],[entry+.7,z,FLOOR_HEIGHT],
+        [gs.start-.7,z,FLOOR_HEIGHT*1.5],[arrival-.6,z,FLOOR_HEIGHT*2],[arrival-.6,-4.7,FLOOR_HEIGHT*2]];
+      const first=fromRect(plan.block2,route[0]);walker.teleport(new Vector3(first[0],.04,first[1]));walker.keys=new Set(["KeyW"]);
+      for(const [x,z,y] of route.slice(1)) {
+        const target=fromRect(plan.block2,[x,z]);let distance=Infinity,steps=0;
+        while(distance>.06&&steps++<1200){const d=new Vector3(target[0]-camera.position.x,0,target[1]-camera.position.z);distance=d.length();if(distance<=.06)break;camera.lookAt(camera.position.clone().add(d));walker.update(Math.min(1/60,distance/4.5));}
+        assert.ok(distance<.1,`Escalera ancha y galería transitables en ${x},${z}: distancia ${distance}`);
+        assert.ok(Math.abs(camera.position.y-1.5-y)<.1,"Descansos y llegadas conservan su cota");
+      }
+      walker.keys.clear();
+    }
     for (let level = 0; level < block1.levels; level++) {
       const feetY = level * FLOOR_HEIGHT + 0.06;
       const center = walkFrom(new Vector3(towerX, feetY, galleryEdge - 1), south, 32);

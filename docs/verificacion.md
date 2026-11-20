@@ -827,3 +827,19 @@ Medición controlada del conjunto integrado, tras GC y con tres gatos: 142,20 MB
 Cuatro pruebas nuevas en `tests/ambient-zones.test.mjs`: conversación en la cantina y la plaza techada, silencio fuera de toda zona, pájaros solo de día y grillos solo de noche, una fuente por puerta con el corte vertical del piso y niveles acotados que bajan con la distancia. `npm test`: 117/118; el único fallo es la separación preexistente de Sala Manfred. `npm run build` correcto.
 
 En Chromium (Playwright, sin aceleración 3D) se instanciaron el motor de audio y `update()` con el visitante en la cantina, junto a un árbol, lejos de todo y en pausa: el contexto arranca, las ganancias siguen a los niveles (0,27 de conversación en la cantina, 0,18 de pájaros junto al árbol, casi cero lejos y en pausa, grillos 0,04 de noche) y no hubo errores de Web Audio. El botón del menú se comprobó en el DOM montado: etiqueta, `aria-pressed` y la preferencia `cyt-ambient` en `localStorage`. No se escuchó la mezcla en parlantes ni auriculares: falta la revisión sonora real y el ajuste fino de volúmenes.
+
+### Solo ensanchado de la escalera del Bloque G — 20/11/2026
+
+Compilación correcta; 113/114 pruebas, con el único fallo previo de separación de Sala Manfred en faculty-blueprint.test.mjs:261. Rayos sobre las rampas de ambos tramos y niveles comprueban apoyo en los dos extremos laterales del ancho nuevo y en el centro. Walker sube PB–1, recorre la galería y sube 1–2, llegando a los descansos y pisos en su cota. La propuesta de follaje se retiró: courtyard-elevator-tree.ts y faculty-reconstruction.ts coinciden con main, y solo cambia el ancho en el plano.
+
+Revisión visual en navegador del ancho duplicado y del árbol original sin hojas, sin errores de consola. Captura ignorada .local/block-g-wide-bare-tree-final.jpg. Registros .local/g-wide-only-tests-final.log y .local/g-wide-only-build-final.log. Memoria controlada tras GC y diez minutos simulados con tres gatos: 142.22 MB de heap y 136.51 MB de buffers externos; no es RAM total del navegador ni VRAM. Registro .local/g-wide-only-memory-final.log.
+
+### Pilares bajo los descansos del Bloque G — 20/11/2026
+
+Compilación correcta; 113/114 pruebas, con el fallo previo de separación de Sala Manfred. Se verifican los tres apoyos visibles: sección completa dentro de la planta del descanso, base en el suelo y extremo superior en la cara inferior de su losa. Rayos ascendentes confirman la existencia física de esa losa a la altura prevista. El recorrido real de Walker por ambos niveles y la galería continúa pasando.
+
+Revisión visual en navegador: apoyos sin separación lateral ni prolongaciones sobre los descansos, sin errores de consola. Captura ignorada .local/block-g-pillars-integrated-final.jpg; registros .local/g-pillars-tests-final.log y .local/g-pillars-build-final.log. No se agregan mallas de soporte: se reposicionan y ajustan las alturas de los tres pilares existentes.
+
+### Sincronización de ancho y pilares con sonido ambiente — 20/11/2026
+
+Integrado main 2094734 (sonido ambiente por zonas) conservando su implementación y los cambios de ancho y apoyos de la escalera del Bloque G. Árbol del cantero sin hojas y propuesta de escalera anterior guardada aparte, sin aplicarla. Compilación correcta; 117/118 pruebas, con el único fallo previo de separación de Sala Manfred en faculty-blueprint.test.mjs:261. Registros locales ignorados: .local/sync-g-supports-tests.log y .local/sync-g-supports-build.log. La geometría integrada conserva la revisión visual de pilares y descansos registrada arriba.

@@ -693,8 +693,19 @@ export function createFaculty(grass = makeGrassMaterial()) {
       landingSlab(arrival-landing,arrival,y+H,true);
       railZ(rear-gWidth,rear,y+H,arrival-landing);
     }
-    for(const x of [gEntry+landing,secondStart,arrival-landing])
-      pole(.16,H*(blockG.levels-1),x,H*(blockG.levels-1)/2,rear-gWidth-.17,m.concrete,true);
+    // Los apoyos quedan dentro del canto de cada descanso y terminan bajo su losa.
+    const inset=plan.blockGStair.supportInset;
+    for(const [id,x,top] of [
+      ["acceso",gEntry+landing-inset,H],
+      ["intermedio",secondStart+inset,H*1.5],
+      ["llegada",arrival-landing+inset,H*2],
+    ] as const) {
+      const h=top-.24;
+      const pillar=pole(.16,h,x,h/2,rear-gWidth+inset,m.concrete,true);
+      pillar.name=`Pilar del descanso ${id} del Bloque G`;
+      pillar.userData.keep=true;pillar.userData.blockGStairSupport=id;
+      layers.solid.children.at(-1)!.userData.blockGStairSupport=id;
+    }
   });
 
   // Rellano de granito rosado al nivel del pasillo, no de la plaza elevada.

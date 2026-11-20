@@ -331,7 +331,7 @@ export const facultyBlueprint = {
   main: { center: [b1x, 0], size: [block1.length, block1.depth], angle: 0 } as Rect,
   block2: gRect,
   /** Escalera exterior junto al árbol de la Plaza de la Amistad. */
-  blockGStair: { start: 13, halfRun: 2.8, width: 1.4 },
+  blockGStair: { start: 13, halfRun: 2.8, width: 2.8, supportInset: .24 },
   coveredPlaza,
   coveredPlazaSeating: [
     { center: [0, -5] as Vec2, blue: true, sideChairs: false },

@@ -780,3 +780,11 @@ La llegada bajo carpa termina dentro de la fila original de árboles, a menos de
 ### Orientación exterior y cierre del frente LED — 20/11/2026
 
 La captura c66fc824 corrige la orientación del tramo corto exterior del LED: se conserva su longitud y el punto de bifurcación, y se gira el arranque sobre la bisectriz de los dos brazos hacia los accesos. Los tres tramos siguen rectos y dentro del arbolado original. La nueva anotación de muro sustituye el hueco anterior: cierre de ladrillo en continuidad con la cabecera del edificio de tejas y retorno hasta el frente del acceso, detrás del paso entre pilares. No se reabre una ventana en ese cierre. La entrada, sus plataformas y la galería perimetral comparten un único material de baldosines gastados, la misma escala y el mismo origen de textura.
+
+### Ancho duplicado de la escalera del Bloque G — 20/11/2026
+
+Por indicación de Horacio, blockGStair.width pasa de 1,40 a 2,80 m. Los dos tramos de cada subida, sus descansos, rampas de colisión, barandas y apoyos exteriores derivan del mismo ancho. El borde junto a la galería queda fijo; el crecimiento ocurre hacia el patio. Se conservan recorrido, desarrollos, pendientes, alturas y materiales de la escalera recibida del equipo. No se recupera la propuesta anterior de escalera guardada aparte. El árbol del cantero conserva su forma desnuda y acabado claro, según la corrección del usuario.
+
+### Apoyos integrados de la escalera del Bloque G — 20/11/2026
+
+Los tres pilares exteriores pasan de quedar por fuera del borde a ubicarse 24 cm hacia el interior de las esquinas de los descansos (supportInset). Conservan el radio de 16 cm y el hormigón existente. Cada uno termina en la cara inferior de la losa más alta que sostiene: alturas de 3,26 m en acceso, 5,01 m en el descanso intermedio y 6,76 m en llegada. La base permanece en el suelo. Se mantienen el ancho de 2,80 m, el recorrido, las barandas y el árbol desnudo. Cotas derivadas del modelo, pendientes de relevamiento.
