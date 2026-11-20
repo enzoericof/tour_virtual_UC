@@ -156,3 +156,10 @@ La reserva se representa con una pose hidden en campus_presence, sin migración 
 ### Empuje del jetpack — 20/11/2026
 
 Las poses y snapshots de presencia incorporan `jetpacking`, opcional para clientes anteriores y falso cuando falta. El emisor actualiza el empuje a 10 Hz mientras está activo y transmite su apagado aunque no cambie la posición. El servidor conserva el campo en memoria y en el snapshot JSON; el rango vertical admitido llega a 1.000.000 m. La interpolación del avatar aplica la bandera al escape y lo apaga ante datos antiguos. No se añaden tablas ni migraciones. La integración mantiene la configuración y el tratamiento de colisiones existentes en main.
+
+
+### Cookies de sesión inválidas — 20/11/2026
+
+`SessionCookieConfig` registra un filtro antes de Spring Session JDBC. Usa el CookieSerializer configurado por Spring Boot para leer los identificadores y omite únicamente las cookies de sesión que se decodifican a un ID vacío o con caracteres de control. Un NUL decodificado provocaba un error PostgreSQL UTF8 al consultar SPRING_SESSION, incluso en la ruta pública de CSRF; el cliente terminaba mostrando «El servicio no está disponible».
+
+El filtro conserva las otras cookies, los identificadores válidos y toda la configuración del serializador: nombre, Base64, dominio, Path, HttpOnly, SameSite, Secure y duración. CSRF y el inicio de sesión generan la cookie nueva por el mecanismo existente. También se aplica en despachos ERROR/FORWARD, porque Tomcat puede recuperar el request original al presentar un 401/403. No cambia permisos, comprobación de contraseña ni protección CSRF; una cookie descartada deja al visitante sin autenticar.
