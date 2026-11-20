@@ -607,7 +607,8 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     walker.setWorld(colliders);
     // Las nuevas cubiertas físicas siguen sus triángulos exactos por ambas caras.
     const roofBodies=[];colliders.traverse(o=>{if(o.userData.roofCollider)roofBodies.push(o);});
-    assert.ok(roofBodies.length>=30,'Incluye chapas de bloques, bóvedas, carpas, lucernario y marquesinas');
+    // La marquesina de la puerta de Recepción se retiró para rehacerla en Blender.
+    assert.ok(roofBodies.length>=15,'Incluye chapas de bloques, bóvedas, carpas y lucernario');
     for(const body of roofBodies){
       const position=body.geometry.attributes.position,index=body.geometry.index;
       for(let i=0;i<index.count;i+=Math.max(6,Math.floor(index.count/30/6)*6)){
