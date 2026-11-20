@@ -26,35 +26,31 @@ def create_material(name, hex_color, roughness=0.88):
     bsdf.inputs["Metallic"].default_value = 0.0
     return mat
 
-mat_suelo_cesped = create_material("BaseCesped", "3b5927", roughness=0.92)
+mat_suelo_cesped = create_material("BaseCesped", "355222", roughness=0.92)
 mat_borde_tierra = create_material("BordeTierraCesped", "362b21", roughness=0.95)
-mat_brizna_oscura = create_material("BriznaOscura", "355422", roughness=0.82)
-mat_brizna_clara = create_material("BriznaClara", "527834", roughness=0.78)
+mat_brizna_oscura = create_material("BriznaOscura", "2d491d", roughness=0.82)
+mat_brizna_clara = create_material("BriznaClara", "496e2d", roughness=0.78)
 
 # Contenedor principal con pivote en el suelo (0, 0, 0)
 container = bpy.data.objects.new("Pasto_Cantero", None)
 bpy.context.scene.collection.objects.link(container)
 
-# 4. Polígono trapezoidal del cantero (en metros, centrado en (0, 0))
+# 4. Trapecio rectángulo exacto del cantero (en metros, centrado en (0, 0))
 # Vértices en sentido antihorario vistos desde arriba:
-# (-Y = frente hacia el patio, +Y = fondo hacia la galería)
-#   0: esquina frontal-izquierda
-#   1: esquina frontal-derecha (vértice agudo que apunta a la derecha)
-#   2: esquina trasera-derecha (junto al caminero techado)
-#   3: esquina trasera-izquierda
+# (-Y = frente hacia el patio de adoquines, +Y = fondo hacia la galería)
+#   0: frente-izquierda (ángulo recto 90° con el caminero izquierdo)
+#   1: frente-derecha (punta aguda hacia el muro curvo de ladrillos)
+#   2: fondo-derecha (junto a la columna derecha de la galería)
+#   3: fondo-izquierda (ángulo recto 90° junto al caminero izquierdo)
 poly_2d = [
-    Vector((-3.10, -1.55)),  # 0: frente-izq
-    Vector((3.05, -1.85)),   # 1: frente-der (punta aguda derecha)
-    Vector((1.65, 1.50)),    # 2: fondo-der (junto a la columna derecha)
-    Vector((-3.30, 1.35)),   # 3: fondo-izq (junto a la columna izquierda)
+    Vector((-2.90, -1.50)),  # 0: frente-izq
+    Vector((2.90, -1.50)),   # 1: frente-der (vértice agudo)
+    Vector((1.35, 1.50)),    # 2: fondo-der (junto a columna derecha)
+    Vector((-2.90, 1.50)),   # 3: fondo-izq (alineado verticalmente con 0)
 ]
 
-
-
-
-
-ALTURA_CESPED = 0.042
-RETRANQUEO_TOP = 0.035  # Ligero chaflán en los bordes
+ALTURA_CESPED = 0.038
+RETRANQUEO_TOP = 0.030
 
 bm = bmesh.new()
 n = len(poly_2d)
@@ -62,7 +58,7 @@ n = len(poly_2d)
 # Anillo inferior (z = 0.0)
 bottom_verts = [bm.verts.new((p.x, p.y, 0.0)) for p in poly_2d]
 
-# Anillo superior ligeramente retraído hacia el centro para borde natural
+# Anillo superior ligeramente retraído hacia el centro para bisel natural
 center_2d = sum(poly_2d, Vector((0.0, 0.0))) / n
 top_verts = []
 for p in poly_2d:
@@ -84,7 +80,7 @@ for i in range(n):
     side_face = bm.faces.new((bottom_verts[i], bottom_verts[j], top_verts[j], top_verts[i]))
     side_face.material_index = 1
 
-# Subdividir levemente la cara superior para dar micro-ondulación natural al terreno
+# Subdividir la cara superior para micro-ondulación natural
 bmesh.ops.subdivide_edges(
     bm,
     edges=list(top_face.edges),
@@ -92,12 +88,21 @@ bmesh.ops.subdivide_edges(
     use_grid_fill=True,
 )
 
+def dist_to_segment(p, a, b):
+    ab = b - a
+    t = max(0.0, min(1.0, (p - a).dot(ab) / (ab.length_squared + 1e-9)))
+    proj = a + ab * t
+    return (p - proj).length
+
 rng = random.Random(108)
 for v in bm.verts:
     if v.co.z > ALTURA_CESPED * 0.8:
-        # Mantener bordes más bajos y elevar apenas el centro
-        dist_edge = min((Vector((v.co.x, v.co.y)) - p).length for p in poly_2d)
-        bump = min(0.018, dist_edge * 0.012) + rng.uniform(-0.004, 0.005)
+        pt2d = Vector((v.co.x, v.co.y))
+        dist_edge = min(
+            dist_to_segment(pt2d, poly_2d[i], poly_2d[(i + 1) % n])
+            for i in range(n)
+        )
+        bump = min(0.016, dist_edge * 0.015) + rng.uniform(-0.003, 0.004)
         v.co.z += bump
 
 base_mesh = bpy.data.meshes.new("BaseCanteroMesh")
@@ -112,7 +117,7 @@ bpy.context.view_layer.objects.active = base_obj
 bpy.ops.object.shade_smooth()
 base_obj.parent = container
 
-# 5. Briznas de pasto distribuidas dentro del polígono (una sola malla optimizada)
+# 5. Briznas de pasto distribuidas dentro del trapecio
 def point_in_poly(pt, poly):
     inside = False
     j = len(poly) - 1
@@ -128,16 +133,15 @@ def point_in_poly(pt, poly):
     return inside
 
 bm_grass = bmesh.new()
-min_x = min(p.x for p in poly_2d)
-max_x = max(p.x for p in poly_2d)
-min_y = min(p.y for p in poly_2d)
-max_y = max(p.y for p in poly_2d)
+min_x = min(p.x for p in poly_2d) + 0.04
+max_x = max(p.x for p in poly_2d) - 0.04
+min_y = min(p.y for p in poly_2d) + 0.04
+max_y = max(p.y for p in poly_2d) - 0.04
 
-# Generar matas pequeñas de 3 briznas cada una para cubrir el cantero con bajo peso
-NUM_MATAS = 1150
+NUM_MATAS = 1400
 creadas = 0
 intentos = 0
-while creadas < NUM_MATAS and intentos < NUM_MATAS * 6:
+while creadas < NUM_MATAS and intentos < NUM_MATAS * 8:
     intentos += 1
     px = rng.uniform(min_x, max_x)
     py = rng.uniform(min_y, max_y)
@@ -149,8 +153,8 @@ while creadas < NUM_MATAS and intentos < NUM_MATAS * 6:
     base_z = ALTURA_CESPED - 0.003
     for b in range(3):
         ang = rng.uniform(0, math.tau)
-        tilt = rng.uniform(0.012, 0.032)
-        h = rng.uniform(0.038, 0.072)
+        tilt = rng.uniform(0.010, 0.028)
+        h = rng.uniform(0.035, 0.068)
         w = 0.007
 
         dx = math.cos(ang)
@@ -158,8 +162,8 @@ while creadas < NUM_MATAS and intentos < NUM_MATAS * 6:
         nx = -dy * w
         ny = dx * w
 
-        ox = px + rng.uniform(-0.015, 0.015)
-        oy = py + rng.uniform(-0.015, 0.015)
+        ox = px + rng.uniform(-0.014, 0.014)
+        oy = py + rng.uniform(-0.014, 0.014)
 
         v0 = bm_grass.verts.new((ox - nx, oy - ny, base_z))
         v1 = bm_grass.verts.new((ox + nx, oy + ny, base_z))
@@ -177,7 +181,7 @@ grass_obj.data.materials.append(mat_brizna_oscura)
 grass_obj.data.materials.append(mat_brizna_clara)
 grass_obj.parent = container
 
-# 6. Exportar GLB directamente a /home/Mati/Repos/tour_virtual_UC/frontend/editor-models/pasto_cantero.glb
+# 6. Exportar GLB
 for obj in bpy.context.scene.objects:
     obj.select_set(False)
 container.select_set(True)
