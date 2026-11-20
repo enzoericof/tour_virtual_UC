@@ -9,6 +9,7 @@ import { mountPlaceInformation } from "./place-information";
 import type { TourShell } from "./tour-shell";
 
 const themeKey = "cyt-theme";
+const ambientKey = "cyt-ambient";
 const hudPanels = { "tour-route": "route-btn", "tour-options": "more-btn", "tour-account": "account-btn" } as const;
 type HudPanel = keyof typeof hudPanels;
 const panelIds = Object.keys(hudPanels) as HudPanel[];
@@ -16,8 +17,10 @@ const panelIds = Object.keys(hudPanels) as HudPanel[];
 export function mountTourControls(shell: TourShell, selectPlace: (place: Place | null) => void) {
   const { closeDialog, dialog, hideToast, openDialog, toast } = shell;
   let theme: CampusTheme = "light";
+  let ambient = true;
   try {
     if (localStorage.getItem(themeKey) === "dark") theme = "dark";
+    if (localStorage.getItem(ambientKey) === "off") ambient = false;
   } catch {
     // El visor también funciona cuando el navegador bloquea el almacenamiento local.
   }
@@ -95,6 +98,16 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     button.innerHTML = icon(dark ? "sun" : "moon") + `<span>${label}</span>`;
   }
 
+  /** Sonido ambiente: pájaros en los jardines, gente en la cantina y clases detrás de las paredes. */
+  function syncAmbient() {
+    const button = element<HTMLButtonElement>("#ambient-btn");
+    const label = ambient ? "Silenciar sonido ambiente" : "Activar sonido ambiente";
+    button.setAttribute("aria-pressed", String(ambient));
+    button.setAttribute("aria-label", label);
+    button.title = label;
+    button.innerHTML = icon("volume") + `<span>${ambient ? "Sonido ambiente" : "Ambiente en silencio"}</span>`;
+  }
+
   function onMode(mode: TourMode) {
     const changed = mode !== currentMode;
     currentMode = mode;
@@ -120,8 +133,10 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
   }
 
   syncTheme();
+  syncAmbient();
   try {
     engine = new TourEngine(element("#viewport"), theme);
+    engine.setAmbient(ambient);
     mountPlaceInformation(shell, engine);
     engine.onMode = onMode;
     engine.onVisitPosition = syncLocation;
@@ -171,6 +186,16 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     }
   });
 
+  element("#ambient-btn").onclick = () => {
+    ambient = !ambient;
+    engine?.setAmbient(ambient);
+    syncAmbient();
+    try {
+      localStorage.setItem(ambientKey, ambient ? "on" : "off");
+    } catch {
+      // La preferencia sigue activa durante esta visita.
+    }
+  };
   element("#theme-btn").onclick = () => {
     theme = theme === "light" ? "dark" : "light";
     engine?.setTheme(theme);

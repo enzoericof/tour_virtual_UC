@@ -18,6 +18,8 @@ Vite apunta al backend en `http://127.0.0.1:8080` por defecto. Para usar otra di
 
 `scene/faculty-reconstruction.ts` arma el modelo a partir de las medidas de `data/`. En `scene/faculty/` están los constructores de la torre de baños, la Sala Manfred, la cantina y los anexos. Usan las mismas primitivas para añadir geometría visible y colisiones al marco de cada sector. El ascensor se arma en `scene/faculty/elevator-shaft.ts` (caja, murales, frentes y cabina). Su estado y sus tiempos están en `scene/elevator.ts`, y sus sonidos en `scene/elevator-audio.ts`, con Web Audio y el contexto creado en el primer gesto del visitante. `TourEngine` los une.
 
+El sonido ambiente (`scene/ambient-zones.ts` y `scene/ambient-audio.ts`) se calcula, no se graba: cada zona del plano es un punto con radio y nivel, y el audio sintetiza pájaros de día, grillos de noche, conversaciones en la cantina y la plaza techada y el murmullo de las aulas del Bloque 1 y del Bloque G detrás de sus puertas. El corte vertical de cada zona impide oír otro piso. Suena solo mientras el visitante camina o está en pausa, se apaga en la vista general y tiene su botón en el menú del recorrido.
+
 ## Aporte campus-backend
 
 El commit `9c5d019` retiró `backend/`. Sus contratos históricos de contenido y chat se conservan más abajo y su código sigue en `fd95f87`. Los archivos de Docker y Compose de ese módulo también quedaron en el historial. La ejecución actual se describe en [la guía del backend](../campus-backend/setup.md).
