@@ -1,3 +1,5 @@
+import { pavementOutside } from "./faculty/pavement-cutout";
+import { addReceptionGarden } from "./faculty/reception-garden";
 import { registerSeats } from "./seating";
 import * as T from "three";
 import { friendshipMaterial, friendshipSign } from "./friendship-materials";
@@ -14,7 +16,7 @@ import { addCantina } from "./faculty/cantina";
 import { addAnnexes } from "./faculty/annexes";
 import {
   facultyBlueprint as plan, block1, blockG, gridAngle, FLOOR_HEIGHT as H, PLAZA_LEVEL, ELEVATOR_LANDING_LEVEL, STEPS_RUN, rectCorners,
-  elevatorStairEdge, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR, fromRect,
+  manfredExitCutout, manfredOutline, elevatorStairEdge, classroomDoor, structureLines, pilasters, ROOMS_PER_FLOOR, fromRect,
   type Rect, type Rooms, type Vec2,
 } from "../data/faculty-blueprint";
 import { insidePolygon } from "../data/campus-geometry";
@@ -809,8 +811,16 @@ export function createFaculty(grass = makeGrassMaterial()) {
   // ---- Plataforma a 0,90 m: plaza techada, cuadrado, Bedelía, cantina, Sala Manfred y cabecera este ----
 
   for (const [i, outline] of plan.platform.entries()) {
-    prism(outline, 0, PLAZA_LEVEL, m.concrete);
-    pave(outline, i === 0 ? m.tile : m.stone, PLAZA_LEVEL + (i === 0 ? 0.008 : 0.005));
+    // La explanada nunca invade la sala, aunque cambien su posición o tamaño.
+    for (const piece of pavementOutside(outline, manfredOutline()).flatMap(p=>pavementOutside(p,manfredExitCutout))) {
+      prism(piece, 0, PLAZA_LEVEL, m.concrete);
+      pave(piece, i === 0 ? m.tile : m.stone, PLAZA_LEVEL + (i === 0 ? 0.008 : 0.005));
+    }
+  }
+  // Remate continuo contra Bedelía, sin dejar la cuña de césped junto a la escalera.
+  for(const piece of pavementOutside(plan.northPassageLanding,manfredExitCutout)) {
+    prism(piece,0,PLAZA_LEVEL,m.concrete);
+    pave(piece,m.stone,PLAZA_LEVEL+.005);
   }
   // Continuación del mismo piso gris por el fondo y lateral de cantina.
   prism(cantinaRearPaving, 0, PLAZA_LEVEL, m.concrete, true);
@@ -1237,6 +1247,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     const depth=plan.bedeliaGalleryDepth;
     box(w+1,.2,depth,0,3.4,z+depth/2,m.concrete);
     box(w+1,.05,depth,0,bedeliaPavingTop-.025,z+depth/2,m.stone,true);
+    addReceptionGarden(builder);
     const gold = new T.MeshStandardMaterial({ color: "#c2a65a", metalness: 0.25, roughness: 0.45 });
     // Vitrina visible desde el acceso de Manfred, sobre el lateral de Bedelía.
     const displayX = -w / 2 - 0.31, displayZ = 2.3;

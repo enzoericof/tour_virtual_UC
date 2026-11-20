@@ -344,3 +344,19 @@ Ajuste final de plaza techada: seis conjuntos desplazados 1 m hacia el exterior 
 Fila de galería desplazada 0,8 m adicionales; fila exterior sin cambios. Revisión visual en Chrome sin errores, sin superposición entre conjuntos. Build y 40 pruebas aprobadas; no se realizó recorrido manual a pie.
 
 Asientos: cámara a altura sentada, aviso E para sentarse/levantarse y retorno al punto de aproximación. Revisada captura sentado.png en Chrome. Ayuda actualizada; Esc mantiene su comportamiento.
+
+### Ajuste de toldo de Recepción (18/11)
+Inicio de cubierta y apoyos trasladado al borde exterior de la galería (z local 7,7), sin superposición en planta con su techo. Compilación correcta y 48 pruebas aprobadas. Revisión visual automática pendiente: el navegador agotó el tiempo de carga de la página.
+
+### Interior Manfred (18/11)
+Compilación y 48 pruebas aprobadas. Revisión en Chrome de vistas hacia la pantalla y hacia el acceso: sillas negras, estructura y luces, gradas, mesa y vidriado visibles; sin errores JavaScript. No se realizó un recorrido manual completo ni prueba multijugador de los nuevos asientos.
+
+Corrección de niveles Manfred: build y 48 pruebas aprobadas. Vistas en Chrome hacia el acceso y desde el lateral confirman piso continuo sin césped ni tabique interior, filas a igual altura y escalones limitados al borde del vestíbulo.
+
+Manfred: revisada en Chrome la onda de doble curvatura y las bandas planas continuas. Build y 48 pruebas correctas; sin errores JavaScript. El sondeo adicional de alturas no produjo intersecciones, por lo que no valida el recorrido a pie.
+
+Rampa trasladada al extremo indicado junto al muro derecho; filas separadas 40 cm adicionales de la mesa. Compilación y 48 pruebas aprobadas, captura de Chrome sin errores JavaScript. No se verificó recorrido manual.
+
+Onda invertida y suavizada según trazo rojo; mobiliario desplazado 25 cm hacia acceso. Compilación y pruebas completas correctas. Revisada captura del ajuste de curva en Chrome; sin validación manual de recorrido.
+
+Escalinata lateral de cantina: contorno quebrado revisado en captura aérea de Chrome, diagonal larga y chaflán final visibles. Sin errores JavaScript; build y 48 pruebas aprobadas.

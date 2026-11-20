@@ -438,3 +438,95 @@ Corrección de distribución: seis conjuntos (seis mesas y doce bancos largos), 
 Ajuste de mobiliario: ambos grupos de la plaza techada se desplazan 1 m hacia el exterior (izquierda desde Bedelía), conservando la separación. Solo el conjunto marrón del extremo junto al toldo y la galería lleva dos sillas laterales.
 
 Solo la fila próxima a la galería se desplaza otros 0,8 m hacia el exterior: x local -0,8 a 0. La otra fila permanece en x=4; queda un paso mínimo aproximado de 1,2 m incluso junto a la silla lateral del último conjunto.
+
+Recepción frente a cantina (18/11): retirado el último banco con cantero rectangular. Se toma la puerta existente de Recepción (x local 6,9 de Bedelía) como eje de una marquesina curva de 4,6 m y jardín bajo lateral, con acceso central libre de 2,2 m. Dimensiones estimadas a partir de fotografía y recuadro aéreo.
+
+Corrección de marquesina: inicio en z local 7,7 de Bedelía, calculado desde el borde exterior del techo de la galería. Cubierta y apoyos se desplazan juntos 3,5 m hacia la plaza; el jardín conserva su posición.
+
+Ajuste según flecha lateral: toldo completo y patas desplazados 0,60 m hacia Recepción (inicio z local 7,10). Se conserva el jardín.
+
+### Sala Manfred: interior según fotografías (18/11)
+Se conserva la implantación y el acceso diagonal hacia la rampa. Interior con revestimiento claro, cinco gradas curvas de 15 cm y cuarenta sillas negras con tablita, distribuidas en dos grupos con paso central; tres sillas de panelistas detrás de la mesa. Pantalla enrollable, proyector, pizarrones, atril, banner, aires acondicionados y cerchas con tubos luminosos. Los asientos admiten una persona con el sistema E existente. Dimensiones y cantidad de sillas aproximadas; no constituyen relevamiento.
+
+Corrección del desnivel de Manfred según plano marcado: se reemplazan las cinco gradas por un piso inferior único a -0,45 m respecto de la entrada. La franja junto al vidrio queda alta y continua, con borde curvo, dos huellas intermedias (tres contrahuellas de 15 cm) y rampa lateral de 1,05 m de ancho. La losa cubre el polígono completo, incluido el retorno oblicuo; el revestimiento sigue ese muro en vez de cortar la sala. Las filas de sillas comparten la cota inferior. Medidas estimadas.
+
+Manfred: borde de escalera con onda de doble curvatura según croquis (96 segmentos, amplitud aproximada 0,95 m). Peldaños recortados en el lateral de la rampa y bandas planas continuas. Cuatro filas de sillas en el piso bajo para dejar libre la onda.
+
+Rampa Manfred corregida al extremo derecho de la onda señalado por el usuario (x=5,35, ancho 1,10 m, desde z=3 a z=-0,8). Huellas y bandas terminan antes de la rampa. Todas las filas se alejan 0,40 m de la mesa frontal.
+
+Ajuste según trazo rojo: invertida y suavizada la onda (amplitud -0,45 m). Mesa, sillas de panelistas y filas de público trasladadas conjuntamente 0,25 m hacia el acceso, conservando la separación entre mesa y primera fila.
+
+Escalinata exterior cantina: contorno lateral con arranque corto, diagonal larga hasta (3;16), tramo recto hasta la plaza y chaflán final, según marcado aéreo. Manfred conserva una planta aproximada de seis vértices; no equivale a una restitución exacta del CAD.
+
+Terraza cantina: tres peldaños de retorno por el lateral exterior desde z=6 hasta z=12, con esquina cerrada a inglete y colisión, para corregir el corte visible junto al césped.
+
+La unión final es diagonal entre (10;12) de la explanada y (14;8) de la terraza lateral, con relleno pavimentado y tres huellas continuas. Sustituye el retorno recto inicial.
+
+
+### Sala Manfred: ajuste al plano aportado (19/11/2026)
+
+Planta hexagonal con seis paredes sobre el mismo contorno, vértices laterales y tres paños hacia el pasillo. Se mantienen la posición y orientación del conjunto y las dimensiones generales estimadas de 12 × 9 m; la imagen no aporta cotas para un relevamiento exacto. La entrada doble está en el paño diagonal del lado del desembarco de la rampa exterior del Bloque 1. La línea roja interior se interpreta como tres contrahuellas curvas entre el acceso alto y el piso bajo; se retira la rampa interior anterior. Mobiliario, cerchas y explanada siguen el nuevo contorno. La sala continúa sin techo.
+
+El acceso exterior de Manfred queda también descubierto por pedido del usuario: retiradas las losas sobre el pasillo y las franjas del desembarco, junto con las luminarias que colgaban de esa cubierta.
+
+### Ampliación visual de Manfred desde la rampa — 19/11/2026
+
+Se amplía la planta de 12 × 9 a 16 × 12 m (un tercio más en ambas dimensiones), como ajuste visual solicitado a partir de la foto del acceso. Son dimensiones adoptadas, no medidas de campo. El crecimiento conserva el extremo próximo a la rampa y la alineación del frente del pasillo: el centro se desplaza 2 m en el eje longitudinal y 1,5 m hacia el fondo. Explanada, escaleras, paredes, puerta y colisiones se construyen con las nuevas dimensiones. Se mantiene el acceso sin cubierta.
+
+Ajuste posterior: traslación de toda la sala 2 m hacia el punto de vista de la rampa, sobre el eje longitudinal del pasillo (+Z del conjunto). Se conservan los 16 × 12 m y el hexágono; piso, mobiliario, entrada y colisiones acompañan el desplazamiento.
+
+Alineación final solicitada: el paño frontal de Manfred coincide con la divisoria de pavimentos del pasillo (coordenada transversal −0,25 m). Traslación transversal de 2,05 m; se conserva la posición longitudinal y el tamaño de la sala.
+
+Ajuste según flecha en vista superior: 1 m hacia la rampa sobre el eje longitudinal y 0,5 m de avance del frente hacia el pasillo. Planta achatada de 16 × 10 m, reduciendo la profundidad sin reducir el largo; el centro compensa esa reducción para mantener el nuevo frente. Se conservan seis lados y el mobiliario a escala humana.
+
+Corrección de orientación del achatamiento: se restaura la profundidad de 12 m y se reduce el largo de 16 a 14 m. Planta final de 14 × 12 m, con el mismo avance del frente y la posición longitudinal del ajuste de la flecha.
+
+### Desplazamiento y corrección del piso de Manfred — 19/11/2026
+
+Nueva traslación de 1 m hacia la rampa y avance del frente de 0,4 m hacia el pasillo, siguiendo ambas flechas. Se conserva la planta de 14 × 12 m. El borde del pasillo acompaña el frente para mantener un trayecto exterior a la sala. Se descuenta el hexágono del pavimento exterior y de su base de colisión. También se recorta el acabado de explanada agregado desde el constructor de cantina: este usaba el contorno compartido de Manfred y generaba una capa por encima de las baldosas interiores. Piso bajo, huellas y descanso alto quedan a sus cotas originales.
+
+### Manfred reducida y alineada con Bedelía — 19/11/2026
+
+Planta ajustada a 12 × 10 m según la nueva captura. El vértice norte del hexágono se fija en la misma sección longitudinal que la cabecera de Bedelía (−20 m en el eje del pasillo), en lugar de desplazar la sala por incrementos aproximados. El centro se calcula desde ese vértice y la mitad del largo. Se conserva el avance transversal del frente y el recorte de todos los pavimentos exteriores.
+
+Ajuste fino posterior según flecha: traslación de 0,5 m hacia el Bloque 1 sobre el eje longitudinal del pasillo. Se conservan tamaño, orientación y posición transversal. El vértice norte queda ahora 0,5 m adelantado respecto a la cabecera de Bedelía.
+
+Traslación lateral final de 1 m hacia la izquierda de la vista superior (−X del conjunto de plaza), solicitada después de deshacer el desplazamiento de 2 m. Planta de 12 × 10 m y posición longitudinal conservadas. El frente queda en −0,35 m y la explanada conecta con el borde del pasillo en +0,65 m.
+
+### Piso exterior frente a Manfred — 19/11/2026
+
+Se reconstruye el desembarco como una unión convexa hasta la cara norte del Bloque 1, a la misma cota de la plataforma, cerrando el hueco de césped entre la diagonal de entrada y el pasillo. El extremo de la franja frontal se calcula desde el vértice actual del hexágono en lugar de la coordenada antigua −9,9 m. Se conserva el recorte del auditorio y no se extiende el relleno sobre la bajada de la rampa.
+
+### Brecha con Bloque 1 y junta del piso — 19/11/2026
+
+El desplazamiento adicional de 1 m hacia la izquierda se realiza paralelo al eje del Bloque 1 (−x del plano general), no sobre el eje girado de la plaza. Así se conserva exactamente la separación perpendicular existente entre ambos edificios, con 1,096 m entre sus contornos de referencia. Se cierra la franja entre el antiguo borde diagonal de plataforma y el borde oeste del pasillo, y se extiende el desembarco hasta ese mismo borde, sin cubrir la bajada de la rampa.
+
+### Pared derecha alineada al pasillo y brecha ampliada — 19/11/2026
+
+La separación perpendicular entre los contornos de Bloque 1 y Manfred aumenta de 1,096 a 1,596 m. La pared derecha recta se hace coincidir con el borde oeste del pasillo (línea verde del plano), en ambos extremos. Se conserva el largo de 12 m y la línea posterior, ampliando el ancho hacia el acceso hasta aproximadamente 11,873 m. El centro se calcula a partir de esas dos restricciones; la separación se comprueba sobre los seis vértices para evitar que el ensanchamiento acerque otro lado al bloque. Son dimensiones de ajuste del modelo, sin nuevas cotas de campo.
+
+### Hexágono menos achatado y mobiliario libre de escaleras — 19/11/2026
+
+Se aumenta el largo a 14 m manteniendo el ancho aproximado de 11,873 m, la pared derecha alineada al pasillo y la brecha de 1,596 m con el Bloque 1. Las cuatro filas se retrasan 0,95 m hacia el piso bajo y la mesa con las sillas de expositores se retrasa 0,8 m para conservar la circulación. La curva de escaleras se calcula en una función compartida; las pruebas revisan la huella completa de cada silla, incluida la paleta, con 12 cm de margen respecto a la huella inferior y verifican que permanezca dentro de la sala y separada de la mesa.
+
+### Escaleras, rampita y cerramiento exterior — 19/11/2026
+
+Las tres contrahuellas siguen una curva arqueada según el trazo rojo, con remates en los paños posteriores. En el extremo norte se incorpora una rampa de 0,9 m de ancho y unos 3,83 m de desarrollo, entre las cotas 0 y −0,45 m de la sala. Las huellas y bandas antideslizantes se recortan contra su planta; superficie y colisión de la pendiente comparten geometría. Se añaden tres paños exteriores de ladrillo, separados 0,55 m por eje del recinto interior, con retornos en los extremos. Se reponen la cubierta de Manfred y las cubiertas y luminarias del pasillo y desembarco. La brecha de 1,596 m se mide ahora respecto al cerramiento exterior y se mantiene la pared derecha alineada con el pasillo. Proporciones adoptadas de las imágenes, sin nuevas cotas relevadas.
+
+### Terminaciones interiores y salida norte — 19/11/2026
+
+Equipos split elevados 0,48 m. Banner actualizado a Ingeniería Informática y retrasado hasta z local −4,8 m para separarlo del atril; pizarra móvil retrasada 1,05 m. La curva roja se proyecta a coordenadas del auditorio y se interpola con tangentes continuas; se eliminan las pequeñas oscilaciones del trazo a pedido del usuario. La rampa cambia de dirección: parte del descanso alto en (4,65; 1,1) y desciende hacia el fondo hasta (4,65; −2,6), con 0,9 m de ancho. El piso se genera por secciones compartidas, sin triangulaciones recortadas superpuestas; acabado y colisión comparten una malla. Contrahuellas suavizadas y textura orientada verticalmente. Se añaden cinco sillas utilizables en el descanso alto a z=4,65 m, fuera de la circulación. Las filas inferiores se ajustan al nuevo borde.
+
+La salida norte se ensancha hasta el borde de Bedelía: pasillo y escalera comparten 3,5 m de ancho y el mismo eje. Se reserva el hueco de toda la escalera, descontándolo de las losas y del acabado exterior que antes tapaban sus huellas. Un rellano lateral cierra la cuña junto a la cabecera administrativa.
+
+### Rampita limitada al remate rojo — 19/11/2026
+
+Se elimina el canal largo que se prolongaba hasta z=−2,6 m. La rampa queda limitada al remate inmediato de la curva: ancho de 0,8 m y desarrollo de 1,5 m, desde z=−0,575 hasta z=0,925 m. El extremo de la curva se lleva a x=5,6 m para reducir la terminación contra la pared; la rampa ocupa x=5,6 a 6,4 m. La superficie inclinada usa toda esa terminación y comparte los vértices del piso circundante.
+
+### Remate conforme a la fotografía real — 19/11/2026
+
+Se retira por completo la rampa rectangular independiente y sus paredes laterales. El desnivel se resuelve con dos contrahuellas de 0,15 m, con piso inferior a −0,30 m. Entre x=4,25 y 5,6 m, la huella intermedia se ensancha y se inclina progresivamente: ambas contrahuellas pierden altura hasta desaparecer en la unión con la pared posterior. La curva acaba sobre esa pared; no continúa como un tabique recto ni deja extremos salientes junto al paso. El piso se mantiene como una única superficie de colisión.
+
+### Cubierta cuadrangular de Manfred — 19/11/2026
+
+La cubierta se separa del contorno hexagonal del recinto: cuatro lados rectos y esquinas en escuadra, siguiendo la terminación azul indicada por el usuario. Su envolvente local es de 15,1 × 12,973 m e incluye el cerramiento exterior existente. No cambian sala, mobiliario, piso, muros ni acceso. El techo y su cielorraso comparten el nuevo contorno.

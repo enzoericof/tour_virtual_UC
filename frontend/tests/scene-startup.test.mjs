@@ -1,3 +1,4 @@
+import { manfredRampSection, manfredStairZ } from "../src/data/faculty-blueprint.ts";
 import { Box3, PerspectiveCamera, Ray, Raycaster, Vector2, Vector3 } from "three";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
@@ -89,9 +90,10 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       }
     }
     // El vano recuperado debe dejar pasar un cuerpo, no solo verse abierto.
-    const width = Math.hypot(4.3,4.3), bays = 6;
-    const doorX = -width/2 + width*2.5/bays;
-    const diagonal = {center:[-5.95,3.85],size:[width,.12],angle:Math.PI/4};
+    const [mw,md]=plan.manfred.size;
+    const width = Math.hypot(mw/4,md/2);
+    const doorX = -width*.08;
+    const diagonal = {center:[-3*mw/8,md/4],size:[width,.12],angle:Math.atan2(-md/2,-mw/4)};
     const trace = (x, rect=diagonal) => {
       const a = fromRect(plan.manfred, fromRect(rect,[x,.7]));
       const b = fromRect(plan.manfred, fromRect(rect,[x,-.7]));
@@ -101,9 +103,87 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     };
     for (const offset of [-.28, 0, .28])
       assert.equal(trace(doorX + offset).length, 0, "Diagonal doorway is clear across walking width");
-    assert.ok(trace(doorX + width/bays).length > 0, "Adjacent glazing still blocks walking");
-    assert.ok(trace(-2.1,{center:[0,6],size:[6.8,.12],angle:0}).length > 0,
+    assert.ok(trace(doorX + 1.25).length > 0, "Adjacent glazing still blocks walking");
+    assert.ok(trace(0,{center:[0,md/2],size:[mw/2,.12],angle:0}).length > 0,
       "Previous doorway on the central panel is closed");
+
+    // La plataforma exterior no rellena el piso bajo ni las huellas curvas.
+    for(const [z, expected] of [[-1,-.3],[manfredStairZ(0)-.15,-.15],[4.2,0]]) {
+      const p=fromRect(plan.manfred,[0,z]);
+      const [floor]=new Raycaster(new Vector3(p[0],PLAZA_LEVEL+.2,p[1]),new Vector3(0,-1,0),0,1)
+        .intersectObject(colliders,true);
+      assert.ok(floor && Math.abs(floor.point.y-(PLAZA_LEVEL+expected))<.015,
+        `Manfred floor at z=${z} keeps its intended level`);
+    }
+
+    // Ni el acabado de piedra ni el hormigón exterior deben cubrir el acceso interior.
+    for(const x of [-2.5,0,2.5]) for(const z of [4,4.5,plan.manfred.size[1]/2-.5]) {
+      const p=fromRect(plan.manfred,[x,z]);
+      for(const object of [group,colliders]) {
+        const [floor]=new Raycaster(new Vector3(p[0],PLAZA_LEVEL+.2,p[1]),new Vector3(0,-1,0),0,.8)
+          .intersectObject(object,true);
+        assert.ok(floor && Math.abs(floor.point.y-PLAZA_LEVEL)<.002,
+          `Interior landing at ${x},${z} has one exposed tile floor`);
+      }
+    }
+
+    // Cruce frente a la diagonal de entrada: la explanada llega al pasillo sin césped ni desniveles.
+    const apronTip=fromRect(plan.manfred,[-plan.manfred.size[0]/2,0]);
+    const apronJoin=plan.corridor[3].map((v,i)=>v+(plan.corridor[0][i]-v)*(7.5/22));
+    for(const t of [.2,.4,.6,.8]) for(const advance of [.1,.35,.6]) {
+      const side=[apronTip[0]+(apronJoin[0]-apronTip[0])*t,apronTip[1]+(apronJoin[1]-apronTip[1])*t];
+      const base=[31,-block1.depth/2-.1];
+      const x=side[0]+(base[0]-side[0])*advance,z=side[1]+(base[1]-side[1])*advance;
+      for(const object of [group,colliders]) {
+        const [floor]=new Raycaster(new Vector3(x,PLAZA_LEVEL+.12,z),new Vector3(0,-1,0),0,.2)
+          .intersectObject(object,true);
+        assert.ok(floor && Math.abs(floor.point.y-PLAZA_LEVEL)<.02,
+          `Entrance apron stays level and continuous at t=${t}, advance=${advance}`);
+      }
+    }
+
+    // Barrido completo de la junta diagonal marcada en la captura.
+    const bridge=plan.platform.at(-1);
+    for(const t of [.05,.25,.5,.75,.95]) for(const across of [.15,.5,.85]) {
+      const a=bridge[0].map((v,i)=>v+(bridge[1][i]-v)*t);
+      const b=bridge[3].map((v,i)=>v+(bridge[2][i]-v)*t);
+      const p=a.map((v,i)=>v+(b[i]-v)*across);
+      for(const object of [group,colliders]) {
+        const [floor]=new Raycaster(new Vector3(p[0],PLAZA_LEVEL+.12,p[1]),new Vector3(0,-1,0),0,.2)
+          .intersectObject(object,true);
+        assert.ok(floor && Math.abs(floor.point.y-PLAZA_LEVEL)<.02,
+          `Diagonal floor joint is continuous at t=${t}, across=${across}`);
+      }
+    }
+
+    // La rampita no contiene losas de escalones que corten su pendiente.
+    const smallRamp=plan.manfredInterior.ramp;
+    for(const along of [.15,.35,.6,.85]) {
+      const x=smallRamp.startX+(smallRamp.endX-smallRamp.startX)*along;
+      const section=manfredRampSection(x);
+      for(const t of [.15,.5,.85]) {
+        const z=section.low+(section.high-section.low)*t;
+        const p=fromRect(plan.manfred,[x,z]);
+        const y=PLAZA_LEVEL+section.lowY+(section.highY-section.lowY)*t;
+        for(const object of [group,colliders]) {
+          const [surface]=new Raycaster(new Vector3(p[0],y+.08,p[1]),new Vector3(0,-1,0),0,.15)
+            .intersectObject(object,true);
+          assert.ok(surface && Math.abs(surface.point.y-y)<.008,"The curved end blends continuously into a ramp");
+        }
+      }
+    }
+    const end=manfredRampSection(smallRamp.endX);
+    assert.ok(Math.abs(end.lowY-plan.manfredInterior.lowerLevel)<.001 && Math.abs(end.highY)<.001,
+      "Both risers disappear at the wall without a rectangular trench");
+    const roofCenter=fromRect(plan.manfred,[0,0]);
+    const [hallRoof]=new Raycaster(new Vector3(roofCenter[0],6,roofCenter[1]),new Vector3(0,-1,0),0,3)
+      .intersectObject(group,true);
+    assert.ok(hallRoof && Math.abs(hallRoof.point.y-(PLAZA_LEVEL+3.82))<.01,"The Manfred roof is restored");
+    const outerOrigin=fromRect(plan.manfred,[0,-plan.manfred.size[1]/2-1]);
+    const outerTarget=fromRect(plan.manfred,[0,-plan.manfred.size[1]/2]);
+    assert.ok(new Raycaster(new Vector3(outerOrigin[0],PLAZA_LEVEL+1.3,outerOrigin[1]),
+      new Vector3(outerTarget[0]-outerOrigin[0],0,outerTarget[1]-outerOrigin[1]).normalize(),0,.7)
+      .intersectObject(colliders,true).length>0,"Outer brick wall encloses the rear of the hexagon");
 
     // Verifica llamadas, puerta, geometría y transporte continuo del jugador.
     const { Walker } = await server.ssrLoadModule("/src/navigation/walker.ts");

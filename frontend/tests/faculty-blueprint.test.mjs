@@ -1,3 +1,4 @@
+import { manfredOuterOutline, manfredStairZ } from "../src/data/faculty-blueprint.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -247,9 +248,19 @@ test("Plaza level: covered plaza, square, Bedelía, canteen and Sala Manfred sit
 
 test("Sala Manfred: rotated facade beside the clear corridor and connected ramp", () => {
   const { manfred, bedelia, eastEnd: { ramp } } = plan;
-  assert.deepEqual(manfred.size, [12, 9]);
+  assert.equal(manfred.size[0],14);
+  assert.ok(close(manfred.size[1],11+Math.cos(gridAngle)));
   assert.ok(close(manfred.angle, gridAngle-Math.PI/2), "Curved facade follows the side of the gallery");
+  // Ambos extremos de la pared derecha pertenecen a la recta del pasillo.
+  const [ca,,,cd]=plan.corridor;
+  const cross=(p,a,b)=>(p[0]-a[0])*(b[1]-a[1])-(p[1]-a[1])*(b[0]-a[0]);
+  for(const x of [-manfred.size[0]/4,manfred.size[0]/4])
+    assert.ok(Math.abs(cross(fromRect(manfred,[x,manfred.size[1]/2]),ca,cd))<.001,
+      "Right wall aligns with the corridor edge at both ends");
   const outline = manfredOutline(), b = rectCorners(bedelia);
+  assert.ok(Math.abs(Math.max(...manfredOuterOutline().map(p=>p[1]))-(-block1.depth/2-1.5962863242))<.001,
+    "Manfred keeps the requested additional half-metre separation");
+
   const gap = Math.min(...outline.flatMap((p) => b.map((q, i) => distanceToSegment(p, q, b[(i + 1) % 4]))),
     ...b.map((q) => Math.min(...outline.map((p, i) => distanceToSegment(q, p, outline[(i + 1) % outline.length])))));
   assert.ok(gap >= 3.2, "Clear passage between Manfred and the administrative building");
@@ -341,5 +352,19 @@ test("Pavement connects covered plaza to canteen with a clear walking width", ()
     const p = [start[0] + (end[0] - start[0]) * t + across[0] * offset,
       start[1] + (end[1] - start[1]) * t + across[1] * offset];
     assert.ok(onPlatform(p), "No grass gap in the paved connection");
+  }
+});
+
+test("Manfred chairs stay on the low floor with clearance from all curved steps and the table",()=>{
+  const p=plan.manfredInterior,outline=manfredOutline();
+  for(const x of p.seatsX) for(const row of p.rows) {
+    const z=row+p.furnitureShiftZ;
+    // Incluye respaldo, patas y la paleta lateral de cada silla.
+    for(let k=0;k<=16;k++) for(const dz of [-.42,.31]) {
+      const xx=x-.27+.75*k/16,zz=z+dz;
+      assert.ok(zz+.12<manfredStairZ(xx,2*p.stepDepth),"Chair footprint clears the lowest tread by 12 cm");
+      assert.ok(insidePolygon(fromRect(plan.manfred,[xx,zz]),outline),"Chair stays inside the hexagon");
+    }
+    assert.ok(z-.42 > -3.85+p.furnitureShiftZ+.36+.12,"Chair front stays clear of the speaker table");
   }
 });

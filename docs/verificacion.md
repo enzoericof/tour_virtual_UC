@@ -367,3 +367,46 @@ Se agregó una prueba de renderizado que recibe posiciones nuevas para diez avat
 En el sitio publicado se midieron dos conexiones de diagnóstico antes de esta corrección. Una recibió tres snapshots en ocho segundos. Se crearon dos cuentas con nombre QA movimiento y se cerraron sus sesiones al terminar la medición. La corrección requiere desplegarse y comprobarse nuevamente en Vercel.
 
 Asientos: 48 pruebas frontend aprobadas, incluidas capacidad 2/1, transformaciones, ocupación independiente y desempate entre visitantes. Chrome: E sienta y levanta, W no desplaza sentado, Esc pausa y permite reanudar sin perder el asiento. Sin errores de página. Ocupación comprobada con instantáneas simuladas; no se verificaron dos cuentas contra un servidor real.
+
+### Ajuste de toldo de Recepción (18/11)
+Inicio de cubierta y apoyos trasladado al borde exterior de la galería (z local 7,7), sin superposición en planta con su techo. Compilación correcta y 48 pruebas aprobadas. Revisión visual automática pendiente: el navegador agotó el tiempo de carga de la página.
+
+### Interior Manfred (18/11)
+Compilación y 48 pruebas aprobadas. Revisión en Chrome de vistas hacia la pantalla y hacia el acceso: sillas negras, estructura y luces, gradas, mesa y vidriado visibles; sin errores JavaScript. No se realizó un recorrido manual completo ni prueba multijugador de los nuevos asientos.
+
+Corrección de niveles Manfred: build y 48 pruebas aprobadas. Vistas en Chrome hacia el acceso y desde el lateral confirman piso continuo sin césped ni tabique interior, filas a igual altura y escalones limitados al borde del vestíbulo.
+
+
+## Manfred hexagonal y escaleras del plano — 19/11/2026
+
+48 pruebas aprobadas y compilación TypeScript/Vite correcta. Actualizada la comprobación de la puerta a su nueva diagonal: vano libre y vidrio contiguo con colisión. Rayos sobre el piso verifican el nivel bajo, dos huellas intermedias y acceso alto sin interferencia de la plataforma exterior. Revisión visual pendiente: el navegador integrado no pudo conectar al servidor local. Proporciones aproximadas de la imagen aportada; no son cotas relevadas.
+
+
+## Manfred: avance y pavimentos recortados — 19/11/2026
+
+48 pruebas aprobadas; TypeScript y Vite correctos. La comprobación de escena verifica el piso bajo, dos huellas curvas y descanso alto, más nueve puntos del descanso tanto en geometría visible como en colisiones. Esta última comprobación detectó y permitió retirar el acabado de explanada que se superponía desde el constructor de cantina. Se conserva el paso por la puerta diagonal y el pasillo exterior. Revisión visual no completada: Computer Use rechazó el acceso a Google Chrome.
+
+
+## Alineación derecha y brecha de Manfred — 19/11/2026
+
+48 pruebas aprobadas: los dos extremos de la pared derecha pertenecen a la recta del borde oeste del pasillo; el vértice más próximo al Bloque 1 conserva una brecha de 1,596 m, 0,5 m mayor que la anterior. Pasan los controles de pisos interiores, junta diagonal, desembarco y puerta. La revisión visual continúa pendiente por el bloqueo previo de acceso a Chrome.
+
+
+## Curva, rampita, muros y cubiertas de Manfred — 19/11/2026
+
+La compilación TypeScript/Vite pasó tras implementar las nuevas geometrías. Se agregaron comprobaciones para el ancho y la pendiente expuesta de la rampita, el muro posterior exterior y la cubierta repuesta. La ejecución final no pudo completarse: revisión automática rechazó la consulta del proceso por detectar un endpoint externo de Application Insights con payload no establecido como autorizado. No se declara aprobada la suite final. Ajustes posteriores al cálculo de separación exterior revisados estáticamente; revisión visual pendiente por bloqueo previo de Chrome.
+
+
+## Carga de escena tras recortar la rampita — 19/11/2026
+
+El recorte del descanso alto generaba 188 polígonos, cada uno extruido y agregado como cuerpo independiente; las huellas repetían ese patrón. Se reemplazan por una malla de superficie combinada por nivel y solo tres contrahuellas visuales reales. Se eliminan caras verticales internas superpuestas del conjunto de colisiones, reduciendo el coste de arranque del octree. Compilación TypeScript/Vite aprobada. No se reejecuta la suite bloqueada por revisión automática ni se afirma una carga visual verificada en navegador.
+
+
+## Piso por secciones, rampa hacia el fondo y asientos — 19/11/2026
+
+Comprobaciones numéricas locales de la geometría, sin ejecutar la suite bloqueada: barrido del piso interior sin huecos ni coordenadas no finitas; error máximo de altura de la rampa inferior a 0,000001 m; cinco asientos nuevos apoyados en el descanso alto. Separación mínima entre la huella de sillas inferiores y escalones: 0,247 m. Barrido de la escalera norte: ninguna losa de plataforma invade las huellas; pasillo y escalera de 3,5 m. Compilación TypeScript/Vite aprobada. Suite completa y revisión visual siguen pendientes por los bloqueos documentados.
+
+
+## Dos escalones fundidos en el remate — 19/11/2026
+
+Comprobación numérica del piso aislado: sin huecos ni coordenadas inválidas; dos contrahuellas y 0,30 m de desnivel total; altura remanente de ambas contrahuellas al terminar la rampa: cero. Separación mínima de las sillas respecto a la huella: 0,547 m. Revisada una proyección rasterizada de las mallas generadas para comprobar ausencia de canal y continuidad del remate. Compilación correcta. La proyección no sustituye una revisión del navegador completo; la suite integral sigue sin ejecutarse por el bloqueo previamente documentado.

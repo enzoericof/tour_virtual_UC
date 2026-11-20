@@ -1,9 +1,10 @@
+import { pavementOutside } from "./pavement-cutout";
 import { registerSeats } from "../seating";
 import * as T from "three";
 import { facultyToWorld, insidePolygon } from "../../data/campus-geometry";
 import { cantinaPatioStair, gardenBounds, gardenHeight, inCantina } from "../../data/cantina-terrain";
 import { facultyAnnexes } from "../../data/faculty-annexes";
-import { cantinaForecourt, facultyBlueprint as plan, fromRect, PLAZA_LEVEL, rectCorners, type Vec2 } from "../../data/faculty-blueprint";
+import { manfredExitCutout, manfredOutline, cantinaForecourt, facultyBlueprint as plan, fromRect, PLAZA_LEVEL, rectCorners, type Vec2 } from "../../data/faculty-blueprint";
 import type { FacultyBuilder } from "./builder";
 
 // Cantina: IMG_5714/5719/5720/5721, frente vidriado bajo marquesina suspendida.
@@ -19,7 +20,8 @@ export function addCantina(builder: FacultyBuilder) {
     const terrace = m.courtyardPaving;
     // Misma orientación y dibujo en explanada y enlace con la plaza, sin modificar
     // su contorno ni abrir huecos de césped en el paso existente.
-    pave(plan.platform[2].map(inCantina), terrace, 0.461);
+    for (const piece of pavementOutside(plan.platform[2], manfredOutline()).flatMap(p=>pavementOutside(p,manfredExitCutout)))
+      pave(piece.map(inCantina), terrace, 0.461);
     // Jardín continuo: reemplaza los bloques verticales por terreno que desciende
     // gradualmente al suelo. La única subida junto al acceso son 3 × 15 cm.
     const lawnVertices: number[] = [], lawnUV: number[] = [];
@@ -79,6 +81,20 @@ export function addCantina(builder: FacultyBuilder) {
       const geometry = new T.BufferGeometry().setFromPoints([points[0], points[2], points[1], points[1], points[2], points[3]]);
       geometry.computeVertexNormals(); layers.solid.add(new T.Mesh(geometry));
     }
+    // Unión diagonal entre la explanada y el extremo de la terraza lateral.
+    const terraceEnd=cantinaForecourt.edge[cantinaForecourt.edge.length-1];
+    const patioCorner:Vec2=[w/2+5,8];
+    const join:Vec2[]=[terraceEnd,[terraceEnd[0],8],patioCorner];
+    prism(join,-PLAZA_LEVEL,PLAZA_LEVEL+.45,m.concrete,true);
+    pave(join,terrace,.461);
+    for(let k=0;k<3;k++) {
+      const inner=k*.4,outer=(k+1)*.4;
+      prism([[terraceEnd[0],terraceEnd[1]+inner],
+        [patioCorner[0]+inner,patioCorner[1]],
+        [patioCorner[0]+outer,patioCorner[1]],
+        [terraceEnd[0],terraceEnd[1]+outer]],
+        -PLAZA_LEVEL,PLAZA_LEVEL+.45-k*.15,stepStone,true);
+    }
     // Continuación de los tres peldaños junto al jardín, hasta antes del pilar azul.
     // Recorte exacto contra el pilar de la esquina de la cubierta (retirado 35 cm).
     const corner = rectCorners(plan.coveredPlaza)[2], centre = plan.coveredPlaza.center;
@@ -96,13 +112,16 @@ export function addCantina(builder: FacultyBuilder) {
       shrub.position.set(sx,gardenHeight(sx,sz)-PLAZA_LEVEL+.28+(j%2)*.08,sz);
       shrub.scale.set(.4,.32+(j%2)*.08,.48);shrub.castShadow=true;layers.visual.add(shrub);
     }
-    const sideLength = sideSteps.to - sideSteps.from, sideZ = (sideSteps.from + sideSteps.to) / 2;
-    for (let k = 0; k < 3; k++) {
-      const height = PLAZA_LEVEL + 0.45 - k * 0.15;
-      box(0.4, height, sideLength, sideSteps.x + 0.2 + k * 0.4,
-        -PLAZA_LEVEL + height / 2, sideZ, stepStone);
+    // Contorno pedido en vista aérea: diagonal larga, tramo recto y chaflán final.
+    const sideEdge:Vec2[]=[...cantinaForecourt.sideStepStart,
+      [sideSteps.x,sideSteps.to-1],[sideSteps.x-.8,sideSteps.to]];
+    prism([[3,12],...cantinaForecourt.sideStepStart],-PLAZA_LEVEL,PLAZA_LEVEL+.45,m.concrete,true);
+    pave([[3,12],...cantinaForecourt.sideStepStart],terrace,.461);
+    for(let k=0;k<3;k++) {
+      const inner=sideEdge.map(([x,z]):Vec2=>[x+k*.4,z]);
+      const outer=sideEdge.map(([x,z]):Vec2=>[x+(k+1)*.4,z]);
+      prism([...inner,...outer.reverse()],-PLAZA_LEVEL,PLAZA_LEVEL+.45-k*.15,stepStone,true);
     }
-    ramp(v3(sideSteps.x + 1.2, 0, sideZ), v3(sideSteps.x, 0.45, sideZ), sideLength);
     // Fotos interiores de Horacio: pared de hormigón opuesta al frente vidriado.
     // La puerta está junto al mostrador; la ventana corrida sigue hacia el comedor.
     const interiorConcrete = m.concrete.clone(); interiorConcrete.color.set("#e4e0d4");
