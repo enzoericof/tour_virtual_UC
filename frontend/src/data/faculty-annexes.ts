@@ -18,10 +18,10 @@ function annex(id: string, name: string, u: number, v: number, w: number, d: num
   return { id, name, rect, height, outline, mapCenter: [u, v],
     entrance: annexPoint(u, v + d / 2 + 2.5), front: annexPoint(u, v + d / 2) };
 }
-const officeShiftU = -7.75, officeShiftV = 7.9;
+const officeShiftV = 7.9;
 function office(id: string, name: string, v: number, w: number, d: number): Annex {
   v += officeShiftV;
-  const u = -45.7 + officeShiftU;
+  const u = officeCenterU;
   const b = annex(id, name, u, v, d, w);
   b.rect.angle -= Math.PI / 2;
   b.entrance = annexPoint(u + w / 2 + 2.5, v);
@@ -143,6 +143,10 @@ maquetas.entrance = annexPoint(maquetas.mapCenter[0], walkV);
 // El caminero de 2 m rodea Maquetas y continúa hacia las oficinas.
 const bypassU = maquetas.mapCenter[0] - maquetas.rect.size[0] / 2 - 1.12;
 const bypassV = maquetas.mapCenter[1] - maquetas.rect.size[1] / 2 - 1.45;
+// Oficinas junto a Civil, dejando únicamente la galería peatonal de 2,5 m.
+const officePassageWidth = 2.5;
+const officeCenterU = maquetasRearU - officePassageWidth - 9.2 / 2;
+const officeWalkU = maquetasRearU - officePassageWidth / 2;
 const dg = office("dg", "DG", 3.4, 9.2, 8.6);
 dg.entrance = annexPoint(bypassU, dg.mapCenter[1]);
 export const annexWalkEnd = annexPoint(bypassU, walkV);
@@ -209,7 +213,7 @@ export const annexEnclosedLink = {
   clearWidth: 3,
   openingHeight: 3.1,
   // El acceso lateral da a la galería de oficinas.
-  sideDoorX: -28 + officeShiftU - linkCenterU,
+  sideDoorX: officeWalkU - linkCenterU,
   sideDoorWidth: 2.1,
   portals: [
     { annexId: led.id, center: [0, led.rect.size[1] / 2] as Vec2 },
@@ -269,10 +273,9 @@ export const gardenWalkHedge: Vec2[] = (() => {
 })();
 /** Se conserva la circulación de oficinas; retirado el circuito blanco de DICIA y Kampus Print. */
 const officeIds = new Set(["led", "da-cap", "das"]);
-const officeWalkU = -38 + officeShiftU;
 export const annexPaths: Vec2[][] = [
   [[officeWalkU,-36 + officeShiftV],[officeWalkU,-18 + officeShiftV],[officeWalkU,-9 + officeShiftV],[officeWalkU,bypassV],[bypassU,bypassV]].map(([u,v])=>annexPoint(u,v)),
-  [annexPoint(-45.7 + officeShiftU + 9.2 / 2 + 0.3, dg.mapCenter[1]), annexPoint(officeWalkU, dg.mapCenter[1]), annexPoint(officeWalkU, bypassV)],
+  [annexPoint(officeCenterU + 9.2 / 2 + 0.3, dg.mapCenter[1]), annexPoint(officeWalkU, dg.mapCenter[1]), annexPoint(officeWalkU, bypassV)],
   // Maquetas y DG ya tienen su punto de visita sobre los caminos principales.
   ...facultyAnnexes.filter(b => b !== maquetas && b !== dg && b !== dicia && b !== kampusPrint).map((b): Vec2[] => {
     const [u,v] = b.mapCenter;

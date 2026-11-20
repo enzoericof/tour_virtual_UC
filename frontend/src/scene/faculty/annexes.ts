@@ -10,6 +10,7 @@ import { addLaboratoryOutbuildings } from "./laboratory-outbuildings";
 import { addLaboratoryGround } from "./laboratory-ground";
 import { addDiciaStructure } from "./dicia-structure";
 import { addSegmentedGardenPath, gardenJunctionReach } from "./garden-path";
+import { addOfficeRoof, isOfficeAnnex } from "./office-roof";
 
 // ---- Anexos del plano general: exteriores provisionales, sin interiores relevados ----
 export function addAnnexes(
@@ -131,7 +132,7 @@ export function addAnnexes(
         roofBreakZ, workshopBrick, true);
       return;
     }
-    prism(outline, h, 0.18, m.roof);
+    if (!isOfficeAnnex(annex.id)) prism(outline, h, 0.18, m.roof);
     for (let i = 0; i < outline.length; i++) {
       const a = outline[i], b = outline[(i + 1) % outline.length];
       const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
@@ -182,6 +183,7 @@ export function addAnnexes(
     if (isDei) addLedEntranceWing(builder, deiBrick);
     if (!isDei && annex.id !== "kampus-print") box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
   });
+  addOfficeRoof(builder);
   annexPaths.forEach((points) => path(points, 2));
   addSegmentedGardenPath(builder, deiGardenPath, annexPavingHeight, gardenWalkMaterial, { startDistance: gardenJunctionReach,
     junctions:deiForecourtRoadJunctions(),pavingJoin: { rect: facultyAnnexes.find(a=>a.id === "dei-led")!.rect, ...deiEntrancePaving } });
