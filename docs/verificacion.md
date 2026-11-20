@@ -1,5 +1,12 @@
 # Verificación (versión 0.1.0)
 
+## Encuentro de pisos junto a cantina - 19/11/2026
+
+- Los rayos sobre el modelo real detectaron dos acabados distintos exactamente a 0,905 m: el hormigón del patio de Maquetas y el piso genérico de la plataforma. También había polígonos repetidos entre las piezas de la plaza.
+- Se recorta el acabado genérico contra la huella del patio y las piezas ya pavimentadas. Los recortes aceptan contornos cóncavos y cortes que cruzan los bordes. Se mantienen las texturas, orientación de juntas, bases y colisiones, sin elevar los pisos ni aplicar desplazamientos de profundidad.
+- Pasaron 84 pruebas y la compilación de producción. Se comprueban áreas con cortes interiores, exteriores, solapados, contornos cóncavos y bordes compartidos. En tres puntos del encuentro real se verifica un único acabado de hormigón a 0,905 m y apoyo transitable a 0,90 m. Se mantienen las pruebas de geometría, pasillos, escaleras y memoria del follaje.
+- Chrome: revisión visual del frente completo de cantina y el encuentro de hormigón y baldosas desde una cámara local a altura peatonal. Se conserva el mosaico del acceso y el suelo continuo, sin el cruce coplanar de materiales. La vista local no usa cuentas ni conecta al backend.
+
 ## Árbol de cantina y memoria del perímetro - 19/11/2026
 
 - Se restaura exactamente el bloque del árbol del alcorque de la cantina anterior a `794f526`: tronco esbelto, ramas y 5.600 hojas geométricas. Se mantienen el alcorque, arbustos, ubicación y colisión originales, y los demás cambios del equipo.

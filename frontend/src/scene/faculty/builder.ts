@@ -1,4 +1,5 @@
 import * as T from "three";
+import { subtractPaving } from "./paving-cutouts";
 import type { Rect, Vec2 } from "../../data/faculty-blueprint";
 import type { makeMaterials } from "../materials";
 
@@ -88,8 +89,9 @@ export function createFacultyBuilder(visual: T.Object3D, solid: T.Object3D, m: R
     if (collide) layers.solid.add(new T.Mesh(geo));
     return mesh;
   }
-  function pave(points: readonly Vec2[], mat: T.Material, y: number, castShadow = false, offset: Vec2 = [0, 0]) {
-    const geo = new T.ShapeGeometry(new T.Shape(points.map(([x, z]) => new T.Vector2(x, -z))));
+  function pave(points: readonly Vec2[], mat: T.Material, y: number, castShadow = false, offset: Vec2 = [0, 0], cutouts: readonly (readonly Vec2[])[] = []) {
+    const outlines = cutouts.length ? subtractPaving(points, cutouts) : [points];
+    const geo = new T.ShapeGeometry(outlines.map(outline => new T.Shape(outline.map(([x, z]) => new T.Vector2(x, -z)))));
     geo.rotateX(-Math.PI / 2);
     const tile = mat.userData.tile as number[] | undefined;
     if (tile) {
@@ -98,7 +100,8 @@ export function createFacultyBuilder(visual: T.Object3D, solid: T.Object3D, m: R
         geo.attributes.uv.setXY(i, p.getX(i) / tile[0] + offset[0], p.getZ(i) / tile[1] + offset[1]);
     }
     const mesh = new T.Mesh(geo, mat); mesh.position.y = y;
-    mesh.castShadow = castShadow; mesh.receiveShadow = true; layers.visual.add(mesh);
+    mesh.castShadow = castShadow; mesh.receiveShadow = true;
+    if (geo.attributes.position.count) layers.visual.add(mesh);
     return mesh;
   }
   function path(points: readonly Vec2[], width = 2.4) {

@@ -693,9 +693,14 @@ export function createFaculty(grass = makeGrassMaterial()) {
 
   // ---- Plataforma a 0,90 m: plaza techada, cuadrado, Bedelía, cantina, Sala Manfred y cabecera este ----
 
+  const pavedPlatform: (readonly Vec2[])[] = [];
   for (const [i, outline] of plan.platform.entries()) {
     prism(outline, 0, PLAZA_LEVEL, m.concrete);
-    pave(outline, i === 0 ? m.tile : m.stone, PLAZA_LEVEL + (i === 0 ? 0.008 : 0.005));
+    // Un solo acabado por punto: el patio de hormigón tiene prioridad en su huella.
+    // Se conservan las bases y las colisiones a la cota original.
+    pave(outline, i === 0 ? m.tile : m.stone, PLAZA_LEVEL + (i === 0 ? 0.008 : 0.005),
+      false, [0, 0], [cantinaRearCourtyard.paving, ...pavedPlatform]);
+    pavedPlatform.push(outline);
   }
   // Circulación frente a Maquetas y jardín enrasado junto a cantina.
   prism(cantinaRearCourtyard.paving, 0, PLAZA_LEVEL, m.concrete, true);

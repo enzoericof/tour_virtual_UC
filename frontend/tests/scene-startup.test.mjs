@@ -34,6 +34,18 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const grass = makeGrassMaterial();
     assert.ok(grass.map && grass.normalMap && !grass.displacementMap, "Grass has color and fine relief on the existing terrain");
     const { group, colliders, elevator } = createFaculty(grass);
+    // Frente a cantina coincidían el hormigón del patio y el acabado genérico de la plaza.
+    const paving = [];
+    group.traverse(o => { if (o.isMesh && !o.isInstancedMesh && [4,8].includes(o.material.userData?.tile?.[0])) paving.push(o); });
+    for (const local of [[-13.607,10.547],[-12.237,10.547],[-10.867,10.547]]) {
+      const [x,z] = fromRect(plan.cantina,local);
+      const floors = new Raycaster(new Vector3(x,1.2,z),new Vector3(0,-1,0),0,.4)
+        .intersectObjects(paving,false).filter(h=>Math.abs(h.point.y-PLAZA_LEVEL-.005)<.0001 && h.face.normal.y>.99);
+      assert.equal(floors.length,1,"Un solo acabado visible en el encuentro del patio y la plaza");
+      assert.deepEqual(floors[0].object.material.userData.tile,[8,6],"Se conserva el hormigón y sus juntas");
+      const support = new Raycaster(new Vector3(x,1.2,z),new Vector3(0,-1,0),0,.4).intersectObject(colliders,true)[0];
+      assert.ok(support && Math.abs(support.point.y-PLAZA_LEVEL)<.001,"El suelo transitable mantiene su cota");
+    }
     // Civil: piezas de suelo en sus cotas reales, sin pozos entre los barrotes.
     const civil = facultyAnnexes.find(a => a.id === "lab-maquetas");
     const civilFloor = (x, z) => {
