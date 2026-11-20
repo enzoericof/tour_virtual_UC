@@ -12,18 +12,21 @@ const previousElement = globalThis.Element;
 globalThis.Element = class { closest() { return this.editing; } };
 after(() => { globalThis.Element = previousElement; });
 
-test("El aviso de Manfred se limita a su llegada y altura, sin activarse desde pisos superiores", () => {
+test("El aviso de Manfred se limita a su puerta y altura, sin activarse desde Bedelía o pisos superiores", async () => {
   const point = informationPoints.find(point => point.place.id === "sala-manfred");
-  const [x, y, z] = point.place.position;
+  const [x, y, z] = point.position;
   assert.equal(nearbyInformation(x, y + 1.5, z), point);
-  assert.equal(nearbyInformation(x + 4.4, y + 1.5, z), point);
-  assert.equal(nearbyInformation(x + 4.5, y + 1.5, z), null);
+  assert.equal(nearbyInformation(x + 2.9, y + 1.5, z), point);
+  assert.equal(nearbyInformation(x + 3, y + 1.5, z), null);
+  const { places } = await server.ssrLoadModule("/src/data/places.ts");
+  const [bx, by, bz] = places.find(place => place.id === "bedelia").position;
+  assert.equal(nearbyInformation(bx, by + 1.5, bz), null);
   assert.equal(nearbyInformation(x, y + 1.5 + 3.5, z), null);
   assert.match(point.information.dedication, /homenaje/);
 });
 
 test("La información no se ofrece a través de muros, en pausa, ascensor o durante un gesto", () => {
-  const [x, y, z] = informationPoints[0].place.position;
+  const [x, y, z] = informationPoints[0].position;
   const engine = { camera: { position: new T.Vector3(x + 1, y + 1.5, z) },
     walker: { active: true, obstructs: () => false }, social: { busy: false },
     elevatorPassenger: false, informationRay: new T.Ray() };

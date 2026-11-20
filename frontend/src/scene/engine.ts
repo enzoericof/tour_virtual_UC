@@ -205,7 +205,7 @@ export class TourEngine {
     const { x, y, z } = this.camera.position;
     const point = nearbyInformation(x, y, z);
     if (!point) return null;
-    const [px, , pz] = point.place.position;
+    const [px, , pz] = point.position;
     this.informationRay.origin.copy(this.camera.position);
     this.informationRay.direction.set(px - x, 0, pz - z);
     const distance = this.informationRay.direction.length();
