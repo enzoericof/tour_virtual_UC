@@ -44,7 +44,7 @@ function distantFoliage(){
  return clusteredFoliage;
 }
 
-export interface TreeOptions { center?: readonly number[]; baseY?: number; height?: number; spread?: number; radius?: number; name?: string; leavesPerTuft?: number; protectShaft?: boolean; distant?: boolean; }
+export interface TreeOptions { center?: readonly number[]; baseY?: number; height?: number; spread?: number; radius?: number; name?: string; leavesPerTuft?: number; bare?: boolean; protectShaft?: boolean; distant?: boolean; }
 
 /** Árbol junto al mural: misma base, ramificación curva y copa podada fuera de la caja completa. */
 export function addCourtyardElevatorTree(parent: T.Object3D, colliders: T.Object3D, options: TreeOptions = {}) {
@@ -151,14 +151,19 @@ export function addCourtyardElevatorTree(parent: T.Object3D, colliders: T.Object
   }
   const geometry = wood.length ? mergeGeometries(wood, false)! : new T.SphereGeometry(.01);
   wood.forEach(g => g.dispose());
-  const trunk = new T.Mesh(geometry, bark);
+  const trunkMaterial = options.bare ? bark.clone() : bark;
+  if (options.bare) {
+    trunkMaterial.map = null;
+    trunkMaterial.color.set("#c9c1ac");
+  }
+  const trunk = new T.Mesh(geometry, trunkMaterial);
   trunk.name = "Tronco y ramas curvas"; trunk.userData.keep = true;
   trunk.castShadow = trunk.receiveShadow = true; tree.add(trunk);
 
   // Tres siluetas del atlas, con nervio central curvado y punta caída.
   const atlas = [[.045, .025, .255, .48], [.38, .12, .555, .39], [.68, .075, .91, .465]];
   const dummy = new T.Object3D(), tint = new T.Color(), bounds = new T.Box3();
-  atlas.forEach(([u0, v0, u1, v1], variant) => {
+  if (!options.bare) atlas.forEach(([u0, v0, u1, v1], variant) => {
     const shape = options.distant ? new T.PlaneGeometry(1,1) : new T.PlaneGeometry(.48, 1, 2, 4);
     const p = shape.attributes.position, uv = shape.attributes.uv;
     for (let i = 0; i < p.count; i++) {

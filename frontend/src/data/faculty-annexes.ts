@@ -36,10 +36,10 @@ function annexCoordinates([x, z]: Vec2): Vec2 {
     -dx * Math.sin(annexAngle) + dz * Math.cos(annexAngle)];
 }
 const [printU, printV] = annexCoordinates(plan.plazaPassage.target);
-const kampusPrint = annex("kampus-print", "Kampus Print", printU, printV, 13.4, 8);
+const kampusPrint = annex("kampus-print", "Kampus Print", printU, printV, 19.2, 8, 4.2);
 kampusPrint.rect.angle = gridAngle;
 kampusPrint.front = annexPoint(printU, printV - 4);
-kampusPrint.entrance = annexPoint(printU, printV - 4.8);
+kampusPrint.entrance = fromRect(kampusPrint.rect, [-2.5, 4.8]);
 const walk = plan.bedeliaWalk;
 const [walkU, walkV] = annexCoordinates(fromRect(walk, [walk.size[0] / 2, 0]));
 // Las paredes tienen 20 cm de espesor: quedan 12 cm entre su cara y el pavimento.

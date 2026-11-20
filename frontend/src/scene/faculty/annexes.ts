@@ -1,3 +1,4 @@
+import { addKampusPrint } from "./kampus-print";
 import * as T from "three";
 import { annexCoveredPaths, annexEnclosedLink, annexPaths, annexWalkEnd, deiGardenPath, deiSideDoor, deiEntranceWing, deiEntrancePaving, diciaWalkExtension, facultyAnnexes, maquetasVolumes } from "../../data/faculty-annexes";
 import { facultyBlueprint as plan, fromRect, rectCorners, type Vec2 } from "../../data/faculty-blueprint";
@@ -109,6 +110,10 @@ export function addAnnexes(
       addDiciaStructure(builder, annex, workshopBrick, workshopMetal, passageTile, annexPavingHeight);
       return;
     }
+    if (annex.id === "kampus-print") {
+      addKampusPrint(builder, annex, workshopBrick, workshopMetal);
+      return;
+    }
     if (isMaquetas) {
       const depth = annex.rect.size[0], rear = -depth / 2, front = depth / 2;
       const { lowRearInset, highFrontLength, lowHeight } = maquetasVolumes;
@@ -181,7 +186,7 @@ export function addAnnexes(
       }
     }
     if (isDei) addLedEntranceWing(builder, deiBrick);
-    if (!isDei && annex.id !== "kampus-print") box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
+    if (!isDei) box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
   });
   addOfficeRoof(builder);
   annexPaths.forEach((points) => path(points, 2));

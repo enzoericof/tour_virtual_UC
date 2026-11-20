@@ -1,3 +1,4 @@
+import { addPassageEntrance } from "./faculty/passage-entrance";
 import { pavementOutside } from "./faculty/pavement-cutout";
 import {addCourtyardElevatorTree, pruneTreeStructures} from "./courtyard-elevator-tree";
 import { registerSeats } from "./seating";
@@ -663,29 +664,38 @@ export function createFaculty(grass = makeGrassMaterial()) {
   // ---- Bloque G ----
   const { start: gStair, halfRun: gHalf, width: gWidth } = plan.blockGStair;
   const gEntry = gStair + gHalf;
+  const landing = 1.55, secondStart = gStair-landing, arrival = secondStart-gHalf;
   frame(plan.block2, () => {
     academicBlock({
       ...blockG, front: -1, topWall: 3.6, roof: m.blue, louvers: false,
       label: () => "BLOQUE G",
       rooms: (level) => plan.rooms.block2[level],
-      openings: (level) => level ? [[gEntry, gEntry + 1.3]] : [],
+      openings: (level) => level === 1 ? [[arrival-landing,arrival],[gEntry,gEntry+landing]]
+        : level === 2 ? [[arrival-landing,arrival]] : [],
       door: "single",
       columns: { radius: 0.17 },
     });
-    // Escalera de ida y vuelta sobre la fachada hacia el Bloque 1 (fotos IMG_5666/5668).
-    const zA = -blockG.depth / 2 - 0.1 - gWidth / 2, zB = zA - gWidth;
-    for (let level = 0; level < blockG.levels - 1; level++) {
-      const y = level * H;
-      flight(gEntry, y, gStair, y + H / 2, zA, gWidth);
-      box(1.3, 0.2, 2 * gWidth, gStair - 0.65, y + H / 2 - 0.1, (zA + zB) / 2, m.stone, true);
-      railZ(zB - gWidth / 2, zA + gWidth / 2, y + H / 2, gStair - 1.3);
-      rail(gStair - 1.3, gStair, y + H / 2, zB - gWidth / 2 - 0.03);
-      rail(gStair - 1.3, gStair, y + H / 2, zA + gWidth / 2 + 0.03);
-      flight(gStair, y + H / 2, gEntry, y + H, zB, gWidth);
-      box(1.3, 0.2, 2 * gWidth + 0.15, gEntry + 0.65, y + H - 0.1, (zA + zB) / 2 + 0.075, m.stone, true);
-      rail(gEntry, gEntry + 1.3, y + H, zB - gWidth / 2 - 0.03);
-      railZ(zB - gWidth / 2, zA + gWidth / 2, y + H, gEntry + 1.3);
+    // Dos tramos en el mismo sentido por piso, con el descanso sobre la línea de pilares.
+    const rear=-blockG.depth/2, z=rear-gWidth/2;
+    function landingSlab(left:number,right:number,y:number,connectGallery:boolean){
+      box(right-left,.24,gWidth,(left+right)/2,y-.12,z,m.concrete,true);
+      rail(left,right,y,rear-gWidth);
+      if(!connectGallery) rail(left,right,y,rear);
     }
+    for(let level=0;level<blockG.levels-1;level++){
+      const y=level*H;
+      if(level>0){
+        landingSlab(gEntry,gEntry+landing,y,true);
+        railZ(rear-gWidth,rear,y,gEntry+landing);
+      }
+      flight(gEntry,y,gStair,y+H/2,z,gWidth,true);
+      landingSlab(secondStart,gStair,y+H/2,false);
+      flight(secondStart,y+H/2,arrival,y+H,z,gWidth,true);
+      landingSlab(arrival-landing,arrival,y+H,true);
+      railZ(rear-gWidth,rear,y+H,arrival-landing);
+    }
+    for(const x of [gEntry+landing,secondStart,arrival-landing])
+      pole(.16,H*(blockG.levels-1),x,H*(blockG.levels-1)/2,rear-gWidth-.17,m.concrete,true);
   });
 
   // Rellano de granito rosado al nivel del pasillo, no de la plaza elevada.
@@ -790,10 +800,6 @@ export function createFaculty(grass = makeGrassMaterial()) {
       layers.visual.add(blade);
     }
   }, PLAZA_LEVEL);
-  // La escalera de la galería junto al ascensor (primer elemento) tiene su propio modelado, abajo; la
-  // salida norte del pasillo de Manfred conserva la escalinata recta genérica.
-  for (const s of plan.platformSteps.slice(1))
-    frame({ center: s.top, size: [STEPS_RUN, s.width], angle: s.angle }, () => steps(STEPS_RUN, 0, PLAZA_LEVEL, s.width));
   {
     const count = 5, tread = STEPS_RUN / count, base = ELEVATOR_LANDING_LEVEL;
     const groove = new T.MeshStandardMaterial({ color: "#8d918c", roughness: 0.9 });
@@ -1061,9 +1067,11 @@ export function createFaculty(grass = makeGrassMaterial()) {
   frame(plan.bedelia, () => {
     const [w,d]=plan.bedelia.size, z=d/2;
     box(w,.16,d,0,.02,0,m.stone,true);
-    for(const [a,b] of [[-w/2,7.8],[10.2,w/2]])box(b-a,3.2,.2,(a+b)/2,1.6,-d/2,officeBrick,true);
+    for(const [a,b] of [[-w/2+.1,7.8],[10.2,w/2]])box(b-a,3.2,.2,(a+b)/2,1.6,-d/2,officeBrick,true);
     box(2.4,.9,.2,9,2.75,-d/2,officeBrick,true);
-    box(w+.8,.2,d+.8,0,3.4,0,m.concrete,true);
+    // La losa termina a ras del cielorraso del pasillo.
+    box(w+.8,.22,d+.8,0,3.71,0,m.concrete,true);
+    box(w-1.35,.4,d,0.675,3.4,0,m.concrete,true);
     // Interior diáfano solicitado: sin habitaciones, tabiques ni escritorios.
     // Dependencia curva posterior y sus dos recintos de enlace, sin atribuirle un uso no rotulado.
     const curved: Vec2[] = [[7.8,-5],[7.8,-7.1]];
@@ -1075,29 +1083,64 @@ export function createFaculty(grass = makeGrassMaterial()) {
     for(let i=1;i<curved.length;i++) {const a=curved[i-1],b=curved[i];
       box(Math.hypot(b[0]-a[0],b[1]-a[1]),3.2,.18,(a[0]+b[0])/2,1.6,(a[1]+b[1])/2,officeBrick,true,{rotation:-Math.atan2(b[1]-a[1],b[0]-a[0])});}
     for(const x of [6,12]) {box(2.5,.12,2,x,.02,-6,m.stone,true);box(2.5,.18,2,x,3.4,-6,m.concrete,true);box(.15,3.2,2,x-1.25,1.6,-6,officeBrick,true);}
-    // Muros laterales: el frente hacia Manfred incluye acceso de profesores y vitrina.
-    for(const side of [-1,1]) {
-      if(side===1)box(.2,3.2,d,side*w/2,1.6,0,officeBrick,true);
-      else {
-        const doorZ=0, dw=1.4;
-        for(const [start,end] of [[-d/2,doorZ-dw/2],[doorZ+dw/2,d/2]])
-          box(.2,3.2,end-start,-w/2,1.6,(start+end)/2,officeBrick,true);
-        box(.2,.7,dw,-w/2,2.85,doorZ,officeBrick,true);
-        frame({center:[-w/2-.12,doorZ],size:[dw,.1],angle:-Math.PI/2},()=>{
-          for(const x of [-dw/2,dw/2])box(.05,2.5,.06,x,1.25,0,blueFrame);
-          box(dw,.05,.06,0,2.5,0,blueFrame);
-          box(.025,2.4,.9,dw/2,1.2,-.45,m.glass,true);
-          sign("SALA DE PROFESORES",0,2.75,-.04,1.2,Math.PI);
-        });
+    const edgeX = -w/2, recessedX = edgeX+1.25, splitZ = -1.72;
+    box(.2,3.2,d,w/2,1.6,0,officeBrick,true);
+    box(.22,.13,d,w/2,.065,0,m.metal);
+    // Acceso de profesores y vitrina en el plano retirado.
+    for(const [lo,hi] of [[splitZ,-.7],[.7,d/2]])
+      box(.2,3.2,hi-lo,recessedX,1.6,(lo+hi)/2,officeBrick,true);
+    box(.2,.7,1.4,recessedX,2.85,0,officeBrick,true);
+    for(const endZ of [splitZ])
+      box(recessedX-edgeX,3.6,.16,(recessedX+edgeX)/2,1.8,endZ,m.plaster,true);
+    frame({center:[recessedX-.12,0],size:[1.4,.1],angle:-Math.PI/2},()=>{
+      for(const x of [-.7,.7]) box(.05,2.5,.06,x,1.25,0,blueFrame);
+      box(1.4,.05,.06,0,2.5,0,blueFrame);
+      box(.025,2.4,.9,.7,1.2,-.45,m.glass,true);
+      sign("SALA DE PROFESORES",0,2.75,-.04,1.2,Math.PI);
+    });
+    // El frente blanco vecino lleva dos hojas de blindex y cortinado interior.
+    const glassDoorZ=(-d/2+splitZ)/2, halfDoor=.92;
+    for(const [lo,hi] of [[-d/2-.1,glassDoorZ-halfDoor],[glassDoorZ+halfDoor,splitZ]])
+      box(.2,3.6,hi-lo,edgeX,1.8,(lo+hi)/2,m.plaster,true);
+    box(.2,1.18,halfDoor*2,edgeX,3.01,glassDoorZ,m.plaster,true);
+    for(const side of [-1,1]){
+      box(.035,2.42,halfDoor-.012,edgeX-.065,1.21,glassDoorZ+side*halfDoor/2,m.glass,true);
+      box(.055,.36,.027,edgeX-.115,1.09,glassDoorZ+side*.09,m.steel);
+    }
+    const fabric = new T.MeshStandardMaterial({color:0xe5ddd0,roughness:1,side:T.DoubleSide});
+    const cloth=new T.PlaneGeometry(2.04,2.47,64,1);
+    const pos=cloth.attributes.position;
+    for(let i=0;i<pos.count;i++) pos.setZ(i,.032*Math.cos(pos.getX(i)*52));
+    cloth.computeVertexNormals();
+    const curtain=new T.Mesh(cloth,fabric);
+    curtain.rotation.y=-Math.PI/2;
+    curtain.position.set(edgeX+.15,1.235,glassDoorZ);
+    layers.visual.add(curtain);
+    // Jardineras del lado del retiro, junto a los pilares existentes.
+    const leafGeometry=new T.SphereGeometry(1,6,4);
+    for(const planterZ of [splitZ+.37,4.12]){
+      const px=edgeX+.36;
+      box(.43,.36,.85,px,.18,planterZ,m.plaster,true);
+      box(.38,.024,.79,px,.37,planterZ,m.brick);
+      for(let stem=0;stem<5;stem++){
+        const z0=planterZ+(stem-2)*.13, lean=.14*Math.cos(stem*2.4), h=1.05+.17*(stem%3);
+        beam(v3(px,.38,z0),v3(px+lean,h+.38,z0+.1),.012,m.leaves[0]);
+        for(let j=0;j<7;j++){
+          const t=.4+j*.095, angle=j*2.4+stem;
+          const leaf=new T.Mesh(leafGeometry,m.leaves[(j+stem)%4]);
+          leaf.scale.set(.052,.24,.022);
+          leaf.rotation.order="YXZ"; leaf.rotation.set(.95,angle,0);
+          leaf.position.set(px+lean*t+.14*Math.sin(angle),.48+h*t,z0+.1*t+.14*Math.cos(angle));
+          layers.visual.add(leaf);
+        }
       }
-      box(.22,.13,d,side*w/2,.065,0,m.metal);
     }
 const frontWallLocal = [
       [-10, 5], [-8.75, 5], [-8.75, 4.2], [-3.75, 4.2],
       [-3.75, 5], [-2.5, 5], [-2.5, 4.2], [2.5, 4.2],
       [2.5, 5], [3.75, 5], [3.75, 4.2], [8.75, 4.2],
       [8.75, 5], [10, 5]
-    ].map(([x,z]) => [x * 1.5,z]);
+    ].map(([x,z],i) => [x * 1.5 + (i < 3 ? recessedX-edgeX : 0),z]);
 
 for (let i = 0; i < frontWallLocal.length - 1; i++) {
       const a = frontWallLocal[i], b = frontWallLocal[i + 1];
@@ -1118,6 +1161,11 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
         else if (i === 10) openingsInRecess = [{x: 4.6, width: 1.05, door: true}, {x: 7.1, width: 2.4, door: false}];
 
         openingsInRecess = openingsInRecess.map(o => ({...o,x:o.x*1.5,width:o.door?o.width:o.width*1.5}));
+        if (i === 2) {
+          const shift = recessedX-edgeX;
+          openingsInRecess[0].x += shift/2;
+          openingsInRecess[0].width -= shift;
+        }
         let cursor = a[0];
         const rz = a[1];
         for (const o of openingsInRecess) {
@@ -1144,13 +1192,13 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
         box(b[0] - cursor, 3.2, 0.2, (b[0] + cursor) / 2, 1.6, rz, officeBrick, true);
       }
     }
-    box(w,.12,.23,0,.06,z,m.metal);
+    box(w-(recessedX-edgeX),.12,.23,(recessedX-edgeX)/2,.06,z,m.metal);
     const depth=plan.bedeliaGalleryDepth;
     box(w+1,.2,depth,0,3.4,z+depth/2,m.concrete,true);
     box(w+1,.05,depth,0,bedeliaPavingTop-.025,z+depth/2,m.stone,true);
     const gold = new T.MeshStandardMaterial({ color: "#c2a65a", metalness: 0.25, roughness: 0.45 });
     // Vitrina visible desde el acceso de Manfred, sobre el lateral de Bedelía.
-    const displayX = -w / 2 - 0.31, displayZ = 2.3;
+    const displayX = recessedX - 0.31, displayZ = 2.3;
     const displayFrame = new T.MeshStandardMaterial({ color: "#2f3635", roughness: 0.64 });
     box(0.06, 2.1, 2.32, displayX + 0.18, 1.05, displayZ, displayFrame, true);
     for (const z of [displayZ - 1.14, displayZ, displayZ + 1.14])
@@ -1178,7 +1226,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     
     // Gabinete de incendio reubicado donde estaba la primera columna
     const red=new T.MeshStandardMaterial({color:"#a92e2b",roughness:.6});
-    const ex = -w/2 + 0.5; // X exacto donde estaba la columna eliminada
+    const ex = recessedX + 0.5;
     box(.55,.7,.18,ex,1.25,z+.18,red,true);
     box(.44,.57,.02,ex,1.25,z+.28,m.glass);
     pole(.105,.52,ex+0.45,1.55,z+.22,red);
@@ -1187,6 +1235,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
   },PLAZA_LEVEL);
 
   addManfredHall(builder);
+  addPassageEntrance(builder, m.brick, officeBrick, steps);
 
   addCantina(builder);
 
@@ -1333,8 +1382,38 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       layers.solid.add(new T.Mesh(geometry));
     }
     const approachLeft = startX - approachWidth / 2, approachRight = startX + approachWidth / 2;
-    segmentedCurve(new T.LineCurve3(start, bend), approachWidth, "Acceso segmentado a la carpa");
-    segmentedCurve(bendCurve, approachWidth, "Curva segmentada de la carpa");
+    // Una cinta continua con bordillo enrasado. La primera sección coincide
+    // con el canto horizontal del granito, aunque el sendero salga en diagonal.
+    const surface:number[]=[], texcoords:number[]=[], indices:number[]=[];
+    const trimIndices:number[]=[];
+    const sections=Math.ceil(curve.getLength()/0.16);
+    for(let i=0;i<=sections;i++){
+      const t=i/sections, center=curve.getPoint(t), tangent=curve.getTangent(t);
+      const across=v3(-tangent.z,0,tangent.x).normalize();
+      across.lerp(v3(-1,0,0),1-T.MathUtils.smoothstep(t,0,0.22));
+      for(const [offset,drop] of [[-.85,.18],[-.85,0],[-.79,0],[.79,0],[.85,0],[.85,.18]]){
+        const point=center.clone().addScaledVector(across,offset);
+        surface.push(point.x,point.y-drop,point.z);
+        texcoords.push(point.x/1.6,point.z/1.4);
+      }
+      if(i===0) continue;
+      for(let strip=0;strip<5;strip++){
+        const prev=(i-1)*6+strip, next=prev+6;
+        (strip===2?indices:trimIndices).push(prev,prev+1,next,next,prev+1,next+1);
+      }
+    }
+    const ribbon=new T.BufferGeometry();
+    ribbon.setAttribute("position",new T.Float32BufferAttribute(surface,3));
+    ribbon.setAttribute("uv",new T.Float32BufferAttribute(texcoords,2));
+    ribbon.setIndex([...indices,...trimIndices]);
+    ribbon.addGroup(0,indices.length,0);
+    ribbon.addGroup(indices.length,trimIndices.length,1);
+    ribbon.computeVertexNormals();
+    const approachMesh=new T.Mesh(ribbon,[gardenWalkMaterial,m.accessStone]);
+    approachMesh.name="Empalme adoquinado del rellano";
+    approachMesh.receiveShadow=true;
+    layers.visual.add(approachMesh);
+    layers.solid.add(new T.Mesh(ribbon));
     // La lona arranca plana dentro del canto de la losa y forma la cumbrera hacia el caminero.
     const [stepX, stepZ] = g.smallSteps.center;
     const attachment = v3(stepX, g.roof + 0.08, stepZ).addScaledVector(direction, -0.12);
@@ -1476,7 +1555,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
           leaf.castShadow=true;layers.visual.add(leaf);
         }
       }
-      addCourtyardElevatorTree(layers.visual,layers.solid,{center:[0,0],baseY:.28,height:6.7,spread:1.6,name:"Árbol del cantero del patio"});
+      addCourtyardElevatorTree(layers.visual,layers.solid,{center:[0,0],baseY:.28,height:6.7,spread:1.6,bare:true,name:"Árbol del cantero del patio"});
     },floor);
     // Cartel azul sobre dos postes, al borde de acceso a la plaza.
     frame(plan.blockGCourtyard.sign,()=>{

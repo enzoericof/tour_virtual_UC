@@ -700,3 +700,13 @@ El índice de colisiones conserva seis niveles y 16 triángulos por hoja. Se amp
 ### Memoria de las cubiertas — 20/11/2026
 
 El índice reutiliza los Vector3 de coordenadas idénticas entre triángulos, incluidas las caras invertidas de las chapas. El conjunto conserva 112.477 triángulos y 57.064 nodos, pero usa 54.584 objetos de vértice frente a 337.431 sin compartir. La medición controlada de escena e índice queda en unos 126–127 MB de heap, inferior a los ~141 MB de la misma escena antes de las cubiertas; con gatos activos queda en unos 137–139 MB. No se modifica la geometría visible ni física. Procedimiento reproducible y contraste con Chrome en `verificacion.md`.
+
+### Kampus Print — 20/11/2026
+
+El frente mide 19,20 m. Se interpretan los 7,38 m hasta Bedelía como distancia perpendicular entre fachadas. Se conserva la profundidad estimada de 8 m. Las aberturas, rejas, alero, equipos y altura se estimaron de las fotos del usuario. El banner vertical utiliza un recorte de la foto de detalle.
+
+Ajuste visual posterior: Kampus Print se retira 1 m adicional sobre el eje del pasillo. La separación del modelo pasa a 8,38 m entre fachadas; la medida relevada sigue siendo 7,38 m.
+
+Segundo ajuste visual: se aleja Kampus Print otros 5 m en la misma dirección. La separación entre fachadas en el modelo queda en 13,38 m.
+
+Acceso norte frente a Kampus Print: reconstrucción aproximada según las tres fotos del usuario. Rellano con rampa lateral y escalones hacia el patio, pórtico, escalera de servicio con jaula, canteros, bancos, parrilla y pileta. Las proporciones se estiman a partir de las fotografías.

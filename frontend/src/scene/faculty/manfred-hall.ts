@@ -68,7 +68,10 @@ export function addManfredHall(builder: FacultyBuilder) {
       });
     }
     // Base enterrada; el acabado interior es una única superficie por secciones.
-    prism(outer,pitY-.18,.16,m.tile,true);
+    const slabBottom = pitY - 0.18;
+    const footingBottom = -PLAZA_LEVEL - 0.35;
+    prism(outer, footingBottom, slabBottom - footingBottom, m.concrete, true);
+    prism(outer, slabBottom, 0.16, m.tile, true);
     addManfredFloor(builder);
     for(const z of plan.manfredInterior.rows)
       for(const x of plan.manfredInterior.seatsX) chair(x,pitY,z+plan.manfredInterior.furnitureShiftZ);
@@ -78,13 +81,13 @@ export function addManfredHall(builder: FacultyBuilder) {
 
   // Cubiertas repuestas en el pasillo y el desembarco exterior.
   for(const polygon of [plan.corridor,plan.platform[2],plan.platform[3]])
-    prism(polygon,PLAZA_LEVEL+3.6,.2,m.concrete,true);
+    prism(polygon,PLAZA_LEVEL+3.6,.22,m.concrete,true);
   {
     const [a,b,c,d]=plan.corridor;
     for(const t of [.12,.32,.52,.72,.92]) {
       for(const [start,end] of [[a,d],[b,c]]) {
         // Frente de Manfred libre de los apoyos señalados.
-        if(start===a && t<=.52) continue;
+        if((start===a && t<=.52) || (start===b && t===.12)) continue;
         // Despejar el nuevo acceso de profesores; apoyo junto al borde del vano.
         const columnT = start===b && t===.32 ? .24 : t;
         const x=start[0]+(end[0]-start[0])*columnT,z=start[1]+(end[1]-start[1])*columnT;

@@ -366,7 +366,7 @@ export const facultyBlueprint = {
     },
   },
   openPlaza,
-  plazaPassage: { start: passagePoint(0, 1.825), target: passagePoint(-32, 1.825), foot: corridorFoot },
+  plazaPassage: { start: passagePoint(0, 1.825), target: passagePoint(-20 - 7.38 - 6 - 4, 1.825), foot: corridorFoot },
   bedelia,
   bedeliaWalk,
   bedeliaGalleryDepth,
