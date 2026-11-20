@@ -303,6 +303,13 @@ export function makeMaterials(grass: T.MeshStandardMaterial) {
       transparent: true,
       opacity: 0.45,
     }),
+    // Vidrio ciego: panel opaco y oscuro detrás de un paño vidriado, para que no
+    // se vea el interior sin perder la lectura de ventana o de puerta.
+    sealedGlass: new T.MeshStandardMaterial({
+      color: "#1d2628",
+      roughness: 0.28,
+      metalness: 0.35,
+    }),
     wood: new T.MeshStandardMaterial({ color: "#b4532f", roughness: 0.8 }),
     bark: new T.MeshStandardMaterial({ color: "#594b39", roughness: 1 }),
     leaves: [0x536b36, 0x617942, 0x788c4c, 0x405d35].map(

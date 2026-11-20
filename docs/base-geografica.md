@@ -738,3 +738,7 @@ Ajuste visual posterior: Kampus Print se retira 1 m adicional sobre el eje del p
 Segundo ajuste visual: se aleja Kampus Print otros 5 m en la misma dirección. La separación entre fachadas en el modelo queda en 13,38 m.
 
 Acceso norte frente a Kampus Print: reconstrucción aproximada según las tres fotos del usuario. Rellano con rampa lateral y escalones hacia el patio, pórtico, escalera de servicio con jaula, canteros, bancos, parrilla y pileta. Las proporciones se estiman a partir de las fotografías.
+
+### Ventanas ciegas de Bedelía — 20/11/2026
+
+Bedelía no se recorre ni se va a abrir, así que sus ventanales dejan de mostrar el interior sin cambiar de aspecto: los tres del frente (los dos paños amplios de los retiros y el de Recepción) y el del muro hacia el pasillo cubierto. Cada uno conserva el vidrio transparente, la perfilería azul, la barra blanca y las rejas inclinadas, y suma un panel ciego dentro del espesor del muro, 7 cm detrás del vidrio, con el material oscuro ya usado para cerrar sus accesos (`sealedGlass`). La pieza no sobresale del muro, no tiene colisión propia —el vidrio ya cierra el vano— y no altera cotas, circulación ni el paso a pie. La vitrina del CECYT mantiene su vidrio transparente sobre la galería.

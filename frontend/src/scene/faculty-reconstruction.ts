@@ -1064,8 +1064,10 @@ export function createFaculty(grass = makeGrassMaterial()) {
   brickMap.wrapS=brickMap.wrapT=T.RepeatWrapping;brickMap.anisotropy=8;
   const officeBrick=new T.MeshStandardMaterial({map:brickMap,roughness:0.93});officeBrick.userData.tile=[1.5,0.64];
   const blueFrame=new T.MeshStandardMaterial({color:"#365663",roughness:0.7});
-  // Vidrio opaco para cerrar los accesos de Bedelía; el equipo colocará su textura encima.
-  const sealedGlass=new T.MeshStandardMaterial({color:"#1d2628",roughness:0.28,metalness:0.35});
+  // Vidrio ciego de Bedelía. Como no se entra ni se recorre, sus accesos, sus
+  // ventanas y el paño del pasillo llevan un panel opaco detrás del vidrio: no
+  // se ve el interior, pero la ventana conserva vidrio, perfilería y rejas.
+  const sealedGlass=m.sealedGlass;
   frame(plan.bedelia, () => {
     const [w,d]=plan.bedelia.size, z=d/2;
     box(w,.16,d,0,.02,0,m.stone,true);
@@ -1178,6 +1180,9 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
           if (sill) box(o.width, sill, 0.2, o.x, sill / 2, rz, officeBrick, true);
           box(o.width, 3.2 - top, 0.2, o.x, (top + 3.2) / 2, rz, officeBrick, true);
           box(o.width, top - sill, 0.035, o.x, (top + sill) / 2, rz, m.glass, !o.door);
+          // Panel ciego dentro del muro: tapa la vista al interior y deja delante el
+          // vidrio, la perfilería azul y las rejas de las ventanas.
+          if (!o.door) box(o.width, top - sill, 0.03, o.x, (top + sill) / 2, rz - 0.07, sealedGlass);
           for (const px of [left, right]) box(0.055, top - sill, 0.08, px, (top + sill) / 2, rz + 0.04, blueFrame);
           for (const py of [sill, top]) box(o.width, 0.055, 0.08, o.x, py, rz + 0.04, blueFrame);
           

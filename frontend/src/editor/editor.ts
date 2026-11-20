@@ -3,6 +3,8 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import "./editor.css";
 import { TourEngine } from "../scene/engine";
 import { currentUser, type User } from "../services/api";
+import { sortModelsNewestFirst } from "./model-order";
+import modelDates from "virtual:editor-model-dates";
 import {
   clearPlacements,
   loadPlacementsInto,
@@ -24,12 +26,14 @@ const modelModules = import.meta.glob(
   { query: "?url", import: "default", eager: true },
 ) as Record<string, string>;
 
-const paletteModels: PaletteModel[] = Object.entries(modelModules).map(
-  ([path, url]) => ({
+// El último modelo agregado a la carpeta aparece primero en la paleta.
+const paletteModels: PaletteModel[] = sortModelsNewestFirst(
+  Object.entries(modelModules).map(([path, url]) => ({
     id: path,
     name: path.split("/").pop()!.replace(/\.(glb|gltf)$/i, ""),
     url,
-  }),
+  })),
+  modelDates,
 );
 
 const escapeHtml = (value: string) =>
@@ -277,7 +281,9 @@ function initEditor() {
       list.innerHTML = '<p class="palette-empty">Todavía no colocaste modelos.</p>';
       return;
     }
-    list.innerHTML = placements
+    // El último modelo arrastrado queda arriba; el guardado conserva el orden en que se colocó.
+    list.innerHTML = [...placements]
+      .reverse()
       .map((placement) => {
         const [x, y, z] = placement.position;
         const [rx, ry, rz] = placement.rotation.map((n) =>

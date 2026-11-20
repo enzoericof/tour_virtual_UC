@@ -51,6 +51,9 @@ export function addPassageEntrance(b: FacultyBuilder, brick: T.Material, facadeB
     box(1.22,0.14,0.18,-4.68,level+0.07,-0.17,facadeBrick,true);
     box(1.22,0.74,0.18,-4.68,level+3.23,-0.17,facadeBrick,true);
     box(1.22,2.72,0.06,-4.68,level+1.5,-0.045,m.glass,true);
+    // El ventanal de Bedelía conserva su vidrio y su perfilería, pero un panel ciego
+    // dentro del muro impide ver el interior.
+    box(1.22,2.72,0.03,-4.68,level+1.5,-0.21,m.sealedGlass);
     
     for(const x of [-5.29,-4.68,-4.07]) box(0.045,2.73,0.14,x,level+1.5,0.04,m.steel);
     for(const y of [0.14,2.86]) box(1.26,0.06,0.15,-4.68,level+y,0.04,m.steel);
