@@ -1,6 +1,6 @@
 import { logout, type User } from "../services/api";
 import { restoreSession, type RegisteredSession } from "../services/session";
-import { consumeVisitEnd } from "../services/visit-lifecycle";
+import { consumeVisitEnd, visitIdleMs } from "../services/visit-lifecycle";
 import { mountAuthForm } from "./auth-form";
 import { escapeHtml } from "./dom";
 import { paintLoading, showVisitLoading } from "./visit-loading";
@@ -17,7 +17,7 @@ export async function enterCampus(root: HTMLElement): Promise<RegisteredSession>
       <div class="welcome-heading"><span class="eyebrow">CIENCIAS Y TECNOLOGÍA</span><h1 id="welcome-title">Tour virtual</h1><p>Elegí cómo ingresar al recorrido.</p></div>
       ${reason ? `<p class="visit-note" role="status">${escapeHtml(reason)}</p>` : ""}
       <div id="welcome-auth"><p role="status" class="session-loading"><span class="inline-spinner" aria-hidden="true"></span>Comprobando cuenta…</p></div>
-      <footer class="welcome-footnote">El recorrido termina al recargar, cerrar la página o pasar 3 min sin actividad. Tu cuenta puede quedar recordada.</footer>
+      <footer class="welcome-footnote">El recorrido termina al recargar, cerrar la página o pasar ${visitIdleMs / 60000} min sin actividad. Tu cuenta puede quedar recordada.</footer>
     </section>
   </main>`;
   const card = root.querySelector<HTMLElement>(".welcome-card")!;

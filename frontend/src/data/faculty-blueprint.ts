@@ -486,6 +486,8 @@ export const facultyBlueprint = {
     size: [2.5, 2.5] as Vec2, mural: 6.5 },
   /** Paso peatonal cubierto del área común 1. */
   coveredWalk: [coveredWalkStart, coveredWalkEnd] as Vec2[],
+  /** Aviso al final del sendero techado; el estacionamiento todavía no está modelado. */
+  parkingNotice: { center: add(coveredWalkEnd, [Z, 2.1]), size: [4.2, .12], angle: gridAngle + Math.PI } as Rect,
   /** Ramal del toldo hacia la galería del Bloque G, sobre el sendero del patio. */
   blockGAwning: {
     // Mismo eje que la galería en todos los pisos; llega a la cabecera del bloque.
@@ -496,8 +498,7 @@ export const facultyBlueprint = {
     [[-16, 9.4], [5, 9.4], courtyardGalleryEnd, courtyardLanding, pinkLandingExit],
     [[5, 9.4], [11.3, 30.7]],
     [[11.3, 30.7], [37.6, 16], courtyardGalleryEnd],
-    [pinkLandingExit, approachBend, approachJunction, coveredWalkStart, coveredWalkEnd, [55, 37]],
-    [[55, 37], [30, 50]],
+    [pinkLandingExit, approachBend, approachJunction, coveredWalkStart, coveredWalkEnd],
     // Del pie de la escalinata norte del pasillo de Manfred hacia el oeste, por detrás de la sala.
     [corridorFoot, [manfredEast - 1.5, manfredBack - 2], [manfredWest - 2, manfredBack - 2], [12, -12], [0, -22]],
     // Subida a la plataforma por el borde sur del cuadrado, cruce de la plaza y pasillo de Manfred.

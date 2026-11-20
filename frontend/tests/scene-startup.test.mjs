@@ -484,18 +484,14 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       openJoints++;
     }
     assert.ok(openJoints >= 3, "Hay varias juntas físicamente abiertas bajo carpa");
-    // El giro al final usa una sola huella, sin dos caminos encimados.
-    const incoming = new Vector3(bx - ax, 0, bz - az).normalize();
-    const outgoing = new Vector3(55 - bx, 0, 37 - bz).normalize();
-    let cornerCoverage = 0;
-    for (const u of [-0.25, 0, 0.25]) for (const v of [-0.25, 0, 0.25]) {
-      const origin = new Vector3(bx, 0.5, bz).addScaledVector(incoming, u).addScaledVector(outgoing, v);
-      const hits = new Raycaster(origin, new Vector3(0, -1, 0), 0, 1).intersectObjects(coveredSlabs);
-      const tops = new Set(hits.filter(hit => hit.face.normal.y > 0.8).map(hit => hit.object));
-      assert.ok(tops.size <= 1, "La esquina no encabalga dos tapas");
-      if (tops.size) cornerCoverage++;
+    // La prolongación en L desaparece y el aviso ocupa su comienzo.
+    for (const [x, z] of [[55, 37], [42.5, 43.5], [30, 50]]) {
+      const hits = new Raycaster(new Vector3(x, 1, z), new Vector3(0, -1, 0), 0, 2).intersectObjects(coveredSlabs);
+      assert.equal(hits.length, 0, "No queda pavimento ni colisión del tramo retirado");
     }
-    assert.ok(cornerCoverage >= 5, "El giro conserva una superficie de paso completa salvo las juntas");
+    const parking = group.getObjectByName("Aviso de futuro estacionamiento");
+    assert.ok(parking?.getObjectByName("Cartel Próximamente estacionamiento"), "El aviso está presente al final del sendero");
+    assert.deepEqual(plan.paths[3].at(-1), plan.coveredWalk[1], "El recorrido termina con la cubierta existente");
     // El vano recuperado debe dejar pasar un cuerpo, no solo verse abierto.
     const [mw,md]=plan.manfred.size;
     const width = Math.hypot(mw/4,md/2);

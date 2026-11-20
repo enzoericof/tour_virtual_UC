@@ -1217,10 +1217,10 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     } else if (index === 2) {
       // Termina junto a la terraza: se retira el brazo transversal sobrante.
       path(p.slice(0, 2));
-    } else if (index === 6) {
+    } else if (index === 5) {
       // El enlace desde el toldo hasta la plaza ya tiene peldaños y piso propio.
       path(p.slice(1));
-    } else if (index !== 3 && index !== 4) {
+    } else if (index !== 3) {
       // El tramo bajo el caminero tiene su propio pavimento.
       path(p);
     }
@@ -1359,10 +1359,6 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
         edgeBand, ELEVATOR_LANDING_LEVEL + 0.003);
     }
     const gardenJoinDistance = v3(deiGardenPath[0][0] - ax, 0, deiGardenPath[0][1] - az).dot(direction);
-    const fullWalk = new T.CurvePath<T.Vector3>();
-    fullWalk.add(walk);
-    fullWalk.add(new T.LineCurve3(walkEnd, v3(55, endHeight, 37)));
-    fullWalk.add(new T.LineCurve3(v3(55, endHeight, 37), v3(30, endHeight, 50)));
     const { junction, end } = plan.blockGAwning;
     const branchT = v3(junction[0] - ax, 0, junction[1] - az).dot(direction) / Math.hypot(bx - ax, bz - az);
     const branchFloorStart = walk.getPoint(branchT), branchFloorEnd = v3(end[0], 0.05, end[1]);
@@ -1373,7 +1369,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
       const t = T.MathUtils.clamp(((x - branchFloorStart.x) * dx + (z - branchFloorStart.z) * dz) / (dx * dx + dz * dz), 0, 1);
       return T.MathUtils.lerp(branchFloorStart.y, branchFloorEnd.y, t);
     };
-    const coveredPaving = segmentedCurve(fullWalk, width, "Caminero bajo carpa", {
+    const coveredPaving = segmentedCurve(walk, width, "Caminero bajo carpa", {
       junctionAt: gardenJoinDistance, junctionBranch: { points: deiGardenPath, ground: annexPavingHeight },
       junctions: [{ at: branchT * walk.getLength(), points: branchPoints, width: 2.25,
         height: branchHeight, label: "Bloque G" }],
@@ -1381,6 +1377,16 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     const roof = new T.LineCurve3(canopyFoot,v3(bx,2.5,bz));
     const bays = Math.ceil(roof.getLength() / 4.5);
     fabricCover(roof, canopyWidth, Array.from({length:bays + 1},(_,i)=>i / bays), canopyRidge, canopyRidge, 1.28);
+    // Sustituye la prolongación en L por un aviso físico al final del tramo cubierto.
+    frame(plan.parkingNotice, () => {
+      builder.layers.visual.name = "Aviso de futuro estacionamiento";
+      for (const x of [-1.75, 1.75]) pole(.045, 2.7, x, 1.35, 0, m.metal, true);
+      const board = box(4.2, 1.85, .12, 0, 1.7, 0, m.metal, true);
+      board.name = "Cartel Próximamente estacionamiento";
+      board.userData.keep = true;
+      sign("Próximamente", 0, 2.1, .065, 3.9);
+      sign("estacionamiento", 0, 1.3, .065, 3.9);
+    }, gardenHeight(...inCantina(plan.parkingNotice.center)));
     // El ramal se une a la lona existente y desemboca en el eje de la galería del Bloque G.
     const junctionPoint = v3(junction[0], 0, junction[1]);
     const junctionT = junctionPoint.sub(walkStart).dot(direction) / Math.hypot(bx - ax, bz - az);
