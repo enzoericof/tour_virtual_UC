@@ -53,6 +53,21 @@ test("La historia de la facultad se activa frente al cartel existente, separada 
   assert.equal(nearbyInformation(...informationPoints[0].position.map((v, i) => i === 1 ? v + 1.5 : v)), informationPoints[0]);
 });
 
+test("La historia del DEI–LED se activa en su galería de acceso y conserva sus tres hitos", async () => {
+  const { facultyAnnexes, deiEntranceWing, deiSideDoor } = await server.ssrLoadModule("/src/data/faculty-annexes.ts");
+  const { fromRect } = await server.ssrLoadModule("/src/data/faculty-blueprint.ts");
+  const { facultyToWorld } = await server.ssrLoadModule("/src/data/campus-geometry.ts");
+  const dei = facultyAnnexes.find(annex => annex.id === "dei-led");
+  const [gx, gz] = fromRect(dei.rect, [deiSideDoor.center[0], deiEntranceWing.frontZ + deiEntranceWing.recess / 2]);
+  const [x, y, z] = facultyToWorld([gx, .055, gz]);
+  const point = nearbyInformation(x, y + 1.5, z);
+  assert.equal(point?.information.placeId, "dei-led");
+  const text = [point.information.dedication, ...point.information.paragraphs].join(" ");
+  for (const year of [1982, 1985, 1987]) assert.match(text, new RegExp(String(year)));
+  assert.match(text, /Carmelo De Blasi/);
+  assert.equal(nearbyInformation(x, y + 5, z), null);
+});
+
 test("I abre solo la información cercana e ignora repetición, escritura, composición y modificadores", () => {
   const calls = [];
   const point = informationPoints[0];

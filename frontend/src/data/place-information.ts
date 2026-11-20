@@ -1,5 +1,6 @@
 import { places } from "./places";
 import { facultyToWorld } from "./campus-geometry";
+import { deiEntranceWing, deiSideDoor, facultyAnnexes } from "./faculty-annexes";
 import { bulgedOutline, facultyBlueprint, fromRect, PLAZA_LEVEL } from "./faculty-blueprint";
 
 export type PlaceInformation = {
@@ -41,6 +42,20 @@ export const placeInformation: readonly PlaceInformation[] = [{
     label: "Facultad de Ciencias y Tecnología · Nuestra historia",
     url: "https://cyt.uc.edu.py/nuestra-historia/",
   },
+}, {
+  placeId: "dei-led",
+  label: "Historia del DEI–LED",
+  title: "Carmelo De Blasi y el origen del DEI–LED",
+  context: "Facultad de Ciencias y Tecnología",
+  dedication: "1982 · Llegada de Carmelo De Blasi a Asunción",
+  paragraphs: [
+    "A inicios de 1982 llegó a Asunción Carmelo De Blasi, ingeniero electrónico italiano, para preparar un proyecto que permitiera obtener financiamiento del Gobierno Italiano a través de la Asociación de Voluntarios para el Servicio Internacional.",
+    "Por iniciativa de De Blasi, en 1985 se creó el Laboratorio de Electrónica Digital (LED). En 1987 se creó el Departamento de Ingeniería Electrónica e Informática (DEI).",
+  ],
+  source: {
+    label: "Facultad de Ciencias y Tecnología · Nuestra historia",
+    url: "https://cyt.uc.edu.py/nuestra-historia/",
+  },
 }];
 
 // Centro del vano real: lado 5 del cerramiento y doorCenter = -length * .08,
@@ -53,10 +68,15 @@ const manfredDoor = facultyToWorld([doorX, PLAZA_LEVEL, doorZ]);
 // Frente del cartel existente, fuera del volumen sólido del tablero.
 const [signX, signZ] = fromRect(facultyBlueprint.blockGCourtyard.sign, [0, .35]);
 const facultySign = facultyToWorld([signX, .055, signZ]);
+// Galería del acceso fotografiado, antes del blindex y fuera de sus pilares.
+const dei = facultyAnnexes.find(annex => annex.id === "dei-led")!;
+const [deiX, deiZ] = fromRect(dei.rect, [deiSideDoor.center[0], deiEntranceWing.frontZ + deiEntranceWing.recess / 2]);
+const deiGallery = facultyToWorld([deiX, .055, deiZ]);
 export const informationPoints = placeInformation.map(information => {
   const place = places.find(place => place.id === information.placeId)!;
   return { information, place, position: information.placeId === "sala-manfred" ? manfredDoor
-    : information.placeId === "bloque-g" ? facultySign : place.position };
+    : information.placeId === "bloque-g" ? facultySign
+    : information.placeId === "dei-led" ? deiGallery : place.position };
 });
 
 /** Distancia horizontal y altura separadas: no activa el aviso desde otro piso. */

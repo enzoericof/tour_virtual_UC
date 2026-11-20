@@ -1,5 +1,11 @@
 # Verificación (versión 0.1.0)
 
+## Historia del DEI–LED - 20/11/2026
+
+Nuevo punto con I en la galería del acceso del DEI–LED, antes del blindex, derivado de la geometría de `deiEntranceWing` y `deiSideDoor`. El panel compartido presenta la llegada de Carmelo De Blasi en 1982, el financiamiento italiano a través de la Asociación de Voluntarios para el Servicio Internacional y la creación del LED (1985) y el DEI (1987), con enlace a la historia institucional. No cambia la escena.
+
+Build correcto y 96/97 pruebas locales aprobadas; continúa únicamente el fallo previo de separación de Manfred. Se comprueban ubicación, aislamiento de altura y los tres hitos del contenido. Revisión visual pendiente por el bloqueo de navegador ya documentado.
+
 ## Historia de la facultad junto al cartel - 20/11/2026
 
 Se agrega un segundo punto informativo frente al cartel azul de Plaza de la Amistad, derivado de `blockGCourtyard.sign` y separado 35 cm de su tablero para evitar la oclusión del propio cartel. I abre el mismo diálogo del recorrido con la aprobación del proyecto de creación de la facultad del 1/12/1979 (acta 4/79) y enlace a la historia institucional. El cartel conserva su geometría y su texto. Las etiquetas del aviso y del panel ahora corresponden a cada contenido.
