@@ -24,9 +24,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class PresenceSocket extends TextWebSocketHandler {
-    public record Pose(Double x, Double y, Double z, Double yaw, boolean walking) {}
+    public record Pose(Double x, Double y, Double z, Double yaw, boolean walking, Boolean jetpacking) {
+        public Pose { jetpacking=Boolean.TRUE.equals(jetpacking); }
+    }
     public record Player(String id, String name, String skin, double x, double y, double z,
-            double yaw, boolean walking, long at, boolean hidden) {
+            double yaw, boolean walking, long at, boolean hidden, Boolean jetpacking) {
+        public Player { jetpacking=Boolean.TRUE.equals(jetpacking); }
+        public Player(String id, String name, String skin, double x, double y, double z,
+                double yaw, boolean walking, long at, boolean hidden) {
+            this(id,name,skin,x,y,z,yaw,walking,at,hidden,false);
+        }
         public Player(String id, String name, String skin, double x, double y, double z,
                 double yaw, boolean walking, long at) {
             this(id, name, skin, x, y, z, yaw, walking, at, false);
@@ -171,11 +178,11 @@ public class PresenceSocket extends TextWebSocketHandler {
             // Un dato inválido no altera la presencia previa.
             return;
         }
-        if (pose == null || !bounded(pose.x(), 10000) || !bounded(pose.y(), 55)
+        if (pose == null || !bounded(pose.x(), 10000) || !bounded(pose.y(), 1_000_000)
                 || !bounded(pose.z(), 10000) || !bounded(pose.yaw(), Math.PI + 0.001)) return;
         peer.lastSeen = now;
         Player player = new Player(peer.id, peer.name, skins.getOrDefault(peer.userId, "azul"),
-            pose.x(), pose.y(), pose.z(), pose.yaw(), pose.walking());
+            pose.x(), pose.y(), pose.z(), pose.yaw(), pose.walking(), System.currentTimeMillis(), false, pose.jetpacking());
         if (peer.player == null && !store.enter(peer.id, peer.userId, peer.sessionId, player)) {
             socket.close(new CloseStatus(4001, "Recorrido completo: 10 jugadores"));
             return;
@@ -248,7 +255,7 @@ public class PresenceSocket extends TextWebSocketHandler {
                     && exchange.sessions().contains(peer.sessionId)) {
                 Player p = peer.player;
                 visible.put(peer.id, new Player(p.id(), p.name(), skins.getOrDefault(peer.userId, p.skin()),
-                    p.x(), p.y(), p.z(), p.yaw(), p.walking(), p.at(), p.hidden()));
+                    p.x(), p.y(), p.z(), p.yaw(), p.walking(), p.at(), p.hidden(), p.jetpacking()));
             }
         }
         List<Player> players = new ArrayList<>(visible.values());

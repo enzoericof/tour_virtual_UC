@@ -72,3 +72,39 @@ test("Ragdoll contacts and sight rays include the static scene, editor and activ
   closed=true;assert.ok(walker.rayDistance(ray,2)<.5);
   assert.ok(walker.sphereCollision(new T.Sphere(new T.Vector3(0,1,-.42),.2)));
 });
+
+function flightWorld(roof=false){
+ const state=setup();const world=new T.Group();
+ const floor=new T.Mesh(new T.BoxGeometry(60,.1,60));floor.position.y=-.05;world.add(floor);
+ if(roof){const ceiling=new T.Mesh(new T.BoxGeometry(20,.15,20));ceiling.position.y=3.075;world.add(ceiling);}
+ world.updateMatrixWorld(true);state.walker.setWorld(world);state.walker.teleport(new T.Vector3(0,.02,0));state.walker.walk();return state;
+}
+const space=held=>window.dispatchEvent(Object.assign(new Event(held?'keydown':'keyup'),{code:'Space'}));
+function advance(walker,seconds,hz=60){for(let i=0;i<Math.round(seconds*hz);i++)walker.update(1/hz);}
+
+test('Jetpack sostenido sube; al soltar conserva inercia y después cae por gravedad',()=>{
+ const {walker,camera}=flightWorld();space(true);advance(walker,2);const height=camera.position.y,speed=walker.verticalSpeed;
+ assert.ok(height>12);assert.ok(speed>10);space(false);advance(walker,.2);
+ assert.ok(camera.position.y>height,'Conserva impulso ascendente');assert.ok(walker.verticalSpeed>0&&walker.verticalSpeed<speed);
+ advance(walker,2);assert.ok(walker.verticalSpeed<0,'La gravedad invierte la marcha');
+});
+test('Activar en caída frena progresivamente antes de volver a subir',()=>{
+ const {walker,camera}=flightWorld();walker.teleport(new T.Vector3(0,100,0));advance(walker,1);
+ const down=walker.verticalSpeed,height=camera.position.y;assert.ok(down<-10);space(true);advance(walker,1/60);
+ assert.ok(walker.verticalSpeed<0&&walker.verticalSpeed>down,'No cambia la velocidad instantáneamente');assert.ok(camera.position.y<height);
+ advance(walker,2);assert.ok(walker.verticalSpeed>0,'El empuje termina por invertir la caída');
+});
+test('El jetpack no agota combustible y el vuelo es consistente entre tasas de cuadros',()=>{
+ const fly=hz=>{const {walker,camera}=flightWorld();space(true);advance(walker,5,hz);return camera.position.y;};
+ assert.ok(Math.abs(fly(30)-fly(144))<.08);
+ const {walker,camera}=flightWorld();space(true);advance(walker,90);assert.ok(camera.position.y>1500);assert.ok(walker.jetpacking);
+});
+test('El vuelo respeta techos y el aterrizaje respeta el suelo',()=>{
+ const {walker}=flightWorld(true);space(true);advance(walker,5);assert.ok(walker.body.end.y+walker.body.radius<=3.001);
+ space(false);advance(walker,4);assert.ok(walker.grounded);assert.ok(walker.body.start.y-walker.body.radius>=-.001);assert.equal(walker.verticalSpeed,0);
+});
+test('Pausa y bloqueo social desactivan el propulsor',async()=>{
+ const {walker,camera}=flightWorld();space(true);advance(walker,1);walker.frozen=true;const y=camera.position.y;advance(walker,1);
+ assert.equal(camera.position.y,y);assert.equal(walker.jetpacking,false);walker.frozen=false;walker.pause();await Promise.resolve();advance(walker,1);
+ assert.equal(walker.jetpacking,false);assert.equal(camera.position.y,y);walker.walk();advance(walker,1);assert.ok(camera.position.y<y);
+});

@@ -202,3 +202,6 @@ Se consultó la fotografía lateral de un gato negro publicada en [ねこのき�
 ### Edificio frente a Civil, junto al pasillo — 19/11/2026
 
 Referencias aportadas por el usuario: `WhatsApp Image 2026-11-19 at 16.45.07 (1).jpeg` (cabecera y portón), `16.45.07.jpeg` y `16.45.06 (3).jpeg` (lateral y pasillo), `16.45.06 (2).jpeg` (puerta de vidrio) y `16.45.04 (2).jpeg` (acceso del Taller de Maquetas y Prototipos). La captura `Captura de pantalla 2026-11-19 213139.png` identifica el bloque actualmente denominado `cta-dicia`. Los originales permanecen fuera del repositorio. Se interpretan formas y proporciones, reutilizando el material de Civil sin añadir desgaste ni copiar reflejos de las fotografías.
+
+
+20/11/2026 — Mochila y llamas del jetpack: geometría y materiales procedurales propios de `frontend/src/scene/jetpack.ts`, sin recursos externos. El paseo interior reutiliza los tres modelos de gato y sus texturas existentes. No se incorporan nuevos archivos multimedia.

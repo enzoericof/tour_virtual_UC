@@ -143,3 +143,8 @@ La cookie de cuenta de 30 días se conserva al finalizar una visita, para ofrece
 ### Admisión previa al visor
 
 La reserva se representa con una pose hidden en campus_presence, sin migración de esquema. exchange conserva esa marca y publish excluye esas poses de los avatares visibles. join es idempotente por conexión; hide retiene la plaza al salir del modo a pie, mientras leave o el cierre liberan la reserva. Los pings existentes mantienen la reserva durante la carga y la vista general; continúa la caducidad de 20 segundos ante un corte abrupto. No se agrega polling HTTP ni una conexión adicional: la misma conexión admitida se entrega a la comunidad del visor. Si falta la confirmación durante 15 segundos, se cierra la conexión y se ofrece reintentar; si una reconexión pierde el cupo, se vuelve al acceso sin permitir una visita fuera de cupo.
+
+
+### Empuje del jetpack — 20/11/2026
+
+Las poses y snapshots de presencia incorporan `jetpacking`, opcional para clientes anteriores y falso cuando falta. El emisor actualiza el empuje a 10 Hz mientras está activo y transmite su apagado aunque no cambie la posición. El servidor conserva el campo en memoria y en el snapshot JSON; el rango vertical admitido llega a 1.000.000 m. La interpolación del avatar aplica la bandera al escape y lo apaga ante datos antiguos. No se añaden tablas ni migraciones. La integración mantiene la configuración y el tratamiento de colisiones existentes en main.

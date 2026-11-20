@@ -17,7 +17,7 @@ export function openTourHelp({ openDialog }: TourShell) {
           <dt><kbd>WASD</kbd> o <kbd>Flechas</kbd></dt><dd>Moverte</dd>
           <dt><kbd>Mouse</kbd></dt><dd>Mirar alrededor</dd>
           <dt><kbd>Shift izq.</kbd></dt><dd>Caminar más rápido</dd>
-          <dt><kbd>Espacio</kbd></dt><dd>Saltar</dd>
+          <dt><kbd>Espacio</kbd></dt><dd>Mantener para usar el jetpack. Al soltar, caés por gravedad.</dd>
           <dt><kbd>E</kbd></dt><dd>Sentarte en un asiento cercano o levantarte.</dd>
           <dt><kbd>G</kbd></dt><dd>Abrir gestos. Mirá a otro visitante de cerca para interactuar con él.</dd>
           <dt><kbd>C</kbd></dt><dd>Abrir el chat. Enviar con Enter y cerrar con Esc.</dd>

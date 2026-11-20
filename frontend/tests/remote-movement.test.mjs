@@ -38,6 +38,15 @@ test('Los diez avatares interpolan posiciones y giros recibidos sin recrearse', 
       assert.ok(Math.abs(avatar.position.y - 0.3) < 0.001);
       assert.ok(Math.abs(avatar.rotation.y - 1) < 0.001);
     });
+    now+=100;
+    const flying=initial.map((p,i)=>({...p,x:p.x+2,y:.3,z:11,yaw:1,jetpacking:i===0,at:now}));
+    remote.receive(flying);
+    for(let i=0;i<20;i++){now+=1000/60;remote.update(1/60);}
+    assert.equal(avatars[0].getObjectByName('Empuje del jetpack').visible,true,'El empuje se ve en el avatar remoto');
+    assert.equal(avatars[1].getObjectByName('Empuje del jetpack').visible,false);
+    now+=100;remote.receive(flying.map(p=>({...p,jetpacking:false,at:now})));
+    for(let i=0;i<20;i++){now+=1000/60;remote.update(1/60);}
+    assert.equal(avatars[0].getObjectByName('Empuje del jetpack').visible,false,'Soltar apaga el escape aunque la posición no cambie');
     remote.receive([]);
     assert.equal(scene.children.length, 0);
   } finally {

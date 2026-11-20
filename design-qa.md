@@ -389,3 +389,6 @@ Escalinata lateral de cantina: contorno quebrado revisado en captura aérea de C
 
 
 19/11/2026: localizada la captura del usuario en la cocina semicircular de cantina. Comparación nocturna del mismo encuadre antes/después en Chrome: desaparece la franja gris fragmentada bajo el remate, que se conserva. Cubierta retranqueada dentro del muro, ventana y marquesina sin cambios.
+
+
+20/11/2026: revisado el jetpack integrado sobre main 4ed9d9a: dos llamas pequeñas en las boquillas del avatar GLB y apagado al terminar el empuje. Se conservan los modelos y acabados de los gatos, con paseo interior comprobado en la escena real. Las colisiones del equipo permanecen intactas; no se integra la propuesta local de superficies sólidas. Captura ignorada `.local/sync-jetpack-flames-final.png`; resultados y fallo preexistente de Manfred en docs/verificacion.md.

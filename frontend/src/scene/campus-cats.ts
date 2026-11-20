@@ -1,6 +1,9 @@
+import {insideCatRoamingArea} from "../data/cat-roaming-area";
+import {CatNavigation} from "./cat-navigation";
 import * as T from "three";
 import {facultyBlueprint as plan} from "../data/faculty-blueprint";
 import {Octree} from "three/addons/math/Octree.js";
+import {buildCollisionWorld} from "../navigation/collision-world";
 import {insidePolygon, layout, facultyToWorld} from "../data/campus-geometry";
 
 /** Modelado propio: proporciones de gato doméstico adulto, pelo corto y articulaciones independientes. */
@@ -86,50 +89,53 @@ export function createCat(coat: number) {
  }};
 }
 
-/** Paseo sin rutas prefijadas. Cada gato elige un rumbo y una pausa nuevos de forma independiente. */
+/** Paseo interior: destinos y pausas independientes, unidos por el paso libre más corto. */
 export class CampusCats {
  readonly group=new T.Group();
  private world=new Octree(); private sphere=new T.Sphere(new T.Vector3(),.17);
  private point=new T.Vector3(); private floorRay=new T.Ray(new T.Vector3(),new T.Vector3(0,-1,0));
  private time=0;
- readonly cats: {model:ReturnType<typeof createCat>; heading:number; desired:number; timer:number; pause:number; speed:number}[]=[];
+ private navigation:CatNavigation;
+ readonly cats: {model:ReturnType<typeof createCat>; heading:number; desired:number; pause:number; speed:number;route:T.Vector3[];stalled:number}[]=[];
  constructor(colliders:T.Object3D|Octree,private random:()=>number=Math.random,private dynamicBlocked?:(sphere:T.Sphere)=>boolean){
-  this.group.name="Tres gatos del campus";if(colliders instanceof Octree)this.world=colliders;else{this.world.maxLevel=9;this.world.fromGraphNode(colliders);}
+  this.group.name="Tres gatos del campus";if(colliders instanceof Octree)this.world=colliders;else buildCollisionWorld(colliders,this.world);
+  this.navigation=new CatNavigation(this.world);
   for(let i=0;i<3;i++){
    const model=createCat(i); const point=plan.campusCats.spawns[i],start=facultyToWorld([point[0],0,point[1]]);
    model.root.position.set(...start);
-   for(let attempt=0;attempt<200;attempt++){
-    const x=start[0]+(this.random()-.5)*attempt*.25,z=start[2]+(this.random()-.5)*attempt*.25;
-    const y=this.ground(x,z,30,40);
-    if(y!==null && y<1.6 && this.clear(x,y,z)){model.root.position.set(x,y,z);break;}
-   }
+   const node=this.navigation.nearest(model.root.position);if(node)model.root.position.set(node.x,node.y,node.z);
    this.group.add(model.root);const heading=this.random()*Math.PI*2;
-   this.cats.push({model,heading,desired:heading,timer:1+this.random()*5,pause:0,speed:plan.campusCats.speed[0]+this.random()*(plan.campusCats.speed[1]-plan.campusCats.speed[0])});
+   this.cats.push({model,heading,desired:heading,pause:1+this.random()*5,route:[],stalled:0,speed:plan.campusCats.speed[0]+this.random()*(plan.campusCats.speed[1]-plan.campusCats.speed[0])});
   }
  }
- private ground(x:number,z:number,previous:number,maxDrop=.5){
-  if(!insidePolygon([x,z],layout.boundary))return null;
-  this.floorRay.origin.set(x,previous+.24,z);const hit=this.world.rayIntersect(this.floorRay);
+ private ground(x:number,z:number,previous:number,maxDrop=.6){
+  if(!insidePolygon([x,z],layout.boundary)||!insideCatRoamingArea(x,z))return null;
+  this.floorRay.origin.set(x,previous+.28,z);const hit=this.world.rayIntersect(this.floorRay);
   return hit && hit.distance<maxDrop?hit.position.y+.015:null;
  }
  private clear(x:number,y:number,z:number,heading=0){
-  for(const offset of [-.16,0,.2])for(const h of [.2,.42]){this.sphere.center.set(x+Math.sin(heading)*offset,y+h,z+Math.cos(heading)*offset);if(this.world.sphereIntersect(this.sphere)||this.dynamicBlocked?.(this.sphere))return false;}return true;
+  for(const offset of [-.16,0,.2])for(const h of [.36,.52]){this.sphere.center.set(x+Math.sin(heading)*offset,y+h,z+Math.cos(heading)*offset);if(this.world.sphereIntersect(this.sphere)||this.dynamicBlocked?.(this.sphere))return false;}return true;
  }
  update(dt:number){
   dt=Math.min(Math.max(dt,0),.05);this.time+=dt;
   for(const cat of this.cats){
-   cat.timer-=dt;cat.pause=Math.max(0,cat.pause-dt);
-   if(cat.timer<=0){cat.desired=this.random()*Math.PI*2;cat.timer=2+this.random()*7;if(this.random()<.25)cat.pause=1+this.random()*3;}
-   const delta=Math.atan2(Math.sin(cat.desired-cat.heading),Math.cos(cat.desired-cat.heading));cat.heading+=T.MathUtils.clamp(delta,-dt*1.4,dt*1.4);
+   cat.pause=Math.max(0,cat.pause-dt);
+   const position=cat.model.root.position;
+   while(cat.route.length&&Math.hypot(cat.route[0].x-position.x,cat.route[0].z-position.z)<.04)cat.route.shift();
+   if(!cat.route.length&&!cat.pause){cat.route=this.navigation.path(position,this.random);cat.pause=.8+this.random()*2.5;}
+   if(cat.route.length)cat.desired=Math.atan2(cat.route[0].x-position.x,cat.route[0].z-position.z);
+   const delta=Math.atan2(Math.sin(cat.desired-cat.heading),Math.cos(cat.desired-cat.heading));cat.heading+=T.MathUtils.clamp(delta,-dt*2.6,dt*2.6);
    const root=cat.model.root;root.rotation.y=cat.heading;
    let moving=false;
-   if(!cat.pause){
-    this.point.copy(root.position);this.point.x+=Math.sin(cat.heading)*cat.speed*dt;this.point.z+=Math.cos(cat.heading)*cat.speed*dt;
+   if(!cat.pause&&cat.route.length&&Math.abs(delta)<.12){
+    // Girar antes de avanzar evita cortar esquinas hacia columnas y muebles.
+    const target=cat.route[0],distance=Math.hypot(target.x-position.x,target.z-position.z),step=Math.min(cat.speed*dt,distance);
+    this.point.copy(root.position);this.point.x+=(target.x-position.x)/distance*step;this.point.z+=(target.z-position.z)/distance*step;
     const y=this.ground(this.point.x,this.point.z,root.position.y);
-    if(y!==null && Math.abs(y-root.position.y)<.18 && this.clear(this.point.x,y,this.point.z,cat.heading)
+    if(y!==null && Math.abs(y-root.position.y)<.22 && this.clear(this.point.x,y,this.point.z,cat.heading)
       && this.cats.every(other=>other===cat||other.model.root.position.distanceToSquared(this.point)>.45*.45)){
-      root.position.set(this.point.x,y,this.point.z);moving=true;
-    }else{if(Math.abs(delta)<.3)cat.desired=cat.heading+Math.PI*(.65+this.random()*.7);cat.timer=Math.max(cat.timer,1.5);}
+      root.position.set(this.point.x,y,this.point.z);moving=true;cat.stalled=0;
+    }else{cat.stalled+=dt;if(cat.stalled>1){cat.route=[];cat.pause=.6;cat.stalled=0;}}
    }
    cat.model.animate(this.time+cat.speed*7,moving);
   }

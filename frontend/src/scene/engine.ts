@@ -287,6 +287,8 @@ export class TourEngine {
       this.camera.near = near;
       this.camera.updateProjectionMatrix();
     }
+    const flightFar=Math.max(1900,this.camera.position.y+1500);
+    if(Math.abs(this.camera.far-flightFar)>1){this.camera.far=flightFar;this.camera.updateProjectionMatrix();}
     this.cats.update(dt);
     this.remotePlayers.update(dt);
     this.renderer.render(this.scene, this.camera);
@@ -545,7 +547,7 @@ export class TourEngine {
     const { x, y, z } = this.camera.position;
     if (this.seated) this.playerDirection.copy(this.seated.forward);
     else this.camera.getWorldDirection(this.playerDirection);
-    return { x, y: this.seated ? this.seated.point.y - 0.9 : y - 1.5, z, yaw: Math.atan2(-this.playerDirection.x, -this.playerDirection.z) };
+    return { jetpacking: !this.seated && !this.elevatorPassenger && this.walker.jetpacking, x, y: this.seated ? this.seated.point.y - 0.9 : y - 1.5, z, yaw: Math.atan2(-this.playerDirection.x, -this.playerDirection.z) };
   }
   get position() {
     return this.camera.position;

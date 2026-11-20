@@ -1,3 +1,4 @@
+import {jetpackVelocity,JETPACK_PHYSICS} from "./jetpack-physics";
 import * as T from "three";
 import type { Octree } from "three/addons/math/Octree.js";
 import { buildCollisionWorld } from "./collision-world";
@@ -80,6 +81,8 @@ export class Walker {
   /** Índice estático compartido con la fauna del campus, sin duplicar geometría. */
   get collisionWorld() { return this.world; }
   get grounded() { return this.ground; }
+  get jetpacking() { return this.enabled && this.active && !this.frozen && this.keys.has("Space"); }
+  get verticalSpeed() { return this.velocity.y; }
   sphereCollision(sphere: T.Sphere) {
     let result = this.world.sphereIntersect(sphere);
     const edition = this.editorWorld.sphereIntersect(sphere);
@@ -230,18 +233,15 @@ export class Walker {
       direction.sub(side);
     direction.normalize();
     const speed = this.keys.has("ShiftLeft") ? 8 : 4.5;
-    const steps = 5;
+    dt=Math.min(Math.max(dt,0),.05);
+    const steps = Math.max(5,Math.ceil(dt/JETPACK_PHYSICS.maxStep),Math.ceil(Math.abs(this.velocity.y)*dt/.12));
     for (let i = 0; i < steps; i++) {
       const delta = dt / steps;
       this.velocity.x = direction.x * speed;
       this.velocity.z = direction.z * speed;
-      this.velocity.y -= 18 * delta;
-      if (this.ground && this.keys.has("Space")) {
-        this.velocity.y = 5;
-        this.ground = false;
-        this.keys.delete("Space");
-      }
-      this.body.translate(this.velocity.clone().multiplyScalar(delta));
+      const before=this.velocity.y;
+      this.velocity.y=jetpackVelocity(before,this.jetpacking,delta);
+      this.body.translate(new T.Vector3(this.velocity.x*delta,(before+this.velocity.y)*.5*delta,this.velocity.z*delta));
       this.ground = false;
       for (let j = 0; j < 3; j++) {
         const result = this.collision(this.body);

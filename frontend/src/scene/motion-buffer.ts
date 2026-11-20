@@ -1,6 +1,6 @@
 import type { Player } from "../services/presence";
 
-type Sample = Pick<Player, "x" | "y" | "z" | "yaw" | "walking"> & { time: number };
+type Sample = Pick<Player, "x" | "y" | "z" | "yaw" | "walking" | "jetpacking"> & { time: number };
 const axes = ["x", "y", "z"] as const;
 
 /** Reproduce una pequeña historia temporal en vez de perseguir posiciones aisladas. */
@@ -11,7 +11,7 @@ export class MotionBuffer {
   private renderedAt = -Infinity;
   private delay = 130;
   private lastFrame = 0;
-  readonly value = { x: 0, y: 0, z: 0, yaw: 0, walking: false };
+  readonly value = { x: 0, y: 0, z: 0, yaw: 0, walking: false, jetpacking:false };
 
   receive(player: Player, now: number) {
     const time = player.at || now;
@@ -26,7 +26,7 @@ export class MotionBuffer {
         this.interval = this.interval * 0.5 + (time - last.time) * 0.5;
       }
     }
-    this.samples.push({ x: player.x, y: player.y, z: player.z, yaw: player.yaw, walking: player.walking, time });
+    this.samples.push({ x: player.x, y: player.y, z: player.z, yaw: player.yaw, walking: player.walking, jetpacking:Boolean(player.jetpacking), time });
     if (this.samples.length > 20) this.samples.shift();
   }
 
@@ -53,6 +53,7 @@ export class MotionBuffer {
     const turn = to.yaw - from.yaw;
     this.value.yaw = from.yaw + Math.atan2(Math.sin(turn), Math.cos(turn)) * Math.min(1, alpha);
     this.value.walking = (alpha < 1 ? from.walking : to.walking) && time <= to.time + 100;
+    this.value.jetpacking = Boolean((alpha<1?from:to).jetpacking) && time<=to.time+1000;
     return this.value;
   }
 }

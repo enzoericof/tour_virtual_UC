@@ -1,5 +1,6 @@
 import { manfredRampSection, manfredStairZ } from "../src/data/faculty-blueprint.ts";
-import { Box3, Matrix4, PerspectiveCamera, Ray, Raycaster, Triangle, Vector2, Vector3 } from "three";
+import { Box3, BoxGeometry, Mesh, Matrix4, PerspectiveCamera, Ray, Raycaster, Triangle, Vector2, Vector3 } from "three";
+import {facultyPose,insidePolygon} from "../src/data/campus-geometry.ts";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
 import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
@@ -840,6 +841,26 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     // Cada sonido acompaña su evento: puertas, viaje y gong de llegada antes de abrir.
     const order = sounds.join(" ");
     assert.ok(order.includes("moving arriving opening open closing"), "Travel, chime and doors follow each other");
+
+    // Paseo completo con los pisos, muebles, paredes y cubiertas reales, en coordenadas de producción.
+    const {CampusCats}=await server.ssrLoadModule('/src/scene/campus-cats.ts');
+    const {catRoamingAreas,insideCatRoamingArea}=await server.ssrLoadModule('/src/data/cat-roaming-area.ts');
+    const catGround=new Mesh(new BoxGeometry(240,.1,180));catGround.position.set(40,-.05,0);colliders.add(catGround);
+    colliders.applyMatrix4(new Matrix4().makeRotationY(-facultyPose.angle).setPosition(facultyPose.x,0,facultyPose.z));
+    walker.setWorld(colliders);
+    let seed=197;const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
+    const cats=new CampusCats(walker.collisionWorld,random),visited=cats.cats.map(()=>new Set());
+    for(let frame=0;frame<24000;frame++){
+      cats.update(.05);
+      if(frame%20===0)cats.cats.forEach((cat,i)=>{
+        const p=cat.model.root.position;
+        assert.ok(insideCatRoamingArea(p.x,p.z),'Los gatos permanecen en el sector interior');
+        catRoamingAreas.slice(0,4).forEach((area,j)=>{if(insidePolygon([p.x,p.z],area))visited[i].add(j);});
+      });
+    }
+    assert.deepEqual([...new Set(visited.flatMap(s=>[...s]))].sort(),[0,1,2,3],
+      'El paseo alcanza Bloque 1, Bloque G, plaza techada y cantina');
+    assert.ok(visited.every(s=>s.size>=2),'Cada gato puede pasar de un sector a otro');
 
   } finally {
     await server.close();

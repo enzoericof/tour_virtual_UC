@@ -113,4 +113,15 @@ class PresenceSocketTest {
         handler.synchronizePresence(); assertEquals(1, closed);
         handler.synchronizePresence(); assertEquals(1, store.removals);
     }
+    @Test void jetpackSurvivesHighAltitudePublishingAndReleaseWithoutHorizontalMovement() throws Exception {
+        connect(); Thread.sleep(55);
+        handler.handleTextMessage(socket,new TextMessage("{\"x\":0,\"y\":450,\"z\":0,\"yaw\":0,\"walking\":false,\"jetpacking\":true}"));
+        handler.synchronizePresence();handler.publish();
+        assertTrue(sent.getLast().getPayload().contains("\"jetpacking\":true"));
+        assertTrue(sent.getLast().getPayload().contains("\"y\":450.0"));
+        Thread.sleep(55);
+        handler.handleTextMessage(socket,new TextMessage("{\"x\":0,\"y\":450,\"z\":0,\"yaw\":0,\"walking\":false,\"jetpacking\":false}"));
+        handler.synchronizePresence();handler.publish();
+        assertTrue(sent.getLast().getPayload().contains("\"jetpacking\":false"));
+    }
 }

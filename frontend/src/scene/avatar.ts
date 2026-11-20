@@ -1,3 +1,4 @@
+import {createJetpack} from "./jetpack";
 import * as T from "three";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { avatarColor } from "../data/skins";
@@ -50,6 +51,7 @@ export class Avatar {
   readonly group = new T.Group();
   readonly visual = new T.Group();
   private motion = new MotionBuffer();
+  private jetpack = createJetpack();
   private shirt = new T.MeshStandardMaterial({ roughness: 0.78 });
   private materials: T.Material[] = [this.shirt];
   private nodes = new Map<string, T.Object3D>();
@@ -88,6 +90,7 @@ export class Avatar {
     this.skin = player.skin;
     this.group.add(this.visual);
     this.fallback();
+    this.nodes.get("Spine")!.add(this.jetpack.group);
     this.captureRest();
     if (showLabel) {
       const canvas = document.createElement("canvas");
@@ -138,6 +141,7 @@ export class Avatar {
             }
           });
           this.visual.add(model);
+          (this.nodes.get("Spine")??this.visual).add(this.jetpack.group);
           this.captureRest();
           this.mixer = new T.AnimationMixer(model);
           this.animations = gltf.animations;
@@ -266,6 +270,8 @@ export class Avatar {
   }
   update(dt: number, now: number, sitting = false, wallNow = Date.now()) {
     this.elapsed += dt;
+    const flight=this.motion.sample(now).jetpacking && !this.action && !sitting;
+    this.jetpack.update(Boolean(flight),this.elapsed);
     if (sitting !== this.sitting) {
       this.sitting = sitting;
       this.resetPose();
@@ -430,6 +436,7 @@ export class Avatar {
   }
   remove() {
     this.removed = true;
+    this.jetpack.dispose();
     this.mixer?.stopAllAction();
     this.mixer?.uncacheRoot(this.visual.children[0]);
     this.group.removeFromParent();

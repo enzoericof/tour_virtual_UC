@@ -9,6 +9,7 @@ test('Tres gatos exploran sin rutas, permanecen en el suelo y respetan paredes y
  globalThis.document={createElement:()=>({getContext:()=>context})};
  const server=await createServer({server:{middlewareMode:true,hmr:false},appType:'custom'});
  try{
+  const {insideCatRoamingArea}=await server.ssrLoadModule('/src/data/cat-roaming-area.ts');
   const {CampusCats}=await server.ssrLoadModule('/src/scene/campus-cats.ts');
   const world=new T.Group(),floor=new T.Mesh(new T.PlaneGeometry(1500,1500));floor.rotation.x=-Math.PI/2;world.add(floor);
   const [x,,z]=facultyToWorld([25,0,14]);const wall=new T.Mesh(new T.BoxGeometry(1,3,15));wall.position.set(x+2,1.5,z);world.add(wall);world.updateMatrixWorld(true);
@@ -18,7 +19,7 @@ test('Tres gatos exploran sin rutas, permanecen en el suelo y respetan paredes y
   for(let i=0;i<6000;i++){
    cats.update(.05);
    cats.cats.forEach((cat,j)=>{const p=cat.model.root.position;
-    assert.ok(insidePolygon([p.x,p.z],layout.boundary),'No salen del campus');assert.ok(Math.abs(p.y-.015)<.001,'Patas al nivel del piso');
+    assert.ok(insidePolygon([p.x,p.z],layout.boundary),'No salen del campus');assert.ok(insideCatRoamingArea(p.x,p.z),'Se quedan en edificios, plazas y conexiones interiores');assert.ok(Math.abs(p.y-.015)<.001,'Patas al nivel del piso');
     assert.ok(!(Math.abs(p.x-(x+2))<.67&&Math.abs(p.z-z)<7.67),'No atraviesan paredes');
     paths[j].add(Math.round(cat.heading*10));if(cat.pause>0)pauses++;
    });

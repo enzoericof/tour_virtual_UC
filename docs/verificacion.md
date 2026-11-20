@@ -679,3 +679,16 @@ Se editaron las cotas de puertas, ventanas y rellanos y la altura de la nave seg
 ## Integración local de origin/main con Manfred — 19/11/2026
 
 Respaldo previo en backup/manfred-local-20261119 (8672ec7). Integrado origin/main hasta 39100d4, conservando las nuevas geometrías, pisos, rampita y cubierta de Manfred. Comprobación de contenido: manfred-hall.ts, manfred-floor.ts, manfred-details.ts y reception-garden.ts idénticos al respaldo local. El bloque del árbol de tronco esbelto, follaje instanciado y alcorque ovalado de cantina.ts permanece idéntico; se conserva también la llamada a addReceptionGarden. Se combinan los recortes locales de piso con la prioridad remota de acabados para evitar superposiciones. TypeScript y compilación Vite aprobados. No se ejecuta la suite completa por el bloqueo de telemetría documentado; revisión visual y backend no comprobados en esta integración. Cambios únicamente locales, sin push.
+
+
+### Integración de gatos y jetpack sin sustituir las colisiones del equipo — 20/11/2026
+
+Integración sobre main 4ed9d9a: 96 de 97 pruebas frontend correctas y compilación TypeScript/Vite aprobada. Pasan el paseo interior de veinte minutos por Bloque 1, Bloque G, plaza techada y cantina; cada gato pasa por al menos dos sectores. También pasan las pruebas de empuje, gravedad, frenado de caída, inercia, duración ilimitada, pausa, captura del mouse y propagación de las llamas al avatar remoto.
+
+El único fallo corresponde a la separación de Sala Manfred en `faculty-blueprint.test.mjs:261`. Se reprodujo ejecutando esa prueba con los archivos de datos originales de main 4ed9d9a en una copia local aislada: ya falla sin esta integración. Se conserva el edificio y su comprobación; el fallo no se oculta ni se cambia su tolerancia.
+
+Se compararon contra main la geometría de reconstrucción, `collision-world.ts`, la construcción de índices y el método de resolución de contactos del caminante: permanecen iguales. No se incorpora `structure-collisions.ts`, ni sus pruebas, ni el ajuste local de subida automática de peldaños. Los gatos reutilizan el índice existente del caminante y el constructor de colisiones del equipo.
+
+Maven Wrapper verify con Java 21 y PostgreSQL 17 desechable en 127.0.0.1:55433/tour_fluidity: 16 pruebas, cero errores, fallos u omisiones. Se omitió únicamente el reempaquetado del JAR porque el servidor local lo mantiene abierto; compilación y todas las pruebas se ejecutaron. Se detuvo la base desechable al finalizar. No se utilizaron credenciales de Neon para las pruebas. La advertencia existente del tamaño del bloque Three.js no impide compilar.
+
+Revisión en navegador del GLB con la mochila y ambas llamas cortas: encendido al recibir empuje y apagado al soltar, usando el código integrado. Captura `.local/sync-jetpack-flames-final.png`, fuera de Git. No se añaden accesos sin autenticación.

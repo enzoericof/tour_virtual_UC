@@ -528,7 +528,7 @@ export const facultyBlueprint = {
     lamps: [[26.95, 17.3], [31.8, 17.3]] as Vec2[],
   },
   /** Puntos iniciales estimados de la fauna; el paseo posterior no sigue rutas. */
-  campusCats: { spawns: [[25,14],[0,26],[65,-35]] as Vec2[], speed: [.45,.65] as const },
+  campusCats: { spawns: [fromRect(coveredPlaza,[-3.5,0]),[b1x,4.7],fromRect(gRect,[0,-4.7])] as Vec2[], speed: [.45,.65] as const },
   picnic: [[14, 25.8], [19, 28.5], [14.5, 20], [19, 22]].map(([x, z]) => fromRect(cantina, [x, z])),
   /** Jardín de mesas y parrilla: distribución estimada según la foto del 18/11. */
   cantinaGarden: {

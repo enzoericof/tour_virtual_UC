@@ -7,6 +7,7 @@ export type Pose = {
   z: number;
   yaw: number;
   walking: boolean;
+  jetpacking?: boolean;
 };
 export type Player = Pose & {
   id: string;
@@ -234,9 +235,9 @@ export class CampusPresence {
         Math.abs(pose.y - prev.y) > 0.001 ||
         Math.abs(pose.z - prev.z) > 0.001 ||
         Math.abs(pose.yaw - prev.yaw) > 0.001 ||
-        walking !== prev.walking;
-      if (!changed && Date.now() - this.lastSent < 5000) return;
-      socket.send(changed ? JSON.stringify(next) : "ping");
+        walking !== prev.walking || Boolean(pose.jetpacking) !== Boolean(prev.jetpacking);
+      if (!changed && !pose.jetpacking && Date.now() - this.lastSent < 5000) return;
+      socket.send(changed || pose.jetpacking ? JSON.stringify(next) : "ping");
       this.lastPose = next;
     } else {
       if (!this.lastPose && Date.now() - this.lastSent < 5000) return;

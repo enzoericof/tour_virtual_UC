@@ -78,7 +78,7 @@ public class PresenceStore {
                 } else {
                     var p = json.readValue(row.getString("pose"), PresenceSocket.Player.class);
                     players.add(new PresenceSocket.Player(p.id(), p.name(), AvatarColor.forUser(row.getLong("user_id")),
-                        p.x(), p.y(), p.z(), p.yaw(), p.walking(), p.at(), p.hidden()));
+                        p.x(), p.y(), p.z(), p.yaw(), p.walking(), p.at(), p.hidden(), p.jetpacking()));
                 }
             }, json.writeValueAsString(updates), System.currentTimeMillis(),
             json.writeValueAsString(sessionIds), System.currentTimeMillis());

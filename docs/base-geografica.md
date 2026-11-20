@@ -677,3 +677,12 @@ La última indicación del usuario sustituye la reducción anterior: se eleva ú
 ### Portón en la cabecera opuesta de CTA–DICIA — 19/11/2026
 
 Por corrección del usuario, el conjunto de portón, marquesina y lámpara pasa de la cabecera x = −7 m a x = 17 m del marco local, orientado hacia el exterior (+x). El muro anterior queda cerrado con ladrillo y colisión; el nuevo vano sustituye el paño macizo de la nave alta. Se conservan las dimensiones del conjunto, las alturas aprobadas, el ala baja y las puertas laterales. Revisión a cargo del usuario, sin ejecutar pruebas, compilaciones ni navegador.
+
+
+### Jetpack y paseo interior de gatos — 20/11/2026
+
+Espacio sostenido activa un empuje continuo de 30 m/s², sumado a gravedad de 18 m/s² y resistencia vertical cuadrática de 0,025·v·|v|. No hay combustible ni recarga. La velocidad no se reinicia al activar o soltar el motor: frena una caída progresivamente y conserva la inercia al soltar en ascenso. Se desactiva al pausar, sentarse, viajar en el ascensor o participar en un gesto. La mochila se monta en el avatar GLB y en el modelo de respaldo. Sus dos llamas naranjas con núcleo azul claro tienen hasta 22 cm y una oscilación leve; se muestran solo durante el empuje.
+
+Los tres gatos eligen destinos aleatorios entre Bloque 1, Bloque G, plaza techada, cantina y patio interior, excluyendo los senderos perimetrales. La región se deriva del plano en `cat-roaming-area.ts`; las curvas de acceso usan los controles Bézier del caminero. `cat-navigation.ts` busca el paso libre más corto sobre pisos y obstáculos existentes. Cada gato hace pausas, gira antes de avanzar y vuelve a elegir destino si algo impide pasar. La fauna se simula localmente, sin posiciones sincronizadas entre navegadores.
+
+La integración conserva el sistema de colisiones y la geometría de main 4ed9d9a. Se descartó la propuesta local de completar superficies estructurales y de subir peldaños automáticamente; no se incorporan cambios propios a techos, paredes ni sólidos del escenario.
