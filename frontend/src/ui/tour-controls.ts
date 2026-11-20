@@ -21,7 +21,6 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
   } catch {
     // El visor también funciona cuando el navegador bloquea el almacenamiento local.
   }
-  let enhancedGraphics = false;
   let engine: TourEngine | undefined;
   let currentMode: TourMode = "overview";
   let activeHudPanel: HudPanel | null = null;
@@ -96,24 +95,6 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     button.innerHTML = icon(dark ? "sun" : "moon");
   }
 
-  function syncGraphics() {
-    const label = enhancedGraphics ? "Luz original" : "Mejorar gráficos";
-    const button = element<HTMLButtonElement>("#graphics-btn");
-    button.setAttribute("aria-pressed", String(enhancedGraphics));
-    button.setAttribute("aria-label", label);
-    button.title = label;
-    button.querySelector("span")!.textContent = label;
-  }
-
-  function toggleGraphics() {
-    enhancedGraphics = !enhancedGraphics;
-    engine?.setEnhancedLighting(enhancedGraphics);
-    syncGraphics();
-    toast(enhancedGraphics
-      ? "Gráficos mejorados: sombras suaves y luz cinematográfica."
-      : "Luz original restaurada.");
-  }
-
   function onMode(mode: TourMode) {
     const changed = mode !== currentMode;
     currentMode = mode;
@@ -126,7 +107,6 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     element("#pause-label").classList.toggle("hidden", !paused);
     element("#tour-toolbar").classList.toggle("hidden", walking);
     element("#overview").classList.toggle("hidden", !paused);
-    element("#recenter").classList.toggle("hidden", mode !== "overview");
     element("#begin span").textContent = paused ? "Continuar" : "Recorrer";
     if (mode === "overview") setLocation(campusName);
     else syncLocation(performance.now(), true);
@@ -142,7 +122,6 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
   }
 
   syncTheme();
-  syncGraphics();
   try {
     engine = new TourEngine(element("#viewport"), theme);
     mountPlaceInformation(shell, engine);
@@ -163,7 +142,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     engine?.startWalking();
   };
   element("#pause-tour").onclick = () => engine?.pause();
-  element("#overview").onclick = element("#recenter").onclick = resetOverview;
+  element("#overview").onclick = resetOverview;
   function resetOverview() {
     engine?.overview();
     selectPlace(null);
@@ -204,7 +183,6 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
       // La preferencia sigue activa durante esta visita.
     }
   };
-  element("#graphics-btn").onclick = toggleGraphics;
   const fullscreenButton = element<HTMLButtonElement>("#fullscreen-btn");
   fullscreenButton.onclick = () => {
     void (

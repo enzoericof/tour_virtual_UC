@@ -1,6 +1,6 @@
 import { logout, type User } from "../services/api";
 import { restoreSession, type RegisteredSession } from "../services/session";
-import { consumeVisitEnd, visitIdleMs } from "../services/visit-lifecycle";
+import { consumeVisitEnd } from "../services/visit-lifecycle";
 import { mountAuthForm } from "./auth-form";
 import { escapeHtml } from "./dom";
 import { paintLoading, showVisitLoading } from "./visit-loading";
@@ -13,11 +13,10 @@ export async function enterCampus(root: HTMLElement): Promise<RegisteredSession>
   const reason = consumeVisitEnd();
   root.innerHTML = `<main class="welcome">
     <section class="welcome-card tour-panel" aria-labelledby="welcome-title">
-      <header class="welcome-brand"><img src="/assets/logo-uc-sapientia.png" width="44" height="44" alt="Universidad Católica"><div><strong>Universidad Católica</strong><span>Campus Santa Librada</span></div></header>
-      <div class="welcome-heading"><span class="eyebrow">CIENCIAS Y TECNOLOGÍA</span><h1 id="welcome-title">Tour virtual</h1><p>Elegí cómo ingresar al recorrido.</p></div>
+      <header class="welcome-brand"><img src="/assets/logo-uc-sapientia.png" width="52" height="52" alt="Universidad Católica"><div><strong>Universidad Católica "Nuestra Señora de la Asunción" <span class="welcome-campus">- Campus Santa Librada</span></strong><span>Facultad de Ciencias y Tecnología</span></div></header>
+      <div class="welcome-heading"><h1 id="welcome-title">Tour Virtual</h1></div>
       ${reason ? `<p class="visit-note" role="status">${escapeHtml(reason)}</p>` : ""}
       <div id="welcome-auth"><p role="status" class="session-loading"><span class="inline-spinner" aria-hidden="true"></span>Comprobando cuenta…</p></div>
-      <footer class="welcome-footnote">El recorrido termina al recargar, cerrar la página o pasar ${visitIdleMs / 60000} min sin actividad. Tu cuenta puede quedar recordada.</footer>
     </section>
   </main>`;
   const card = root.querySelector<HTMLElement>(".welcome-card")!;
