@@ -1215,7 +1215,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     } else if (index === 2) {
       // Termina junto a la terraza: se retira el brazo transversal sobrante.
       path(p.slice(0, 2));
-    } else if (index === 5) {
+    } else if (index === 4) {
       // El enlace desde el toldo hasta la plaza ya tiene peldaños y piso propio.
       path(p.slice(1));
     } else if (index !== 3) {

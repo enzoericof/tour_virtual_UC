@@ -267,9 +267,6 @@ const manfredClosestZ = Math.max(...bulgedOutline(manfredSize[0]+1.1,manfredSize
   .map(p=>fromRect(manfredAligned,p)[1]));
 const manfredRect: Rect = {...manfredAligned, center:add(manfredAligned.center,
   [Z,(-half.z-manfredBlockGap-manfredClosestZ)/Z[1]])};
-const mfCorners=rectCorners(manfredRect);
-const manfredEast=Math.max(...mfCorners.map(p=>p[0])), manfredWest=Math.min(...mfCorners.map(p=>p[0]));
-const manfredFront=Math.max(...mfCorners.map(p=>p[1])), manfredBack=Math.min(...mfCorners.map(p=>p[1]));
 const corridor: Vec2[] = [passagePoint(-22,manfredPassageEdge),passagePoint(-22,4.15),passagePoint(0,4.15),passagePoint(0,manfredPassageEdge)];
 // Encuentro del borde oeste del pasillo con las cotas del desembarco.
 const corridorWestAtZ=(z:number):Vec2=>{
@@ -499,8 +496,6 @@ export const facultyBlueprint = {
     [[5, 9.4], [11.3, 30.7]],
     [[11.3, 30.7], [37.6, 16], courtyardGalleryEnd],
     [pinkLandingExit, approachBend, approachJunction, coveredWalkStart, coveredWalkEnd],
-    // Del pie de la escalinata norte del pasillo de Manfred hacia el oeste, por detrás de la sala.
-    [corridorFoot, [manfredEast - 1.5, manfredBack - 2], [manfredWest - 2, manfredBack - 2], [12, -12], [0, -22]],
     // Subida a la plataforma por el borde sur del cuadrado, cruce de la plaza y pasillo de Manfred.
     [coveredWalkStart, squareSteps, add(plazaNorth, [X, -2], [Z, 0.5]),
       corridorTop, corridorFoot],
