@@ -16,18 +16,19 @@ export function openTourHelp({ openDialog }: TourShell) {
         <dl class="help-grid">
           <dt><kbd>WASD</kbd> o <kbd>Flechas</kbd></dt><dd>Moverte</dd>
           <dt><kbd>Mouse</kbd></dt><dd>Mirar alrededor</dd>
-          <dt><kbd>Shift izq.</kbd></dt><dd>Caminar más rápido</dd>
+          <dt><kbd>Shift izq.</kbd></dt><dd>Caminar m�s r�pido</dd>
           <dt><kbd>Espacio</kbd></dt><dd>Mantener para usar el jetpack. Al soltar, caés por gravedad.</dd>
           <dt><kbd>E</kbd></dt><dd>Sentarte en un asiento cercano o levantarte.</dd>
-          <dt><kbd>G</kbd></dt><dd>Abrir gestos. Mirá a otro visitante de cerca para interactuar con él.</dd>
+          <dt><kbd>I</kbd></dt><dd>Leer informaci�n del lugar cuando aparezca el aviso al acercarte.</dd>
+          <dt><kbd>G</kbd></dt><dd>Abrir gestos. Mir� a otro visitante de cerca para interactuar con �l.</dd>
           <dt><kbd>C</kbd></dt><dd>Abrir el chat. Enviar con Enter y cerrar con Esc.</dd>
-          <dt><kbd>WASD</kbd> / <kbd>Espacio</kbd> al caerte</dt><dd>Dar impulsos al cuerpo. Se levanta automáticamente.</dd>
-          <dt><kbd>Clic</kbd></dt><dd>Pulsar el botón resaltado del ascensor</dd>
+          <dt><kbd>WASD</kbd> / <kbd>Espacio</kbd> al caerte</dt><dd>Dar impulsos al cuerpo. Se levanta autom�ticamente.</dd>
+          <dt><kbd>Clic</kbd></dt><dd>Pulsar el bot�n resaltado del ascensor</dd>
           <dt><kbd>Esc</kbd></dt><dd>Pausar y liberar el cursor</dd>
         </dl>
         <h3>Vista general</h3>
         <dl class="help-grid">
-          <dt><kbd>Arrastrar</kbd></dt><dd>Girar la cámara</dd>
+          <dt><kbd>Arrastrar</kbd></dt><dd>Girar la c�mara</dd>
           <dt><kbd>Rueda</kbd></dt><dd>Acercar o alejar</dd>
           <dt><kbd>Clic</kbd></dt><dd>Empezar en ese punto del campus</dd>
           <dt><kbd>M</kbd></dt><dd>Ocultar o mostrar la interfaz</dd>
@@ -36,12 +37,12 @@ export function openTourHelp({ openDialog }: TourShell) {
       <section id="help-touch" class="help-controls" role="tabpanel" aria-labelledby="help-touch-tab" tabindex="0" ${touch ? "" : "hidden"}>
         <h3>Vista general</h3>
         <dl class="help-grid">
-          <dt><kbd>Arrastrar</kbd></dt><dd>Girar la cámara</dd>
+          <dt><kbd>Arrastrar</kbd></dt><dd>Girar la c�mara</dd>
           <dt><kbd>Pellizcar</kbd></dt><dd>Acercar o alejar</dd>
         </dl>
-        <p>Para recorrer a pie, usá teclado y mouse.</p>
+        <p>Para recorrer a pie, us� teclado y mouse.</p>
       </section>
-      <footer><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></footer>
+      <footer><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">� OpenStreetMap contributors</a></footer>
     </div>`,
     "help-title",
   );

@@ -5,6 +5,7 @@ import { TourEngine, type TourMode } from "../scene/engine";
 import { element, escapeHtml } from "./dom";
 import { icon } from "./icons";
 import { openTourHelp } from "./tour-help";
+import { mountPlaceInformation } from "./place-information";
 import type { TourShell } from "./tour-shell";
 
 const themeKey = "cyt-theme";
@@ -18,7 +19,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
   try {
     if (localStorage.getItem(themeKey) === "dark") theme = "dark";
   } catch {
-    // El visor también funciona cuando el navegador bloquea el almacenamiento local.
+    // El visor tambi�n funciona cuando el navegador bloquea el almacenamiento local.
   }
   let enhancedGraphics = false;
   let engine: TourEngine | undefined;
@@ -96,7 +97,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
   }
 
   function syncGraphics() {
-    const label = enhancedGraphics ? "Luz original" : "Mejorar gráficos";
+    const label = enhancedGraphics ? "Luz original" : "Mejorar gr�ficos";
     const button = element<HTMLButtonElement>("#graphics-btn");
     button.setAttribute("aria-pressed", String(enhancedGraphics));
     button.setAttribute("aria-label", label);
@@ -109,7 +110,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     engine?.setEnhancedLighting(enhancedGraphics);
     syncGraphics();
     toast(enhancedGraphics
-      ? "Gráficos mejorados: sombras suaves y luz cinematográfica."
+      ? "Gr�ficos mejorados: sombras suaves y luz cinematogr�fica."
       : "Luz original restaurada.");
   }
 
@@ -144,6 +145,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
   syncGraphics();
   try {
     engine = new TourEngine(element("#viewport"), theme);
+    mountPlaceInformation(shell, engine);
     engine.onMode = onMode;
     engine.onVisitPosition = syncLocation;
     engine.overview();
@@ -152,7 +154,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
   } catch (e) {
     console.error("No se pudo iniciar la vista 3D", e);
     openDialog(
-      `<h2>No se pudo iniciar la vista 3D</h2><p>Recargá la página. Si el problema continúa, revisá el detalle del error y la consola del navegador.</p><p>${escapeHtml((e as Error).message)}</p>`,
+      `<h2>No se pudo iniciar la vista 3D</h2><p>Recarg� la p�gina. Si el problema contin�a, revis� el detalle del error y la consola del navegador.</p><p>${escapeHtml((e as Error).message)}</p>`,
     );
   }
   element("#begin").onclick = () => {
@@ -210,7 +212,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
         ? document.exitFullscreen()
         : document.documentElement.requestFullscreen()
     ).catch(() =>
-      toast("La pantalla completa no está disponible en esta vista."),
+      toast("La pantalla completa no est� disponible en esta vista."),
     );
   };
   document.addEventListener("fullscreenchange", () => {

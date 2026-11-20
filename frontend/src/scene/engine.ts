@@ -15,6 +15,7 @@ import { makeCampusSky, type CampusTheme } from "./campus-sky";
 import { Walker } from "../navigation/walker";
 import { pickDestination, pointerOnCanvas } from "../navigation/pick-destination";
 import { places, type Place } from "../data/places";
+import { nearbyInformation, type PlaceInformation } from "../data/place-information";
 import { campusBounds, facultyToWorld, insidePolygon, layout } from "../data/campus-geometry";
 import { facultyVisitTargets, FLOOR_HEIGHT } from "../data/faculty-blueprint";
 import { annexVisitTargets } from "../data/faculty-annexes";
@@ -31,6 +32,8 @@ export class TourEngine {
   readonly walker: Walker;
   readonly social: SocialPerformance;
   onSocialMenu = (_player: Player | null) => {};
+  onInformation = (_information: PlaceInformation) => {};
+  private readonly informationRay = new T.Ray();
   readonly campus = createCampus();
   readonly cats: CampusCats;
   private readonly entranceDoors = new EntranceDoors(this.campus.group);
@@ -121,6 +124,7 @@ export class TourEngine {
       if (this.walker.active) this.useElevator();
     });
     this.walker.onLockChange = (locked) => {
+      if (!locked) this.seatHint.textContent = "";
       this.orbit.enabled = !locked && !this.walker.enabled;
       this.onMode(
         locked ? "walking" : this.walker.enabled ? "paused" : "overview",
@@ -143,7 +147,7 @@ export class TourEngine {
     this.canvas.addEventListener("webglcontextlost", (e) => {
       e.preventDefault();
       this.onError(
-        "El navegador perdió el contexto gráfico. Recargá la página para continuar.",
+        "El navegador perdi� el contexto gr�fico. Recarg� la p�gina para continuar.",
       );
     });
     let press: { x: number; y: number; id: number; time: number; dragged: boolean } | null = null;
@@ -181,17 +185,35 @@ export class TourEngine {
     this.animate();
   }
   private interactionKey(event: KeyboardEvent) {
-    if (!["KeyE", "KeyG"].includes(event.code) || event.repeat || event.ctrlKey || event.metaKey || event.altKey
+    if (!["KeyE", "KeyG", "KeyI"].includes(event.code) || event.repeat || event.ctrlKey || event.metaKey || event.altKey
       || event.isComposing || !this.walker.active || this.social.busy) return;
     if (event.target instanceof Element && event.target.closest("input,textarea,select,[contenteditable],dialog")) return;
     event.preventDefault();
-    if (event.code === "KeyG") {
+    if (event.code === "KeyI") {
+      const point = this.nearInformation();
+      if (point) this.onInformation(point.information);
+    } else if (event.code === "KeyG") {
       this.onSocialMenu(this.nearPlayer());
     } else if (this.seated) {
       this.leaveSeat();
     } else {
       this.sit();
     }
+  }
+  private nearInformation() {
+    if (!this.walker.active || this.social.busy || this.elevatorPassenger) return null;
+    const { x, y, z } = this.camera.position;
+    const point = nearbyInformation(x, y, z);
+    if (!point) return null;
+    const [px, , pz] = point.place.position;
+    this.informationRay.origin.copy(this.camera.position);
+    this.informationRay.direction.set(px - x, 0, pz - z);
+    const distance = this.informationRay.direction.length();
+    if (distance > 0.01) {
+      this.informationRay.direction.multiplyScalar(1 / distance);
+      if (this.walker.obstructs(this.informationRay, distance)) return null;
+    }
+    return point;
   }
   private nearSeat() {
     if (this.seated || this.elevatorPassenger) return null;
@@ -204,7 +226,7 @@ export class TourEngine {
       const d = Math.hypot(delta.x, delta.z);
       delta.y = 0;
       if (d >= distance || direction.dot(delta.normalize()) < 0.15) continue;
-      // La línea a la altura de los ojos evita sentarse atravesando paredes.
+      // La l�nea a la altura de los ojos evita sentarse atravesando paredes.
       const target = seat.point.clone(); target.y = this.camera.position.y;
       const ray = new T.Ray(this.camera.position.clone(), target.sub(this.camera.position).normalize());
       if (this.walker.obstructs(ray, d)) continue;
@@ -225,7 +247,7 @@ export class TourEngine {
     this.seated = null;
     this.walker.teleport(this.seatReturn);
   }
-  /** El desempate por id evita que dos clientes con la misma instantánea conserven una plaza. */
+  /** El desempate por id evita que dos clientes con la misma instant�nea conserven una plaza. */
   receiveSeating(players: Player[], self?: string) {
     this.social.setSelf(players.find(p=>p.id===self)??null);
     this.occupied.clear();
@@ -236,11 +258,11 @@ export class TourEngine {
       this.occupied.add(seat.id);
       if (this.seated?.id === seat.id && self && player.id < self) {
         this.leaveSeat();
-        this.onError("Otro visitante ocupó ese lugar. Elegí otro asiento.");
+        this.onError("Otro visitante ocup� ese lugar. Eleg� otro asiento.");
       }
     }
   }
-  /** Selección por mira y distancia, con oclusión por los sólidos del escenario. */
+  /** Selecci�n por mira y distancia, con oclusi�n por los s�lidos del escenario. */
   private nearPlayer():Player|null {
     if(!this.walker.active)return null;
     const origin=this.walker.body.end;
@@ -274,8 +296,11 @@ export class TourEngine {
     if (now >= this.nextSeatHint) {
       this.nextSeatHint = now + 100;
       const available = this.walker.active ? this.nearSeat() : null;
-      this.seatHint.textContent = !this.walker.active ? '' : this.social.busy ? 'Interacción en curso · Esc para pausar'
-        : this.seated ? 'E · Levantarse' : available ? 'E · Sentarse' : '';
+      const information = this.nearInformation();
+      const seatText = this.seated ? 'E � Levantarse' : available ? 'E � Sentarse' : '';
+      const hint = !this.walker.active ? '' : this.social.busy ? 'Interacci�n en curso � Esc para pausar'
+        : [information ? `I � Conocer la historia de ${information.place.name}` : '', seatText].filter(Boolean).join('\n');
+      if (this.seatHint.textContent !== hint) this.seatHint.textContent = hint;
     }
     this.updateElevator(elapsed);
     this.social.update(dt);
@@ -409,7 +434,7 @@ export class TourEngine {
     const view = new T.Vector3(-0.44, 0.73, -1).normalize();
     const vertical = T.MathUtils.degToRad(this.camera.fov / 2);
     const horizontal = Math.atan(Math.tan(vertical) * this.camera.aspect);
-    // Encadra el contorno completo en el tamaño actual de la ventana.
+    // Encadra el contorno completo en el tama�o actual de la ventana.
     const right = new T.Vector3().crossVectors(this.camera.up, view).normalize();
     const up = new T.Vector3().crossVectors(view, right);
     const offset = new T.Vector3();
@@ -456,7 +481,7 @@ export class TourEngine {
     this.moonSprite.visible = dark;
     this.applyLighting();
   }
-  /** Luz cálida de alto rango con sombras suaves, relleno frío y exposición de cine. */
+  /** Luz c�lida de alto rango con sombras suaves, relleno fr�o y exposici�n de cine. */
   setEnhancedLighting(enabled: boolean) {
     this.enhancedLighting = enabled;
     this.renderer.shadowMap.enabled = enabled;
@@ -465,7 +490,7 @@ export class TourEngine {
       this.sun.castShadow = true;
       this.sun.shadow.mapSize.set(2048, 2048);
       // La luz mira al origen; un cuadrado generoso cubre todo el sector sin
-      // depender de la orientación de la cámara de sombras.
+      // depender de la orientaci�n de la c�mara de sombras.
       const corners = [
         [campusBounds.minX, campusBounds.minZ],
         [campusBounds.minX, campusBounds.maxZ],

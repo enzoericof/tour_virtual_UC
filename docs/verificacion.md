@@ -1,5 +1,11 @@
 # Verificación (versión 0.1.0)
 
+## Información de Sala Manfred - 20/11/2026
+
+Al acercarse a la llegada transitable de Sala Manfred aparece el aviso con I. Se comprueban distancia horizontal, altura y oclusión para evitar activarlo desde otro piso o a través de paredes. El contenido editorial local presenta a Manfred Stark González, su rol estudiantil, el Marzo Paraguayo y la dedicación de la sala, con enlace a la fuente aportada. Se reutilizan el aviso contextual y el diálogo del recorrido; abrirlo pausa y libera el mouse. Esc o el cierre mantienen la pausa y «Continuar recorrido» vuelve a solicitar la captura del mouse.
+
+Validación sobre la base local 4ed9d9a: build de TypeScript/Vite aprobado; 94 de 95 pruebas aprobadas, incluidas las tres nuevas de cercanía, oclusión y atajo. El único fallo corresponde a la separación de Sala Manfred ya documentada. Revisión visual pendiente: el servidor local no resultó accesible y el control del navegador se detuvo al no poder verificar la URL activa. Antes de publicar se integraron los cambios de engine y Ayuda de main 12918f4; no se afirma una prueba visual ni multijugador en producción.
+
 ## Gestos: falso rechazo de espacio - 19/11/2026
 
 La pose de presencia resta 1,5 m a la cámara, mientras la cápsula asentada puede dejar la cámara a 1,48 m del piso. Validar esa pose directamente como destino hacía colisionar los pies con el suelo y cancelaba gestos en lugares despejados. Ahora se busca apoyo real hasta 18 cm alrededor de la altura recibida, se agrega un margen de 2,5 cm y se comprueba la cápsula completa antes de reubicar al visitante. Se conservan las comprobaciones del trayecto, paredes, objetos del editor y barreras activas; un destino sin piso se rechaza. No se añaden consultas de red ni trabajo por cuadro.

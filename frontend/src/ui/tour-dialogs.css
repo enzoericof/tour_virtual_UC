@@ -29,6 +29,24 @@ dialog p {
   color: var(--muted);
   font-size: 12px !important;
 }
+.information-dedication {
+  padding: 16px 18px;
+  margin-block: 24px;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--surface-tint);
+  font-weight: 650;
+}
+.information-source {
+  display: grid;
+  gap: 8px;
+  padding-top: 20px;
+  margin-top: 24px;
+  border-top: 1px solid var(--surface-border);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.place-information .actions { margin-bottom: 0; }
 .detail-hero {
   width: calc(100% + 72px);
   height: 230px;

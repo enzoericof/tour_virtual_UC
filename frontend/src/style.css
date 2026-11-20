@@ -122,3 +122,4 @@ body.is-walking { cursor: none; }
 
 .seat-hint { position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 5; }
 .seat-hint:empty { display: none; }
+.seat-hint { max-width: calc(100vw - 32px); width: max-content; white-space: pre-line; text-align: center; line-height: 1.6; }
