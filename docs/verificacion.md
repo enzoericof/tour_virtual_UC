@@ -1,5 +1,22 @@
 # Verificación (versión 0.1.0)
 
+## Consumo del índice de colisiones - 19/11/2026
+
+- La auditoría anterior de buffers geométricos no medía los objetos del índice de colisiones. Se detectó que el `Octree` de Three.js, con sus 16 niveles y 8 triángulos por hoja predeterminados, reproducía referencias de las caras grandes y solapadas en millones de celdas.
+- Comparación local controlada sobre el mismo modelo `b82d570`, después de GC y con 88.098 triángulos únicos en ambos casos:
+
+| Métrica | Configuración anterior | Configuración acotada |
+| --- | ---: | ---: |
+| Nodos del índice | 2.252.488 | 52.258 |
+| Referencias a triángulos | 7.635.389 | 559.291 |
+| Heap JavaScript tras construir escena e índice | 1.985,42 MB | 143,30 MB |
+| RSS del proceso de medición | 2.386,61 MB | 513,52 MB |
+
+- Se centraliza la construcción del índice con `maxLevel=6` y `trianglesPerLeaf=16`. Se aplica al campus, colocaciones del editor y barreras dinámicas. Se conservan todos los triángulos y sus coordenadas: la subdivisión solo selecciona candidatos y las comprobaciones finales siguen siendo exactas. Al reconstruir se conserva el objeto que comparten caminante y gatos.
+- Se incorporó main `32770ac` antes de validar. Con ese edificio adicional se midieron 88.558 triángulos únicos, 53.209 nodos y 144,88 MB de heap. En una muestra local de cápsula más rayo sobre los puntos de visita: mediana 0,0121 ms y percentil 95 de 0,0811 ms. Son mediciones sintéticas de consultas, no FPS del navegador.
+- Chrome: carga visual del campus completo con la configuración de producción; se observaron 53.209 nodos, los 88.558 triángulos y aproximadamente 230 MB de heap JavaScript en la vista local. Esto no representa el total de la pestaña: excluye parte de texturas, buffers de GPU y gastos del navegador. No se usaron cuentas ni la base de producción.
+- Pasaron 87 pruebas y el build de producción, incluidos rayos contrastados con el modelo, contactos de esfera/cápsula en piso/pared/escalón, reconstrucción del índice y referencia compartida. La prueba de campus verifica que no se pierden triángulos y que el índice queda por debajo de 150.000 nodos; se mantienen el recorrido por baños, pisos y ascensor y las pruebas de gatos, asientos y multijugador.
+
 ## Encuentro de pisos junto a cantina - 19/11/2026
 
 - Los rayos sobre el modelo real detectaron dos acabados distintos exactamente a 0,905 m: el hormigón del patio de Maquetas y el piso genérico de la plataforma. También había polígonos repetidos entre las piezas de la plaza.

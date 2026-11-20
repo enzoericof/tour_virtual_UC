@@ -524,6 +524,12 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       body: new Capsule(new Vector3(), new Vector3(0, 1, 0), 0.28),
     });
     walker.setWorld(colliders);
+    let collisionNodes=0;const indexedTriangles=new Set();
+    function inspectCollision(tree){collisionNodes++;for(const triangle of tree.triangles)indexedTriangles.add(triangle);tree.subTrees.forEach(inspectCollision);}
+    inspectCollision(walker.collisionWorld);
+    let modelTriangles=0;colliders.traverse(o=>{if(o.isMesh)modelTriangles+=(o.geometry.index?.count??o.geometry.attributes.position.count)/3;});
+    assert.equal(indexedTriangles.size,modelTriangles,"El presupuesto de memoria no elimina triángulos de colisión");
+    assert.ok(collisionNodes<150000,`El índice del campus conserva un tamaño acotado: ${collisionNodes} nodos`);
     const { center: [towerX, towerZ], radius, radiusX, core, entry: entrance, menSide } = plan.tower;
     const galleryEdge = block1.depth / 2;
     const south = new Vector3(0, 0, 1);

@@ -1,5 +1,6 @@
 import * as T from "three";
-import { Octree } from "three/addons/math/Octree.js";
+import type { Octree } from "three/addons/math/Octree.js";
+import { buildCollisionWorld } from "./collision-world";
 import { Capsule } from "three/addons/math/Capsule.js";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 export class Walker {
@@ -9,8 +10,8 @@ export class Walker {
     new T.Vector3(0, 1.5, 0),
     0.28,
   );
-  private world = new Octree();
-  private editorWorld = new Octree();
+  private world = buildCollisionWorld();
+  private editorWorld = buildCollisionWorld();
   private barriers: { world: Octree; blocked: () => boolean }[] = [];
   private velocity = new T.Vector3();
   private keys = new Set<string>();
@@ -94,16 +95,14 @@ export class Walker {
     return Boolean(this.editorWorld.sphereIntersect(sphere)) || this.barriers.some(b=>b.blocked() && Boolean(b.world.sphereIntersect(sphere)));
   }
   setWorld(object: T.Object3D) {
-    this.world.clear();
-    this.world.fromGraphNode(object);
+    buildCollisionWorld(object, this.world);
   }
   /** Sólidos colocados desde el editor 3D: se reconstruyen cuando cambian. */
   setEditorWorld(object: T.Object3D | null) {
-    this.editorWorld.clear();
-    if (object) this.editorWorld.fromGraphNode(object);
+    buildCollisionWorld(object, this.editorWorld);
   }
   addBarrier(mesh: T.Mesh, blocked: () => boolean) {
-    this.barriers.push({ world: new Octree().fromGraphNode(mesh), blocked });
+    this.barriers.push({ world: buildCollisionWorld(mesh), blocked });
   }
   obstructs(ray: T.Ray, distance: number) {
     return this.rayDistance(ray,distance) < distance - .015;
