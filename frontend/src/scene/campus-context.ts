@@ -92,6 +92,26 @@ function addPerimeterTrees(group: T.Group, edge: number[][], y: number) {
     const tree = new T.LOD(); tree.name = "Árbol del perímetro"; tree.userData.realisticTree=true;
     tree.position.set(x,y,z);tree.rotation.y=index*2.39996;
     tree.scale.set(spread/5.4,height/10,spread/5.4);
-    tree.addLevel(near.clone(true),0);tree.addLevel(far.clone(true),18);group.add(tree);
+    tree.addLevel(copyTreeTemplate(near),0);tree.addLevel(copyTreeTemplate(far),18);group.add(tree);
   });
+}
+
+/** Las copias del perímetro solo cambian su transformación exterior.
+ * Comparten las matrices y colores inmutables de las hojas, también en la GPU.
+ * InstancedMesh.clone() duplicaría esos buffers para cada árbol y cada nivel.
+ */
+function copyTreeTemplate(source: T.Object3D): T.Object3D {
+  if (source instanceof T.InstancedMesh) {
+    const copy = new T.InstancedMesh(source.geometry, source.material, 0);
+    T.Mesh.prototype.copy.call(copy, source, false);
+    copy.instanceMatrix = source.instanceMatrix;
+    copy.instanceColor = source.instanceColor;
+    copy.count = source.count;
+    copy.boundingBox = source.boundingBox?.clone() ?? null;
+    copy.boundingSphere = source.boundingSphere?.clone() ?? null;
+    return copy;
+  }
+  const copy = source.clone(false);
+  for (const child of source.children) copy.add(copyTreeTemplate(child));
+  return copy;
 }

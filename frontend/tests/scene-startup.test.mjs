@@ -110,6 +110,22 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       assert.ok(hit && Math.abs(hit.point.y - floor - .78) < .06, "Cada mesa tiene colisión a la altura de su tablero");
     }
     const { group: context } = createCampusContext(grass);
+    // El perímetro conserva sus árboles y ambos niveles sin copiar millones de matrices.
+    const perimeter = context.children.filter(o => o.isLOD);
+    assert.ok(perimeter.length > 100);
+    const instanceBuffers = new Set();
+    for (const tree of perimeter) {
+      assert.equal(tree.levels.length, 2);
+      tree.traverse(o => {
+        if (!o.isInstancedMesh) return;
+        assert.ok(o.count > 0 && o.boundingSphere?.radius > 0);
+        instanceBuffers.add(o.instanceMatrix.array.buffer);
+        if (o.instanceColor) instanceBuffers.add(o.instanceColor.array.buffer);
+      });
+    }
+    const foliageBytes = [...instanceBuffers].reduce((sum, buffer) => sum + buffer.byteLength, 0);
+    assert.ok(foliageBytes < 8_000_000, `Perimeter foliage buffers: ${foliageBytes} bytes`);
+    assert.equal(instanceBuffers.size, 12, "Tres variantes y dos LOD comparten matrices y colores");
     const ground = context.getObjectByName("Terreno continuo");
     assert.equal(ground.material, grass, "The base terrain uses the same grass material as the garden");
     assert.ok(ground.receiveShadow && !ground.castShadow, "The ground receives shadows without casting them");

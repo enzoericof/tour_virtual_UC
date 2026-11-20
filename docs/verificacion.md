@@ -1,5 +1,21 @@
 # Verificación (versión 0.1.0)
 
+## Árbol de cantina y memoria del perímetro - 19/11/2026
+
+- Se restaura exactamente el bloque del árbol del alcorque de la cantina anterior a `794f526`: tronco esbelto, ramas y 5.600 hojas geométricas. Se mantienen el alcorque, arbustos, ubicación y colisión originales, y los demás cambios del equipo.
+- El perímetro tenía 210 árboles con dos niveles de detalle. `InstancedMesh.clone()` copiaba matrices y colores para cada ejemplar: aproximadamente 12,45 millones de instancias entre ambos niveles. Ahora solo se copia la jerarquía y sus transformaciones exteriores; las matrices y colores locales inmutables se comparten, igual que geometrías y materiales. Se conserva la cantidad de árboles, hojas, forma y distancia de cambio de detalle.
+- Medición local construyendo el modelo real, sumando cada `ArrayBuffer` único de geometrías, índices y atributos de instancias, en MB decimales:
+
+| Datos retenidos | Antes | Después |
+| --- | ---: | ---: |
+| Contexto exterior completo | 949,15 MB | 7,55 MB |
+| Escena completa | 1.066,66 MB | 121,24 MB |
+| Proceso Node después de GC (RSS orientativo) | 1.467,45 MB | 517,82 MB |
+
+- Los 73 recursos de `frontend/public` sumaban 12,15 MB. Esta cifra no es el tráfico inicial ni incluye los paquetes compilados: diferencia tamaño de archivos de memoria de ejecución. Tampoco las cifras de buffers equivalen al total de una pestaña de Chrome, que incluye texturas decodificadas, GPU, colisiones y otros gastos del navegador.
+- Chrome: campus completo y árbol restaurado revisados en una vista local sin autenticar ni conectar a la base. En esa vista, la instrumentación de `bufferData` registró 34,88 MB de buffers gráficos asignados, 147 geometrías y 33 texturas; el consumo depende de qué objetos se hayan dibujado. No se midieron FPS ni memoria total del proceso del navegador.
+- Pasaron las 81 pruebas y la compilación de producción. La prueba de escena comprueba ambos niveles de detalle, límites válidos para el descarte fuera de cámara, doce buffers únicos compartidos para matrices/colores y un presupuesto inferior a 8 MB para el follaje del perímetro. Se contrastó el bloque del árbol restaurado con el original de Git.
+
 ## Gestos con G y retiro del aviso permanente - 19/11/2026
 
 - Retirado del motor 3D el aviso «E · Gestos · Enter · Chat». El indicador de asientos solo aparece junto a una plaza disponible o al estar sentado. C abre el chat, G abre los gestos e interacciones y E permite sentarse o levantarse.
