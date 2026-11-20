@@ -85,13 +85,14 @@ export class SocialPerformance {
       return;
     }
     const anchor = actionAnchor(action, this.self.id);
+    const destination = this.walker.standingPosition(anchor.position);
     const feet = this.walker.body.end.clone().add(new T.Vector3(0, -1.5, 0));
     this.ray.origin.copy(this.camera.position);
-    this.ray.direction.copy(anchor.position).sub(feet);
+    this.ray.direction.copy(destination ?? anchor.position).sub(feet);
     const distance = this.ray.direction.length();
     this.ray.direction.normalize();
     if (
-      !this.walker.canStandAt(anchor.position) ||
+      !destination ||
       (distance > 0.02 && this.walker.obstructs(this.ray, distance))
     ) {
       this.error(
@@ -105,7 +106,7 @@ export class SocialPerformance {
     this.savedLook.copy(this.camera.quaternion);
     this.active = action;
     this.walker.frozen = true;
-    this.walker.teleport(anchor.position);
+    this.walker.teleport(destination);
     this.avatar = new Avatar(this.self.id, this.self, performance.now(), false);
     this.avatar.setAction(
       action,

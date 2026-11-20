@@ -151,6 +151,16 @@ export class Walker {
       feet.clone().add(new T.Vector3(0, 1.5, 0)), this.body.radius,
     ));
   }
+  /** Apoyo real para reubicar un gesto: la pose de red puede tocar el piso
+   * o quedar unos milímetros por debajo al asentarse la cápsula del caminante. */
+  standingPosition(feet: T.Vector3): T.Vector3 | null {
+    const range = 0.18;
+    const ray = new T.Ray(feet.clone().add(new T.Vector3(0, range, 0)), new T.Vector3(0, -1, 0));
+    const distance = this.rayDistance(ray, range * 2);
+    if (distance >= range * 2) return null;
+    const position = ray.at(Math.max(0, distance - 0.025), new T.Vector3());
+    return this.canStandAt(position) ? position : null;
+  }
   findSpawn(mesh: T.Object3D, preferred = new T.Vector3()): T.Vector3 {
     const ray = new T.Raycaster();
     const candidate = new T.Vector3();

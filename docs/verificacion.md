@@ -1,5 +1,13 @@
 # Verificación (versión 0.1.0)
 
+## Gestos: falso rechazo de espacio - 19/11/2026
+
+La pose de presencia resta 1,5 m a la cámara, mientras la cápsula asentada puede dejar la cámara a 1,48 m del piso. Validar esa pose directamente como destino hacía colisionar los pies con el suelo y cancelaba gestos en lugares despejados. Ahora se busca apoyo real hasta 18 cm alrededor de la altura recibida, se agrega un margen de 2,5 cm y se comprueba la cápsula completa antes de reubicar al visitante. Se conservan las comprobaciones del trayecto, paredes, objetos del editor y barreras activas; un destino sin piso se rechaza. No se añaden consultas de red ni trabajo por cuadro.
+
+Cuatro pruebas nuevas reproducen el contacto con el suelo, los cinco gestos en cuatro alturas, paredes y barreras, y un destino sin apoyo. Pasan todas. Compilación TypeScript/Vite correcta. Suite completa: 91/92 aprobadas; la prueba de separación adicional de Sala Manfred ya falla en main 91f6e72 y depende de archivos de distribución que esta corrección no modifica. Se conserva ese fallo visible, sin alterar medidas ni debilitar su comprobación.
+
+Revisión en Chrome con el controlador social, caminante, colisiones y menú reales: G abre los gestos y seleccionar OK activa la animación sin aviso de falta de espacio. Presencia simulada localmente; no equivale a una prueba entre dos cuentas en producción.
+
 ## Consumo del índice de colisiones - 19/11/2026
 
 - La auditoría anterior de buffers geométricos no medía los objetos del índice de colisiones. Se detectó que el `Octree` de Three.js, con sus 16 niveles y 8 triángulos por hoja predeterminados, reproducía referencias de las caras grandes y solapadas en millones de celdas.
