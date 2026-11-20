@@ -267,22 +267,19 @@ export const gardenWalkHedge: Vec2[] = (() => {
   return [[along - 4.4, 1.85], [along - 1.5, 1.85], [along - 1.3, 3.0]]
     .map(([d, offset]): Vec2 => [a[0] + dx * d - dz * side * offset, a[1] + dz * d + dx * side * offset]);
 })();
-/** Circuito exterior: evita atravesar los edificios y llega al sendero existente detrás de Manfred. */
+/** Se conserva la circulación de oficinas; retirado el circuito blanco de DICIA y Kampus Print. */
 const officeIds = new Set(["led", "da-cap", "das"]);
 const officeWalkU = -38 + officeShiftU;
 export const annexPaths: Vec2[][] = [
-  [[officeWalkU,-36 + officeShiftV],[officeWalkU,-18 + officeShiftV],[officeWalkU,-9 + officeShiftV],[officeWalkU,bypassV],[bypassU,bypassV],[bypassU,23],[-55,23],[-55,48],[-38,48],[30,48],[printU + 8,48],[57.1,48]].map(([u,v])=>annexPoint(u,v)),
+  [[officeWalkU,-36 + officeShiftV],[officeWalkU,-18 + officeShiftV],[officeWalkU,-9 + officeShiftV],[officeWalkU,bypassV],[bypassU,bypassV]].map(([u,v])=>annexPoint(u,v)),
   [annexPoint(-45.7 + officeShiftU + 9.2 / 2 + 0.3, dg.mapCenter[1]), annexPoint(officeWalkU, dg.mapCenter[1]), annexPoint(officeWalkU, bypassV)],
   // Maquetas y DG ya tienen su punto de visita sobre los caminos principales.
-  ...facultyAnnexes.filter(b => b !== maquetas && b !== dg).map((b): Vec2[] => {
+  ...facultyAnnexes.filter(b => b !== maquetas && b !== dg && b !== dicia && b !== kampusPrint).map((b): Vec2[] => {
     const [u,v] = b.mapCenter;
     if (b === dei) return [b.entrance, annexPoint(u + deiSideDoor.center[0], outerWalkV - 0.4)];
     if (officeIds.has(b.id)) return [b.entrance, annexPoint(officeWalkU,v)];
-    if (b.id === "kampus-print") return [plan.plazaPassage.foot, b.entrance, annexPoint(u + 8, v - 4.8), annexPoint(u + 8, 48)];
-    if (b.id === "cta-dicia") return [b.entrance,annexPoint(u,48),annexPoint(-38,48)];
     return [b.entrance,annexPoint(officeWalkU,v+b.rect.size[1]/2+2.5)];
   }),
-  [annexPoint(57.1,48), annexPoint(70,48), [0,-22]],
 ];
 export const annexCoveredPaths: Vec2[][] = [
   // Solo continúa la galería exterior del ala de oficinas, desde la puerta del corredor.

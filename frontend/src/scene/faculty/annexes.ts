@@ -180,7 +180,7 @@ export function addAnnexes(
       }
     }
     if (isDei) addLedEntranceWing(builder, deiBrick);
-    if (!isDei) box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
+    if (!isDei && annex.id !== "kampus-print") box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
   });
   annexPaths.forEach((points) => path(points, 2));
   addSegmentedGardenPath(builder, deiGardenPath, annexPavingHeight, gardenWalkMaterial, { startDistance: gardenJunctionReach,

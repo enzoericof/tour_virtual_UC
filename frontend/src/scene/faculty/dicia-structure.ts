@@ -71,6 +71,4 @@ export function addDiciaStructure(builder: FacultyBuilder, annex: Annex,
   for (const x of [n.minX, n.maxX])
     box(0.28, h, spec.pillarWidth, x, h / 2, n.maxZ - 0.1, brick, true);
   box(run, 0.20, 0.035, cx, h - 0.14, n.minZ - 0.12, trim);
-  // Se mantiene la vereda de llegada del modelo anterior.
-  box(annex.rect.size[0] + 1, 0.08, 2.1, 0, 0.01, wing.maxZ + 1.1, builder.m.stone);
 }
