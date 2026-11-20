@@ -61,7 +61,43 @@ body {
 [data-theme="dark"] .tour-panel .form-error { color: #ffb5ab; }
 .tour-menu span { max-width: 94px; overflow: hidden; text-overflow: ellipsis; }
 .account-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
-.account-actions .text-btn { grid-column: 1 / -1; justify-self: start; }
+.account-actions .primary {
+  min-height: 52px;
+  gap: 10px;
+  font-size: 16px;
+  border: 1px solid transparent;
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.account-actions .account-logout {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  margin-top: 10px;
+  padding: 12px 18px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: var(--surface-tint);
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 700;
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+.account-actions :is(.primary, .account-logout):focus-visible {
+  box-shadow: 0 4px 12px var(--menu-shadow);
+}
+@media (hover: hover) {
+  .account-actions .primary:hover {
+    box-shadow: 0 5px 14px color-mix(in srgb, var(--action-fill) 30%, transparent);
+    transform: translateY(-1px);
+  }
+  .account-actions .account-logout:hover {
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    box-shadow: 0 4px 12px var(--menu-shadow);
+  }
+}
 .register-fields { display: grid; gap: 16px; padding: 0; margin: 0; border: 0; min-width: 0; }
 .form-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-columns label { min-width: 0; }
@@ -102,11 +138,11 @@ dialog.tour-panel:has(.tour-help) .dialog-close:hover { background: var(--surfac
 .welcome-card form label { font-size: 17px; gap: 8px; }
 .welcome-card form :is(input, select) { padding: 14px 16px; min-height: 54px; font-weight: 400; }
 .welcome-card .form-error:empty { min-height: 0; display: none; }
-.remembered-account { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--surface-border); background: var(--surface-tint); border-radius: 12px; }
-.account-avatar { display: grid; place-items: center; width: 38px; height: 38px; flex: none; border-radius: 50%; background: var(--surface-tint); color: var(--accent); font: 750 17px "Source Sans 3", sans-serif; }
+.remembered-account { display: flex; align-items: center; gap: 16px; padding: 18px; border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--surface-border)); background: var(--surface-tint); border-radius: 14px; box-shadow: 0 3px 10px var(--menu-shadow); }
+.account-avatar { display: grid; place-items: center; width: 46px; height: 46px; flex: none; border: 2px solid color-mix(in srgb, var(--accent) 65%, var(--surface-border)); border-radius: 50%; background: var(--surface); color: var(--accent); font: 750 20px "Source Sans 3", sans-serif; }
 .remembered-account div { min-width: 0; display: grid; gap: 5px; }
-.remembered-account strong { font: 700 13px "Source Sans 3", sans-serif; }
-.remembered-account div span { font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.remembered-account strong { font: 700 16px "Source Sans 3", sans-serif; }
+.remembered-account div span { font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
 .welcome-actions { display: grid; gap: 10px; margin-top: 20px; }
 .welcome-actions button { width: 100%; }
 .session-loading, .auth-progress { display: flex; align-items: center; gap: 10px; padding: 12px 0; margin: 0; color: var(--muted); font-size: 12px; }

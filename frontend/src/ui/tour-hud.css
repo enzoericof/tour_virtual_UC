@@ -98,7 +98,6 @@
   width: clamp(104px, 14vw, 138px);
   padding-inline: 6px;
 }
-.tour-toolbar .tour-icon { width: 44px; padding: 0; }
 .tour-toolbar svg, .tour-popover svg {
   width: 18px;
   height: 18px;
@@ -131,6 +130,22 @@
 body.is-walking .tour-guidance { bottom: var(--tour-bottom); }
 body:has(.tour-popover:not(.hidden)) #pause-label { visibility: hidden; }
 .tour-guidance p { margin: 0; }
+.pause-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px;
+  border: 1px solid var(--menu-border);
+  border-radius: 12px;
+  background: var(--menu-surface);
+  color: var(--menu-text);
+  box-shadow: 0 4px 14px var(--menu-shadow);
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: none;
+  pointer-events: none;
+}
+.pause-status svg { width: 16px; height: 16px; color: var(--menu-accent); }
 body.ui-compact :is(.campus-heading, .tour-toolbar, .tour-guidance) { display: none; }
 [data-theme="light"] body {
   --scene-text: #102346;

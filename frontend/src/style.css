@@ -75,14 +75,37 @@ body.is-walking { cursor: none; }
 .pause-tour {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 10px;
   min-height: 44px;
+  padding: 8px 14px 8px 9px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px var(--menu-shadow);
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+.pause-tour kbd {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  min-height: 28px;
+  margin: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--menu-border);
+  border-bottom-width: 3px;
+  border-radius: 6px;
+  background: var(--menu-tint);
+  color: var(--menu-accent);
+  font: 600 12px/1.2 "IBM Plex Mono", monospace;
+}
+@media (hover: hover) {
+  .pause-tour:hover {
+    background: var(--menu-tint);
+    border-color: var(--menu-accent);
+    box-shadow: 0 6px 18px var(--menu-shadow);
+  }
 }
 .tour-panel button:focus-visible { outline-offset: 2px; }
 @media (max-width: 500px) {
-  .tour-toolbar .tour-icon, .tour-toolbar #overview { width: 44px; padding: 0; }
   .tour-toolbar :is(.tour-start, .tour-menu) { width: 96px; }
-  #overview span { display: none; }
 }
 @media (max-width: 390px) {
   .tour-toolbar { gap: 2px; }
@@ -91,6 +114,7 @@ body.is-walking { cursor: none; }
 }
 @media (max-width: 370px) {
   .tour-toolbar :is(.tour-start, .tour-menu) { width: 68px; }
+  .tour-toolbar .tour-start { width: 80px; }
   .tour-toolbar :is(.tour-start, .tour-menu) svg { display: none; }
 }
 @media (max-height: 480px) {

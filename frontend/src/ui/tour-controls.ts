@@ -9,7 +9,7 @@ import { mountPlaceInformation } from "./place-information";
 import type { TourShell } from "./tour-shell";
 
 const themeKey = "cyt-theme";
-const hudPanels = { "tour-options": "more-btn", "tour-account": "account-btn" } as const;
+const hudPanels = { "tour-route": "route-btn", "tour-options": "more-btn", "tour-account": "account-btn" } as const;
 type HudPanel = keyof typeof hudPanels;
 const panelIds = Object.keys(hudPanels) as HudPanel[];
 
@@ -37,7 +37,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     setHudPanel(null);
     selectPlace(place);
     engine.go(place);
-    element("#begin").focus();
+    element("#route-btn").focus();
   }
 
   function setHudPanel(panel: HudPanel | null, restoreFocus = false) {
@@ -92,7 +92,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     const button = element<HTMLButtonElement>("#theme-btn");
     button.setAttribute("aria-label", label);
     button.title = label;
-    button.innerHTML = icon(dark ? "sun" : "moon");
+    button.innerHTML = icon(dark ? "sun" : "moon") + `<span>${label}</span>`;
   }
 
   function onMode(mode: TourMode) {
@@ -106,8 +106,6 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     element("#pause-tour").classList.toggle("hidden", !walking);
     element("#pause-label").classList.toggle("hidden", !paused);
     element("#tour-toolbar").classList.toggle("hidden", walking);
-    element("#overview").classList.toggle("hidden", !paused);
-    element("#begin span").textContent = paused ? "Continuar" : "Recorrer";
     if (mode === "overview") setLocation(campusName);
     else syncLocation(performance.now(), true);
     if (walking) {
@@ -116,7 +114,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     }
     if (paused && changed) {
       queueMicrotask(() => {
-        if (currentMode === "paused" && !activeHudPanel && !dialog.open) element("#begin").focus();
+        if (currentMode === "paused" && !activeHudPanel && !dialog.open) element("#route-btn").focus();
       });
     }
   }
@@ -147,7 +145,7 @@ export function mountTourControls(shell: TourShell, selectPlace: (place: Place |
     engine?.overview();
     selectPlace(null);
     setHudPanel(null);
-    element("#begin").focus();
+    element("#route-btn").focus();
   }
   for (const id of panelIds) {
     element("#" + hudPanels[id]).onclick = () => setHudPanel(activeHudPanel === id ? null : id);

@@ -7,6 +7,7 @@ import { createLibrary } from "./library";
 import type { TourShell } from "./tour-shell";
 import type { InitialSession } from "../services/session";
 import { mountAuthForm } from "./auth-form";
+import { icon } from "./icons";
 
 export function mountCommunity(
   shell: TourShell,
@@ -41,7 +42,7 @@ export function mountCommunity(
   function account() {
     if (user) {
       openDialog(
-        `<span class="eyebrow">MI CUENTA</span><h2>Hola, ${escapeHtml(user.name)}</h2><p>${escapeHtml(user.email)}</p><p class="subtle">${user.role === "ADMIN" ? "Administrador de contenidos" : "Miembro de la comunidad"}</p><p class="subtle" id="presence-status">${escapeHtml(presenceStatus)}</p><div class="account-actions"><button class="primary" id="my-works">Mis trabajos</button><button class="secondary" id="community-chat">Chat del campus</button>${user.role === "ADMIN" ? '<button class="secondary" id="manage-panels">Administrar paneles</button>' : ""}<button class="text-btn" id="logout">Cerrar sesión</button></div>`,
+        `<span class="eyebrow">MI CUENTA</span><h2>Hola, ${escapeHtml(user.name)}</h2><p>${escapeHtml(user.email)}</p><p class="subtle">${user.role === "ADMIN" ? "Administrador de contenidos" : "Miembro de la comunidad"}</p><p class="subtle" id="presence-status">${escapeHtml(presenceStatus)}</p><div class="account-actions"><button class="primary" id="my-works">${icon("book")}<span>Mis trabajos</span></button><button class="primary" id="community-chat">${icon("chat")}<span>Chat del campus</span></button>${user.role === "ADMIN" ? '<button class="secondary" id="manage-panels">Administrar paneles</button>' : ""}<button class="account-logout" id="logout">${icon("logout")}<span>Cerrar sesión</span></button></div>`,
       );
       element("#my-works").onclick = () => void library();
       element("#community-chat").onclick = openChat;
