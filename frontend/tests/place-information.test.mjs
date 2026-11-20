@@ -40,6 +40,19 @@ test("La información no se ofrece a través de muros, en pausa, ascensor o dura
   engine.social.busy = false; engine.elevatorPassenger = true; assert.equal(nearby(), null);
 });
 
+test("La historia de la facultad se activa frente al cartel existente, separada de Manfred", async () => {
+  const { facultyBlueprint, fromRect } = await server.ssrLoadModule("/src/data/faculty-blueprint.ts");
+  const { facultyToWorld } = await server.ssrLoadModule("/src/data/campus-geometry.ts");
+  const [sx, sz] = fromRect(facultyBlueprint.blockGCourtyard.sign, [0, .35]);
+  const [x, y, z] = facultyToWorld([sx, .055, sz]);
+  const point = nearbyInformation(x, y + 1.5, z);
+  assert.equal(point?.information.label, "Historia de la facultad");
+  assert.match(point.information.dedication, /1979/);
+  assert.match(point.information.paragraphs.join(" "), /4\/79/);
+  assert.equal(nearbyInformation(x, y + 5, z), null);
+  assert.equal(nearbyInformation(...informationPoints[0].position.map((v, i) => i === 1 ? v + 1.5 : v)), informationPoints[0]);
+});
+
 test("I abre solo la información cercana e ignora repetición, escritura, composición y modificadores", () => {
   const calls = [];
   const point = informationPoints[0];

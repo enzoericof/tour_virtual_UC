@@ -1,5 +1,11 @@
 # Verificación (versión 0.1.0)
 
+## Historia de la facultad junto al cartel - 20/11/2026
+
+Se agrega un segundo punto informativo frente al cartel azul de Plaza de la Amistad, derivado de `blockGCourtyard.sign` y separado 35 cm de su tablero para evitar la oclusión del propio cartel. I abre el mismo diálogo del recorrido con la aprobación del proyecto de creación de la facultad del 1/12/1979 (acta 4/79) y enlace a la historia institucional. El cartel conserva su geometría y su texto. Las etiquetas del aviso y del panel ahora corresponden a cada contenido.
+
+Build aprobado y 95/96 pruebas locales aprobadas; permanece el fallo previo de separación de Manfred. La prueba nueva verifica el anclaje al cartel, el contenido y su independencia de Manfred y otros pisos. La revisión visual del tour sigue pendiente por el bloqueo del navegador documentado anteriormente.
+
 ## Información de Sala Manfred - 20/11/2026
 
 Al acercarse a la puerta real de Sala Manfred aparece el aviso con I (radio de 3 m). El punto se deriva del vano del modelo, separado de la llegada del pasillo junto a Bedelía. Se verificó que no se activa en la llegada de Bedelía; las ocho pruebas de información e inactividad y el build pasaron. Se comprueban distancia horizontal, altura y oclusión para evitar activarlo desde otro piso o a través de paredes. El contenido editorial local presenta a Manfred Stark González, su rol estudiantil, el Marzo Paraguayo y la dedicación de la sala, con enlace a la fuente aportada. Se reutilizan el aviso contextual y el diálogo del recorrido; abrirlo pausa y libera el mouse. Esc o el cierre mantienen la pausa y «Continuar recorrido» vuelve a solicitar la captura del mouse.

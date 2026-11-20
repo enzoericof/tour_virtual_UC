@@ -299,7 +299,7 @@ export class TourEngine {
       const information = this.nearInformation();
       const seatText = this.seated ? 'E · Levantarse' : available ? 'E · Sentarse' : '';
       const hint = !this.walker.active ? '' : this.social.busy ? 'Interacción en curso · Esc para pausar'
-        : [information ? `I · Conocer la historia de ${information.place.name}` : '', seatText].filter(Boolean).join('\n');
+        : [information ? `I · ${information.information.label}` : '', seatText].filter(Boolean).join('\n');
       if (this.seatHint.textContent !== hint) this.seatHint.textContent = hint;
     }
     this.updateElevator(elapsed);

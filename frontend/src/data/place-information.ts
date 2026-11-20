@@ -4,6 +4,7 @@ import { bulgedOutline, facultyBlueprint, fromRect, PLAZA_LEVEL } from "./facult
 
 export type PlaceInformation = {
   placeId: string;
+  label: string;
   title: string;
   context: string;
   dedication: string;
@@ -14,6 +15,7 @@ export type PlaceInformation = {
 /** Contenido editorial local; disponible sin consultar el servicio de paneles. */
 export const placeInformation: readonly PlaceInformation[] = [{
   placeId: "sala-manfred",
+  label: "Sala Manfred",
   title: "Manfred Stark González",
   context: "Memoria universitaria · Marzo Paraguayo",
   dedication: "Esta sala lleva su nombre en homenaje a su memoria.",
@@ -25,6 +27,20 @@ export const placeInformation: readonly PlaceInformation[] = [{
     label: "El Nacional · Estos fueron los mártires del Marzo Paraguayo",
     url: "https://elnacional.com.py/politica/estos-fueron-martires-marzo-paraguayo-n64129",
   },
+}, {
+  placeId: "bloque-g",
+  label: "Historia de la facultad",
+  title: "Facultad de Ciencias y Tecnología",
+  context: "Universidad Católica «Nuestra Señora de la Asunción»",
+  dedication: "1 de diciembre de 1979 · Acta N.º 4/79",
+  paragraphs: [
+    "El 1 de diciembre de 1979, el Consejo Universitario aprobó el proyecto de creación de la Facultad de Ciencias y Tecnología de la Universidad Católica «Nuestra Señora de la Asunción», según consta en el acta N.º 4/79.",
+    "Su creación respondió al proceso de transformación global que atravesaba el país y a los cambios previstos para los años siguientes.",
+  ],
+  source: {
+    label: "Facultad de Ciencias y Tecnología · Nuestra historia",
+    url: "https://cyt.uc.edu.py/nuestra-historia/",
+  },
 }];
 
 // Centro del vano real: lado 5 del cerramiento y doorCenter = -length * .08,
@@ -34,9 +50,13 @@ const outline = bulgedOutline(...manfred.size, manfred.bulge);
 const a = outline[5], b = outline[0];
 const [doorX, doorZ] = fromRect(manfred, [a[0] + (b[0] - a[0]) * .42, a[1] + (b[1] - a[1]) * .42]);
 const manfredDoor = facultyToWorld([doorX, PLAZA_LEVEL, doorZ]);
+// Frente del cartel existente, fuera del volumen sólido del tablero.
+const [signX, signZ] = fromRect(facultyBlueprint.blockGCourtyard.sign, [0, .35]);
+const facultySign = facultyToWorld([signX, .055, signZ]);
 export const informationPoints = placeInformation.map(information => {
   const place = places.find(place => place.id === information.placeId)!;
-  return { information, place, position: information.placeId === "sala-manfred" ? manfredDoor : place.position };
+  return { information, place, position: information.placeId === "sala-manfred" ? manfredDoor
+    : information.placeId === "bloque-g" ? facultySign : place.position };
 });
 
 /** Distancia horizontal y altura separadas: no activa el aviso desde otro piso. */

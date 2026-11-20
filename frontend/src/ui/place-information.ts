@@ -6,7 +6,7 @@ import type { TourShell } from "./tour-shell";
 export function openPlaceInformation(shell: TourShell, information: PlaceInformation, resume: () => void) {
   shell.openDialog(
     `<article class="place-information">
-      <span class="eyebrow">Sala Manfred</span>
+      <span class="eyebrow">${escapeHtml(information.label)}</span>
       <h2 id="place-information-title">${escapeHtml(information.title)}</h2>
       <p class="subtle">${escapeHtml(information.context)}</p>
       <p class="information-dedication">${escapeHtml(information.dedication)}</p>
