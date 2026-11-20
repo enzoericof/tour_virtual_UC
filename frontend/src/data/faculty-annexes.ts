@@ -203,12 +203,15 @@ const officeWalkU = maquetasRearU - officePassageWidth / 2;
 const dg = office("dg", "DG", 3.4, 9.2, 8.6);
 dg.entrance = annexPoint(bypassU, dg.mapCenter[1]);
 export const annexWalkEnd = annexPoint(bypassU, walkV);
+// Retiro de la cabecera para alinear el paso con el hueco entre los pilares
+// frontal e intermedio de la entrada existente; el extremo trasero queda fijo.
+export const ledOfficeFrontCut = .685;
 export const facultyAnnexes: Annex[] = [
   maquetas,
   kampusPrint,
   dicia,
   annex("dei-led", "DEI–LED", ...annexCoordinates(plan.electronics.center), 28.8, 12, 7.2),
-  office("led", "LED", -24.8, 9.2, 11.6),
+  office("led", "LED", -24.8+ledOfficeFrontCut/2, 9.2, 11.6-ledOfficeFrontCut),
   office("da-cap", "DA / CAP", -14.5, 9.2, 9),
   office("das", "DAS", -5.6, 9.2, 8.6),
   dg,
@@ -220,7 +223,8 @@ const led = facultyAnnexes.find((building) => building.id === "led")!;
 const dei = facultyAnnexes.find((building) => building.id === "dei-led")!;
 /** Prolongación baja a la derecha de la fachada: estimada según la foto del acceso. */
 export const deiEntranceWing = {
-  minX: -22.4, maxX: -14.4, frontZ: -4.4, backZ: 1.3,
+  minX: led.mapCenter[0]-dei.mapCenter[0]+led.rect.size[1]/2+.10, maxX: -14.4, frontZ: -4.4, backZ: 1.3,
+  frontWallMinX: -23.4,
   height: 3.7, recess: 4.65, porchDepth: 4.0,
   glazingWidth: 3.4, pillarSize: .28,
   sideWindows: { offset: 2.55, width: .82, sill: .25, height: 2.35 },
@@ -230,6 +234,12 @@ export const deiEntranceWing = {
 };
 /** Entrada retraída en el nuevo cuerpo bajo, fuera del paño alto de lamas. */
 export const deiSideDoor = { center: [-18.2, deiEntranceWing.frontZ + deiEntranceWing.recess] as Vec2, width: 2.3, height: 2.65 };
+export const deiSidePassage = {
+  pillarX: deiSideDoor.center[0]-deiEntranceWing.glazingWidth/2-deiEntranceWing.pillarSize/2,
+  pillarZ: [deiEntranceWing.frontZ,(deiEntranceWing.frontZ+deiSideDoor.center[1])/2] as Vec2,
+  centerZ: (3*deiEntranceWing.frontZ+deiSideDoor.center[1])/4,
+  width: (deiSideDoor.center[1]-deiEntranceWing.frontZ)/2-deiEntranceWing.pillarSize,
+};
 dei.outline = [[-14.4,-6],[14.4,-6],[14.4,6],[-14.4,6],[-14.4,1.3],
   [deiEntranceWing.minX,1.3],[deiEntranceWing.minX,deiEntranceWing.frontZ],[-14.4,deiEntranceWing.frontZ]];
 /** Lateral fotografiado del LED. Distribución estimada de las fotos del 18/11. */
@@ -273,6 +283,29 @@ export const annexEnclosedLink = {
     { annexId: dei.id, center: [-dei.rect.size[0] / 2, linkV - dei.mapCenter[1]] as Vec2 },
   ],
 };
+/** Pasillo exterior marcado en rojo: salida lateral, frente corto y costado del bloque de tejas. */
+export const deiPerimeterWalk = (() => {
+  const offices=facultyAnnexes.filter(b=>["led","da-cap","das","dg"].includes(b.id));
+  const width=deiSidePassage.width;
+  const eastX=led.mapCenter[0]-dei.mapCenter[0]+led.rect.size[1]/2+.10;
+  const wallX=led.mapCenter[0]-dei.mapCenter[0]-led.rect.size[1]/2-.10;
+  const wallFrontZ=led.mapCenter[1]-dei.mapCenter[1]-led.rect.size[0]/2-.10;
+  const endZ=Math.max(...offices.map(b=>b.mapCenter[1]-dei.mapCenter[1]+b.rect.size[0]/2))+.25;
+  const outerX=wallX-width,frontZ=wallFrontZ-width/2;
+  const portal={x:deiEntranceWing.minX,z:deiSidePassage.centerZ,width,height:3.0};
+  const orange:Vec2=[wallX-width/2,frontZ];
+  return {width,eastX,wallX,wallFrontZ,endZ,outerX,frontZ,portal,
+    orange:fromRect(dei.rect,orange),localOrange:orange,
+    outline:[
+      [portal.x,wallFrontZ-.025],
+      [wallX-.025,wallFrontZ-.025],[wallX-.025,endZ],[outerX,endZ],
+      [outerX,wallFrontZ-width],[portal.x,wallFrontZ-width],
+    ] as Vec2[],
+    route:[
+      [portal.x+.08,portal.z],orange,[orange[0],endZ-.25],
+    ].map(p=>fromRect(dei.rect,p as Vec2)),
+  };
+})();
 // Sendero desde la galería azul, junto a la fachada exterior del DEI–LED.
 const coveredWalkU = annexCoordinates(plan.coveredWalk[0])[0];
 const outerWalkV = dei.mapCenter[1] - dei.rect.size[1] / 2 - 2.0;
@@ -285,7 +318,7 @@ export const deiGardenPath: Vec2[] = [
   [1.2, outerWalkV - 0.2],
   [-6, outerWalkV - 0.1],
   [-18, outerWalkV - 0.25],
-  [dei.mapCenter[0] + deiEntranceWing.minX - 1.5, outerWalkV - 0.55],
+  [dei.mapCenter[0] + deiEntranceWing.minX - .1, outerWalkV - 0.55],
 ].map(([u, v]) => annexPoint(u, v));
 /** Caminero y árboles señalados por Horacio en rojo y azul (19/11), medidas estimadas. */
 const exteriorRoadZ = (x: number) => {
@@ -293,15 +326,31 @@ const exteriorRoadZ = (x: number) => {
   const t=(x+dei.mapCenter[0]-a[0])/(b[0]-a[0]);
   return a[1]+(b[1]-a[1])*t-dei.mapCenter[1];
 };
-const exteriorFork: Vec2 = [-19,-18.3];
+const exteriorFork: Vec2 = [-30,-31];
+const exteriorArrival: Vec2 = [-18.2,exteriorRoadZ(-18.2)];
+const entranceDirection=(point:Vec2):Vec2=>{
+  const x=point[0]-exteriorFork[0],z=point[1]-exteriorFork[1],length=Math.hypot(x,z);
+  return [x/length,z/length];
+};
+const leftArm=entranceDirection(exteriorArrival),rightArm=entranceDirection(deiPerimeterWalk.localOrange);
+const incomingLength=Math.hypot(exteriorArrival[0]-exteriorFork[0],exteriorArrival[1]-exteriorFork[1])*.20;
+const bisectorLength=Math.hypot(leftArm[0]+rightArm[0],leftArm[1]+rightArm[1]);
+const exteriorStart: Vec2 = [exteriorFork[0]-(leftArm[0]+rightArm[0])*incomingLength/bisectorLength,
+  exteriorFork[1]-(leftArm[1]+rightArm[1])*incomingLength/bisectorLength];
 export const deiForecourt = {
-  width: 1.6, canopyWidth: 2.25, eave: 2.75, ridge: .44,
-  main: [[-15.7,exteriorRoadZ(-15.7)],[-16.3,-12.1],exteriorFork,[-18.9,-25],[-19.5,-33],[-19.8,-44]]
-    .map(([x,z])=>fromRect(dei.rect,[x,z])),
-  branch: [exteriorFork,[-22.2,-12.6],[-21.4,exteriorRoadZ(-21.4)]]
+  width: 1.6, canopyWidth: 2.25, eave: 2.85, ridge: .46,
+  main: [exteriorArrival,exteriorFork,exteriorStart].map(p=>fromRect(dei.rect,p)),
+  branch: [exteriorFork,deiPerimeterWalk.localOrange]
     .map(([x,z])=>fromRect(dei.rect,[x,z])),
   fork: fromRect(dei.rect,exteriorFork),
-  trees: [[16.5,-16.5],[3,-19],[-8.5,-21],[-28,-14.2]].map(([x,z])=>fromRect(dei.rect,[x,z])),
+  trees: [[16.5,-16.5],[3,-19],[-8.5,-21],[-42,-30]].map(([x,z])=>fromRect(dei.rect,[x,z])),
+  medianTree: fromRect(dei.rect,[-27.3,-15.5]),
+  parking: [
+    { center: fromRect(dei.rect,[-12.8,-16.3]), angle: dei.rect.angle+Math.PI, color: "#e5e3dc" },
+    { center: fromRect(dei.rect,[-41,-9]), angle: dei.rect.angle, color: "#b7c0c4" },
+    { center: fromRect(dei.rect,[-41,-15]), angle: dei.rect.angle+.04, color: "#313b40" },
+    { center: fromRect(dei.rect,[-41,-21]), angle: dei.rect.angle-.05, color: "#e7e6df" },
+  ],
 };
 /** Corte compartido entre el borde del caminero y el embaldosado de entrada. */
 export const deiEntrancePaving = {
@@ -327,7 +376,7 @@ export const gardenWalkHedge: Vec2[] = (() => {
 /** Se conserva la circulación de oficinas; retirado el circuito blanco de DICIA y Kampus Print. */
 const officeIds = new Set(["led", "da-cap", "das"]);
 export const annexPaths: Vec2[][] = [
-  [[officeWalkU,-36 + officeShiftV],[officeWalkU,-18 + officeShiftV],[officeWalkU,-9 + officeShiftV],[officeWalkU,bypassV],[bypassU,bypassV]].map(([u,v])=>annexPoint(u,v)),
+  [[officeWalkU,linkV+annexEnclosedLink.rect.size[1]/2],[officeWalkU,-18 + officeShiftV],[officeWalkU,-9 + officeShiftV],[officeWalkU,bypassV],[bypassU,bypassV]].map(([u,v])=>annexPoint(u,v)),
   [annexPoint(officeCenterU + 9.2 / 2 + 0.3, dg.mapCenter[1]), annexPoint(officeWalkU, dg.mapCenter[1]), annexPoint(officeWalkU, bypassV)],
   // Maquetas y DG ya tienen su punto de visita sobre los caminos principales.
   ...facultyAnnexes.filter(b => b !== maquetas && b !== dg && b !== dicia && b !== kampusPrint).map((b): Vec2[] => {

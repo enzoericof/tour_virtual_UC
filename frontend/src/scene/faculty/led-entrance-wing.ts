@@ -1,9 +1,11 @@
 import * as T from "three";
-import { deiEntranceWing as wing, deiSideDoor, deiEntrancePaving } from "../../data/faculty-annexes";
+import { annexEnclosedLink, facultyAnnexes, deiEntranceWing as wing, deiSideDoor, deiEntrancePaving, deiPerimeterWalk } from "../../data/faculty-annexes";
 import type { FacultyBuilder } from "./builder";
+import type { Vec2 } from "../../data/faculty-blueprint";
+import { subtractPaving } from "./paving-cutouts";
 
 /** Acceso del LED según la foto frontal: galería, cantero de macetas, carpa y blindex. */
-export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandardMaterial) {
+export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandardMaterial, paving:T.MeshStandardMaterial) {
   const { layers, box, pole, beam, v3, prism, m, solidRoof } = builder;
   const { minX, maxX, frontZ, backZ, height, recess, canopy } = wing;
   const [doorX, doorZ] = deiSideDoor.center, doorW = deiSideDoor.width, doorH = deiSideDoor.height;
@@ -16,9 +18,22 @@ export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandar
   const concrete = m.concrete.clone(); concrete.color.set("#dfdbce");
   const glass = m.glass.clone(); glass.color.set("#263c3d"); glass.opacity = .68; glass.roughness = .24; glass.depthWrite = false;
   const footprint = [[minX,frontZ],[maxX,frontZ],[maxX,backZ],[minX,backZ]] as const;
-  prism(footprint,-.10,.15,concrete).name = "Ampliación baja del LED";
+  prism(footprint,-.10,.15,paving).name = "Ampliación baja del LED";
   box(width+.15,.14,backZ-frontZ+.2,centerX,height+.03,(frontZ+backZ)/2,m.roof,true);
-  box(.20,height+.22,backZ-frontZ,minX,(height+.22)/2,(frontZ+backZ)/2,masonry,true);
+  const portal=deiPerimeterWalk.portal;
+  const openStart=portal.z-portal.width/2;
+  box(.20,height+.22,openStart-frontZ,minX,(height+.22)/2,(frontZ+openStart)/2,masonry,true);
+  box(.20,height+.22-portal.height,backZ-openStart,minX,(height+.22+portal.height)/2,(backZ+openStart)/2,masonry,true);
+  // El cierre antiguo del enlace se retira: el piso interior llega sin césped hasta él.
+  const dei=facultyAnnexes.find(b=>b.id==="dei-led")!,led=facultyAnnexes.find(b=>b.id==="led")!;
+  const linkFront=led.mapCenter[1]-dei.mapCenter[1]-annexEnclosedLink.rect.size[1]/2;
+  box(width,.15,linkFront-backZ+.04,centerX,-.025,(backZ+linkFront)/2,paving,true);
+  // Cierre continuo marcado por el usuario, detrás del paso lateral entre los pilares.
+  const joinMin=minX-.10,joinMax=wing.frontWallMinX+.10;
+  const joinZ=deiPerimeterWalk.wallFrontZ+.10;
+  const joinWall=box(joinMax-joinMin,height,.20,(joinMin+joinMax)/2,height/2,joinZ,masonry,true);
+  joinWall.name="Pared de unión entre el acceso DEI y el bloque de oficinas";joinWall.userData.keep=true;
+  box(.20,height,doorZ-joinZ,wing.frontWallMinX,height/2,(doorZ+joinZ)/2,masonry,true);
 
   // Galería abierta delante del cierre; dos pilares exteriores y dos junto al vidrio.
   const halfGlass=wing.glazingWidth/2, columnOffset=halfGlass+wing.pillarSize/2;
@@ -35,6 +50,10 @@ export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandar
     pillar(doorX+side*columnOffset,doorZ,"entry");
   }
   box(width,.46,.24,centerX,3.28,frontZ,masonry,true);
+  for(const z of [frontZ,doorZ]) {
+    const column=box(wing.pillarSize,3.05,wing.pillarSize,wing.frontWallMinX+1.4,1.575,z,masonry,true);
+    column.name="Columna lateral de la prolongación LED";column.userData.keep=true;
+  }
   box(wing.glazingWidth+.62,.15,.22,doorX,3.02,frontZ,timber);
   // Frontón de ladrillo debajo de la cumbrera de la lona.
   const triangle = new T.ExtrudeGeometry(new T.Shape([
@@ -68,7 +87,7 @@ export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandar
   const win=wing.sideWindows;
   for(const side of [-1,1]) {
     const wx=doorX+side*win.offset;
-    const lo=side<0?minX:doorX+columnOffset+wing.pillarSize/2;
+    const lo=side<0?wing.frontWallMinX:doorX+columnOffset+wing.pillarSize/2;
     const hi=side<0?doorX-columnOffset-wing.pillarSize/2:maxX;
     for(const [a,b] of [[lo,wx-win.width/2],[wx+win.width/2,hi]])
       box(b-a,doorH,.18,(a+b)/2,doorH/2,doorZ,masonry,true);
@@ -110,23 +129,10 @@ export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandar
   barrier.position.set(doorX,doorH/2+.05,doorZ-.13);barrier.scale.set(doorW,doorH-.10,.04);
   barrier.visible=false;barrier.userData.keep=true;barrier.userData.entranceDoorBarrierId="dei";
   parent.add(barrier);
-  // El interior termina en un paño de ladrillo, sin una segunda puerta detrás del blindex.
-  box(width,2.7,.025,centerX,1.4,backZ+3.25,masonry);
+  // El fondo comunica con el enlace existente, sin un telón de ladrillo agregado.
 
-  // Baldositas cuadradas con relieve fino y juntas, independientes de la trama del caminero.
-  let seed=2371; const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
-  const canvas=document.createElement("canvas");canvas.width=canvas.height=512;
-  const ctx=canvas.getContext("2d")!;
-  ctx.fillStyle="#9f9a8c";ctx.fillRect(0,0,512,512);
-  for(let x=0;x<512;x+=32) for(let y=0;y<512;y+=32) {
-    const tone=173+Math.floor(random()*28);ctx.fillStyle=`rgb(${tone+10},${tone+6},${tone-4})`;
-    ctx.fillRect(x+1,y+1,30,30);
-    ctx.strokeStyle="#79796b30";ctx.lineWidth=1;
-    for(let j=5;j<30;j+=5){ctx.beginPath();ctx.moveTo(x+j,y+2);ctx.lineTo(x+j,y+29);ctx.stroke();}
-  }
-  for(let i=0;i<10000;i++){ctx.fillStyle=i%2?"#ffffff18":"#24201015";ctx.fillRect(random()*512,random()*512,1,1);}
-  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;map.wrapS=map.wrapT=T.RepeatWrapping;map.anisotropy=12;
-  const paving=new T.MeshStandardMaterial({map,bumpMap:map,bumpScale:.008,roughness:.94});paving.userData.tile=[.8,.8];
+  // Misma textura, escala y origen UV que la galería perimetral.
+  const [tileX,tileZ]=paving.userData.tile;
   const endZ=doorZ+.30,apron=deiEntrancePaving;
   const outline=[[apron.minX,apron.frontZ(apron.minX)],[apron.maxX,apron.frontZ(apron.maxX)],
     [apron.maxX,endZ],[apron.minX,endZ]];
@@ -137,7 +143,7 @@ export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandar
     const x=floorP.getX(i),z=floorP.getZ(i),t=T.MathUtils.clamp((z-apron.frontZ(x))/(endZ-apron.frontZ(x)),0,1);
     const top=T.MathUtils.lerp(apron.frontHeight,apron.rearHeight,t);
     floorP.setY(i,T.MathUtils.lerp(-.07,top,floorP.getY(i)));
-    floorUV.setXY(i,x/.8,z/.8);
+    floorUV.setXY(i,x/tileX,z/tileZ);
   }
   floorGeometry.computeVertexNormals();
   const path=new T.Mesh(floorGeometry,paving);path.name="Embaldosado completo de entrada al DEI";
@@ -150,17 +156,23 @@ export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandar
     for(const part of [0,1]) {
     const start=(x:number)=>apron.frontZ(x)+(part===0?.20:.60);
     const end=(x:number)=>part===0?apron.frontZ(x)+.60:doorZ+.3;
-    const outline=[[lo,start(lo)],[hi,start(hi)],[hi,end(hi)],[lo,end(lo)]];
-    const geo=new T.ExtrudeGeometry(new T.Shape(outline.map(([x,z])=>new T.Vector2(x,-z))),{depth:1,bevelEnabled:false});geo.rotateX(-Math.PI/2);
+    const outline:Vec2[]=[[lo,start(lo)],[hi,start(hi)],[hi,end(hi)],[lo,end(lo)]];
+    const cut:Vec2[]=[[lo-.1,portal.z-portal.width/2],[hi+.1,portal.z-portal.width/2],
+      [hi+.1,portal.z+portal.width/2],[lo-.1,portal.z+portal.width/2]];
+    const parts=side<0?subtractPaving(outline,[cut]):[outline];
+    for(const polygon of parts) {
+    const geo=new T.ExtrudeGeometry(new T.Shape(polygon.map(([x,z])=>new T.Vector2(x,-z))),{depth:1,bevelEnabled:false});geo.rotateX(-Math.PI/2);
     const p=geo.attributes.position,uv=geo.attributes.uv;
     for(let i=0;i<p.count;i++) {
       const x=p.getX(i),z=p.getZ(i),top=T.MathUtils.lerp(.15,wing.sidePlatformHeight,T.MathUtils.smoothstep(z-apron.frontZ(x)-.2,0,.4));
-      p.setY(i,T.MathUtils.lerp(.01,top,p.getY(i)));uv.setXY(i,x/.8,z/.8);
+      p.setY(i,T.MathUtils.lerp(.01,top,p.getY(i)));uv.setXY(i,x/tileX,z/tileZ);
     }
     geo.computeVertexNormals();layers.visual.add(new T.Mesh(geo,paving));layers.solid.add(new T.Mesh(geo));
     }
+    }
     const curbX=doorX+side*(wing.approachWidth/2+.025),curbStart=apron.frontZ(curbX)+.6;
-    box(.055,.13,doorZ-curbStart,curbX,.14,(curbStart+doorZ)/2,concrete,true);
+    const curbParts=side<0?builder.spans(curbStart,doorZ,[[portal.z-portal.width/2,portal.z+portal.width/2]]):[[curbStart,doorZ]];
+    for(const [a,b] of curbParts)box(.055,.13,b-a,curbX,.14,(a+b)/2,concrete,true);
   }
   box(doorW,.025,.24,doorX,.065,doorZ-.08,concrete,true);
 
@@ -220,7 +232,7 @@ function addEntrancePlants(builder: FacultyBuilder,cx: number,frontZ: number,doo
   let plantIndex=0;
   for(const side of [-1,1]) for(let j=0;j<5;j++) {
     const x=cx+side*([1.65,1.88,2.27,2.28,1.43][j]);
-    const z=[frontZ-2.9,frontZ-1.8,frontZ+.55,doorZ-.20,doorZ+.55][j];
+    const z=side<0 && j===2?frontZ-.35:[frontZ-2.9,frontZ-1.8,frontZ+.55,doorZ-.20,doorZ+.55][j];
     const floor=j===4?.05:wing.sidePlatformHeight;
     const radius=j===0?.27:j===3?.20:.22,h=j===0?.24:.35;
     const pot=new T.Mesh(potBody,clay);pot.position.set(x,floor+h/2,z);pot.scale.set(radius,h,radius);layers.visual.add(pot);

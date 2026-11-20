@@ -2,12 +2,13 @@ import * as T from "three";
 import { annexPoint, facultyAnnexes } from "../../data/faculty-annexes";
 import type { Rect } from "../../data/faculty-blueprint";
 import type { FacultyBuilder } from "./builder";
+import { addDeiPerimeterWalk } from "./dei-perimeter-walk";
 
 const officeIds = new Set(["led", "da-cap", "das", "dg"]);
 export const isOfficeAnnex = (id: string) => officeIds.has(id);
 
 /** Cubierta continua de tejas del bloque de oficinas, seg�n la vista a�rea. */
-export function addOfficeRoof(builder: FacultyBuilder) {
+export function addOfficeRoof(builder: FacultyBuilder, brick: T.MeshStandardMaterial, paving:T.MeshStandardMaterial) {
   const offices = facultyAnnexes.filter(a => isOfficeAnnex(a.id));
   const min = Math.min(...offices.map(a => a.mapCenter[1] - a.rect.size[0] / 2));
   const max = Math.max(...offices.map(a => a.mapCenter[1] + a.rect.size[0] / 2));
@@ -36,7 +37,7 @@ export function addOfficeRoof(builder: FacultyBuilder) {
   const tiles = new T.MeshStandardMaterial({ map, roughness: .94 });
   tiles.userData.tile = [1.6, 1.44];
   const clay = new T.MeshStandardMaterial({ color: "#ad6848", roughness: .94 });
-  const { frame, box, slopedWall, beam, v3, m, layers } = builder;
+  const { frame, box, slopedWall, beam, v3, layers } = builder;
   frame(rect, () => {
     layers.visual.name = "office-tiled-roof";
     const eave = 3.7, half = rect.size[1] / 2, rise = 1.45, overhang = .32;
@@ -49,11 +50,12 @@ export function addOfficeRoof(builder: FacultyBuilder) {
         0, ridge - roofRise - .06, side * run, clay);
     }
     for (const x of [-rect.size[0] / 2, rect.size[0] / 2]) {
-      slopedWall(x, -half, 0, eave, ridge, eave, m.brick);
-      slopedWall(x, 0, half, ridge, eave, eave, m.brick);
+      slopedWall(x, -half, 0, eave, ridge, eave, brick);
+      slopedWall(x, 0, half, ridge, eave, eave, brick);
     }
     beam(v3(-rect.size[0] / 2 - overhang, ridge + .06, 0),
       v3(rect.size[0] / 2 + overhang, ridge + .06, 0), .14, clay);
   });
+  addDeiPerimeterWalk(builder,tiles,brick,paving);
 }
 

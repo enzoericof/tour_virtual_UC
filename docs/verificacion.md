@@ -771,3 +771,51 @@ Sala de profesores: la misma prueba comprueba, con rayos desde el atrio hacia el
 ### Aulas cerradas y vidrios polarizados — 20/11/2026
 
 `npm run build` correcto. `npm test`: 107 de 108 aprobadas tras integrar `origin/main`; el único fallo es la prueba preexistente de separación de Sala Manfred, que también falla en `main` sin estos cambios. Pruebas nuevas: en `scene-startup.test.mjs`, las 42 puertas de ambos bloques (24 del Bloque 1 en cuatro niveles y 18 del Bloque G en tres) están selladas (rayos a cinco posiciones y cuatro alturas), el vidrio de las hojas y de los montantes es el material polarizado y el `Walker` real no atraviesa una puerta de cada bloque; en `faculty-blueprint.test.mjs`, `laboratorio` y `aula-p3` están en la galería, frente a la puerta de su aula y mirando hacia ella. La prueba de escena falla contra la geometría anterior (la primera puerta de planta baja dejaba pasar) y pasa con la nueva. Revisión en navegador registrada en [design-qa.md](../design-qa.md).
+
+### Acceso bifurcado del LED — 20/11/2026
+
+Compilación de producción correcta. Pasan 105 de 106 pruebas; el único fallo continúa siendo la separación preexistente de Sala Manfred. Se corrigió la cobertura de la prueba de trazados: ahora recorre los ejes main y branch del jardín exterior en vez del objeto contenedor. Las pruebas agregadas verifican retiro de raíces y tronco respecto de ambos caminos, espacio de estacionamiento dentro del campus y carrocerías/espejos fuera del paso techado. La escena real comprueba por rayos la unión de los tres brazos, ambas llegadas al sendero transversal, césped sin pavimento en la punta central, apoyos fuera del piso y techos sólidos de las cuatro camionetas. El acceso blindex y el enlace con oficinas siguen pasando sus pruebas existentes.
+
+Revisión visual en navegador de la aproximación bajo carpa y del conjunto desde arriba, sin errores de consola. Capturas locales ignoradas: .local/led-forecourt-walk-final.jpg y .local/led-forecourt-overview-final.jpg. Las fotos del usuario son referencias de forma y acabado; no se copiaron como texturas ni se incorporaron credenciales o archivos privados.
+
+Medición con npm run measure:memory, mismo entorno y GC: antes 136,19 MB de heap tras diez minutos simulados con gatos; después 136,59 MB, aproximadamente 0,40 MB adicionales. Buffers externos: 128,10 a 133,13 MB, aproximadamente 5,03 MB más, separados del heap. El heap final pasa de 136,56 MB al minuto 1 a 136,59 MB al minuto 10. Se comparten geometrías y materiales; las nuevas texturas de lajas son dos mapas de 512 px y los cristales/sombras usan mapas pequeños. El benchmark no mide memoria total del navegador ni VRAM. Registros locales ignorados .local/led-forecourt-memory-before.log y .local/led-forecourt-memory-final.log.
+
+### Pasillo perimetral LED y unión en la esquina naranja — 20/11/2026
+
+Compilación de producción correcta; pasan 106 de 107 pruebas. El fallo restante es el previo de separación de Sala Manfred. Además de las pruebas geométricas existentes, la cápsula real de Walker recorre de forma continua desde la carpa azul, pasando por la esquina naranja y el frente corto, hasta cruzar el vano lateral e ingresar a la entrada del LED. Luego recorre el sentido contrario y todo el costado largo. Se comprueba que llega a los puntos sin bloqueos y conserva apoyo sobre el piso. La prueba de trazado verifica que el extremo de la carpa coincide con el punto naranja y que la planta del pasillo permanece dentro del terreno; las camionetas también mantienen retiro respecto del nuevo pasillo.
+
+Revisión visual en navegador desde el punto naranja mirando a la entrada (pared a la derecha), desde el arranque del costado largo y desde arriba. Sin errores de consola. Capturas ignoradas: .local/led-perimeter-corridor-final.jpg, .local/led-perimeter-long-final.jpg y .local/led-perimeter-overview-final.jpg. Se conserva la textura del techo original y se comparten materiales y piezas del nuevo alero.
+
+Memoria controlada, mismo benchmark con GC y gatos durante diez minutos simulados: 139,10 MB de heap, frente a 136,59 MB de la bifurcación anterior (+2,51 MB). Buffers externos: 133,90 frente a 133,13 MB (+0,78 MB). Del minuto 1 al 10, el heap pasa de 139,08 a 139,10 MB. No representa RAM total del navegador ni VRAM. Registro ignorado .local/led-perimeter-memory-final.log.
+
+### Paso alineado con los pilares y nueva bifurcación — 20/11/2026
+
+Compilación correcta; 108 de 109 pruebas pasan. Sigue el fallo previo de separación de Sala Manfred. Se comprueba que la cabecera retirada conserva el extremo posterior del módulo, que el eje del pasillo coincide con el centro entre los pilares y que el eje principal del caminero queda casi recto. La escena verifica las posiciones y el espesor de los dos pilares originales, línea de visión libre desde el interior de la entrada hasta la esquina y cotas sin plataforma/bordillo en la banda de paso.
+
+Walker recorre desde la carpa hasta el interior de la entrada, cruzando ahora desde el lado interior de los pilares, y vuelve para continuar por todo el costado largo. Conserva apoyo en el piso y no encuentra bloqueos. Los árboles del perímetro dejan margen al nuevo caminero cubierto. Revisión visual en navegador del paso lateral y del conjunto; sin errores de consola. Capturas ignoradas .local/led-pillars-entry-final.jpg y .local/led-fork-aligned-final.jpg.
+
+Memoria controlada final con gatos: 139,18 MB de heap a diez minutos simulados (139,15 MB al primer minuto), frente a 139,10 MB de la versión anterior. Buffers externos 133,83 MB, separados del heap. No es una lectura de RAM total del navegador ni de VRAM. Registro ignorado .local/led-pillars-memory-final.log.
+
+### Unión interior del DEI y caminos rectos dentro del arbolado — 20/11/2026
+
+Compilación correcta; 109 de 110 pruebas pasan. El único fallo restante es el previo de separación de Sala Manfred (faculty-blueprint.test.mjs:261), sin cambios en ese edificio. Se verifican colinealidad exacta de la llegada y brazo principal, segundo brazo sin quiebres, retiro del arranque y conservación de los dos pilares originales. campus-context.ts vuelve a coincidir con main: no se omiten ni desplazan árboles para despejar el caminero.
+
+Rayos sobre la escena visible y los sólidos comprueban que no quedan pared ni vidrio en la unión señalada ni en la medianera retirada. Walker cruza el enlace interior y pasa del acceso a las oficinas; también recorre el caminero desde su nuevo arranque, la bifurcación, la esquina naranja y el paso entre los pilares. Se mantienen las pruebas de apoyo, cubiertas y recorrido por todo el costado largo. Dos rayos identifican el mismo objeto de material en el DEI y en el bloque de oficinas.
+
+Revisión visual en navegador del conjunto con la fila de árboles restaurada y de la entrada unificada, sin errores de consola. Capturas ignoradas: .local/led-straight-forest-final.jpg y .local/led-joined-entry-final.jpg. Registros: .local/led-unified-tests-final.log, .local/led-unified-build-final.log.
+
+Memoria controlada con GC y tres gatos durante diez minutos simulados: 138,94 MB de heap (138,91 MB al minuto 1), frente a 139,18 MB en la versión anterior. Buffers externos: 133,67 MB. No representa la RAM total del navegador ni la VRAM. Registro ignorado .local/led-unified-memory-final.log. Los materiales y texturas se comparten; no se agregan recursos multimedia.
+
+### Eje exterior y cierre LED — 20/11/2026
+
+El trazado verifica la longitud exacta conservada del tramo corto, su orientación entre ambos brazos y la ausencia de árboles invadiendo las carpas. Los rayos verifican el nuevo cierre de ladrillo visible y sólido, y el paso lateral sigue libre. Entrada y pasillo perimetral usan el mismo objeto de material, con repetición de 1,20 × 1,20 m.
+
+Revisión visual del muro cerrado con los nuevos baldosines y de la salida recta hacia el perímetro, sin errores de consola. Capturas ignoradas: .local/led-wall-square-floor-final.jpg y .local/led-walk-view-axis-final.jpg. La verificación del conjunto integrado se registra tras sincronizar con main.
+
+### Integración del LED con main, sin la propuesta de escalera — 20/11/2026
+
+Se integraron los 20 commits nuevos del equipo hasta b07cc8e mediante rebase. Se conservaron las nuevas puertas y vidrios de aulas/Bedelía, Kampus Print, Civil, diseño y la escalera del Bloque G de main. La propuesta local de esa escalera, sus adaptaciones de losa y su prueba se guardaron aparte y no forman parte de la publicación. faculty-blueprint.ts y faculty-reconstruction.ts coinciden íntegramente con origin/main en este cambio.
+
+npm run build correcto. npm test: 113/114; el único fallo es el previo de separación de Sala Manfred (faculty-blueprint.test.mjs:261). La prueba de escena integrada conserva tanto los controles nuevos del equipo sobre aulas cerradas como los recorridos, encuentros y materiales del LED. Registros locales ignorados: .local/sync-led-tests-final.log y .local/sync-led-build-final.log.
+
+Medición controlada del conjunto integrado, tras GC y con tres gatos: 142,20 MB de heap a diez minutos simulados (142,15 MB al primer minuto); buffers externos 136,52 MB. Incluye todos los cambios recibidos del equipo y no mide RAM total del navegador ni VRAM. Registro .local/sync-led-memory-final.log.

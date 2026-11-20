@@ -1,6 +1,6 @@
 import { addKampusPrint } from "./kampus-print";
 import * as T from "three";
-import { annexCoveredPaths, annexEnclosedLink, annexPaths, annexWalkEnd, deiGardenPath, deiSideDoor, deiEntranceWing, deiEntrancePaving, diciaWalkExtension, facultyAnnexes, maquetasVolumes } from "../../data/faculty-annexes";
+import { annexCoveredPaths, annexEnclosedLink, annexPaths, annexWalkEnd, deiGardenPath, deiSideDoor, deiEntrancePaving, diciaWalkExtension, facultyAnnexes, maquetasVolumes } from "../../data/faculty-annexes";
 import { facultyBlueprint as plan, fromRect, rectCorners, type Vec2 } from "../../data/faculty-blueprint";
 import type { FacultyBuilder, Range } from "./builder";
 import { addLedRightFacade } from "./led-right-facade";
@@ -12,6 +12,8 @@ import { addLaboratoryGround } from "./laboratory-ground";
 import { addDiciaStructure } from "./dicia-structure";
 import { addSegmentedGardenPath, gardenJunctionReach } from "./garden-path";
 import { addOfficeRoof, isOfficeAnnex } from "./office-roof";
+import { addOfficePerimeterFacade } from "./dei-perimeter-walk";
+import { makeLedPassageTile } from "./led-passage-tile";
 
 // ---- Anexos del plano general: exteriores provisionales, sin interiores relevados ----
 export function addAnnexes(
@@ -26,6 +28,7 @@ export function addAnnexes(
   const workshopBrick = officeBrick.clone();
   workshopBrick.color.set("#ffb4a0");
   const deiBrick = officeBrick.clone(); deiBrick.color.set("#c9bda8");
+  const ledPassageTile=makeLedPassageTile();
   const deiLouver = m.blue.clone(); deiLouver.color.set("#315a78");
   const workshopMetal = new T.MeshStandardMaterial({ color: "#353a41", roughness: 0.78 });
 
@@ -70,7 +73,7 @@ export function addAnnexes(
   }
   // La unión y los edificios comparten ladrillo, ventanas y dinteles. Los vanos
   // se descuentan también de las colisiones, para comunicar realmente los interiores.
-  function annexWall(a: Vec2, b: Vec2, h: number, openings: AnnexOpening[] = [], masonry = false) {
+  function annexWall(a: Vec2, b: Vec2, h: number, openings: AnnexOpening[] = [], masonry = false, brick = m.brick) {
     const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
     const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
     const cx = (a[0] + b[0]) / 2, cz = (a[1] + b[1]) / 2;
@@ -83,8 +86,8 @@ export function addAnnexes(
         box(end - start, h, 0.2, x, h / 2, z, workshopBrick, true, opts);
         continue;
       }
-      box(end - start, 1, 0.2, x, 0.55, z, m.brick, true, opts);
-      box(end - start, h - 2.5, 0.2, x, (h + 2.5) / 2, z, m.brick, true, opts);
+      box(end - start, 1, 0.2, x, 0.55, z, brick, true, opts);
+      box(end - start, h - 2.5, 0.2, x, (h + 2.5) / 2, z, brick, true, opts);
       box(end - start, 1.45, 0.08, x, 1.78, z, m.glass, true, opts);
       const count = Math.ceil((end - start) / 2.4);
       for (let k = 0; k <= count; k++) {
@@ -95,7 +98,7 @@ export function addAnnexes(
     for (const opening of openings) {
       box(opening.width, h - opening.height, 0.2,
         cx + opening.center * Math.cos(angle), (h + opening.height) / 2,
-        cz + opening.center * Math.sin(angle), masonry ? workshopBrick : m.brick, true, opts);
+        cz + opening.center * Math.sin(angle), masonry ? workshopBrick : brick, true, opts);
     }
   }
 
@@ -143,6 +146,10 @@ export function addAnnexes(
       const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
       const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
       const front = a[1] === maxZ && b[1] === maxZ;
+      if(isOfficeAnnex(annex.id) && ((a[1]===-maxZ && b[1]===-maxZ)
+        || (annex.id==="led" && a[0]===annex.rect.size[0]/2 && b[0]===a[0]))) {
+        addOfficePerimeterFacade(builder,a,b,h,deiBrick);continue;
+      }
       if (isDei && a[1] === -maxZ && b[1] === -maxZ) {
         addLedRightFacade(builder, annex, deiBrick);
         continue;
@@ -158,6 +165,11 @@ export function addAnnexes(
         center: (deiSideDoor.center[0] - cx) * Math.cos(angle),
         width: deiSideDoor.width, height: deiSideDoor.height,
       }] : []) : front ? [{ center: 0, width: 2.1, height: 2.5 }] : [];
+      if (annex.id === "led" && front) {
+        // El lateral compartido con el acceso queda abierto hasta el corredor interior.
+        const start = -annexEnclosedLink.rect.size[1]/2, end = annex.rect.size[0]/2;
+        openings.splice(0,openings.length,{center:-(start+end)/2,width:end-start,height:annexEnclosedLink.openingHeight});
+      }
       if (isDei && a[0] === annex.rect.size[0] / 2 && b[0] === a[0]) {
         // Cabecera hacia el jardín: muro ciego de ladrillo como en la foto.
         box(0.2, h, length, a[0], h / 2, cz, deiBrick, true);
@@ -178,21 +190,21 @@ export function addAnnexes(
         }
         for (const y of [bottom, top]) box(length, 0.045, 0.13, cx, y, cz + 0.23, deiLouver);
       } else {
-        annexWall(a, b, h, openings);
+        annexWall(a, b, h, openings, false, isOfficeAnnex(annex.id) ? deiBrick : m.brick);
       }
       if (front && !isDei) {
         if (!portal) box(3.2,0.12,1.4,cx,2.9,cz+0.6,m.concrete,true);
         sign(annex.name.toUpperCase(),cx,portal ? 3.4 : 3.25,cz+0.13,portal ? 2.6 : Math.min(annex.rect.size[0]-1,9));
       }
     }
-    if (isDei) addLedEntranceWing(builder, deiBrick);
+    if (isDei) addLedEntranceWing(builder, deiBrick,ledPassageTile);
     if (!isDei) box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
   });
-  addOfficeRoof(builder);
+  addOfficeRoof(builder,deiBrick,ledPassageTile);
   annexPaths.forEach((points) => path(points, 2));
   addSegmentedGardenPath(builder, deiGardenPath, annexPavingHeight, gardenWalkMaterial, { startDistance: gardenJunctionReach,
     junctions:deiForecourtRoadJunctions(),pavingJoin: { rect: facultyAnnexes.find(a=>a.id === "dei-led")!.rect, ...deiEntrancePaving } });
-  addDeiForecourt(builder,gardenWalkMaterial);
+  addDeiForecourt(builder);
   // Baldosas hasta la esquina de DICIA; desde allí sigue el caminero exterior.
   {
     const walk = plan.bedeliaWalk;
@@ -222,12 +234,10 @@ export function addAnnexes(
     box(length + 0.2, 0.18, width + 0.2, 0, link.height + 0.09, 0, m.roof, true);
     box(length, 0.08, width - link.wallThickness * 2, 0, link.height - 0.04, 0, m.concrete);
     const galleryZ = (width - link.wallThickness) / 2;
-    const dei = facultyAnnexes.find(b => b.id === "dei-led")!;
-    const linkCenterInDei = -dei.rect.size[0] / 2 - length / 2;
     annexWall([-length / 2, -galleryZ], [length / 2, -galleryZ], link.height,
-      [{ center: (deiEntranceWing.minX+deiEntranceWing.maxX)/2 - linkCenterInDei, width: deiEntranceWing.maxX-deiEntranceWing.minX, height: link.openingHeight }]);
+      [{ center: 0, width: length, height: link.openingHeight }],false,deiBrick);
     annexWall([-length / 2, galleryZ], [length / 2, galleryZ], link.height,
-      [{ center: link.sideDoorX, width: link.sideDoorWidth, height: link.openingHeight }]);
+      [{ center: link.sideDoorX, width: link.sideDoorWidth, height: link.openingHeight }],false,deiBrick);
     for (const edge of [-1, 1]) box(0.07, link.openingHeight, 0.24,
       link.sideDoorX + edge * (link.sideDoorWidth / 2 + 0.035), link.openingHeight / 2, galleryZ, m.metal);
     box(link.sideDoorWidth + 0.14, 0.07, 0.24,

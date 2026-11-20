@@ -207,3 +207,13 @@ Referencias aportadas por el usuario: `WhatsApp Image 2026-11-19 at 16.45.07 (1)
 20/11/2026 — Mochila y llamas del jetpack: geometría y materiales procedurales propios de `frontend/src/scene/jetpack.ts`, sin recursos externos. El paseo interior reutiliza los tres modelos de gato y sus texturas existentes. No se incorporan nuevos archivos multimedia.
 
 20/11/2026: las dos capturas de Sapientia compartidas por el usuario guían la nueva temática de la interfaz: superficies blancas y títulos azul profundo en claro, tarjetas azul marino en oscuro y acentos azules. Se utiliza Source Sans 3 mediante Google Fonts con respaldo sans-serif. La paleta se aproxima visualmente a las capturas; no se presenta como una especificación oficial del portal.
+
+20/11/2026: acceso exterior del LED basado en las fotos del usuario (9cb1fe65, d70600b6 y 2ee36937). Lajas con color y relieve generados en canvas, geometría de camionetas genéricas construida en el repositorio y pequeños mapas procedurales de cristales/sombra, sin marcas comerciales ni recursos descargados. El árbol central reutiliza geometrías y materiales del árbol existente de cantina/ascensor. Implementación en scene/faculty/forecourt-stone.ts, dei-parked-vehicles.ts y dei-forecourt.ts. Posiciones y medidas interpretadas de las imágenes, no relevadas.
+
+20/11/2026: foto del pasillo lateral del usuario (cf3f87c8) y vista aérea anotada como referencia de la galería perimetral. Baldosines y cielorraso generados en canvas, tejas reutilizadas de office-roof.ts, ladrillo y perfilería de los materiales existentes. No se descargaron recursos ni se incrustó la foto. El trazado y el acabado se implementan en dei-perimeter-walk.ts, con proporciones estimadas del material aportado.
+
+20/11/2026: captura lateral 241893c4 y vista aérea con la nueva bifurcación roja aportadas por Horacio. Guían el recorte de cabecera y la alineación del pasillo con los dos pilares existentes. Se reutilizan los materiales anteriores; no se agregan fotos como texturas ni recursos externos.
+
+20/11/2026: captura 21cfe540 y vistas del acceso anotadas por Horacio como referencia de la unión entre edificios, la retirada del paño interior y los tres tramos rectos del caminero. Se reutiliza exactamente el material existente del DEI para el bloque de tejas y sus pilares. Se restaura el arbolado perimetral del contexto sin generar ni descargar recursos adicionales; originales fuera del repositorio.
+
+20/11/2026: captura c66fc824 para el eje visual del caminero y nueva anotación roja para el cierre del acceso LED. Se reutiliza el ladrillo existente; los baldosines perimetrales pasan a led-passage-tile.ts y se comparten con la entrada, sin descargas ni fotografías incorporadas como texturas.

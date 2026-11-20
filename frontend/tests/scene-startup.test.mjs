@@ -1,8 +1,8 @@
 import { manfredRampSection, manfredStairZ } from "../src/data/faculty-blueprint.ts";
 import { Box3, BoxGeometry, Mesh, Matrix4, PerspectiveCamera, Ray, Raycaster, Triangle, Vector2, Vector3 } from "three";
-import {facultyPose,insidePolygon} from "../src/data/campus-geometry.ts";
+import {facultyPose,facultyToWorld,insidePolygon} from "../src/data/campus-geometry.ts";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, blockG, classroomDoor, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
-import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
+import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, deiPerimeterWalk, deiSidePassage, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { laboratoryGroundDetails } from "../src/data/faculty-annexes.ts";
 import { test } from "node:test";
@@ -130,6 +130,12 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const instanceBuffers = new Set();
     for (const tree of perimeter) {
       assert.equal(tree.levels.length, 2);
+      for(const route of [deiForecourt.main,deiForecourt.branch])for(let i=1;i<route.length;i++){
+        const a=facultyToWorld([route[i-1][0],0,route[i-1][1]]),b=facultyToWorld([route[i][0],0,route[i][1]]);
+        const dx=b[0]-a[0],dz=b[2]-a[2],t=Math.max(0,Math.min(1,((tree.position.x-a[0])*dx+(tree.position.z-a[2])*dz)/(dx*dx+dz*dz)));
+        assert.ok(Math.hypot(tree.position.x-a[0]-t*dx,tree.position.z-a[2]-t*dz)>deiForecourt.canopyWidth/2+.5,
+          "Los árboles del perímetro dejan libre la nueva llegada bajo carpa");
+      }
       tree.traverse(o => {
         if (!o.isInstancedMesh) return;
         assert.ok(o.count > 0 && o.boundingSphere?.radius > 0);
@@ -387,9 +393,11 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     assert.equal(newTrees.length,4,"Se agregan los cuatro árboles señalados");
     assert.equal(newRoofs.length,2,"La carpa cubre el tramo principal y la bifurcación");
     assert.ok(newPosts.length>12,"La carpa tiene soportes a lo largo del recorrido");
-    const oldWalk=group.getObjectByName("Caminero segmentado del LED"),newWalk=group.getObjectByName("Caminero exterior principal del LED");
-    assert.equal(newWalk.children.find(o=>o.isMesh).material[0],oldWalk.children.find(o=>o.isMesh).material[0],
-      "La prolongación usa exactamente el material del caminero existente");
+    const newWalk=group.getObjectByName("Caminero exterior principal del LED"),rightWalk=group.getObjectByName("Ramal exterior derecho del LED");
+    const stone=newWalk.children.find(o=>o.isMesh).material[0];
+    assert.equal(stone,rightWalk.children.find(o=>o.isMesh).material[0],
+      "Ambos ramales comparten las lajas irregulares de las nuevas fotos");
+    assert.ok(stone.bumpMap && stone.roughness>.9,"Las lajas tienen relieve fino y acabado mate");
     const {pathSampler}=await server.ssrLoadModule("/src/scene/faculty/garden-path.ts");
     const forkBranch=pathSampler(deiForecourt.branch);
     for(const along of [.4,1.2,2.0,2.9]) for(const side of [-.5,0,.5]) {
@@ -402,10 +410,22 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       for(const along of [.4,1.2,2.0]) for(const side of [-.5,0,.5]) {
         const p=sampler.at(along,side);
         const [hit]=new Raycaster(new Vector3(p[0],1,p[1]),new Vector3(0,-1,0),0,2).intersectObject(colliders,true);
-        assert.ok(hit && Math.abs(hit.point.y-.15)<.005,"Ambos ramales empalman completos con el caminero existente");
+        assert.ok(hit && Math.abs(hit.point.y-.15)<.005,`Ambos ramales empalman completos: inicio=${route[0]}, avance=${along}, lado=${side}, altura=${hit?.point.y}`);
       }
     }
     const newBodies=[...exteriorSlabs,...colliders.children.filter(o=>o.userData.gardenSlab || o.userData.walkJunction === "Horquilla del jardín exterior LED")];
+    const divider=deiForecourt.fork.map((v,i)=>v*.7+deiForecourt.medianTree[i]*.3);
+    const [dividerHit]=new Raycaster(new Vector3(divider[0],1,divider[1]),new Vector3(0,-1,0),0,2).intersectObject(colliders,true);
+    assert.ok(!dividerHit || dividerHit.point.y<.05,"La punta central queda con césped y no se rellena con una placa convexa");
+    const vehicles=[],medianTrees=[];
+    colliders.traverse(o=>{if(o.userData.deiParkedVehicle)vehicles.push(o);});
+    group.traverse(o=>{if(o.userData.deiMedianTree)medianTrees.push(o);});
+    assert.equal(vehicles.length,4,"Las cuatro camionetas tienen carrocerías sólidas");
+    assert.equal(medianTrees.length,1,"El nuevo árbol se ubica en la divisoria");
+    for(const vehicle of deiForecourt.parking) {
+      const [hit]=new Raycaster(new Vector3(vehicle.center[0],3,vehicle.center[1]),new Vector3(0,-1,0),0,4).intersectObject(colliders,true);
+      assert.ok(hit && hit.point.y>1.7 && hit.point.y<2,"El techo sigue el perfil sólido de la camioneta");
+    }
     for(const post of newPosts) {
       const p=post.getWorldPosition(new Vector3());p.y=1;
       assert.equal(new Raycaster(p,new Vector3(0,-1,0),0,2).intersectObjects(newBodies).length,0,"Los postes quedan a los costados de las losas");
@@ -648,6 +668,70 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       walker.keys.clear();
       return camera.position.clone();
     }
+    // Recorrido continuo con la cápsula real: carpa -> esquina naranja -> vano
+    // lateral de la entrada; luego el mismo trayecto y todo el costado largo.
+    function walkPerimeter(points,minimumFeet=.04) {
+      walker.teleport(new Vector3(points[0][0],.18,points[0][1]));
+      walker.keys=new Set(["KeyW"]);
+      for(const target of points.slice(1)) {
+        let distance=Infinity,steps=0;
+        while(distance>.06 && steps++<1000) {
+          const direction=new Vector3(target[0]-camera.position.x,0,target[1]-camera.position.z);
+          distance=direction.length();if(distance<=.06)break;
+          camera.lookAt(camera.position.clone().add(direction));
+          walker.update(Math.min(1/60,distance/4.5));
+        }
+        assert.ok(distance<.10,`El pasillo permite llegar sin bloqueos a ${target}: distancia ${distance}`);
+        assert.ok(camera.position.y-1.5>minimumFeet && camera.position.y-1.5<.21,`El visitante sigue apoyado en el piso del pasillo: ${camera.position.y-1.5} al llegar a ${target}`);
+      }
+      walker.keys.clear();
+    }
+    const orange=deiPerimeterWalk.localOrange;
+    const blueArrival=fromRect(dei.rect,[orange[0],orange[1]-2.2]);
+    const insideEntry=fromRect(dei.rect,[deiSideDoor.center[0]-.3,deiPerimeterWalk.portal.z]);
+    const sight=new Vector3(deiPerimeterWalk.orange[0]-insideEntry[0],0,deiPerimeterWalk.orange[1]-insideEntry[1]);
+    const line=new Raycaster(new Vector3(insideEntry[0],1.6,insideEntry[1]),sight.clone().normalize(),0,sight.length()).intersectObject(colliders,true);
+    assert.equal(line.length,0,`El eje entre los pilares permite ver el pasillo sin muros: ${line[0]?.point.toArray()}`);
+    for(const x of [deiSideDoor.center[0]-.3,-19.3,-20.04,-20.7,-22,-23.4,-25,-28]) {
+      const p=fromRect(dei.rect,[x,deiSidePassage.centerZ]);
+      const [hit]=new Raycaster(new Vector3(p[0],1,p[1]),new Vector3(0,-1,0),0,2).intersectObject(colliders,true);
+      assert.ok(hit && hit.point.y>.07 && hit.point.y<.17,"El piso entre los pilares no conserva la plataforma ni el bordillo elevados");
+    }
+    const savedPillars=[];group.traverse(o=>{if(["Pilar frontal del pórtico LED","Pilar intermedio del acceso LED"].includes(o.name))savedPillars.push(o);});
+    for(const z of deiSidePassage.pillarZ) {
+      const expected=fromRect(dei.rect,[deiSidePassage.pillarX,z]);
+      const pillar=savedPillars.find(o=>{const p=o.getWorldPosition(new Vector3());return Math.hypot(p.x-expected[0],p.z-expected[1])<1e-6;});
+      assert.ok(pillar && Math.abs(pillar.scale.x-deiEntranceWing.pillarSize)<1e-6,"Los dos pilares originales conservan posición y espesor");
+    }
+    walkPerimeter([blueArrival,deiPerimeterWalk.orange,deiPerimeterWalk.route[0],insideEntry]);
+    walkPerimeter([insideEntry,...deiPerimeterWalk.route,deiPerimeterWalk.route.at(-1)]);
+    // La medianera interior sigue comunicada detrás del nuevo cierre de ladrillo.
+    for(const [start,end] of [
+      [[-24.7,.9],[-24.7,2.2]],
+      [[-24.6,-.8],[-27.3,-.8]],
+      [[-24.6,.8],[-27.3,.8]],
+    ]) {
+      const a=fromRect(dei.rect,start),b=fromRect(dei.rect,end);
+      const direction=new Vector3(b[0]-a[0],0,b[1]-a[1]);
+      for(const model of [group,colliders])assert.equal(new Raycaster(new Vector3(a[0],1.6,a[1]),direction.clone().normalize(),0,direction.length()).intersectObject(model,true).length,0,
+        "La unión interior queda libre de paredes, vidrios y colisiones anteriores");
+    }
+    const wallA=fromRect(dei.rect,[-24.6,-3]),wallB=fromRect(dei.rect,[-24.6,-1]);
+    const wallDirection=new Vector3(wallB[0]-wallA[0],0,wallB[1]-wallA[1]);
+    for(const model of [group,colliders])assert.ok(new Raycaster(new Vector3(wallA[0],1.6,wallA[1]),wallDirection.clone().normalize(),0,wallDirection.length()).intersectObject(model,true).length,
+      "El cierre marcado es ladrillo visible y sólido, sin dejar el hueco de la unión");
+    walkPerimeter([[-24.6,.8],[-24.6,3],[-27.3,3]].map(p=>fromRect(dei.rect,p)),.02);
+    walkPerimeter([deiForecourt.main.at(-1),deiForecourt.fork,deiPerimeterWalk.orange,deiPerimeterWalk.route[0],insideEntry]);
+    const materialAt=(a,b)=>{
+      const p=fromRect(dei.rect,a),q=fromRect(dei.rect,b),direction=new Vector3(q[0]-p[0],0,q[1]-p[1]);
+      return new Raycaster(new Vector3(p[0],.6,p[1]),direction.clone().normalize(),0,direction.length()).intersectObject(group,true)[0]?.object.material;
+    };
+    const deiWall=materialAt([8,8],[8,5.8]);assert.ok(deiWall,"El rayo identifica la mampostería del DEI");
+    assert.equal(deiWall,materialAt([deiPerimeterWalk.wallX-.3,8],[deiPerimeterWalk.wallX+.3,8]),
+      "El DEI y el bloque de oficinas reutilizan exactamente el mismo material de ladrillo");
+    const apronMesh=group.getObjectByName("Embaldosado completo de entrada al DEI"),perimeterMesh=group.getObjectByName("Piso continuo del pasillo perimetral LED");
+    assert.equal(apronMesh.material,perimeterMesh.material,"Entrada y pasillo usan un solo material de baldosines");
+    assert.deepEqual(apronMesh.material.userData.tile,[1.2,1.2],"La escala de los cuadraditos se conserva en ambos pisos");
     for (let level = 0; level < block1.levels; level++) {
       const feetY = level * FLOOR_HEIGHT + 0.06;
       const center = walkFrom(new Vector3(towerX, feetY, galleryEdge - 1), south, 32);

@@ -16,7 +16,7 @@ test("The eight annexes have distinct ids and arrivals outside every building",(
    assert.ok(!insidePolygon(b.entrance,polygon),`${b.name}: arrival inside building`);
 });
 test("New pedestrian routes do not cut across existing or added buildings",()=>{
- for(const points of [...annexPaths, deiGardenPath, deiForecourt]) for(let i=1;i<points.length;i++) {
+ for(const points of [...annexPaths, deiGardenPath, deiForecourt.main, deiForecourt.branch]) for(let i=1;i<points.length;i++) {
   const a=points[i-1],b=points[i],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])*4);
   for(let k=0;k<=n;k++) { const t=n?k/n:0,p=[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
    for(const polygon of [...footprints,...existing]) assert.ok(!insidePolygon(p,polygon),`Path crosses building at ${p}`);
