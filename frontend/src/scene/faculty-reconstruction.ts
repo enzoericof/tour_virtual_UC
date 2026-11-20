@@ -1,5 +1,4 @@
 import { pavementOutside } from "./faculty/pavement-cutout";
-import { addReceptionGarden } from "./faculty/reception-garden";
 import {addCourtyardElevatorTree, pruneTreeStructures} from "./courtyard-elevator-tree";
 import { registerSeats } from "./seating";
 import * as T from "three";
@@ -1149,7 +1148,6 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
     const depth=plan.bedeliaGalleryDepth;
     box(w+1,.2,depth,0,3.4,z+depth/2,m.concrete,true);
     box(w+1,.05,depth,0,bedeliaPavingTop-.025,z+depth/2,m.stone,true);
-    addReceptionGarden(builder);
     const gold = new T.MeshStandardMaterial({ color: "#c2a65a", metalness: 0.25, roughness: 0.45 });
     // Vitrina visible desde el acceso de Manfred, sobre el lateral de Bedelía.
     const displayX = -w / 2 - 0.31, displayZ = 2.3;
