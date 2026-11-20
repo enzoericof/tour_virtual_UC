@@ -46,8 +46,32 @@ const [walkU, walkV] = annexCoordinates(fromRect(walk, [walk.size[0] / 2, 0]));
 const wallOffset = walk.size[1] / 2 + 0.22;
 // Retiro longitudinal para ensanchar el paso junto a la escalera de la cantina.
 const maquetasSetback = 2.8;
-const dicia = annex("cta-dicia", "CTA–DICIA", walkU + 6 - 34 / 2, walkV + wallOffset + 16 / 2, 34, 16, 4.2,
+const dicia = annex("cta-dicia", "CTA–DICIA", walkU + 6 - 34 / 2, walkV + wallOffset + 16 / 2, 34, 16, 4.8,
   [[-7,-8],[17,-8],[17,8],[-17,8],[-17,3],[-7,3]]);
+/** Primera etapa de las fotos del 19/11, 16:45: volumen y mampostería.
+ * Se conserva la huella en L; cotas estimadas, no medidas de campo. */
+export const diciaStructure = {
+  nave: { minX: -7, maxX: 17, minZ: -8, maxZ: 3, rise: 0.55 },
+  rearWing: { minX: -17, maxX: 17, minZ: 3, maxZ: 8, height: 3.7 },
+  wallThickness: 0.2, bandY: 2.85, corridorBandY: 3.65, bandHeight: 0.26,
+  pillarWidth: 0.25, corridorPillars: [-6.9, -2.15, 2.6, 7.35, 12.1, 16.9],
+  existingEntrance: { x: 0, width: 2.1, height: 2.5 },
+};
+/** Aberturas interpretadas de las cinco fotos del 19/11, 16:45.
+ * Coordenadas del lateral en el marco de DICIA. Distribución estimada. */
+export const diciaFacades = {
+  gate: { width: 3.1, height: 2.65, sill: 0.05, canopyDepth: 0.65 },
+  windows: [
+    { x: -4.525, width: 1.9, sill: 1.05, height: 1.4 },
+    { x: 4.975, width: 1.9, sill: 1.05, height: 1.4 },
+    { x: 9.725, width: 1.7, sill: 1.05, height: 1.4 },
+  ],
+  doors: [
+    { x: 0.225, width: 1.9, sill: 0.05, height: 2.55 },
+    { x: 14.475, width: 1.9, sill: 0.05, height: 2.55 },
+  ],
+  downpipes: [-2.15, 7.35, 16.9],
+};
 // El techo termina donde la fachada junto al pasillo gira hacia el interior de la L.
 const corridorWall = dicia.outline.filter(([, z]) => z === -dicia.rect.size[1] / 2);
 const cornerU = dicia.mapCenter[0] + Math.min(...corridorWall.map(([x]) => x));

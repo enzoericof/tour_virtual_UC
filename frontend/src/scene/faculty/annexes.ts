@@ -8,6 +8,7 @@ import { addDeiForecourt, deiForecourtRoadJunctions } from "./dei-forecourt";
 import { addLaboratoryFacades } from "./laboratory-facades";
 import { addLaboratoryOutbuildings } from "./laboratory-outbuildings";
 import { addLaboratoryGround } from "./laboratory-ground";
+import { addDiciaStructure } from "./dicia-structure";
 import { addSegmentedGardenPath, gardenJunctionReach } from "./garden-path";
 
 // ---- Anexos del plano general: exteriores provisionales, sin interiores relevados ----
@@ -103,6 +104,10 @@ export function addAnnexes(
     const isDei = annex.id === "dei-led";
     const maxZ = Math.max(...outline.map((p) => p[1]));
     prism(outline, -0.1, 0.15, m.concrete);
+    if (annex.id === "cta-dicia") {
+      addDiciaStructure(builder, annex, workshopBrick, workshopMetal, passageTile, annexPavingHeight);
+      return;
+    }
     if (isMaquetas) {
       const depth = annex.rect.size[0], rear = -depth / 2, front = depth / 2;
       const { lowRearInset, highFrontLength, lowHeight } = maquetasVolumes;

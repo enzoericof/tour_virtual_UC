@@ -569,3 +569,19 @@ Tres gatos domésticos de pelo corto, con pelajes gris, naranja y negro con blan
 El follaje individual pasa a 280 hojas por variante y grupo. Quince grupos interiores, entre 6 y 7,8 m en la plantilla, cierran el centro de la copa; se conservan los recortes contra el ascensor y otros sólidos. La corteza compartida toma marrón oscuro y las hojas verde oscuro con menos emisión de luz. Los árboles del perímetro usan la misma densidad cercana. Desde 18 m usan tarjetas con 36 hojas agrupadas y un umbral de alfa menor, para conservar la cobertura al reducirse a pocos píxeles. El detalle lejano usa planos simples y materiales/geometrías compartidos.
 
 Los gatos tienen un torso continuo que une grupa, lomo, pecho y cuello; cabeza y orejas más pequeñas, hocico del color del pelaje, cola horizontal y paso de cuatro tiempos con dos articulaciones por pata. El tercer gato es negro completo, con ojos verde amarillentos y sin pecho ni patas blancas. El relieve del pelo se separa de las rayas de color para evitar el aspecto de estrías en relieve.
+
+### CTA–DICIA: cabecera y lateral junto al pasillo — 19/11/2026
+
+Se conserva el volumen aprobado: nave con techo a dos aguas, huella en L y ala posterior baja provisional. La mampostería usa el mismo material y color que Civil. Las fotos de las 16:45 guían un portón metálico gris de dos hojas en la cabecera, con nervaduras, tiradores, marquesina y lámpara mural. El lateral incorpora tres ventanas rectangulares, dos puertas dobles de vidrio con herrajes y tiradores, y tres bajantes junto a los pilares. Posiciones y dimensiones se definen en `diciaFacades` en metros estimados; no constituyen un relevamiento. Los vanos se descuentan de los muros; vidrios y portón se modelan cerrados con colisión, sin apertura automática en esta etapa. Se mantiene el acceso previo del ala posterior. Carteles, bancos, macetas y rejillas quedan pendientes del punto 5.
+
+### Ajuste de puertas y altura de CTA–DICIA — 19/11/2026
+
+Según las capturas del usuario, las puertas laterales pasan a tomar su cota del borde del pasillo: 0,912 m en el tramo original y la altura del pavimento sobre el terreno en la prolongación. Tiradores, hojas y ventanas se referencian a esa cota; se eleva la banda lateral para evitar que atraviese los vanos. Cada puerta incorpora un rellano de baldosas con colisión, enrasado con el umbral y adaptado a la pendiente hacia el pasillo, que tapa la franja de césped del acceso. El alero de la nave pasa a 4,05 m y la subida del frontón a 0,55 m: cumbrera a 4,60 m frente a los 4,20 m del arco del pasillo. Dimensiones aproximadas para la revisión del usuario; se conserva la implantación y el color.
+
+### Corrección de altura de la nave de CTA–DICIA — 19/11/2026
+
+La última indicación del usuario sustituye la reducción anterior: se eleva únicamente la nave con frontón, de alero 4,05 m a 4,80 m. La subida de cubierta permanece en 0,55 m, con cumbrera a 5,35 m. El ala posterior conserva sus 3,70 m y el pasillo mantiene su cubierta. Las cotas aprobadas de puertas, ventanas y rellanos no cambian. Ajuste estimado pendiente de revisión del usuario; no se ejecutaron pruebas, compilación ni navegador.
+
+### Portón en la cabecera opuesta de CTA–DICIA — 19/11/2026
+
+Por corrección del usuario, el conjunto de portón, marquesina y lámpara pasa de la cabecera x = −7 m a x = 17 m del marco local, orientado hacia el exterior (+x). El muro anterior queda cerrado con ladrillo y colisión; el nuevo vano sustituye el paño macizo de la nave alta. Se conservan las dimensiones del conjunto, las alturas aprobadas, el ala baja y las puertas laterales. Revisión a cargo del usuario, sin ejecutar pruebas, compilaciones ni navegador.

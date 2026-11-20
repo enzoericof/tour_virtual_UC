@@ -598,3 +598,11 @@ La captura de la franja gris interrumpida corresponde a la cocina de cantina y n
 Una regresión por rayos falló antes del cambio al encontrar dos materiales en la fachada. Después pasó en siete segmentos y tres alturas; también comprueba cierre y colisión superior de la cocina. Pasaron las 68 pruebas frontend y el build TypeScript/Vite. Comparación en Chrome de la misma vista nocturna antes/después: manchas reproducidas y posteriormente ausentes, sin cambiar ángulo, ventana ni remate.
 
 Integración posterior con 794f526 (árboles y gatos): 70/70 pruebas y compilación correctas; se conservaron ambos aportes en cantina y en la prueba de escena. El build advierte que el paquete Three.js integrado supera ligeramente 700 kB; no impide compilar.
+
+### Cabecera y lateral de CTA–DICIA — 19/11/2026
+
+Implementados el portón, marquesina y lámpara de cabecera, ventanas, puertas de vidrio y bajantes del lateral. Por indicación expresa del usuario, no se ejecutaron pruebas, compilación ni revisión en navegador para esta etapa. La revisión visual y de circulación queda a cargo del usuario.
+
+### Ajuste de puertas y altura de CTA–DICIA — 19/11/2026
+
+Se editaron las cotas de puertas, ventanas y rellanos y la altura de la nave según las capturas aportadas. Por instrucción del usuario no se ejecutaron pruebas, compilación ni revisión en navegador. La comprobación visual y del paso queda pendiente a su cargo.
