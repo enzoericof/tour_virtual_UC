@@ -217,7 +217,3 @@ Referencias aportadas por el usuario: `WhatsApp Image 2026-11-19 at 16.45.07 (1)
 20/11/2026: captura 21cfe540 y vistas del acceso anotadas por Horacio como referencia de la unión entre edificios, la retirada del paño interior y los tres tramos rectos del caminero. Se reutiliza exactamente el material existente del DEI para el bloque de tejas y sus pilares. Se restaura el arbolado perimetral del contexto sin generar ni descargar recursos adicionales; originales fuera del repositorio.
 
 20/11/2026: captura c66fc824 para el eje visual del caminero y nueva anotación roja para el cierre del acceso LED. Se reutiliza el ladrillo existente; los baldosines perimetrales pasan a led-passage-tile.ts y se comparten con la entrada, sin descargas ni fotografías incorporadas como texturas.
-
-## Sonido ambiente — 20/11/2026
-
-El ambiente del recorrido (pájaros, gente y clases) no usa grabaciones: se sintetiza en el navegador con Web Audio a partir de osciladores y ruido filtrado generado en memoria. No agrega archivos, descargas ni licencias, y por eso no tiene entrada en `sources.json`. Los sonidos con grabación siguen siendo los del ascensor y los dos del audio social.

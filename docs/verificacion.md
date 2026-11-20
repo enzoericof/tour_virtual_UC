@@ -820,14 +820,6 @@ npm run build correcto. npm test: 113/114; el único fallo es el previo de separ
 
 Medición controlada del conjunto integrado, tras GC y con tres gatos: 142,20 MB de heap a diez minutos simulados (142,15 MB al primer minuto); buffers externos 136,52 MB. Incluye todos los cambios recibidos del equipo y no mide RAM total del navegador ni VRAM. Registro .local/sync-led-memory-final.log.
 
-### Sonido ambiente — 20/11/2026
-
-`scene/ambient-zones.ts` reparte niveles por zona con `smoothstep` y un corte de altura por familia: 10 árboles con pájaros de día y grillos de noche, 7 zonas de gente (cantina, plaza techada, pasillo de la plaza y mesas del jardín) y 42 fuentes de murmullo, una por puerta de aula de los Bloques 1 y G. `scene/ambient-audio.ts` sintetiza todo con Web Audio: dos lechos de ruido filtrado con vaivén lento, trinos de una a tres notas y voces de sierra con formante y sílabas; el murmullo pasa por un filtro grave porque suena del otro lado de la pared. No se agregan grabaciones ni recursos nuevos.
-
-Cuatro pruebas nuevas en `tests/ambient-zones.test.mjs`: conversación en la cantina y la plaza techada, silencio fuera de toda zona, pájaros solo de día y grillos solo de noche, una fuente por puerta con el corte vertical del piso y niveles acotados que bajan con la distancia. `npm test`: 117/118; el único fallo es la separación preexistente de Sala Manfred. `npm run build` correcto.
-
-En Chromium (Playwright, sin aceleración 3D) se instanciaron el motor de audio y `update()` con el visitante en la cantina, junto a un árbol, lejos de todo y en pausa: el contexto arranca, las ganancias siguen a los niveles (0,27 de conversación en la cantina, 0,18 de pájaros junto al árbol, casi cero lejos y en pausa, grillos 0,04 de noche) y no hubo errores de Web Audio. El botón del menú se comprobó en el DOM montado: etiqueta, `aria-pressed` y la preferencia `cyt-ambient` en `localStorage`. No se escuchó la mezcla en parlantes ni auriculares: falta la revisión sonora real y el ajuste fino de volúmenes.
-
 ### Solo ensanchado de la escalera del Bloque G — 20/11/2026
 
 Compilación correcta; 113/114 pruebas, con el único fallo previo de separación de Sala Manfred en faculty-blueprint.test.mjs:261. Rayos sobre las rampas de ambos tramos y niveles comprueban apoyo en los dos extremos laterales del ancho nuevo y en el centro. Walker sube PB–1, recorre la galería y sube 1–2, llegando a los descansos y pisos en su cota. La propuesta de follaje se retiró: courtyard-elevator-tree.ts y faculty-reconstruction.ts coinciden con main, y solo cambia el ancho en el plano.
@@ -842,4 +834,10 @@ Revisión visual en navegador: apoyos sin separación lateral ni prolongaciones 
 
 ### Sincronización de ancho y pilares con sonido ambiente — 20/11/2026
 
-Integrado main 2094734 (sonido ambiente por zonas) conservando su implementación y los cambios de ancho y apoyos de la escalera del Bloque G. Árbol del cantero sin hojas y propuesta de escalera anterior guardada aparte, sin aplicarla. Compilación correcta; 117/118 pruebas, con el único fallo previo de separación de Sala Manfred en faculty-blueprint.test.mjs:261. Registros locales ignorados: .local/sync-g-supports-tests.log y .local/sync-g-supports-build.log. La geometría integrada conserva la revisión visual de pilares y descansos registrada arriba.
+Integrado main 2094734 (sonido ambiente por zonas, retirado después) conservando los cambios de ancho y apoyos de la escalera del Bloque G. Árbol del cantero sin hojas y propuesta de escalera anterior guardada aparte, sin aplicarla. Compilación correcta; 117/118 pruebas, con el único fallo previo de separación de Sala Manfred en faculty-blueprint.test.mjs:261. Registros locales ignorados: .local/sync-g-supports-tests.log y .local/sync-g-supports-build.log. La geometría integrada conserva la revisión visual de pilares y descansos registrada arriba.
+
+### Sonido ambiente retirado — 20/11/2026
+
+Los sonidos ambientales de `2094734` (pájaros, gente y murmullo de clases) no convencieron en la revisión del usuario. Se retira todo el agregado con un revert del commit: `scene/ambient-zones.ts`, `scene/ambient-audio.ts`, su prueba, el botón «Sonido ambiente» del menú y la preferencia `cyt-ambient`. `engine.ts` vuelve a quedar sin audio propio más allá del ascensor y el audio social, y la documentación recupera su estado anterior.
+
+`npm test`: 113/114, con el único fallo previo de separación de Sala Manfred; `npm run build` correcto. El sonido seguía apareciendo después de `git reset --hard a5e782d` porque ese commit ya contenía el agregado: no era una caché del navegador, hacía falta revertirlo.

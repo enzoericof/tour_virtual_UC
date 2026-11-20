@@ -31,7 +31,6 @@ export function mountTourShell(pauseTour: () => void) {
    </section>
    <section id="tour-options" class="tour-popover tour-panel hidden" aria-label="Menú del recorrido">
     <button id="theme-btn" type="button" title="Modo oscuro" aria-label="Modo oscuro">${icon("moon")}<span>Modo oscuro</span></button>
-    <button id="ambient-btn" type="button" aria-pressed="true" title="Silenciar sonido ambiente" aria-label="Silenciar sonido ambiente">${icon("volume")}<span>Sonido ambiente</span></button>
     <button type="button" id="fullscreen-btn" aria-pressed="false">${icon("expand")}<span>Pantalla completa</span></button>
     <button id="help">${icon("help")} Ayuda</button>
    </section>

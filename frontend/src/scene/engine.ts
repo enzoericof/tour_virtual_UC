@@ -7,7 +7,6 @@ import { SocialPerformance } from './social-performance';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { CABIN, ElevatorMotion, type ElevatorButton, type ElevatorDoor } from "./elevator";
 import { ElevatorAudio } from "./elevator-audio";
-import { AmbientAudio } from "./ambient-audio";
 import { createCampus } from "./campus";
 import { EntranceDoors } from "./entrance-doors";
 import { loadPlacementsInto } from "./editor-placements";
@@ -69,7 +68,6 @@ export class TourEngine {
   private elevator = new ElevatorMotion(FLOOR_HEIGHT);
   private elevatorPassenger = false;
   private elevatorAudio = new ElevatorAudio(this.camera, this.campus.elevator.car);
-  private ambientAudio = new AmbientAudio();
   private cabinPoint = new T.Vector3();
   onMode = (_mode: TourMode) => {};
   onLocation = (_place: Place | null) => {};
@@ -123,7 +121,6 @@ export class TourEngine {
     this.canvas.addEventListener("click", (event) => {
       if (event.button !== 0) return;
       this.elevatorAudio.unlock();
-      this.ambientAudio.unlock();
       if (this.walker.active) this.useElevator();
     });
     this.walker.onLockChange = (locked) => {
@@ -180,7 +177,6 @@ export class TourEngine {
       this.campus.setDetail(true);
       this.orbit.enabled = false;
       this.elevatorAudio.unlock();
-      this.ambientAudio.unlock();
       this.walker.teleport(destination);
       this.camera.lookAt(this.gaze);
       this.walker.enabled = true;
@@ -308,8 +304,6 @@ export class TourEngine {
     }
     this.updateElevator(elapsed);
     this.social.update(dt);
-    // El ambiente suena solo mientras el visitante recorre el campus; en la vista general se apaga.
-    this.ambientAudio.update(this.camera.position, dt, this.walker.enabled);
     if (this.orbit.enabled) this.orbit.update();
     // Far views need depth precision for ground, paving and grass surfaces.
     const near = this.orbit.enabled && this.current === "campus"
@@ -424,7 +418,6 @@ export class TourEngine {
     }
     this.orbit.enabled = false;
     this.elevatorAudio.unlock();
-    this.ambientAudio.unlock();
     this.walker.walk();
   }
   overview() {
@@ -479,13 +472,8 @@ export class TourEngine {
       this.onMode("paused");
     } else this.overview();
   }
-  /** Sonido ambiente (pájaros, gente y clases): la preferencia vive en la interfaz. */
-  setAmbient(enabled: boolean) {
-    this.ambientAudio.setEnabled(enabled);
-  }
   setTheme(theme: CampusTheme) {
     this.lightingTheme = theme;
-    this.ambientAudio.setTheme(theme);
     const dark = theme === "dark";
     this.scene.background = this.skies[theme] ??= makeCampusSky(theme);
     this.scene.fog = new T.Fog(dark ? "#141d36" : "#c7e0ed", 450, 1900);
