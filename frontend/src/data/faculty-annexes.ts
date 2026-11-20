@@ -89,6 +89,16 @@ export const diciaRearFacade = {
     width: 1.05, height: 0.85, depth: 0.42,
   },
 };
+/** Cabecera junto al pasillo, foto del 19/11 a las 16:45 (2).
+ * Marco de fachada: x a lo largo del muro, z negativo hacia el exterior.
+ * Dimensiones estimadas; el cartel no reproduce texto ilegible de la foto. */
+export const diciaEntranceFacade = {
+  door: { x: 0, width: 1.8, height: 2.5, frostedY: 0.95, frostedHeight: 0.3 },
+  plaque: { x: 1.45, y: 2.15, width: 0.48, height: 0.55 },
+  benches: { centers: [-2.5, 3.9], width: 1.8, z: -0.65 },
+  pots: [-4.4, -1.25, 2.5],
+  pavingDepth: 2.2,
+};
 // La llegada queda frente a una puerta lateral, sobre el pasillo conservado.
 dicia.front = fromRect(dicia.rect, [diciaFacades.doors[0].x, diciaStructure.nave.minZ]);
 dicia.entrance = fromRect(dicia.rect, [diciaFacades.doors[0].x, diciaStructure.nave.minZ - 0.65]);
@@ -106,6 +116,29 @@ const maquetasLength = 1417 / 100;
 // Foto posterior del 18/11: el cuerpo bajo termina antes y deja un rincón abierto.
 // Retiro de profundidad estimado, pendiente de medición.
 export const maquetasVolumes = { lowRearInset: 4, highFrontLength: 9.5, lowHeight: 3.55 };
+/** Lateral de Civil paralelo al pasillo, foto del 20/11 a las 14:52.
+ * Distancias en metros desde la esquina del frente con portones.
+ * Dos conjuntos visibles y una ventana al fondo solicitada por el usuario;
+ * cotas estimadas. */
+export const laboratoryCorridorFacade = {
+  windows: [
+    { fromFront: 2.3, width: 1.35, sill: 1.3, height: 1.35 },
+    { fromFront: 6.5, width: 1.35, sill: 1.3, height: 1.35 },
+    { fromFront: 10.3, width: 1.35, sill: 1.3, height: 1.35 },
+  ],
+  airConditioners: [{ fromFront: 2.3, y: 3.4 }, { fromFront: 6.5, y: 3.4 }],
+  pilasters: { fromFront: [0.14, 4.5, 8.7], width: 0.28, projection: 0.08 },
+};
+/** Muro de Civil hacia la galería de oficinas, foto del 20/11 a las 15:13.
+ * Marco local de fachada: x positivo hacia el rincón del cuerpo bajo.
+ * Cotas aproximadas interpretadas de la foto, pendientes de medición. */
+export const laboratoryOfficeFacade = {
+  window: { x: 1.0, width: 1.8, sill: 1.15, height: 1.3, louvered: true },
+  airConditioners: [{ x: 3.5, y: 4.15 }, { x: -1.7, y: 3.85 }, { x: 2.7, y: 2.55 }],
+  windowUnit: { x: 0.6, y: 2.15, width: 0.95, height: 0.6, depth: 0.48 },
+  canopy: { x: 1.0, width: 2.5, y: 2.85, depth: 0.65 },
+  pilasters: { centers: [-4.61, -0.65, 4.61], width: 0.28, projection: 0.12 },
+};
 /** Detalles de las fotos del 19/11. Metros estimados en cada fachada, desde su centro.
  * Se conserva el identificador histórico lab-maquetas para los laboratorios de Civil. */
 export const laboratoryDetails = {

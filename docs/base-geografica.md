@@ -627,6 +627,18 @@ Por la nueva indicación, el frente de blindex y ventanas se adelanta 1 m, de Z 
 
 Según las marcas rojas, se prolonga el caminero del jardín en forma de Y: dos ramales conectan con el trazado existente frente al DEI y se unen en un tramo hacia la franja arbolada del perímetro. Ancho de 1,60 m, mismo material de hormigón con piezas circulares, losas con volumen y juntas abiertas. Los dos empalmes comparten losas de unión y la horquilla tiene una pieza común, con los brazos recortados para evitar solapamientos. Cota de tapa 0,15 m y bases bajo el césped. La carpa azul de 2,25 m de ancho sigue los quiebres de los dos trazados, con aleros a 2,75 m y cumbrera 44 cm más alta; sus apoyos quedan fuera de las losas y del cruce. Se plantan cuatro árboles en los puntos azules, reutilizando geometrías y materiales, con variación de escala y giro. Trazado, longitudes y posiciones son estimaciones interpretadas de la captura, no medidas relevadas. No se amplía el perímetro del campus.
 
+### Muro de Civil frente a las oficinas — 20/11/2026
+
+La foto `WhatsApp Image 2026-11-20 at 15.13.28.jpeg` guía el paño alto antes macizo, en x = −profundidad/2, desde el rincón retraído hasta el extremo junto al pasillo techado. Se sustituye por un muro con ventana oscura de celosías, tres condensadoras (dos altas y una junto a la ventana), un equipo de ventana con rejilla rectangular y soportes, marquesina corta, banda gris y pilastras de ladrillo. Se reutilizan los materiales del laboratorio, con vanos descontados del muro y colisiones en cristal y equipos. La galería de oficinas y su cubierta conservan su geometría. `laboratoryOfficeFacade` contiene las cotas estimadas de la foto; no son medidas relevadas. La referencia permanece fuera del repositorio. No se ejecutaron pruebas, compilación ni revisión en navegador, por indicación del usuario.
+
+### Lateral de Civil paralelo al pasillo — 20/11/2026
+
+La tercera ventana se desplaza después 1,2 m hacia la derecha en la vista del usuario, de 11,5 a 10,3 m desde la esquina del frente, para separarla del poste del pasillo. Conserva tamaño, altura, material y colisión. Ajuste sin pruebas ni compilación.
+
+Corrección posterior del usuario: se retiran las cañerías de los dos aires de este lateral porque atravesaban visualmente las ventanas; se conservan equipos y soportes. Se agrega una tercera ventana del mismo tamaño y acabado a 11,5 m de la esquina del frente, hacia el final del muro. Las otras fachadas conservan sus cañerías. Sin pruebas, compilación ni revisión en navegador.
+
+La foto `WhatsApp Image 2026-11-20 at 14.52.31.jpeg` guía el muro de Civil que enfrenta el pasillo techado (identificador histórico `lab-maquetas`). El paño macizo se sustituye por mampostería con dos ventanas oscuras cerradas y colisión, dos unidades exteriores de aire acondicionado con soportes y cañerías, y pilastras de ladrillo. Se reutilizan los materiales y constructores existentes del laboratorio; el borde del techo, las demás fachadas y el pasillo no se modifican. `laboratoryCorridorFacade` define dimensiones y distancias estimadas desde la esquina del frente con portones. Las pilastras sobresalen 8 cm para conservar el margen junto al pavimento; las unidades se colocan a 3,40 m. Las aberturas ocultas en la foto siguen pendientes de confirmación. La imagen se usa como referencia y permanece fuera del repositorio. Por indicación del usuario no se ejecutaron pruebas, compilación ni revisión en navegador.
+
 ### Volumen del rincón y depósito de Civil — 19/11/2026
 
 Detalles de suelo: `laboratoryGroundDetails` define dos rejillas (0,38 × 1,05 m junto al portón bajo y 0,55 × 0,65 m hacia el depósito), dos registros cerrados (0,62 × 0,62 m en el patio y 0,58 × 0,68 m sobre el sendero lateral) y una plataforma de 1,50 × 2 m bajo la ventana del rincón. Medidas y posiciones estimadas de las fotos, pendientes de confirmación. Rejillas y registros sobresalen como máximo 7 mm sobre sus pavimentos existentes: patio a 0,905 m y lateral a 0,05 m. La plataforma alcanza 12 cm, con un bisel visible de 18 cm en su contorno y colisión de la misma forma. Se reutiliza el hormigón del patio. Se conservan las alturas generales, los edificios y el césped; no se añaden árboles ni se abren pozos transitables bajo las rejillas.
@@ -681,6 +693,12 @@ Por corrección del usuario, el conjunto de portón, marquesina y lámpara pasa 
 ### Retiro del ala posterior de CTA–DICIA — 20/11/2026
 
 La captura señalada por el usuario sustituye la huella en L provisional: se retira el ala baja de 34 × 5 m, con su techo, muros, piso y colisiones. La nave conserva su posición, cubierta y fachadas; su huella efectiva queda entre x = −7 y 17 m, z = −8 y 3 m en el marco local existente. El borde posterior z = 3 m se cierra de piso a alero con el mismo material de ladrillo, banda exterior y colisión que los muros conservados. El punto de visita se traslada al pasillo, frente a la primera puerta lateral, conservando nombre e identificador. Las cotas siguen siendo estimadas. No se ejecutaron pruebas, compilación ni revisión en navegador, por indicación del usuario.
+
+### Acceso vidriado de la cabecera de CTA–DICIA — 20/11/2026
+
+Corrección posterior del usuario: puerta centrada en el muro (x = 0 en el marco de fachada). El cartel acompaña el desplazamiento y la maceta que quedaba delante se mueve a un costado para despejar el acceso. Sin pruebas ni compilación.
+
+La foto `WhatsApp Image 2026-11-19 at 16.45.03 (2).jpeg` guía la cabecera x = −7 m, junto al pasillo. Se agrega una puerta doble de vidrio cerrada con colisión, tiradores metálicos y banda opaca, descontando el vano del muro. El cartel rectangular a su izquierda se representa sin transcribir texto ilegible. Dos bancos de madera con estructura azul, con plazas para sentarse, y tres macetas acompañan el acceso sobre baldosas que siguen la cota del terreno y llegan al borde del pasillo. Se conservan las pilastras de esquina y la franja gris; no se agrega la carpa. `diciaEntranceFacade` define posiciones y medidas estimadas en metros. La foto permanece fuera del repositorio. No se ejecutaron pruebas, compilación ni revisión en navegador, por indicación del usuario.
 
 ### Ventanas y aires del muro posterior de CTA–DICIA — 20/11/2026
 

@@ -3,6 +3,7 @@ import { diciaStructure as spec, type Annex } from "../../data/faculty-annexes";
 import type { FacultyBuilder } from "./builder";
 import { addDiciaFacades } from "./dicia-facades";
 import { addDiciaRearFacade } from "./dicia-rear-facade";
+import { addDiciaEntranceFacade } from "./dicia-entrance-facade";
 import { facultyBlueprint as plan, fromRect, PLAZA_LEVEL, type Vec2 } from "../../data/faculty-blueprint";
 
 /** Volumen de CTA–DICIA con cabecera y lateral fotografiados. */
@@ -37,6 +38,9 @@ export function addDiciaStructure(builder: FacultyBuilder, annex: Annex,
     } else if (a[1] === n.maxZ && b[1] === n.maxZ) {
       // El muro posterior se construye con sus ventanas y aires acondicionados.
       addDiciaRearFacade(builder, h, brick);
+    } else if (a[0] === n.minX && b[0] === n.minX) {
+      addDiciaEntranceFacade(builder, annex, brick, trim, passageTile, annexPavingHeight);
+      continue; // La cabecera conserva su banda, recortada si coincide con la puerta.
     } else box(length, h, t, x, h / 2, z, brick, true, options);
     // Banda sobrepuesta siguiendo el exterior de la huella, sin cambiar su escala.
     const bandY = a[1] === n.minZ && b[1] === n.minZ ? spec.corridorBandY : spec.bandY;

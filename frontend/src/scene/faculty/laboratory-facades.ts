@@ -1,5 +1,5 @@
 import * as T from "three";
-import { laboratoryDetails as detail, maquetasVolumes, type Annex } from "../../data/faculty-annexes";
+import { laboratoryDetails as detail, laboratoryCorridorFacade as corridor, laboratoryOfficeFacade as office, maquetasVolumes, type Annex } from "../../data/faculty-annexes";
 import type { Vec2 } from "../../data/faculty-blueprint";
 import type { FacultyBuilder } from "./builder";
 
@@ -24,7 +24,7 @@ export function addLaboratoryFacades(builder: FacultyBuilder, annex: Annex, bric
 
   // Todas las fachadas miran hacia -z en su marco propio.
   function facade(center: Vec2, width: number, angle: number, height: number, windows: Window[],
-    decorate: () => void) {
+    decorate: () => void, band = true) {
     frame({ center, size: [width, 0.2], angle }, () => {
       const edges = [-width / 2, width / 2, ...windows.flatMap(w => [w.x - w.width / 2, w.x + w.width / 2])]
         .sort((a, b) => a - b);
@@ -58,7 +58,7 @@ export function addLaboratoryFacades(builder: FacultyBuilder, annex: Annex, bric
           }
         } else box(0.035, w.height, 0.11, w.x, y, -0.075, trim);
       }
-      box(width, detail.bandHeight, 0.025, 0, detail.bandY, -0.113, trim);
+      if (band) box(width, detail.bandHeight, 0.025, 0, detail.bandY, -0.113, trim);
       decorate();
     });
   }
@@ -84,7 +84,7 @@ export function addLaboratoryFacades(builder: FacultyBuilder, annex: Annex, bric
     pole(0.095, 0.16, x, height - 0.24, -0.55, m.white);
     beam(v3(x, 2.48, -0.125), v3(x, height - 0.35, -0.125), 0.012, pipe);
   }
-  function airConditioner(x: number, y: number) {
+  function airConditioner(x: number, y: number, withPipes = true) {
     box(0.85, 0.59, 0.35, x, y, -0.34, equipment, true);
     const disk = pole(0.21, 0.025, x - 0.10, y, -0.53, dark); disk.rotation.x = Math.PI / 2;
     for (let i = 0; i < 4; i++) {
@@ -102,9 +102,59 @@ export function addLaboratoryFacades(builder: FacultyBuilder, annex: Annex, bric
       box(0.045, 0.045, 0.5, x + side * 0.30, y - 0.34, -0.30, trim);
       box(0.045, 0.27, 0.045, x + side * 0.30, y - 0.23, -0.14, trim);
     }
-    beam(v3(x + 0.45, y, -0.3), v3(x + 0.5, y, -0.14), 0.025, equipment);
-    beam(v3(x + 0.5, y, -0.14), v3(x + 0.5, 0.18, -0.14), 0.018, pipe);
+    if (withPipes) {
+      beam(v3(x + 0.45, y, -0.3), v3(x + 0.5, y, -0.14), 0.025, equipment);
+      beam(v3(x + 0.5, y, -0.14), v3(x + 0.5, 0.18, -0.14), 0.018, pipe);
+    }
   }
+
+  // Muro hacia el pasillo techado: sustituye el paño macizo, sin tocar la cubierta.
+  // El giro invierte x: el extremo negativo del marco corresponde al frente.
+  facade([0, end - 0.1], depth, Math.PI, annex.height,
+    corridor.windows.map(w => ({ x: -depth / 2 + w.fromFront,
+      width: w.width, sill: w.sill, height: w.height })), () => {
+      const p = corridor.pilasters;
+      for (const x of [...p.fromFront.map(offset => -depth / 2 + offset), depth / 2 - p.width / 2])
+        box(p.width, annex.height, 0.2 + p.projection, x, annex.height / 2,
+          -p.projection / 2, brick, true);
+      for (const ac of corridor.airConditioners)
+        airConditioner(-depth / 2 + ac.fromFront, ac.y, false);
+    }, false);
+
+  // Muro alto hacia la galería de oficinas, antes macizo. Se conserva su posición.
+  facade([rear, (split + end) / 2], highFrontLength, -Math.PI / 2, annex.height,
+    [office.window], () => {
+      const p = office.pilasters;
+      for (const x of p.centers)
+        box(p.width, annex.height, 0.2 + p.projection, x, annex.height / 2,
+          -p.projection / 2, brick, true);
+      for (const ac of office.airConditioners) airConditioner(ac.x, ac.y);
+
+      // Marquesina pequeña sobre la ventana; independiente de la cubierta del paso.
+      const c = office.canopy;
+      box(c.width, 0.1, c.depth, c.x, c.y, -0.1 - c.depth / 2, trim, true);
+      box(c.width, 0.08, 0.05, c.x, c.y - 0.06, -0.1 - c.depth, trim);
+      for (const side of [-1, 1]) {
+        const x = c.x + side * (c.width / 2 - 0.15);
+        beam(v3(x, c.y - 0.35, -0.13), v3(x, c.y - 0.05, -c.depth), 0.025, trim);
+      }
+
+      // Equipo de ventana: carcasa con rejilla rectangular, distinto de las condensadoras.
+      const unit = office.windowUnit, faceZ = -0.12 - unit.depth;
+      box(unit.width, unit.height, unit.depth, unit.x, unit.y,
+        faceZ + unit.depth / 2, equipment, true);
+      box(unit.width * 0.66, unit.height - 0.1, 0.018, unit.x + 0.07, unit.y, faceZ - 0.012, dark);
+      for (let i = 0; i < 13; i++) box(unit.width * 0.66, 0.014, 0.025,
+        unit.x + 0.07, unit.y - (unit.height - 0.12) / 2 + i * (unit.height - 0.12) / 12,
+        faceZ - 0.03, equipment);
+      for (const side of [-1, 1]) {
+        const x = unit.x + side * (unit.width / 2 - 0.06);
+        box(0.045, 0.045, unit.depth + 0.08, x, unit.y - unit.height / 2 - 0.03,
+          faceZ + unit.depth / 2, trim);
+        beam(v3(x, office.window.sill - 0.25, -0.13),
+          v3(x, unit.y - unit.height / 2 - 0.03, faceZ + 0.04), 0.025, trim);
+      }
+    });
 
   // Muro retraído del bloque bajo: ventana centrada y esquina con bajante.
   facade([lowRear, (-end + split) / 2], lowWidth, -Math.PI / 2, lowHeight,

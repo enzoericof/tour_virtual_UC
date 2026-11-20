@@ -115,7 +115,7 @@ export function addAnnexes(
       return;
     }
     if (isMaquetas) {
-      const depth = annex.rect.size[0], rear = -depth / 2, front = depth / 2;
+      const depth = annex.rect.size[0], front = depth / 2;
       const { lowRearInset, highFrontLength, lowHeight } = maquetasVolumes;
       const lowDepth = depth - lowRearInset;
       const roofBreakZ = maxZ - highFrontLength;
@@ -127,8 +127,8 @@ export function addAnnexes(
       annexWall([front, roofBreakZ], [front, maxZ], h, [], true);
       workshopFront(front, roofBreakZ, maxZ, h, true);
       workshopFront(front, -maxZ, roofBreakZ, lowHeight, false, true);
-      annexWall([rear, maxZ - 0.1], [front, maxZ - 0.1], h, [], true);
-      annexWall([rear, roofBreakZ], [rear, maxZ], h, [], true);
+      // El lateral hacia el pasillo se construye con vanos en addLaboratoryFacades.
+      // El muro hacia las oficinas también descuenta su ventana en addLaboratoryFacades.
       // Pared alta expuesta en el rincón y parte superior sobre el techo bajo.
       addLaboratoryFacades(builder, annex, workshopBrick, workshopMetal);
       addLaboratoryOutbuildings(builder, officeBrick);
