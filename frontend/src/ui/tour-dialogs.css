@@ -284,6 +284,21 @@ form .primary {
     sans-serif;
   margin-bottom: 8px;
 }
+.library-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+.library-actions button:disabled {
+  opacity: .5;
+  cursor: default;
+}
+.work-description {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .work-card .text-btn {
   margin-left: 15px;
 }

@@ -22,7 +22,7 @@ Prioridades indicadas por el usuario, en este orden.
 
 | Tarea | Criterio de terminado |
 | --- | --- |
-| **Servidor del frontend:** integrar la biblioteca y los paneles con `campus-backend/`. El chat ya usa presencia; falta su aceptación con PostgreSQL real en la nube. [Arquitectura](arquitectura.md#chat-grupal-y-gestos) | Biblioteca y paneles operativos; chat e interacciones verificados en despliegue real |
+| **Servidor del frontend:** verificar la integración implementada de la biblioteca con `campus-backend/` e integrar los paneles. El chat ya usa presencia; falta su aceptación con PostgreSQL real en la nube. [Arquitectura](arquitectura.md#chat-grupal-y-gestos) | Biblioteca y paneles operativos; chat e interacciones verificados en despliegue real |
 | Medidas: tomar en el lugar las que faltan del Bloque 1 y las de los demás edificios ([estado de las medidas](base-geografica.md#estado-de-las-medidas-03112026)) y confirmar las interpretaciones de los [límites de fidelidad](base-geografica.md#límites-de-fidelidad) | Medidas registradas en base-geografica.md e incorporadas a `faculty-blueprint.ts`, con `npm test` actualizado |
 | Ascensor: confirmar en el lugar si el armario de maniobra está solo en planta baja, medir la cabina (alto interior) y la puerta, y grabar el cierre de puertas (hoy se reutiliza la apertura) | Medidas y foto registradas en base-geografica.md e incorporadas a `elevator.ts` / `elevator-shaft.ts`, con `npm test` actualizado |
 | Cantina: fachada, forma de cubierta e interior; interior de Electrónica e Informática | Referencias recibidas e incorporadas a `faculty-blueprint.ts` / `faculty-reconstruction.ts` |

@@ -42,6 +42,10 @@ Revisión en Chrome con el controlador social, caminante, colisiones y menú rea
 - Se incorporó main `32770ac` antes de validar. Con ese edificio adicional se midieron 88.558 triángulos únicos, 53.209 nodos y 144,88 MB de heap. En una muestra local de cápsula más rayo sobre los puntos de visita: mediana 0,0121 ms y percentil 95 de 0,0811 ms. Son mediciones sintéticas de consultas, no FPS del navegador.
 - Chrome: carga visual del campus completo con la configuración de producción; se observaron 53.209 nodos, los 88.558 triángulos y aproximadamente 230 MB de heap JavaScript en la vista local. Esto no representa el total de la pestaña: excluye parte de texturas, buffers de GPU y gastos del navegador. No se usaron cuentas ni la base de producción.
 - Pasaron 87 pruebas y el build de producción, incluidos rayos contrastados con el modelo, contactos de esfera/cápsula en piso/pared/escalón, reconstrucción del índice y referencia compartida. La prueba de campus verifica que no se pierden triángulos y que el índice queda por debajo de 150.000 nodos; se mantienen el recorrido por baños, pisos y ascensor y las pruebas de gatos, asientos y multijugador.
+## Biblioteca conectada al backend actual - 20/11/2026
+
+- Implementados el listado propio `/api/trabajos/mis-trabajos` y su integración en el frontend, junto al listado general, paginación y formularios de publicación y edición por materia.
+- Por indicación del usuario, no se ejecutaron pruebas, compilación ni revisión en navegador. La comprobación funcional con sesión y PostgreSQL queda a cargo del usuario.
 
 ## Encuentro de pisos junto a cantina - 19/11/2026
 

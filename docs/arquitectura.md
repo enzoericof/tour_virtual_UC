@@ -20,7 +20,15 @@ Vite apunta al backend en `http://127.0.0.1:8080` por defecto. Para usar otra di
 
 El commit `9c5d019` retiró `backend/`. Sus contratos históricos de contenido y chat se conservan más abajo y su código sigue en `fd95f87`. Los archivos de Docker y Compose de ese módulo también quedaron en el historial. La ejecución actual se describe en [la guía del backend](../campus-backend/setup.md).
 
-`campus-backend` compila con su propio Maven Wrapper y apunta a PostgreSQL local `TP_INFO3` con `DB_USER` y `DB_PASSWORD`. Expone `/api/materias` y `/api/trabajos` con listado paginado por materia y operaciones para el propietario o un administrador. La biblioteca y los paneles siguen usando los contratos anteriores. El chat y los gestos usan el protocolo actual de presencia. [Tareas pendientes](pendientes.md).
+`campus-backend` compila con su propio Maven Wrapper y apunta a PostgreSQL local `TP_INFO3` con `DB_USER` y `DB_PASSWORD`. Expone `/api/materias` y `/api/trabajos` con listado paginado por materia y operaciones para el propietario o un administrador. La biblioteca usa estos contratos; los paneles siguen usando los anteriores. El chat y los gestos usan el protocolo actual de presencia. [Tareas pendientes](pendientes.md).
+
+### Trabajos del usuario autenticado
+
+El frontend abre «Mis trabajos» por defecto y permite cambiar a «Todos los trabajos». `services/works.ts` consulta las rutas actuales mediante el cliente compartido de sesión y CSRF; muestra páginas de 20 elementos. Los formularios de alta y edición envían `titulo`, `descripcion` y `materiaId`, con opciones cargadas de `/api/materias`. Las tarjetas muestran materia, título y descripción, con acciones para el propietario o un administrador. No hay enlace ni adjunto en el contrato actual. Los fallos muestran el mensaje del servicio y permiten reintentar; una respuesta 401 ofrece volver a la cuenta. El proxy local de Vite conserva su configuración.
+
+`GET /api/trabajos/mis-trabajos?pagina=0&tamano=20` devuelve únicamente los trabajos de la cuenta activa identificada por la sesión, también cuando es administradora. No recibe un `usuarioId` del cliente. Requiere sesión autenticada; sin ella responde 401.
+
+La página comienza en 0 y el tamaño admite entre 1 y 100 elementos; los valores predeterminados son 0 y 20. Los valores fuera de rango devuelven 400. Ordena por `fechaPublicacion` e `id` descendentes y conserva el formato `PaginaTrabajosResponse`: `contenido`, `pagina`, `tamano`, `totalElementos` y `totalPaginas`. Cada elemento usa `TrabajoResponse`; si no hay resultados, `contenido` es una lista vacía. El listado general y su filtro por materia mantienen su contrato.
 
 ## Usuarios, sesiones y multijugador en campus-backend
 

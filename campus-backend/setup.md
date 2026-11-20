@@ -318,7 +318,7 @@ Tras reiniciar el backend, iniciar sesión nuevamente. Las cuentas y trabajos pe
 
 El arranque descrito corresponde a usuarios, sesiones, materias y trabajos del backend actual. La subida de imágenes y video, el alta controlada de administradores y la adaptación del frontend Three.js todavía están pendientes. Tener la tabla de archivos no significa que exista una API de subida.
 
-Para probar las cuentas y la presencia multijugador, iniciá también el frontend según el [README](../README.md#inicio-con-multijugador). La biblioteca y los paneles todavía usan los contratos del servidor anterior. El chat grupal y los gestos ya usan el WebSocket autenticado de presencia; V11 agrega el archivo de mensajes y el consentimiento de interacciones.
+Para probar las cuentas y la presencia multijugador, iniciá también el frontend según el [README](../README.md#inicio-con-multijugador). La biblioteca usa las rutas actuales de trabajos y materias, con verificación funcional pendiente; los paneles todavía usan los contratos del servidor anterior. El chat grupal y los gestos ya usan el WebSocket autenticado de presencia; V11 agrega el archivo de mensajes y el consentimiento de interacciones.
 
 La configuración mantiene la protección CSRF en las escrituras REST y exige sesión y origen permitido para el WebSocket. El arranque de esta guía no sustituye la configuración HTTPS del despliegue público.
 

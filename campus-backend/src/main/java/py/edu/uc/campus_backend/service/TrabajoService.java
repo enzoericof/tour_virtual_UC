@@ -45,12 +45,7 @@ public class TrabajoService {
     @Transactional(readOnly = true)
     public PaginaTrabajosResponse listar(Long materiaId, int pagina, int tamano, String correo) {
         usuarioService.obtenerActivo(correo);
-        if (pagina < 0 || tamano < 1 || tamano > 100) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "La página debe ser mayor o igual a 0 y el tamaño debe estar entre 1 y 100.");
-        }
-        PageRequest consulta = PageRequest.of(pagina, tamano,
-            Sort.by(Sort.Direction.DESC, "fechaPublicacion", "id"));
+        PageRequest consulta = consultaPaginada(pagina, tamano);
         Page<Trabajo> trabajos;
         if (materiaId == null) {
             trabajos = trabajoRepository.findAll(consulta);
@@ -61,6 +56,25 @@ public class TrabajoService {
         return new PaginaTrabajosResponse(
             trabajos.getContent().stream().map(this::respuesta).toList(),
             pagina, tamano, trabajos.getTotalElements(), trabajos.getTotalPages());
+    }
+
+    @Transactional(readOnly = true)
+    public PaginaTrabajosResponse listarMisTrabajos(int pagina, int tamano, String correo) {
+        Usuario usuario = usuarioService.obtenerActivo(correo);
+        Page<Trabajo> trabajos = trabajoRepository.findByUsuarioId(
+            usuario.getId(), consultaPaginada(pagina, tamano));
+        return new PaginaTrabajosResponse(
+            trabajos.getContent().stream().map(this::respuesta).toList(),
+            pagina, tamano, trabajos.getTotalElements(), trabajos.getTotalPages());
+    }
+
+    private PageRequest consultaPaginada(int pagina, int tamano) {
+        if (pagina < 0 || tamano < 1 || tamano > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "La página debe ser mayor o igual a 0 y el tamaño debe estar entre 1 y 100.");
+        }
+        return PageRequest.of(pagina, tamano,
+            Sort.by(Sort.Direction.DESC, "fechaPublicacion", "id"));
     }
 
     @Transactional(readOnly = true)
