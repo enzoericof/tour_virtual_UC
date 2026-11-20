@@ -1,0 +1,22 @@
+name: Diagnostico temporal del scheduler
+
+on:
+  schedule:
+    # Prueba de una sola fecha: 20/11 a las 16:55 Paraguay (19:55 UTC).
+    - cron: '55 19 20 11 *'
+
+permissions: {}
+
+jobs:
+  comprobar-evento:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Registrar evento automatico sin desplegar ni usar secretos
+        env:
+          EVENT: ${{ github.event_name }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          test "$EVENT" = schedule
+          printf 'Evento recibido: %s\nCommit: %s\n' "$EVENT" "$COMMIT"
+          printf '### Prueba del scheduler\nEvento schedule recibido automaticamente. No se ejecuto ningun deploy.\n' >> "$GITHUB_STEP_SUMMARY"
