@@ -1,8 +1,8 @@
-.campus-chat { width: min(440px, calc(100vw - 40px)); max-height: min(560px, calc(100dvh - 48px)); padding: 22px; font: 13px/1.5 "DM Sans", sans-serif; }
+.campus-chat { width: min(440px, calc(100vw - 40px)); max-height: min(560px, calc(100dvh - 48px)); padding: 22px; font: 13px/1.5 "Source Sans 3", sans-serif; }
 .campus-chat:not([open]) { display: none; }
 .campus-chat[open] { display: flex; flex-direction: column; }
 .campus-chat header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--surface-border); }
-.campus-chat header strong { display: block; font: 750 19px/1.4 "Manrope", sans-serif; }
+.campus-chat header strong { display: block; font: 750 19px/1.4 "Source Sans 3", sans-serif; }
 .chat-state { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
 .chat-close { border: 1px solid var(--surface-border); background: var(--surface-tint); color: var(--ink); }
 .campus-chat-log { min-height: 150px; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--surface-border) transparent; padding: 16px 2px; }
@@ -19,14 +19,14 @@
 .campus-chat-form .primary { padding: 10px 16px; }
 .chat-older { align-self: center; margin-top: 12px; padding: 6px 10px; color: var(--accent); font-size: 11px; }
 .social-open .tour-toolbar, .social-open .tour-guidance { visibility: hidden; }
-.social-dialog { width: min(400px, calc(100vw - 40px)); max-height: calc(100dvh - 48px); overflow: auto; padding: 24px; font-family: "DM Sans", sans-serif; }
-.social-dialog h2 { font: 750 20px/1.4 "Manrope", sans-serif; margin: 0 0 10px; color: var(--ink); }
+.social-dialog { width: min(400px, calc(100vw - 40px)); max-height: calc(100dvh - 48px); overflow: auto; padding: 24px; font-family: "Source Sans 3", sans-serif; }
+.social-dialog h2 { font: 750 20px/1.4 "Source Sans 3", sans-serif; margin: 0 0 10px; color: var(--ink); }
 .social-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
 .social-header h2 { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .social-close { flex: none; color: var(--ink); background: var(--surface-tint); border: 1px solid var(--surface-border); }
 .social-description { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
 .social-options { display: grid; gap: 9px; }
-.social-options button { min-height: 46px; padding: 10px 14px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-tint); color: var(--ink); text-align: left; font: 750 13px "Manrope", sans-serif; }
+.social-options button { min-height: 46px; padding: 10px 14px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-tint); color: var(--ink); text-align: left; font: 750 13px "Source Sans 3", sans-serif; }
 .social-options button:hover { background: var(--surface-border); }
 .social-dismiss { width: 100%; margin-top: 18px; padding: 10px 14px; font-size: 12px; }
-.social-pending { position: fixed; top: var(--tour-edge); left: 50%; transform: translateX(-50%); z-index: 13; max-width: 45vw; padding: 10px 16px; overflow-wrap: anywhere; border: 1px solid var(--menu-border); border-radius: 12px; background: var(--menu-surface); color: var(--menu-text); font: 12px/1.4 "DM Sans", sans-serif; pointer-events: none; }
+.social-pending { position: fixed; top: var(--tour-edge); left: 50%; transform: translateX(-50%); z-index: 13; max-width: 45vw; padding: 10px 16px; overflow-wrap: anywhere; border: 1px solid var(--menu-border); border-radius: 12px; background: var(--menu-surface); color: var(--menu-text); font: 12px/1.4 "Source Sans 3", sans-serif; pointer-events: none; }

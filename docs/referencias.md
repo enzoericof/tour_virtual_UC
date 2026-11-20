@@ -205,3 +205,5 @@ Referencias aportadas por el usuario: `WhatsApp Image 2026-11-19 at 16.45.07 (1)
 
 
 20/11/2026 — Mochila y llamas del jetpack: geometría y materiales procedurales propios de `frontend/src/scene/jetpack.ts`, sin recursos externos. El paseo interior reutiliza los tres modelos de gato y sus texturas existentes. No se incorporan nuevos archivos multimedia.
+
+20/11/2026: las dos capturas de Sapientia compartidas por el usuario guían la nueva temática de la interfaz: superficies blancas y títulos azul profundo en claro, tarjetas azul marino en oscuro y acentos azules. Se utiliza Source Sans 3 mediante Google Fonts con respaldo sans-serif. La paleta se aproxima visualmente a las capturas; no se presenta como una especificación oficial del portal.

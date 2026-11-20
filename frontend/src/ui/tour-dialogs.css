@@ -88,7 +88,7 @@ dialog p {
 }
 .info-panel h3 {
   font:
-    600 18px "Manrope",
+    600 18px "Source Sans 3",
     sans-serif;
 }
 .full-photo {
@@ -130,7 +130,7 @@ dialog:has(.tour-help) .dialog-close:hover { background: #963142; }
 .tour-help h2 {
   margin: 0 44px 1px 0;
   color: inherit;
-  font: 750 20px/1.4 "Manrope", sans-serif;
+  font: 750 20px/1.4 "Source Sans 3", sans-serif;
   letter-spacing: 0;
 }
 .help-tabs {
@@ -280,9 +280,24 @@ form .primary {
 }
 .work-card h3 {
   font:
-    650 19px "Manrope",
+    650 19px "Source Sans 3",
     sans-serif;
   margin-bottom: 8px;
+}
+.library-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+.library-actions button:disabled {
+  opacity: .5;
+  cursor: default;
+}
+.work-description {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .work-card .text-btn {
   margin-left: 15px;

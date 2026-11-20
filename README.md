@@ -46,7 +46,7 @@ En el backend, configurá `CAMPUS_FRONTEND_ORIGINS=http://127.0.0.1:5173,http://
 
 Cuando publiques el frontend compilado, configurá su servidor para reenviar `/api` y `/ws` al backend, con soporte de WebSocket para `/ws`. Si el frontend tiene otro dominio, agregá su origen HTTPS a `CAMPUS_FRONTEND_ORIGINS`.
 
-La biblioteca y los paneles informativos están pendientes de integración con el backend actual. El chat grupal y las interacciones usan el WebSocket de presencia. [Arquitectura y contratos](docs/arquitectura.md#chat-grupal-y-gestos).
+La biblioteca está conectada al backend actual con vistas de trabajos propios y generales, paginación y formularios por materia; su verificación funcional está pendiente. Los paneles informativos todavía requieren integración. El chat grupal y las interacciones usan el WebSocket de presencia. [Arquitectura y contratos](docs/arquitectura.md).
 
 ## Todo con Docker
 

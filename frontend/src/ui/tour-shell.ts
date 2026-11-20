@@ -14,22 +14,23 @@ export function mountTourShell(pauseTour: () => void) {
     </div>
    </header>
    <div class="tour-guidance">
-    <button id="pause-tour" class="pause-tour hidden" aria-label="Pausar recorrido">Esc · Pausar</button>
-    <p id="pause-label" class="hidden">En pausa</p>
+    <button id="pause-tour" class="pause-tour hidden" aria-label="Pausar recorrido"><kbd>Esc</kbd><span>Pausar</span></button>
+    <p id="pause-label" class="pause-status hidden" role="status">${icon("pause")}<span>Recorrido en pausa</span></p>
    </div>
    <nav id="tour-toolbar" class="tour-toolbar" aria-label="Controles del recorrido">
-    <button id="begin" class="tour-start">${icon("walk")}<span>Recorrer</span></button>
-    <button id="overview" class="hidden" title="Vista general" aria-label="Vista general">${icon("cube")}<span>Vista general</span></button>
+    <button id="route-btn" class="tour-start" type="button" aria-controls="tour-route" aria-expanded="false">${icon("walk")}<span>Recorrido</span></button>
     <div class="tour-utilities">
-     <button id="theme-btn" class="tour-icon" type="button" title="Modo oscuro" aria-label="Modo oscuro">${icon("moon")}</button>
-     <button id="more-btn" class="tour-icon" title="Más opciones" aria-label="Más opciones" aria-controls="tour-options" aria-expanded="false">${icon("menu")}</button>
+     <button id="more-btn" class="tour-menu" type="button" title="Menú" aria-label="Menú" aria-controls="tour-options" aria-expanded="false">${icon("menu")}<span>Menú</span></button>
     </div>
-    <button id="account-btn" class="tour-menu" title="Menú de cuenta" aria-controls="tour-account" aria-expanded="false">${icon("user")}<span>Menú</span></button>
+    <button id="account-btn" class="tour-menu" title="Menú de cuenta" aria-controls="tour-account" aria-expanded="false">${icon("user")}<span>Perfil</span></button>
    </nav>
    <aside class="explorer tour-panel collapsed" id="explorer" aria-label="Espacios de la facultad"><div class="section-top"><div><h2>Espacios</h2></div><button class="icon-btn" id="close-explorer" aria-label="Cerrar espacios">${icon("close")}</button></div><label class="search">${icon("search")}<input id="search" placeholder="Buscar un espacio…" aria-label="Buscar un espacio"></label><div class="filters"><button data-filter="all" class="selected">Todos</button><button data-filter="outside">Exteriores</button></div><div id="place-list" class="place-list"></div></aside>
-   <section id="tour-options" class="tour-popover tour-panel hidden" aria-label="Más opciones">
-    <button id="recenter">${icon("cube")} Recentrar cámara</button>
-    <button type="button" id="graphics-btn" aria-pressed="false">${icon("sparkles")}<span>Mejorar gráficos</span></button>
+   <section id="tour-route" class="tour-popover tour-panel hidden" aria-label="Opciones del recorrido">
+    <button id="begin" type="button">${icon("walk")}<span>Recorrer campus</span></button>
+    <button id="overview" type="button">${icon("cube")}<span>Vista 3D</span></button>
+   </section>
+   <section id="tour-options" class="tour-popover tour-panel hidden" aria-label="Menú del recorrido">
+    <button id="theme-btn" type="button" title="Modo oscuro" aria-label="Modo oscuro">${icon("moon")}<span>Modo oscuro</span></button>
     <button type="button" id="fullscreen-btn" aria-pressed="false">${icon("expand")}<span>Pantalla completa</span></button>
     <button id="help">${icon("help")} Ayuda</button>
    </section>

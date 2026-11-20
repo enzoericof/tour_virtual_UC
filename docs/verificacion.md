@@ -42,6 +42,10 @@ Revisión en Chrome con el controlador social, caminante, colisiones y menú rea
 - Se incorporó main `32770ac` antes de validar. Con ese edificio adicional se midieron 88.558 triángulos únicos, 53.209 nodos y 144,88 MB de heap. En una muestra local de cápsula más rayo sobre los puntos de visita: mediana 0,0121 ms y percentil 95 de 0,0811 ms. Son mediciones sintéticas de consultas, no FPS del navegador.
 - Chrome: carga visual del campus completo con la configuración de producción; se observaron 53.209 nodos, los 88.558 triángulos y aproximadamente 230 MB de heap JavaScript en la vista local. Esto no representa el total de la pestaña: excluye parte de texturas, buffers de GPU y gastos del navegador. No se usaron cuentas ni la base de producción.
 - Pasaron 87 pruebas y el build de producción, incluidos rayos contrastados con el modelo, contactos de esfera/cápsula en piso/pared/escalón, reconstrucción del índice y referencia compartida. La prueba de campus verifica que no se pierden triángulos y que el índice queda por debajo de 150.000 nodos; se mantienen el recorrido por baños, pisos y ascensor y las pruebas de gatos, asientos y multijugador.
+## Biblioteca conectada al backend actual - 20/11/2026
+
+- Implementados el listado propio `/api/trabajos/mis-trabajos` y su integración en el frontend, junto al listado general, paginación y formularios de publicación y edición por materia.
+- Por indicación del usuario, no se ejecutaron pruebas, compilación ni revisión en navegador. La comprobación funcional con sesión y PostgreSQL queda a cargo del usuario.
 
 ## Encuentro de pisos junto a cantina - 19/11/2026
 
@@ -746,3 +750,12 @@ Se incorpora `npm run measure:memory` desde `frontend/` para repetir la medició
 Comprobación adicional con TourEngine completo en Chrome, gatos y puertas activos, sin presencia remota ni GC forzado: antes, entre 235,9 y 261,7 MB observados después del segundo 10 hasta una captura a los 62 s; con cubiertas optimizadas, entre 224,0 y 249,6 MB hasta los 122 s. La lectura final fue 224,6 MB. `performance.memory` es un indicador aproximado del navegador y fluctúa con su GC; no es la misma medición controlada de ~143 MB ni la memoria total del proceso/GPU. El registro por accesibilidad queda en `.local/memory-browser-observations.md`; los benchmarks comparativos quedan fuera de Git en `.local/memory-roof-*.json`.
 
 Tras la optimización: 98/99 pruebas y compilación correctas. Pasan memoria estructural, rayos, cápsulas, reconstrucción/reutilización del índice, cubiertas por ambas caras, aterrizaje, puertas, ascensor y gatos. El único fallo continúa siendo la prueba preexistente de separación de Sala Manfred.
+
+
+### Recuperación de sesión local con cookie inválida — 20/11/2026
+
+Se reprodujo en la API local el fallo con `JSESSIONID=AA==`: Base64 válido que se decodifica a NUL. GET `/api/auth/csrf` respondía 500 y PostgreSQL rechazaba el parámetro de consulta de sesión con «invalid byte sequence for encoding UTF8: 0x00». Sin esa cookie, las comprobaciones de disponibilidad daban 200; por eso comprobar solo health no detectaba el problema del navegador.
+
+Después de agregar el filtro y reiniciar la API, el mismo caso devuelve 200, emite una sesión válida y la reutiliza. Un POST login con esa sesión y el token CSRF, usando credenciales de prueba inexistentes, devuelve 401 «Correo o contraseña incorrectos», sin error de servicio. No se modificaron cuentas ni credenciales reales. El log del servidor corregido no registra errores UTF8 durante esta comprobación.
+
+Maven Wrapper verify con Java 21 y PostgreSQL 17 desechable en 127.0.0.1:55433/tour_fluidity: 22 pruebas correctas, sin errores, fallos ni omisiones. Las tres pruebas unitarias cubren ID decodificado con NUL, convivencia de cookies inválidas/válidas/ajenas, nombre configurable y paso intacto de sesiones válidas. Tres pruebas HTTP con el servidor real comprueban recuperación de CSRF, reutilización de sesión, HttpOnly, SameSite=Lax, Max-Age de 30 días, acceso protegido 401, rechazo 403 sin CSRF y llegada al control de credenciales. El test HTTP solo se habilita con PRESENCE_TEST_DB apuntando a esa base desechable. Se detuvo esa base al terminar y se dejó la API local corriendo con su configuración privada existente. No se cambió el frontend ni se desactivó autenticación.

@@ -10,7 +10,7 @@
   padding: max(28px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   color: #102b63;
   background: radial-gradient(ellipse at top, #f8fbff, #e9f3fc);
-  font-family: "DM Sans", system-ui, sans-serif;
+  font-family: "Source Sans 3", system-ui, sans-serif;
   font-synthesis: none;
   color-scheme: light;
   -webkit-text-size-adjust: 100%;
@@ -32,14 +32,14 @@
   gap: 12px;
   margin-bottom: 34px;
   text-align: left;
-  font: 700 14px/1.4 "Manrope", system-ui, sans-serif;
+  font: 700 14px/1.4 "Source Sans 3", system-ui, sans-serif;
 }
 .desktop-access__brand img { object-fit: contain; flex-shrink: 0; }
-.desktop-access__brand small { display: block; margin-top: 2px; color: #4c6383; font: 400 12px/1.5 "DM Sans", system-ui, sans-serif; }
+.desktop-access__brand small { display: block; margin-top: 2px; color: #4c6383; font: 400 12px/1.5 "Source Sans 3", system-ui, sans-serif; }
 .desktop-access__illustration { display: grid; place-items: center; width: 108px; height: 108px; margin: 0 auto 27px; border: 1px solid #cfdeef; border-radius: 26px; background: #eef6ff; color: #1268c4; }
 .desktop-access__illustration svg { display: block; width: 76px; height: 64px; }
 .desktop-access__eyebrow { margin: 0 0 14px; font: 500 10px/1.6 "IBM Plex Mono", monospace; letter-spacing: 0.9px; text-transform: uppercase; color: #4c6383; }
-.desktop-access h1 { margin: 0; font: 750 clamp(25px, 7vw, 31px)/1.2 "Manrope", system-ui, sans-serif; letter-spacing: -1px; color: #102b63; }
+.desktop-access h1 { margin: 0; font: 750 clamp(25px, 7vw, 31px)/1.2 "Source Sans 3", system-ui, sans-serif; letter-spacing: -1px; color: #102b63; }
 .desktop-access__message { margin: 20px 0 0; font-size: 16px; line-height: 1.7; color: #4c6383; }
 .desktop-access__message strong { font-weight: 650; color: #102b63; }
 .desktop-access__hint { margin: 24px 0 0; padding-top: 20px; border-top: 1px solid #e2ebf5; font-size: 12px; line-height: 1.7; color: #4c6383; }

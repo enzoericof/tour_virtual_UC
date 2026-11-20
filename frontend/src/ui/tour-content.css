@@ -9,7 +9,7 @@
 }
 h1 {
   font:
-    500 clamp(40px, 4.1vw, 68px) / 1.1 "Manrope",
+    500 clamp(40px, 4.1vw, 68px) / 1.1 "Source Sans 3",
     sans-serif;
   letter-spacing: -3px;
   margin: 25px 0;
@@ -78,7 +78,7 @@ h1 em {
 }
 h2 {
   font:
-    650 26px/1.25 "Manrope",
+    650 26px/1.25 "Source Sans 3",
     sans-serif;
   letter-spacing: -1px;
   margin: 10px 0 16px;
@@ -234,7 +234,7 @@ h2 {
 }
 kbd {
   font:
-    10px "DM Sans",
+    10px "Source Sans 3",
     sans-serif;
   border: 1px solid var(--surface-border);
   border-radius: 4px;

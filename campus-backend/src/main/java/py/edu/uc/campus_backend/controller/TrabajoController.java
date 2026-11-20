@@ -40,6 +40,14 @@ public class TrabajoController {
         return trabajoService.listar(materiaId, pagina, tamano, authentication.getName());
     }
 
+    @GetMapping("/mis-trabajos")
+    public PaginaTrabajosResponse listarMisTrabajos(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "20") int tamano,
+            Authentication authentication) {
+        return trabajoService.listarMisTrabajos(pagina, tamano, authentication.getName());
+    }
+
     @GetMapping("/{id}")
     public TrabajoResponse obtener(@PathVariable Long id, Authentication authentication) {
         return trabajoService.obtener(id, authentication.getName());

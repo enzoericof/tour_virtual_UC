@@ -210,7 +210,7 @@ Geometría adicional en `frontend/src/data/faculty-annexes.ts`, referida al cent
 | --- | --- | --- |
 | Laboratorio de Maquetas | `lab-maquetas` | Edificio junto al pasillo cubierto detrás de la cantina |
 | Kampus Print | `kampus-print` | Edificio independiente con su fachada al fondo del pasillo de la plaza techada, reubicado según la foto del 05/11 |
-| CTA–DICIA | `cta-dicia` | Planta escalonada en L |
+| CTA–DICIA | `cta-dicia` | Nave rectangular; ala posterior provisional retirada el 20/11/2026 |
 | DEI–LED | `dei-led` | Pabellón separado, con conexión cubierta al ala LED |
 | LED | `led` | Primera dependencia del ala lateral |
 | DA / CAP | `da-cap` | Segundo módulo; se conserva la denominación del plano |
@@ -677,6 +677,16 @@ La última indicación del usuario sustituye la reducción anterior: se eleva ú
 ### Portón en la cabecera opuesta de CTA–DICIA — 19/11/2026
 
 Por corrección del usuario, el conjunto de portón, marquesina y lámpara pasa de la cabecera x = −7 m a x = 17 m del marco local, orientado hacia el exterior (+x). El muro anterior queda cerrado con ladrillo y colisión; el nuevo vano sustituye el paño macizo de la nave alta. Se conservan las dimensiones del conjunto, las alturas aprobadas, el ala baja y las puertas laterales. Revisión a cargo del usuario, sin ejecutar pruebas, compilaciones ni navegador.
+
+### Retiro del ala posterior de CTA–DICIA — 20/11/2026
+
+La captura señalada por el usuario sustituye la huella en L provisional: se retira el ala baja de 34 × 5 m, con su techo, muros, piso y colisiones. La nave conserva su posición, cubierta y fachadas; su huella efectiva queda entre x = −7 y 17 m, z = −8 y 3 m en el marco local existente. El borde posterior z = 3 m se cierra de piso a alero con el mismo material de ladrillo, banda exterior y colisión que los muros conservados. El punto de visita se traslada al pasillo, frente a la primera puerta lateral, conservando nombre e identificador. Las cotas siguen siendo estimadas. No se ejecutaron pruebas, compilación ni revisión en navegador, por indicación del usuario.
+
+### Ventanas y aires del muro posterior de CTA–DICIA — 20/11/2026
+
+Se incorporan también las pilastras solicitadas a partir de esa foto: dos en los extremos y tres intermedias entre ventanas, de piso a techo, con el mismo ladrillo y colisión. El ancho de 28 cm, saliente de 22 cm y posiciones de `diciaRearFacade.pilasters` son estimaciones visuales. Sustituyen los dos pilares posteriores anteriores; se conservan ventanas, equipos y banda horizontal. Sin pruebas, compilación ni revisión en navegador por indicación del usuario.
+
+La foto `WhatsApp Image 2026-11-19 at 16.45.03 (1).jpeg`, aportada por el usuario, corresponde al muro posterior recién cerrado. Se agregan cuatro ventanas inferiores y una superior, con marcos oscuros y vidrio cerrado con colisión, y tres unidades exteriores de aire acondicionado con ventiladores y soportes metálicos. Los vanos se descuentan de la mampostería. Posiciones y dimensiones se definen en `diciaRearFacade` como estimaciones visuales; el extremo oculto por vegetación queda pendiente de confirmación. Se conserva la banda existente y no se agregan rejilla mural, luminaria ni alero. La foto se usa solo como referencia y no se copia al repositorio. Por indicación del usuario no se ejecutaron pruebas, compilación ni revisión en navegador.
 
 
 ### Jetpack y paseo interior de gatos — 20/11/2026

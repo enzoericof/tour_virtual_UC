@@ -1,0 +1,121 @@
+name: Deploy de main cada 3 horas
+
+on:
+  schedule:
+    - cron: '10 */3 * * *'
+      timezone: America/Asuncion
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Comprobar cambios sin iniciar un deploy
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tour-virtual-uc-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Activar después de configurar el secreto SCHEDULED_VERCEL_TOKEN.
+    if: github.ref == 'refs/heads/main' && vars.SCHEDULED_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Comparar main con producción y desplegar solo si cambió
+        uses: actions/github-script@v7
+        env:
+          VERCEL_TOKEN: ${{ secrets.SCHEDULED_VERCEL_TOKEN }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        with:
+          script: |
+            const token = process.env.VERCEL_TOKEN;
+            if (!token) throw new Error('Falta el secreto SCHEDULED_VERCEL_TOKEN.');
+            const repository = { owner: 'enzoericof', repo: 'tour_virtual_UC' };
+            if (context.repo.owner !== repository.owner || context.repo.repo !== repository.repo) {
+              throw new Error('Este workflow solo está habilitado para tour_virtual_UC.');
+            }
+            const scope = 'enzoericof-2770s-projects';
+            const domain = 'tour-virtual-uc.vercel.app';
+            const commitSha = deployment => deployment.gitSource?.sha || deployment.meta?.githubCommitSha;
+            const state = deployment => deployment.readyState || deployment.state;
+            async function vercel(path, method = 'GET', body) {
+              const url = new URL(path, 'https://api.vercel.com');
+              url.searchParams.set('slug', scope);
+              const response = await fetch(url, {
+                method,
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : undefined,
+                signal: AbortSignal.timeout(30000),
+                redirect: 'error',
+              });
+              if (!response.ok) throw new Error(`Vercel respondió HTTP ${response.status}; no se reintenta el POST.`);
+              return response.json();
+            }
+            async function finish(result, message) {
+              core.setOutput('result', result);
+              core.info(message);
+              await core.summary.addHeading('Deploy programado de main').addRaw(message).write();
+            }
+            // Leer main al empezar, también si el evento estuvo en cola.
+            const main = (await github.rest.repos.getCommit({ ...repository, ref: 'main' })).data;
+            const sha = main.sha;
+            if (!/^[a-f0-9]{40}$/.test(sha)) throw new Error('No se pudo identificar el commit de main.');
+            const project = await vercel('/v9/projects/tour-virtual-uc');
+            if (!project.id || project.link?.type !== 'github' || !project.link.repoId) {
+              throw new Error('No se pudo verificar el proyecto y su repositorio de GitHub.');
+            }
+            const live = await vercel(`/v13/deployments/${domain}?withGitRepoInfo=true`);
+            const liveSha = commitSha(live);
+            if (live.projectId !== project.id || state(live) !== 'READY' || !/^[a-f0-9]{40}$/.test(liveSha || '')) {
+              throw new Error('No se pudo verificar el commit que atiende el dominio de producción; no se despliega.');
+            }
+            if (liveSha === sha) {
+              await finish('skipped', `Sin cambios: ${sha.slice(0, 7)} ya está en producción.`);
+              return;
+            }
+            const previous = (await github.rest.repos.getCommit({ ...repository, ref: liveSha })).data;
+            if (!main.commit?.tree?.sha || !previous.commit?.tree?.sha) {
+              throw new Error('No se pudo comparar el contenido de los commits; no se despliega.');
+            }
+            if (main.commit.tree.sha === previous.commit.tree.sha) {
+              await finish('skipped', 'Sin cambios de contenido respecto a producción; se omite el deploy.');
+              return;
+            }
+            const pending = await vercel(`/v7/deployments?projectId=${encodeURIComponent(project.id)}&target=production&sha=${sha}&state=QUEUED,INITIALIZING,BUILDING&limit=100`);
+            if (!Array.isArray(pending.deployments)) throw new Error('No se pudieron verificar los deploys en curso.');
+            if (pending.deployments.some(d => commitSha(d) === sha && ['QUEUED', 'INITIALIZING', 'BUILDING'].includes(state(d)))) {
+              await finish('skipped', `Ya hay un deploy en curso para ${sha.slice(0, 7)}.`);
+              return;
+            }
+            if (process.env.DRY_RUN === 'true') {
+              await finish('dry-run', `Hay cambios: ${liveSha.slice(0, 7)} → ${sha.slice(0, 7)}. Comprobación sin deploy.`);
+              return;
+            }
+            const deployment = await vercel('/v13/deployments', 'POST', {
+              name: project.name,
+              project: project.id,
+              target: 'production',
+              gitSource: { type: 'github', repoId: String(project.link.repoId), ref: 'main', sha },
+              meta: { scheduledMainDeploy: 'true' },
+            });
+            if (!deployment.id) throw new Error('Vercel no devolvió un identificador de deploy.');
+            for (let attempt = 0; attempt < 120; attempt++) {
+              const status = await vercel(`/v13/deployments/${encodeURIComponent(deployment.id)}?withGitRepoInfo=true`);
+              if (['ERROR', 'CANCELED'].includes(state(status)) || status.aliasError) {
+                throw new Error(`El deploy ${deployment.id} falló o fue cancelado; no se registra como publicado.`);
+              }
+              if (commitSha(status) && commitSha(status) !== sha) throw new Error('El deploy no corresponde al commit solicitado.');
+              if (state(status) === 'READY') {
+                const production = await vercel(`/v13/deployments/${domain}?withGitRepoInfo=true`);
+                if (production.projectId === project.id && commitSha(production) === sha && state(production) === 'READY') {
+                  await finish('deployed', `Publicado ${sha.slice(0, 7)} en https://${domain}/.`);
+                  return;
+                }
+              }
+              await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+            throw new Error(`Tiempo agotado esperando el deploy ${deployment.id}. La próxima ejecución comprobará su estado.`);

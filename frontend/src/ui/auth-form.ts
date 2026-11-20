@@ -16,7 +16,6 @@ export function mountAuthForm(root: HTMLElement, authenticated: (user: User) => 
       </fieldset>
       <label>Correo electrónico<input name="email" type="email" required autocomplete="username" maxlength="150" placeholder="tu.correo@ejemplo.com"></label>
       <label>Contraseña<input name="password" type="password" required maxlength="72" autocomplete="current-password" placeholder="Tu contraseña"></label>
-      <p class="session-note">Recordaremos esta cuenta. En tu próxima visita elegís si querés continuar.</p>
       <button class="primary auth-submit" type="submit">Entrar al campus ${icon("arrow")}</button>
       <p class="auth-progress hidden" role="status">Validando cuenta…</p>
       <p class="form-error" role="alert" aria-live="polite"></p>

@@ -13,6 +13,9 @@ public interface TrabajoRepository extends JpaRepository<Trabajo, Long> {
 
     List<Trabajo> findByUsuarioId(Long usuarioId);
 
+    @EntityGraph(attributePaths = {"materia", "usuario"})
+    Page<Trabajo> findByUsuarioId(Long usuarioId, Pageable pageable);
+
     @Override
     @EntityGraph(attributePaths = {"materia", "usuario"})
     Page<Trabajo> findAll(Pageable pageable);

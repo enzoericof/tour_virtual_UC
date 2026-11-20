@@ -11,14 +11,6 @@ function account(data: Account): User {
 export async function currentUser() {
   return account(await api<Account>("/auth/me"));
 }
-export type Work = {
-  id: number;
-  title: string;
-  description: string;
-  url: string;
-  author: string;
-  ownerId: number;
-};
 export type Panel = {
   id: number;
   placeId: string;
@@ -46,7 +38,8 @@ export async function api<T>(
     if (!csrf) await refreshCsrf();
     headers.set(csrf!.headerName, csrf!.token);
   }
-  const r = await fetch((url.startsWith("/auth/") || url === "/health" ? "/api" : "/api/v1") + url, {
+  const currentApi = /^\/(auth|trabajos|materias)(?:\/|\?|$)/.test(url) || url === "/health";
+  const r = await fetch((currentApi ? "/api" : "/api/v1") + url, {
     ...options,
     headers,
     credentials: "same-origin",

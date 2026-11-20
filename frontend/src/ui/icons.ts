@@ -7,6 +7,8 @@ const paths: Record<string, string> = {
   book: "M4 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-2H4V4Zm9 3a3 3 0 0 1 3-3h5v15h-4a4 4 0 0 0-4 2",
   chat: "M21 11a8 8 0 0 1-8 8H6l-4 3 1-7a8 8 0 0 1 2-10 9 9 0 0 1 16 6Z",
   user: "M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-2a8 8 0 0 1 16 0v2",
+  logout: "M9 4H4v16h5m5-13 5 5-5 5m-5-5h10",
+  pause: "M6 4h4v16H6Zm8 0h4v16h-4Z",
   search: "M16 10a6 6 0 1 1-12 0 6 6 0 0 1 12 0Zm-2 4 7 7",
   pin: "M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Zm-5 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z",
   photo: "M3 4h18v16H3V4Zm0 12 6-6 5 5 3-3 4 5M16 8h.01",
