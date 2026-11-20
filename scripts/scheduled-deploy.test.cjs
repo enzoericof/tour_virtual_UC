@@ -5,7 +5,7 @@ const { join } = require('node:path');
 const workflow = readFileSync(join(__dirname, '../.github/workflows/scheduled-vercel-production.yml'), 'utf8');
 const source = workflow.split('          script: |\n')[1].replace(/^ {12}/gm, '');
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-const run = new AsyncFunction('github', 'context', 'core', 'fetch', 'process', 'setTimeout', source);
+const run = new AsyncFunction('github', 'context', 'core', 'fetch', 'process', 'setTimeout', 'Date', source);
 const mainSha = 'a'.repeat(40), liveSha = 'b'.repeat(40);
 
 function fixture(options = {}) {
@@ -15,7 +15,7 @@ function fixture(options = {}) {
   const github = { rest: { repos: { getCommit: async ({ ref }) => ({ data: {
     sha: ref === 'main' ? mainSha : liveSha,
     commit: { tree: { sha: ref === 'main' || options.sameTree ? 'tree-new' : 'tree-old' } },
-  } }) } } };
+  } }) }, actions: { listWorkflowRuns: async () => ({ data: { workflow_runs: options.previousRuns ?? [] } }) } } };
   const summary = { addHeading() { return this; }, addRaw() { return this; }, async write() {} };
   const core = { setOutput: (key, value) => { outputs[key] = value; }, info() {}, summary };
   const fetch = async (url, init) => {
@@ -33,7 +33,9 @@ function fixture(options = {}) {
   };
   const env = { VERCEL_TOKEN: 'test-only', DRY_RUN: options.dryRun ? 'true' : 'false' };
   if (options.noToken) delete env.VERCEL_TOKEN;
-  return { calls, outputs, execute: () => run(github, { repo: { owner: 'enzoericof', repo: 'tour_virtual_UC' } }, core, fetch, { env }, callback => callback()) };
+  class Clock extends Date { static now() { return Date.parse(options.now ?? '2026-11-20T17:00:00-03:00'); } }
+  const context = { repo: { owner: 'enzoericof', repo: 'tour_virtual_UC' }, eventName: options.scheduled ? 'schedule' : 'workflow_dispatch', runId: 99 };
+  return { calls, outputs, execute: () => run(github, context, core, fetch, { env }, callback => callback(), Clock) };
 }
 
 for (const [name, options] of [
@@ -79,11 +81,43 @@ for (const [name, options, pattern] of [
 });
 
 test('Solo tiene disparadores programados/manuales y permisos de lectura', () => {
-  assert.match(workflow, /cron: '45 3,7,11,15,19,23 \* \* \*'/);
-  assert.match(workflow, /timezone: America\/Asuncion/);
+  assert.match(workflow, /cron: '0 \* \* \* \*'/);
+  assert.match(workflow, /2026-11-20T17:00:00-03:00/);
   assert.doesNotMatch(workflow, /^  (push|pull_request):/m);
   assert.match(workflow, /contents: read/);
+  assert.match(workflow, /actions: read/);
   assert.match(workflow, /cancel-in-progress: false/);
+});
+
+test('No despliega antes del primer turno de las 17:00', async () => {
+  const scenario = fixture({ scheduled: true, now: '2026-11-20T16:59:00-03:00' });
+  await scenario.execute();
+  assert.equal(scenario.outputs.result, 'waiting');
+  assert.equal(scenario.calls.length, 0);
+});
+
+for (const now of ['2026-11-20T17:00:00-03:00', '2026-11-20T22:00:00-03:00', '2026-11-21T03:00:00-03:00', '2026-11-21T18:00:00-03:00']) {
+  test(`Atiende un nuevo turno de cinco horas: ${now}`, async () => {
+    const previous = new Date(Date.parse(now) - 60 * 60 * 1000).toISOString();
+    const scenario = fixture({ scheduled: true, now, previousRuns: [{ id: 98, head_branch: 'main', created_at: previous }] });
+    await scenario.execute();
+    assert.equal(scenario.outputs.result, 'deployed');
+    assert.equal(scenario.calls.filter(c => c.method === 'POST').length, 1);
+  });
+}
+
+test('Un turno sin cambios no permite desplegar nuevos commits una hora después', async () => {
+  const scenario = fixture({ scheduled: true, now: '2026-11-20T18:00:00-03:00',
+    previousRuns: [{ id: 98, head_branch: 'main', created_at: '2026-11-20T20:00:00Z' }] });
+  await scenario.execute();
+  assert.equal(scenario.outputs.result, 'waiting');
+  assert.equal(scenario.calls.length, 0);
+});
+
+test('Recupera un turno cuyo disparador llegó con retraso', async () => {
+  const scenario = fixture({ scheduled: true, now: '2026-11-20T18:00:00-03:00' });
+  await scenario.execute();
+  assert.equal(scenario.outputs.result, 'deployed');
 });
 
 test('Se mantienen desactivados los deploys por push sin bloquear commits de otros autores', () => {
