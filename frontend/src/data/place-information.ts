@@ -12,15 +12,15 @@ export type PlaceInformation = {
 /** Contenido editorial local; disponible sin consultar el servicio de paneles. */
 export const placeInformation: readonly PlaceInformation[] = [{
   placeId: "sala-manfred",
-  title: "Manfred Stark Gonz�lez",
-  context: "Memoria universitaria � Marzo Paraguayo",
+  title: "Manfred Stark González",
+  context: "Memoria universitaria · Marzo Paraguayo",
   dedication: "Esta sala lleva su nombre en homenaje a su memoria.",
   paragraphs: [
-    "Manfred Stark Gonz�lez fue un estudiante universitario y dirigente estudiantil paraguayo. Es recordado como uno de los m�rtires del Marzo Paraguayo, fallecido el 26 de marzo de 1999.",
-    "Ten�a 28 a�os y fue presidente del Centro de Estudiantes de la Facultad de Ciencias y Tecnolog�a de la Universidad Cat�lica.",
+    "Manfred Stark González fue un estudiante universitario y dirigente estudiantil paraguayo. Es recordado como uno de los mártires del Marzo Paraguayo, fallecido el 26 de marzo de 1999.",
+    "Tenía 28 años y fue presidente del Centro de Estudiantes de la Facultad de Ciencias y Tecnología de la Universidad Católica.",
   ],
   source: {
-    label: "El Nacional � Estos fueron los m�rtires del Marzo Paraguayo",
+    label: "El Nacional · Estos fueron los mártires del Marzo Paraguayo",
     url: "https://elnacional.com.py/politica/estos-fueron-martires-marzo-paraguayo-n64129",
   },
 }];

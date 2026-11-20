@@ -147,7 +147,7 @@ export class TourEngine {
     this.canvas.addEventListener("webglcontextlost", (e) => {
       e.preventDefault();
       this.onError(
-        "El navegador perdi� el contexto gr�fico. Recarg� la p�gina para continuar.",
+        "El navegador perdió el contexto gráfico. Recargá la página para continuar.",
       );
     });
     let press: { x: number; y: number; id: number; time: number; dragged: boolean } | null = null;
@@ -226,7 +226,7 @@ export class TourEngine {
       const d = Math.hypot(delta.x, delta.z);
       delta.y = 0;
       if (d >= distance || direction.dot(delta.normalize()) < 0.15) continue;
-      // La l�nea a la altura de los ojos evita sentarse atravesando paredes.
+      // La línea a la altura de los ojos evita sentarse atravesando paredes.
       const target = seat.point.clone(); target.y = this.camera.position.y;
       const ray = new T.Ray(this.camera.position.clone(), target.sub(this.camera.position).normalize());
       if (this.walker.obstructs(ray, d)) continue;
@@ -247,7 +247,7 @@ export class TourEngine {
     this.seated = null;
     this.walker.teleport(this.seatReturn);
   }
-  /** El desempate por id evita que dos clientes con la misma instant�nea conserven una plaza. */
+  /** El desempate por id evita que dos clientes con la misma instantánea conserven una plaza. */
   receiveSeating(players: Player[], self?: string) {
     this.social.setSelf(players.find(p=>p.id===self)??null);
     this.occupied.clear();
@@ -258,11 +258,11 @@ export class TourEngine {
       this.occupied.add(seat.id);
       if (this.seated?.id === seat.id && self && player.id < self) {
         this.leaveSeat();
-        this.onError("Otro visitante ocup� ese lugar. Eleg� otro asiento.");
+        this.onError("Otro visitante ocupó ese lugar. Elegí otro asiento.");
       }
     }
   }
-  /** Selecci�n por mira y distancia, con oclusi�n por los s�lidos del escenario. */
+  /** Selección por mira y distancia, con oclusión por los sólidos del escenario. */
   private nearPlayer():Player|null {
     if(!this.walker.active)return null;
     const origin=this.walker.body.end;
@@ -297,9 +297,9 @@ export class TourEngine {
       this.nextSeatHint = now + 100;
       const available = this.walker.active ? this.nearSeat() : null;
       const information = this.nearInformation();
-      const seatText = this.seated ? 'E � Levantarse' : available ? 'E � Sentarse' : '';
-      const hint = !this.walker.active ? '' : this.social.busy ? 'Interacci�n en curso � Esc para pausar'
-        : [information ? `I � Conocer la historia de ${information.place.name}` : '', seatText].filter(Boolean).join('\n');
+      const seatText = this.seated ? 'E · Levantarse' : available ? 'E · Sentarse' : '';
+      const hint = !this.walker.active ? '' : this.social.busy ? 'Interacción en curso · Esc para pausar'
+        : [information ? `I · Conocer la historia de ${information.place.name}` : '', seatText].filter(Boolean).join('\n');
       if (this.seatHint.textContent !== hint) this.seatHint.textContent = hint;
     }
     this.updateElevator(elapsed);
@@ -434,7 +434,7 @@ export class TourEngine {
     const view = new T.Vector3(-0.44, 0.73, -1).normalize();
     const vertical = T.MathUtils.degToRad(this.camera.fov / 2);
     const horizontal = Math.atan(Math.tan(vertical) * this.camera.aspect);
-    // Encadra el contorno completo en el tama�o actual de la ventana.
+    // Encadra el contorno completo en el tamaño actual de la ventana.
     const right = new T.Vector3().crossVectors(this.camera.up, view).normalize();
     const up = new T.Vector3().crossVectors(view, right);
     const offset = new T.Vector3();
@@ -481,7 +481,7 @@ export class TourEngine {
     this.moonSprite.visible = dark;
     this.applyLighting();
   }
-  /** Luz c�lida de alto rango con sombras suaves, relleno fr�o y exposici�n de cine. */
+  /** Luz cálida de alto rango con sombras suaves, relleno frío y exposición de cine. */
   setEnhancedLighting(enabled: boolean) {
     this.enhancedLighting = enabled;
     this.renderer.shadowMap.enabled = enabled;
@@ -490,7 +490,7 @@ export class TourEngine {
       this.sun.castShadow = true;
       this.sun.shadow.mapSize.set(2048, 2048);
       // La luz mira al origen; un cuadrado generoso cubre todo el sector sin
-      // depender de la orientaci�n de la c�mara de sombras.
+      // depender de la orientación de la cámara de sombras.
       const corners = [
         [campusBounds.minX, campusBounds.minZ],
         [campusBounds.minX, campusBounds.maxZ],

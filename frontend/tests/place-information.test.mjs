@@ -22,7 +22,7 @@ test("El aviso de Manfred se limita a su llegada y altura, sin activarse desde p
   assert.match(point.information.dedication, /homenaje/);
 });
 
-test("La informaci�n no se ofrece a trav�s de muros, en pausa, ascensor o durante un gesto", () => {
+test("La información no se ofrece a través de muros, en pausa, ascensor o durante un gesto", () => {
   const [x, y, z] = informationPoints[0].place.position;
   const engine = { camera: { position: new T.Vector3(x + 1, y + 1.5, z) },
     walker: { active: true, obstructs: () => false }, social: { busy: false },
@@ -37,7 +37,7 @@ test("La informaci�n no se ofrece a trav�s de muros, en pausa, ascensor o du
   engine.social.busy = false; engine.elevatorPassenger = true; assert.equal(nearby(), null);
 });
 
-test("I abre solo la informaci�n cercana e ignora repetici�n, escritura, composici�n y modificadores", () => {
+test("I abre solo la información cercana e ignora repetición, escritura, composición y modificadores", () => {
   const calls = [];
   const point = informationPoints[0];
   const engine = { walker: { active: true }, social: { busy: false },
