@@ -1064,6 +1064,8 @@ export function createFaculty(grass = makeGrassMaterial()) {
   brickMap.wrapS=brickMap.wrapT=T.RepeatWrapping;brickMap.anisotropy=8;
   const officeBrick=new T.MeshStandardMaterial({map:brickMap,roughness:0.93});officeBrick.userData.tile=[1.5,0.64];
   const blueFrame=new T.MeshStandardMaterial({color:"#365663",roughness:0.7});
+  // Vidrio opaco para cerrar los accesos de Bedelía; el equipo colocará su textura encima.
+  const sealedGlass=new T.MeshStandardMaterial({color:"#1d2628",roughness:0.28,metalness:0.35});
   frame(plan.bedelia, () => {
     const [w,d]=plan.bedelia.size, z=d/2;
     box(w,.16,d,0,.02,0,m.stone,true);
@@ -1098,6 +1100,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
       box(.025,2.4,.9,.7,1.2,-.45,m.glass,true);
       sign("SALA DE PROFESORES",0,2.75,-.04,1.2,Math.PI);
     });
+    box(.24,2.6,1.48,recessedX,1.3,0,sealedGlass,true);
     // El frente blanco vecino lleva dos hojas de blindex y cortinado interior.
     const glassDoorZ=(-d/2+splitZ)/2, halfDoor=.92;
     for(const [lo,hi] of [[-d/2-.1,glassDoorZ-halfDoor],[glassDoorZ+halfDoor,splitZ]])
@@ -1107,6 +1110,7 @@ export function createFaculty(grass = makeGrassMaterial()) {
       box(.035,2.42,halfDoor-.012,edgeX-.065,1.21,glassDoorZ+side*halfDoor/2,m.glass,true);
       box(.055,.36,.027,edgeX-.115,1.09,glassDoorZ+side*.09,m.steel);
     }
+    box(.24,2.6,halfDoor*2+.08,edgeX,1.3,glassDoorZ,sealedGlass,true);
     const fabric = new T.MeshStandardMaterial({color:0xe5ddd0,roughness:1,side:T.DoubleSide});
     const cloth=new T.PlaneGeometry(2.04,2.47,64,1);
     const pos=cloth.attributes.position;
@@ -1180,6 +1184,7 @@ for (let i = 0; i < frontWallLocal.length - 1; i++) {
           if (o.door) {
             sign("RECEPCIÓN", o.x, 2.76, rz + 0.13, 1.05);
             box(0.035, 2.45, 0.95, right - 0.04, 1.225, rz - 0.5, m.glass, true);
+            box(o.width + 0.06, 2.6, 0.24, o.x, 1.3, rz, sealedGlass, true);
           } else {
             // El código original dibuja las barras diagonales perfectas
             box(o.width, 0.035, 0.07, o.x, 1.65, rz + 0.05, m.white);
