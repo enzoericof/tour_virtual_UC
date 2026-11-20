@@ -1,9 +1,10 @@
-name: Deploy de main cada 4 horas
+name: Deploy de main cada 5 horas desde las 17 PY
 
 on:
   schedule:
-    - cron: '45 3,7,11,15,19,23 * * *'
-      timezone: America/Asuncion
+    # UTC: cada hora comprueba si ya atendió el turno de cinco horas.
+    # Ancla: 20/11/2026 17:00 Paraguay = 20:00 UTC.
+    - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -13,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: tour-virtual-uc-production
@@ -59,6 +61,27 @@ jobs:
               core.setOutput('result', result);
               core.info(message);
               await core.summary.addHeading('Deploy programado de main').addRaw(message).write();
+            }
+            if (context.eventName === 'schedule') {
+              const anchor = Date.parse('2026-11-20T17:00:00-03:00');
+              const interval = 5 * 60 * 60 * 1000;
+              const now = Date.now();
+              if (now < anchor) {
+                await finish('waiting', 'El primer turno automático empieza el 20/11/2026 a las 17:00 de Paraguay.');
+                return;
+              }
+              const slot = anchor + Math.floor((now - anchor) / interval) * interval;
+              const completed = (await github.rest.actions.listWorkflowRuns({
+                ...repository, workflow_id: 'scheduled-vercel-production.yml',
+                event: 'schedule', status: 'success', per_page: 100,
+              })).data.workflow_runs;
+              if (!Array.isArray(completed)) throw new Error('No se pudo verificar el último turno automático.');
+              if (completed.some(r => r.id !== context.runId && r.head_branch === 'main'
+                  && Date.parse(r.created_at) >= slot)) {
+                await finish('waiting', `El turno ${new Date(slot).toISOString()} ya fue comprobado. El próximo es dentro de cinco horas.`);
+                return;
+              }
+              core.info(`Turno automático: ${new Date(slot).toISOString()}. Se comprueba main contra producción.`);
             }
             // Leer main al empezar, también si el evento estuvo en cola.
             const main = (await github.rest.repos.getCommit({ ...repository, ref: 'main' })).data;
