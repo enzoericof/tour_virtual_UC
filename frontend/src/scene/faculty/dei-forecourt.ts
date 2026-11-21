@@ -8,6 +8,7 @@ import type { FacultyBuilder } from "./builder";
 import { gardenJunctionReach, pathSampler } from "./garden-path";
 import { addForecourtStonePath, makeForecourtStone } from "./forecourt-stone";
 import { addDeiParkedVehicles } from "./dei-parked-vehicles";
+import { widenMedianCrown } from "./dei-median-tree";
 
 function alongPath(points: readonly Vec2[], target: Vec2) {
   let offset=0, nearest=Infinity, at=0;
@@ -82,6 +83,7 @@ export function addDeiForecourt(builder:FacultyBuilder) {
     body.userData.deiForecourtTree=true;body.userData.treeTrunk=true;solids.add(body);
   });
   const middle=template.clone(true);
+  widenMedianCrown(middle,plan.medianCrown);
   middle.name="Árbol central entre los dos camineros del LED";
   middle.userData.deiForecourtTree=false;middle.userData.deiMedianTree=true;
   middle.position.set(plan.medianTree[0],cantinaGardenFloor(plan.medianTree),plan.medianTree[1]);

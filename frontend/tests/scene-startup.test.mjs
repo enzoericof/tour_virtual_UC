@@ -2,7 +2,7 @@ import { manfredRampSection, manfredStairZ } from "../src/data/faculty-blueprint
 import { Box3, BoxGeometry, Mesh, Matrix4, PerspectiveCamera, Ray, Raycaster, Triangle, Vector2, Vector3 } from "three";
 import {facultyPose,facultyToWorld,insidePolygon} from "../src/data/campus-geometry.ts";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, blockG, classroomDoor, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
-import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, deiPerimeterWalk, deiSidePassage, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
+import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, deiPerimeterWalk, deiReception, deiSidePassage, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { laboratoryGroundDetails } from "../src/data/faculty-annexes.ts";
 import { test } from "node:test";
@@ -449,9 +449,20 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     group.traverse(o=>{if(o.userData.deiMedianTree)medianTrees.push(o);});
     assert.equal(vehicles.length,4,"Las cuatro camionetas tienen carrocerías sólidas");
     assert.equal(medianTrees.length,1,"El nuevo árbol se ubica en la divisoria");
+    const median=medianTrees[0],sourceTree=group.getObjectByName("Árbol exterior nuevo del LED 1");
+    const medianWood=median.getObjectByName("Tronco y ramas curvas"),sourceWood=sourceTree.getObjectByName("Tronco y ramas curvas");
+    medianWood.geometry.computeBoundingBox();sourceWood.geometry.computeBoundingBox();
+    const wide=medianWood.geometry.boundingBox.getSize(new Vector3()),narrow=sourceWood.geometry.boundingBox.getSize(new Vector3());
+    assert.ok(wide.x>narrow.x*1.3&&wide.z>narrow.z*1.3,"Las ramas se abren horizontalmente en ambas direcciones");
+    let sourceLeaves=0,medianLeaves=0;sourceTree.traverse(o=>{if(o.isInstancedMesh)sourceLeaves+=o.count;});median.traverse(o=>{if(o.isInstancedMesh)medianLeaves+=o.count;});
+    assert.ok(medianLeaves>sourceLeaves*1.2,"La copa central tiene más hojas, además de más amplitud");
+    const bollardBodies=[];colliders.traverse(o=>{if(o.userData.deiParkingBollard)bollardBodies.push(o);});
+    assert.equal(bollardBodies.length,deiForecourt.parkingBollards.length);
+    const bollardMesh=group.getObjectByName("Delimitadores bajos del estacionamiento LED");assert.ok(bollardMesh?.isInstancedMesh&&bollardMesh.count===65);
+    for(const post of bollardBodies){assert.ok(post.scale.y>.25&&post.scale.y<.32);assert.ok(Math.abs(post.position.y-post.scale.y/2-cantinaGardenFloor([post.position.x,post.position.z]))<1e-6,"Los postes están apoyados en el terreno");}
     for(const vehicle of deiForecourt.parking) {
       const [hit]=new Raycaster(new Vector3(vehicle.center[0],3,vehicle.center[1]),new Vector3(0,-1,0),0,4).intersectObject(colliders,true);
-      assert.ok(hit && hit.point.y>1.7 && hit.point.y<2,"El techo sigue el perfil sólido de la camioneta");
+      assert.ok(hit && Math.abs(hit.point.y-(cantinaGardenFloor(vehicle.center)+1.94*deiForecourt.pickupScale))<.015,"El techo sólido sigue la nueva escala de la pickup");
     }
     for(const post of newPosts) {
       const p=post.getWorldPosition(new Vector3());p.y=1;
@@ -759,6 +770,14 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const apronMesh=group.getObjectByName("Embaldosado completo de entrada al DEI"),perimeterMesh=group.getObjectByName("Piso continuo del pasillo perimetral LED");
     assert.equal(apronMesh.material,perimeterMesh.material,"Entrada y pasillo usan un solo material de baldosines");
     assert.deepEqual(apronMesh.material.userData.tile,[1.2,1.2],"La escala de los cuadraditos se conserva en ambos pisos");
+    walkPerimeter([[deiSideDoor.center[0]-.32,2.6],[deiSideDoor.center[0]-.32,5.6],[deiSideDoor.center[0]-.32,6.7]].map(p=>fromRect(dei.rect,p)),.02);
+    const receptionGlass=group.getObjectByName("Ventanilla de recepción LED"),receptionDoor=group.getObjectByName("Puerta de madera de recepción LED");
+    assert.ok(receptionGlass&&receptionDoor&&group.getObjectByName("Monitor de la recepción LED"));
+    for(const x of [deiReception.doorX,(deiReception.minX+deiReception.doorX-deiReception.doorWidth/2-.28)/2]){
+      const a=fromRect(dei.rect,[x,deiReception.backZ-.5]),b=fromRect(dei.rect,[x,deiReception.backZ+.5]);
+      const d=new Vector3(b[0]-a[0],0,b[1]-a[1]);
+      assert.ok(new Raycaster(new Vector3(a[0],1.4,a[1]),d.clone().normalize(),0,d.length()).intersectObject(colliders,true).length,"La puerta y ventanilla de recepción cierran físicamente el frente");
+    }
     {
       const gs=plan.blockGStair,entry=gs.start+gs.halfRun,arrival=gs.start-1.55-gs.halfRun,z=-blockG.depth/2-gs.width/2;
       const route=[[entry+.6,z,0],[gs.start-.7,z,FLOOR_HEIGHT/2],[arrival-.6,z,FLOOR_HEIGHT],

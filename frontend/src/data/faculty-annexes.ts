@@ -283,6 +283,14 @@ export const annexEnclosedLink = {
     { annexId: dei.id, center: [-dei.rect.size[0] / 2, linkV - dei.mapCenter[1]] as Vec2 },
   ],
 };
+/** Recepción retranqueada detrás del blindex; proporciones estimadas de la foto del usuario. */
+export const deiReception = {
+  minX: deiSideDoor.center[0]-3.2, maxX: -14.4,
+  frontZ: linkV-dei.mapCenter[1]+annexEnclosedLink.rect.size[1]/2-.10,
+  backZ: linkV-dei.mapCenter[1]+annexEnclosedLink.rect.size[1]/2+2.5,
+  height: 3.15, counterHeight: 1.02,
+  doorX: -16.5, doorWidth: 1.0, doorHeight: 2.32,
+};
 /** Pasillo exterior marcado en rojo: salida lateral, frente corto y costado del bloque de tejas. */
 export const deiPerimeterWalk = (() => {
   const offices=facultyAnnexes.filter(b=>["led","da-cap","das","dg"].includes(b.id));
@@ -337,6 +345,14 @@ const incomingLength=Math.hypot(exteriorArrival[0]-exteriorFork[0],exteriorArriv
 const bisectorLength=Math.hypot(leftArm[0]+rightArm[0],leftArm[1]+rightArm[1]);
 const exteriorStart: Vec2 = [exteriorFork[0]-(leftArm[0]+rightArm[0])*incomingLength/bisectorLength,
   exteriorFork[1]-(leftArm[1]+rightArm[1])*incomingLength/bisectorLength];
+const parkingOutside:Vec2=[-rightArm[1],rightArm[0]];
+const parkingFront=(along:number,depth=0):Vec2=>[
+  exteriorFork[0]+rightArm[0]*along+parkingOutside[0]*(2.15+depth),
+  exteriorFork[1]+rightArm[1]*along+parkingOutside[1]*(2.15+depth),
+];
+const bollards:Vec2[]=[];
+for(let i=0;i<=24;i++)bollards.push(parkingFront(6.5+i*13.2/24));
+for(let bay=0;bay<=4;bay++)for(let j=1;j<=8;j++)bollards.push(parkingFront(6.5+bay*3.3,j*5.3/8));
 export const deiForecourt = {
   width: 1.6, canopyWidth: 2.25, eave: 2.85, ridge: .46,
   main: [exteriorArrival,exteriorFork,exteriorStart].map(p=>fromRect(dei.rect,p)),
@@ -345,12 +361,13 @@ export const deiForecourt = {
   fork: fromRect(dei.rect,exteriorFork),
   trees: [[16.5,-16.5],[3,-19],[-8.5,-21],[-42,-30]].map(([x,z])=>fromRect(dei.rect,[x,z])),
   medianTree: fromRect(dei.rect,[-27.3,-15.5]),
-  parking: [
-    { center: fromRect(dei.rect,[-12.8,-16.3]), angle: dei.rect.angle+Math.PI, color: "#e5e3dc" },
-    { center: fromRect(dei.rect,[-41,-9]), angle: dei.rect.angle, color: "#b7c0c4" },
-    { center: fromRect(dei.rect,[-41,-15]), angle: dei.rect.angle+.04, color: "#313b40" },
-    { center: fromRect(dei.rect,[-41,-21]), angle: dei.rect.angle-.05, color: "#e7e6df" },
-  ],
+  medianCrown: { spread: 1.5, density: 1.35, flatten: .90 },
+  pickupScale: .84,
+  parking: ["#c7d2d4","#242e32","#eeece5","#4b646c"].map((color,index)=>({
+    center:fromRect(dei.rect,parkingFront(8.15+index*3.3,2.65)),
+    angle:dei.rect.angle+Math.atan2(-rightArm[0],rightArm[1]),color,
+  })),
+  parkingBollards: bollards.map(p=>fromRect(dei.rect,p)),
 };
 /** Corte compartido entre el borde del caminero y el embaldosado de entrada. */
 export const deiEntrancePaving = {

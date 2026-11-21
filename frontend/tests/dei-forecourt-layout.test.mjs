@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { deiEntranceWing, deiForecourt, deiGardenPath, deiPerimeterWalk, deiSidePassage, facultyAnnexes } from "../src/data/faculty-annexes.ts";
+import { deiEntranceWing, deiForecourt, deiGardenPath, deiPerimeterWalk, deiReception, deiSidePassage, facultyAnnexes } from "../src/data/faculty-annexes.ts";
 import { fromRect } from "../src/data/faculty-blueprint.ts";
 import { facultyToWorld, insidePolygon, layout } from "../src/data/campus-geometry.ts";
 
@@ -69,4 +69,25 @@ test("El recorte de la cabecera alinea el pasillo con los pilares y conserva el 
   assert.ok(Math.abs(deiPerimeterWalk.portal.width-deiSidePassage.width)<1e-6);
   const led=facultyAnnexes.find(b=>b.id==="led"),dei=facultyAnnexes.find(b=>b.id==="dei-led");
   assert.ok(Math.abs(led.mapCenter[1]-dei.mapCenter[1]+led.rect.size[0]/2-8.8)<1e-6,"El extremo posterior del módulo conserva su posición");
+});
+
+test("Las pickups forman una fila paralela al caminero y miran hacia él",()=>{
+  const [a,b]=deiForecourt.branch,axis=[b[0]-a[0],b[1]-a[1]],length=Math.hypot(...axis),u=axis.map(v=>v/length);
+  for(const [i,car]of deiForecourt.parking.entries()){
+    assert.ok(Math.abs(Math.cos(car.angle)*u[0]+Math.sin(car.angle)*u[1])<1e-8,"Los frentes quedan perpendiculares al caminero");
+    if(i){const previous=deiForecourt.parking[i-1],dx=car.center[0]-previous.center[0],dz=car.center[1]-previous.center[1];
+      assert.ok(Math.abs(dx*u[1]-dz*u[0])<1e-8);assert.ok(Math.abs(Math.hypot(dx,dz)-3.3)<1e-8);assert.equal(car.angle,previous.angle);}
+  }
+  assert.ok(deiForecourt.pickupScale<.9,"El modelo nuevo queda más pequeño");
+});
+
+test("Los postes bajos delimitan los frentes y laterales sin atravesar las carrocerías",()=>{
+  assert.equal(deiForecourt.parkingBollards.length,65);
+  for(const p of deiForecourt.parkingBollards){
+    const world=facultyToWorld([p[0],0,p[1]]);assert.ok(insidePolygon([world[0],world[2]],layout.boundary));
+    assert.ok(clearance(p,deiForecourt.branch)>deiForecourt.canopyWidth/2+.7);
+    for(const car of deiForecourt.parking){const dx=p[0]-car.center[0],dz=p[1]-car.center[1],c=Math.cos(car.angle),s=Math.sin(car.angle);
+      assert.ok(Math.abs(dx*c+dz*s)>2.35||Math.abs(-dx*s+dz*c)>1.1,"Los delimitadores quedan fuera del vehículo");}
+  }
+  assert.ok(deiReception.backZ-deiReception.frontZ>2.5,"La recepción se retranquea respecto del antiguo fondo");
 });

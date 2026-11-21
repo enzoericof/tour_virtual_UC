@@ -841,3 +841,17 @@ Integrado main 2094734 (sonido ambiente por zonas, retirado después) conservand
 Los sonidos ambientales de `2094734` (pájaros, gente y murmullo de clases) no convencieron en la revisión del usuario. Se retira todo el agregado con un revert del commit: `scene/ambient-zones.ts`, `scene/ambient-audio.ts`, su prueba, el botón «Sonido ambiente» del menú y la preferencia `cyt-ambient`. `engine.ts` vuelve a quedar sin audio propio más allá del ascensor y el audio social, y la documentación recupera su estado anterior.
 
 `npm test`: 113/114, con el único fallo previo de separación de Sala Manfred; `npm run build` correcto. El sonido seguía apareciendo después de `git reset --hard a5e782d` porque ese commit ya contenía el agregado: no era una caché del navegador, hacía falta revertirlo.
+
+### Árbol, estacionamiento y recepción LED — 20/11/2026
+
+Compilación correcta; 119/120 pruebas, con el único fallo previo de Sala Manfred en faculty-blueprint.test.mjs:261. Se comprueba apertura de ramas en ambos ejes y aumento real de hojas de la copia central. Los cuatro vehículos forman una fila recta paralela al caminero, con igual orientación perpendicular a él. Los 65 delimitadores quedan dentro de la isla y fuera de los vehículos y de la carpa; la escena verifica sus alturas y apoyo. Los techos de las pickups conservan colisión en su nueva escala.
+
+Walker recorre la entrada y el vestíbulo ampliado hasta delante de la recepción. Rayos confirman la puerta y ventanilla cerradas, el paso lateral conservado, el piso continuo, el alero perimetral y el resto de colisiones de cubierta. Tras ajustar el canto del piso para evitar tapas superpuestas se repite la prueba de escena completa. Los registros ignorados son .local/led-reception-raptor-tests-final.log, .local/led-reception-final-floor.log y .local/led-reception-raptor-build-final.log.
+
+Revisados en navegador el frente de recepción con la disposición de la foto, las pickups con sus plazas y la copa completa, sin errores de consola. Capturas ignoradas: .local/led-reception-wood-final.jpg, .local/led-raptor-parking-final.jpg y .local/led-broad-crown-final.jpg.
+
+Medición controlada con GC y tres gatos durante diez minutos simulados: 142,84 MB de heap (142,81 MB al minuto 1), frente a unos 142,22 MB antes del cambio. Buffers externos 138,73 MB, separados del heap. No es una medición de la RAM total del navegador ni de VRAM. Registro .local/led-reception-raptor-memory-final.log. Se comparten los mapas y geometrías de vehículos, y los delimitadores se dibujan con una malla instanciada.
+
+### Publicación del LED sobre main actualizado — 20/11/2026
+
+Integrado main 12ba635, conservando la retirada del sonido ambiente. Nuestros cambios se limitan a la copa central, el estacionamiento con pickups y delimitadores y la recepción LED; la propuesta anterior de escalera permanece guardada aparte. Compilación correcta; 115/116 pruebas, con el único fallo previo de Sala Manfred. Registros ignorados .local/upload-led-raptor-tests-final.log y .local/upload-led-raptor-build-final.log. La integración no modifica la geometría de las vistas verificadas arriba.
