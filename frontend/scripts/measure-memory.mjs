@@ -38,6 +38,9 @@ function indexStats(world) {
 try {
   const { createCampus } = await server.ssrLoadModule('/src/scene/campus.ts');
   const { buildCollisionWorld } = await server.ssrLoadModule('/src/navigation/collision-world.ts');
+  const T=await import('three');
+  const {Walker}=await server.ssrLoadModule('/src/navigation/walker.ts');
+  const {VehicleFleet}=await server.ssrLoadModule('/src/scene/vehicle-fleet.ts');
   const { CampusCats } = await server.ssrLoadModule('/src/scene/campus-cats.ts');
   const initial = await memory(), started = performance.now();
   const campus = createCampus(), scene = await memory();
@@ -45,14 +48,18 @@ try {
   let seed = 197;
   const random = () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
   const cats = new CampusCats(world, random);
-  for (let frame = 0; frame < 1200; frame++) cats.update(.05);
+  const camera=new T.PerspectiveCamera();
+  const walker=Object.assign(Object.create(Walker.prototype),{world,editorWorld:buildCollisionWorld(),barriers:[],moving:[],camera});
+  const fleet=new VehicleFleet(campus.vehicles,walker,camera,()=>{});
+  const vehiclesIndexed=await memory();
+  for (let frame = 0; frame < 1200; frame++) {cats.update(.05);fleet.update(.05);}
   const oneMinute = await memory();
-  for (let frame = 1200; frame < 12000; frame++) cats.update(.05);
+  for (let frame = 1200; frame < 12000; frame++) {cats.update(.05);fleet.update(.05);}
   const tenMinutes = await memory();
   console.log(JSON.stringify({
-    node: process.version, units: 'MB decimales, después de GC', initial, scene, index,
+    node: process.version, units: 'MB decimales, después de GC', initial, scene, index, vehiclesIndexed,
     catsAtOneSimulatedMinute: oneMinute, catsAtTenSimulatedMinutes: tenMinutes,
-    stats: indexStats(world), sceneRoots: campus.group.children.length, cats: cats.cats.length,
+    stats: indexStats(world), sceneRoots: campus.group.children.length, cats: cats.cats.length, vehicles:fleet.cars.length,
     elapsedMS: performance.now() - started,
   }, null, 2));
 } finally {

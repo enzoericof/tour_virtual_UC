@@ -7,6 +7,7 @@ import { Avatar } from "./avatar";
 
 export class RemotePlayers {
   seats: Seat[] = [];
+  drivers=new Set<string>();
   players: Player[] = [];
   world: SphereWorld = () => false;
   now = () => Date.now();
@@ -90,6 +91,7 @@ export class RemotePlayers {
     const now = this.clock();
     for (const [id, action] of this.actions)
       if (action.expiresAt <= this.now()) this.actions.delete(id);
+    for(const [id,avatar]of this.avatars)avatar.group.visible=!this.drivers.has(id);
     for (const p of this.players)
       this.avatars
         .get(p.id)

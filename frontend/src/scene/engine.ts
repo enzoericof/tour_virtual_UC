@@ -1,3 +1,4 @@
+import { VehicleFleet } from "./vehicle-fleet";
 import { CampusCats } from "./campus-cats";
 import { collectSeats, occupiedSeat, type Seat } from "./seating";
 import type { Player } from "../services/presence";
@@ -36,6 +37,7 @@ export class TourEngine {
   private readonly informationRay = new T.Ray();
   readonly campus = createCampus();
   readonly cats: CampusCats;
+  readonly vehicles:VehicleFleet;
   private readonly entranceDoors = new EntranceDoors(this.campus.group);
   /** Modelos colocados con el editor 3D (solo lectura para el visitante normal). */
   readonly editorPlacements = new T.Group();
@@ -107,8 +109,9 @@ export class TourEngine {
     this.walker = new Walker(this.camera, this.canvas);
     this.walker.onCaptureError = (message) => this.onError(message);
     this.walker.setWorld(this.campus.colliders);
+    this.vehicles=new VehicleFleet(this.campus.vehicles,this.walker,this.camera,message=>this.onError(message));
     this.social = new SocialPerformance(this.scene,this.camera,this.walker,this.remotePlayers,
-      ()=>Boolean(this.seated)||this.elevatorPassenger||this.insideElevator(),message=>this.onError(message));
+      ()=>Boolean(this.seated)||Boolean(this.vehicles.driving)||this.elevatorPassenger||this.insideElevator(),message=>this.onError(message));
     this.cats = new CampusCats(this.walker.collisionWorld,Math.random,sphere=>this.walker.blocksDynamicSphere(sphere));
     this.scene.add(this.cats.group);
     this.entranceDoors.register(this.walker);
@@ -121,7 +124,7 @@ export class TourEngine {
     this.canvas.addEventListener("click", (event) => {
       if (event.button !== 0) return;
       this.elevatorAudio.unlock();
-      if (this.walker.active) this.useElevator();
+      if (this.walker.active&&!this.vehicles.driving) this.useElevator();
     });
     this.walker.onLockChange = (locked) => {
       if (!locked) this.seatHint.textContent = "";
@@ -185,10 +188,17 @@ export class TourEngine {
     this.animate();
   }
   private interactionKey(event: KeyboardEvent) {
-    if (!["KeyE", "KeyG", "KeyI"].includes(event.code) || event.repeat || event.ctrlKey || event.metaKey || event.altKey
+    if (!["KeyE", "KeyG", "KeyI", "KeyF", "KeyV"].includes(event.code) || event.repeat || event.ctrlKey || event.metaKey || event.altKey
       || event.isComposing || !this.walker.active || this.social.busy) return;
     if (event.target instanceof Element && event.target.closest("input,textarea,select,[contenteditable],dialog")) return;
     event.preventDefault();
+    if(event.code==="KeyF"){
+      if(this.vehicles.driving)this.vehicles.exit();
+      else if(!this.seated&&!this.elevatorPassenger)this.vehicles.enter();
+      return;
+    }
+    if(event.code==="KeyV"){this.vehicles.toggleCamera();return;}
+    if(this.vehicles.driving)return;
     if (event.code === "KeyI") {
       const point = this.nearInformation();
       if (point) this.onInformation(point.information);
@@ -216,7 +226,7 @@ export class TourEngine {
     return point;
   }
   private nearSeat() {
-    if (this.seated || this.elevatorPassenger) return null;
+    if (this.seated || this.elevatorPassenger || this.vehicles.driving) return null;
     let best: Seat | null = null, distance = 1.65;
     const direction = this.camera.getWorldDirection(new T.Vector3());
     for (const seat of this.seats) {
@@ -292,17 +302,18 @@ export class TourEngine {
     const dt = Math.min(elapsed, 0.05);
     this.entranceDoors.update(dt,this.camera.position,this.walker.enabled);
     this.previous = now;
-    if (!this.elevatorPassenger && !this.seated) this.walker.update(dt);
+    this.vehicles.update(dt,now);
+    if (!this.elevatorPassenger && !this.seated && !this.vehicles.driving) this.walker.update(dt);
     if (now >= this.nextSeatHint) {
       this.nextSeatHint = now + 100;
       const available = this.walker.active ? this.nearSeat() : null;
       const information = this.nearInformation();
       const seatText = this.seated ? 'E · Levantarse' : available ? 'E · Sentarse' : '';
       const hint = !this.walker.active ? '' : this.social.busy ? 'Interacción en curso · Esc para pausar'
-        : [information ? `I · ${information.information.label}` : '', seatText].filter(Boolean).join('\n');
+        : this.vehicles.driving ? this.vehicles.hint() : [this.vehicles.hint(),information ? `I · ${information.information.label}` : '', seatText].filter(Boolean).join('\n');
       if (this.seatHint.textContent !== hint) this.seatHint.textContent = hint;
     }
-    this.updateElevator(elapsed);
+    if(!this.vehicles.driving)this.updateElevator(elapsed);
     this.social.update(dt);
     if (this.orbit.enabled) this.orbit.update();
     // Far views need depth precision for ground, paving and grass surfaces.
@@ -421,6 +432,7 @@ export class TourEngine {
     this.walker.walk();
   }
   overview() {
+    this.vehicles.exit(true);
     if(this.social.busy)this.social.clear();
     this.leaveSeat();
     this.elevatorPassenger = false;
@@ -456,6 +468,7 @@ export class TourEngine {
     this.walker.pause();
   }
   go(place?: Place) {
+    this.vehicles.exit(true);
     if(this.social.busy)this.social.clear();
     this.elevatorPassenger = false;
     this.pause();
@@ -568,6 +581,7 @@ export class TourEngine {
   }
   playerPose() {
     if (!this.walker.enabled) return null;
+    if(this.vehicles.driving){const s=this.vehicles.driving.state;return {x:s.x,y:s.y+.3,z:s.z,yaw:s.yaw-Math.PI/2,jetpacking:false};}
     const socialPose=this.social.pose();if(socialPose)return socialPose;
     const { x, y, z } = this.camera.position;
     if (this.seated) this.playerDirection.copy(this.seated.forward);

@@ -4,6 +4,7 @@ import type { Octree } from "three/addons/math/Octree.js";
 import { buildCollisionWorld } from "./collision-world";
 import { Capsule } from "three/addons/math/Capsule.js";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
+import type { MovingCollider } from './moving-collider';
 export class Walker {
   readonly controls: PointerLockControls;
   readonly body = new Capsule(
@@ -14,6 +15,9 @@ export class Walker {
   private world = buildCollisionWorld();
   private editorWorld = buildCollisionWorld();
   private barriers: { world: Octree; blocked: () => boolean }[] = [];
+  private moving: { world:MovingCollider; blocked:()=>boolean }[]=[];
+  pressed(code:string) { return this.keys.has(code); }
+  addMoving(world:MovingCollider,blocked:()=>boolean) { this.moving.push({world,blocked}); }
   private velocity = new T.Vector3();
   private keys = new Set<string>();
   private ground = false;
@@ -92,10 +96,14 @@ export class Walker {
       const hit = barrier.world.sphereIntersect(sphere);
       if (hit && (!result || hit.depth > result.depth)) result = hit;
     }
+    for(const item of this.moving)if(item.blocked()) {
+      const hit=item.world.sphereIntersect(sphere);
+      if(hit&&(!result||hit.depth>result.depth))result=hit;
+    }
     return result;
   }
   blocksDynamicSphere(sphere:T.Sphere) {
-    return Boolean(this.editorWorld.sphereIntersect(sphere)) || this.barriers.some(b=>b.blocked() && Boolean(b.world.sphereIntersect(sphere)));
+    return Boolean(this.editorWorld.sphereIntersect(sphere)) || this.barriers.some(b=>b.blocked() && Boolean(b.world.sphereIntersect(sphere))) || this.moving.some(b=>b.blocked()&&Boolean(b.world.sphereIntersect(sphere)));
   }
   setWorld(object: T.Object3D) {
     buildCollisionWorld(object, this.world);
@@ -120,9 +128,13 @@ export class Walker {
       const hit=barrier.world.rayIntersect(ray);
       if(hit)nearest=Math.min(nearest,hit.distance);
     }
+    for(const item of this.moving)if(item.blocked()){const hit=item.world.rayIntersect(ray);if(hit)nearest=Math.min(nearest,hit.distance);}
     return nearest;
   }
   private collision(body: Capsule) {
+    for(const item of this.moving)if(item.blocked()) {
+      const hit=item.world.capsuleIntersect(body);if(hit)return hit;
+    }
     const collision = this.world.capsuleIntersect(body);
     if (collision) return collision;
     const edition = this.editorWorld?.capsuleIntersect(body);

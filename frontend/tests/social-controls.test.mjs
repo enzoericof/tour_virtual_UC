@@ -13,7 +13,7 @@ after(() => { globalThis.Element = previousElement; });
 function setup() {
   const calls = [];
   const target = { id: "other", name: "Visitante" };
-  const engine = { walker: { active: true }, social: { busy: false }, seated: null,
+  const engine = { walker: { active: true }, vehicles:{driving:null}, social: { busy: false }, seated: null,
     nearPlayer: () => target, onSocialMenu: player => calls.push(["gestures", player]),
     sit: () => calls.push("sit"), leaveSeat: () => calls.push("stand") };
   const press = (code, extra = {}) => TourEngine.prototype.interactionKey.call(engine, { code, preventDefault() {}, ...extra });

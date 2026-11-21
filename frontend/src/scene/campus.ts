@@ -27,5 +27,15 @@ export function createCampus() {
   }
   setDetail(false);
   group.updateMatrixWorld(true); colliders.updateMatrixWorld(true);
-  return { group, colliders, boundary: context.boundary, elevator: faculty.elevator, setDetail };
+  // Los vehículos se indexan por separado: al moverlos no queda una copia sólida estacionada.
+  const vehicles:{id:string;visual:T.Group;solid:T.Group}[]=[];
+  const moving:T.Group[]=[];faculty.colliders.traverse(o=>{if(o.userData.vehicleId)moving.push(o as T.Group);});
+  for(const solid of moving) {
+    const id=solid.userData.vehicleId as string;let visual:T.Group|undefined;
+    faculty.group.traverse(o=>{if(o.userData.vehicleId===id)visual=o as T.Group;});
+    if(!visual)continue;group.attach(visual);
+    solid.removeFromParent();solid.position.set(0,0,0);solid.quaternion.identity();solid.scale.setScalar(1);solid.updateMatrixWorld(true);
+    vehicles.push({id,visual,solid});
+  }
+  return { group, colliders, vehicles, boundary: context.boundary, elevator: faculty.elevator, setDetail };
 }

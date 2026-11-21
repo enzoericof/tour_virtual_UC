@@ -20,7 +20,7 @@ test("El árbol de la divisoria queda entre ambos ramales y fuera de sus carpas"
 });
 
 test("Las camionetas estacionadas dejan libres los camineros y quedan dentro del campus",()=>{
-  assert.equal(deiForecourt.parking.length,4);
+  assert.equal(deiForecourt.parking.length,8);
   for(const vehicle of deiForecourt.parking) {
     const rect={center:vehicle.center,size:[4.9,2.1],angle:vehicle.angle};
     for(const local of [[-2.5,-1.2],[-2.5,1.2],[2.5,-1.2],[2.5,1.2],[0,0]]) {
@@ -76,18 +76,18 @@ test("Las pickups forman una fila paralela al caminero y miran hacia él",()=>{
   for(const [i,car]of deiForecourt.parking.entries()){
     assert.ok(Math.abs(Math.cos(car.angle)*u[0]+Math.sin(car.angle)*u[1])<1e-8,"Los frentes quedan perpendiculares al caminero");
     if(i){const previous=deiForecourt.parking[i-1],dx=car.center[0]-previous.center[0],dz=car.center[1]-previous.center[1];
-      assert.ok(Math.abs(dx*u[1]-dz*u[0])<1e-8);assert.ok(Math.abs(Math.hypot(dx,dz)-3.3)<1e-8);assert.equal(car.angle,previous.angle);}
+      assert.ok(Math.abs(dx*u[1]-dz*u[0])<1e-8);assert.ok(Math.abs(Math.hypot(dx,dz)-3.35)<1e-8);assert.equal(car.angle,previous.angle);}
   }
-  assert.ok(deiForecourt.pickupScale<.9,"El modelo nuevo queda más pequeño");
+  assert.ok(deiForecourt.pickupScale===1,"Las Raptor recuperan su tamaño de doble cabina");
 });
 
 test("Los postes bajos delimitan los frentes y laterales sin atravesar las carrocerías",()=>{
-  assert.equal(deiForecourt.parkingBollards.length,65);
+  assert.equal(deiForecourt.parkingBollards.length,139);
   for(const p of deiForecourt.parkingBollards){
     const world=facultyToWorld([p[0],0,p[1]]);assert.ok(insidePolygon([world[0],world[2]],layout.boundary));
     assert.ok(clearance(p,deiForecourt.branch)>deiForecourt.canopyWidth/2+.7);
     for(const car of deiForecourt.parking){const dx=p[0]-car.center[0],dz=p[1]-car.center[1],c=Math.cos(car.angle),s=Math.sin(car.angle);
-      assert.ok(Math.abs(dx*c+dz*s)>2.35||Math.abs(-dx*s+dz*c)>1.1,"Los delimitadores quedan fuera del vehículo");}
+      assert.ok(Math.abs(dx*c+dz*s)>2.85||Math.abs(-dx*s+dz*c)>1.35,"Los delimitadores quedan fuera del vehículo");}
   }
   assert.ok(deiReception.backZ-deiReception.frontZ>2.5,"La recepción se retranquea respecto del antiguo fondo");
 });

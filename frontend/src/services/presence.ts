@@ -1,3 +1,4 @@
+import type { VehicleState } from "../scene/vehicle-fleet";
 import type { Skin } from "../data/skins";
 import type { SocialEvent } from "./social";
 
@@ -15,7 +16,7 @@ export type Player = Pose & {
   skin: Skin;
   at?: number;
 };
-type Snapshot = { self: string; players: Player[]; admitted?: boolean };
+type Snapshot = { self: string; players: Player[]; admitted?: boolean; vehicles?:VehicleState[] };
 
 export class AdmissionError extends Error {
   constructor(readonly reason: "full" | "connection" | "auth") {
@@ -34,6 +35,8 @@ export class CampusPresence {
   selfPlayer: Player | null = null;
   onSocial = (_event: SocialEvent) => {};
   onDisconnect = () => {};
+  onVehicles = (_states:VehicleState[],_self:string)=>{};
+  onVehicleDisconnect=()=>{};
   private serverOffset = 0;
   private synced = false;
   now() {
@@ -116,6 +119,7 @@ export class CampusPresence {
     this.selfPlayer = null;
     this.synced = false;
     this.onDisconnect();
+    this.onVehicleDisconnect();
     window.clearInterval(this.timer);
     window.clearTimeout(this.reconnect);
     const socket = this.socket;
@@ -179,6 +183,7 @@ export class CampusPresence {
         this.send({ type: "social.sync" });
       }
       if (!this.selfPlayer) this.synced = false;
+      if(Array.isArray(snapshot.vehicles))this.onVehicles(snapshot.vehicles,self);
       this.onSeating(players, self);
       const others = players.filter((player) => player.id !== self);
       this.onPlayers(others);
@@ -194,6 +199,7 @@ export class CampusPresence {
       this.selfPlayer = null;
       this.synced = false;
       this.onDisconnect();
+      this.onVehicleDisconnect();
       this.lastPose = null;
       this.onPlayers([]);
       this.onSeating([]);

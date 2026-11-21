@@ -37,6 +37,11 @@ export function mountCommunity(
     },
     (players, self) => engine?.receiveSeating(players, self),
   );
+  if(engine){
+    engine.vehicles.send=command=>presence.send(command);
+    presence.onVehicles=(states,self)=>{engine.vehicles.receive(states,self);engine.remotePlayers.drivers=engine.vehicles.drivers();};
+    presence.onVehicleDisconnect=()=>engine.vehicles.disconnected();
+  }
   const library = createLibrary(shell, () => user, account);
 
   function account() {

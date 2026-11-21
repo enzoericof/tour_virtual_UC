@@ -14,7 +14,7 @@ function setup(height=0){
  globalThis.window=new EventTarget();
  const floor=new T.Mesh(new T.BoxGeometry(20,.2,20));floor.position.y=height-.1;floor.updateMatrixWorld(true);
  const camera=new T.PerspectiveCamera();
- const walker=Object.assign(Object.create(Walker.prototype),{camera,body:new Capsule(new T.Vector3(0,height+.28,0),new T.Vector3(0,height+1.48,0),.28),world:buildCollisionWorld(floor),editorWorld:buildCollisionWorld(),barriers:[],enabled:true,frozen:false,ground:true,spawn:new T.Vector3()});camera.position.copy(walker.body.end);
+ const walker=Object.assign(Object.create(Walker.prototype),{camera,body:new Capsule(new T.Vector3(0,height+.28,0),new T.Vector3(0,height+1.48,0),.28),world:buildCollisionWorld(floor),editorWorld:buildCollisionWorld(),barriers:[],moving:[],enabled:true,frozen:false,ground:true,spawn:new T.Vector3()});camera.position.copy(walker.body.end);
  walker.velocity=new T.Vector3();
  const errors=[],cancelled=[],remote={action(){},clearActions(){}};
  const performance=new SocialPerformance(new T.Scene(),camera,walker,remote,()=>false,m=>errors.push(m));performance.now=()=>1500;performance.onCancel=id=>cancelled.push(id);

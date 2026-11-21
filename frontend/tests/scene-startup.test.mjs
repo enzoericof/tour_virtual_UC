@@ -447,7 +447,7 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const vehicles=[],medianTrees=[];
     colliders.traverse(o=>{if(o.userData.deiParkedVehicle)vehicles.push(o);});
     group.traverse(o=>{if(o.userData.deiMedianTree)medianTrees.push(o);});
-    assert.equal(vehicles.length,4,"Las cuatro camionetas tienen carrocerías sólidas");
+    assert.equal(vehicles.length,8,"Las ocho camionetas tienen carrocerías sólidas");
     assert.equal(medianTrees.length,1,"El nuevo árbol se ubica en la divisoria");
     const median=medianTrees[0],sourceTree=group.getObjectByName("Árbol exterior nuevo del LED 1");
     const medianWood=median.getObjectByName("Tronco y ramas curvas"),sourceWood=sourceTree.getObjectByName("Tronco y ramas curvas");
@@ -458,7 +458,7 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     assert.ok(medianLeaves>sourceLeaves*1.2,"La copa central tiene más hojas, además de más amplitud");
     const bollardBodies=[];colliders.traverse(o=>{if(o.userData.deiParkingBollard)bollardBodies.push(o);});
     assert.equal(bollardBodies.length,deiForecourt.parkingBollards.length);
-    const bollardMesh=group.getObjectByName("Delimitadores bajos del estacionamiento LED");assert.ok(bollardMesh?.isInstancedMesh&&bollardMesh.count===65);
+    const bollardMesh=group.getObjectByName("Delimitadores bajos del estacionamiento LED");assert.ok(bollardMesh?.isInstancedMesh&&bollardMesh.count===139);
     for(const post of bollardBodies){assert.ok(post.scale.y>.25&&post.scale.y<.32);assert.ok(Math.abs(post.position.y-post.scale.y/2-cantinaGardenFloor([post.position.x,post.position.z]))<1e-6,"Los postes están apoyados en el terreno");}
     for(const vehicle of deiForecourt.parking) {
       const [hit]=new Raycaster(new Vector3(vehicle.center[0],3,vehicle.center[1]),new Vector3(0,-1,0),0,4).intersectObject(colliders,true);
@@ -654,7 +654,7 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const { Capsule } = await import("three/addons/math/Capsule.js");
     const camera = new PerspectiveCamera();
     const walker = Object.assign(Object.create(Walker.prototype), {
-      camera, world: new Octree(), barriers: [], controls: { isLocked: true }, enabled: true,
+      camera, world: new Octree(), barriers: [], moving: [], controls: { isLocked: true }, enabled: true,
       velocity: new Vector3(), spawn: new Vector3(),
       body: new Capsule(new Vector3(), new Vector3(0, 1, 0), 0.28),
     });

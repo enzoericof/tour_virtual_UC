@@ -26,6 +26,15 @@ export function openTourHelp({ openDialog }: TourShell) {
           <dt><kbd>Clic</kbd></dt><dd>Pulsar el botón resaltado del ascensor</dd>
           <dt><kbd>Esc</kbd></dt><dd>Pausar y liberar el cursor</dd>
         </dl>
+        <h3>Ranger Raptor</h3>
+        <dl class="help-grid">
+          <dt><kbd>F</kbd></dt><dd>Subir junto a la puerta del conductor. Para bajar, detené la camioneta y pulsá F.</dd>
+          <dt><kbd>W</kbd> / <kbd>S</kbd></dt><dd>Acelerar / frenar. Mantené S al detenerte para retroceder.</dd>
+          <dt><kbd>A</kbd> / <kbd>D</kbd></dt><dd>Girar. También podés usar las flechas.</dd>
+          <dt><kbd>Espacio</kbd></dt><dd>Freno de mano mientras manejás.</dd>
+          <dt><kbd>V</kbd></dt><dd>Cambiar entre cabina y cámara exterior.</dd>
+          <dt><kbd>Esc</kbd></dt><dd>Pausar y detener la camioneta. Los demás ven dónde queda estacionada.</dd>
+        </dl>
         <h3>Vista general</h3>
         <dl class="help-grid">
           <dt><kbd>Arrastrar</kbd></dt><dd>Girar la cámara</dd>

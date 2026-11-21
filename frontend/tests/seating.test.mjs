@@ -25,7 +25,7 @@ test('Ocupación independiente, desempate simultáneo y liberación al salir', a
   const {TourEngine}=await server.ssrLoadModule('/src/scene/engine.ts');
   const root=new T.Group();registerSeats(root,1.8);const seats=collectSeats(root);
   const engine=Object.create(TourEngine.prototype);
-  engine.social={setSelf:()=>{}};
+  engine.vehicles={driving:null};engine.social={setSelf:()=>{}};
   Object.assign(engine,{seats,occupied:new Set(),seated:seats[0],seatReturn:new T.Vector3(2,0,3),onError:()=>{},walker:{teleport:p=>engine.returned=p.clone()}});
   const player=(id,s)=>({id,x:s.point.x,y:s.point.y-.9,z:s.point.z,yaw:0,walking:false});
   engine.receiveSeating([player('b',seats[0]),player('c',seats[1])],'a');

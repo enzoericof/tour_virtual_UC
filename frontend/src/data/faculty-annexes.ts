@@ -351,8 +351,8 @@ const parkingFront=(along:number,depth=0):Vec2=>[
   exteriorFork[1]+rightArm[1]*along+parkingOutside[1]*(2.15+depth),
 ];
 const bollards:Vec2[]=[];
-for(let i=0;i<=24;i++)bollards.push(parkingFront(6.5+i*13.2/24));
-for(let bay=0;bay<=4;bay++)for(let j=1;j<=8;j++)bollards.push(parkingFront(6.5+bay*3.3,j*5.3/8));
+for(let i=0;i<=48;i++)bollards.push(parkingFront(1+i*26.8/48));
+for(let bay=0;bay<=8;bay++)for(let j=1;j<=10;j++)bollards.push(parkingFront(1+bay*3.35,j*6.2/10));
 export const deiForecourt = {
   width: 1.6, canopyWidth: 2.25, eave: 2.85, ridge: .46,
   main: [exteriorArrival,exteriorFork,exteriorStart].map(p=>fromRect(dei.rect,p)),
@@ -362,9 +362,9 @@ export const deiForecourt = {
   trees: [[16.5,-16.5],[3,-19],[-8.5,-21],[-42,-30]].map(([x,z])=>fromRect(dei.rect,[x,z])),
   medianTree: fromRect(dei.rect,[-27.3,-15.5]),
   medianCrown: { spread: 1.5, density: 1.35, flatten: .90 },
-  pickupScale: .84,
-  parking: ["#c7d2d4","#242e32","#eeece5","#4b646c"].map((color,index)=>({
-    center:fromRect(dei.rect,parkingFront(8.15+index*3.3,2.65)),
+  pickupScale: 1.0,
+  parking: ["#c7d2d4","#242e32","#eeece5","#24618c","#ce5b28","#8c999e","#e7e9e8","#26343b"].map((color,index)=>({
+    center:fromRect(dei.rect,parkingFront(2.675+index*3.35,3.1)),
     angle:dei.rect.angle+Math.atan2(-rightArm[0],rightArm[1]),color,
   })),
   parkingBollards: bollards.map(p=>fromRect(dei.rect,p)),

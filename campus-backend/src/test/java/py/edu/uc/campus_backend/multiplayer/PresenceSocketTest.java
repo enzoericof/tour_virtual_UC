@@ -52,7 +52,7 @@ class PresenceSocketTest {
         }
     };
     private final PresenceSocket handler = new PresenceSocket(users, new ObjectMapper(), store,
-        org.mockito.Mockito.mock(SocialService.class));
+        org.mockito.Mockito.mock(SocialService.class),org.mockito.Mockito.mock(VehicleService.class));
     private void connect() throws Exception {
         handler.afterConnectionEstablished(socket); move(0); handler.synchronizePresence();
     }

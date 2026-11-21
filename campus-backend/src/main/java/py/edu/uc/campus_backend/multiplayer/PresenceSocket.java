@@ -43,7 +43,7 @@ public class PresenceSocket extends TextWebSocketHandler {
             this(id, name, skin, x, y, z, yaw, walking, System.currentTimeMillis());
         }
     }
-    private record Snapshot(String self, List<Player> players) {}
+    private record Snapshot(String self, List<Player> players, List<py.edu.uc.campus_backend.dto.VehicleState> vehicles) {}
 
     private static class Peer {
         final String id = UUID.randomUUID().toString();
@@ -72,16 +72,18 @@ public class PresenceSocket extends TextWebSocketHandler {
     private final ObjectMapper json;
     private final PresenceStore store;
     private final SocialService social;
+    private final VehicleService vehicles;
     private volatile PresenceStore.Exchange shared = new PresenceStore.Exchange(List.of(), Set.of());
     private final Set<String> departed = ConcurrentHashMap.newKeySet();
     private volatile long lastExchange;
     private volatile long lastChange;
 
-    public PresenceSocket(UsuarioService users, ObjectMapper json, PresenceStore store, SocialService social) {
+    public PresenceSocket(UsuarioService users, ObjectMapper json, PresenceStore store, SocialService social, VehicleService vehicles) {
         this.users = users;
         this.json = json;
         this.store = store;
         this.social = social;
+        this.vehicles=vehicles;vehicles.bind(()->!peers.isEmpty());
         social.bind(this::publishSocial,()->!peers.isEmpty());
     }
 
@@ -129,7 +131,8 @@ public class PresenceSocket extends TextWebSocketHandler {
                     if (peer.player != null && !peer.player.hidden() && shared.sessions().contains(peer.sessionId)
                         && now - lastExchange <= 5_000_000_000L) {
                         peer.lastSeen = now;
-                        social.handle(peer.id, peer.userId, peer.name, command);
+                        if(command.path("type").asText().startsWith("vehicle."))vehicles.handle(peer.id,command);
+                        else social.handle(peer.id, peer.userId, peer.name, command);
                     }
                     return;
                 }
@@ -151,6 +154,7 @@ public class PresenceSocket extends TextWebSocketHandler {
             return;
         }
         if (body.equals("hide")) {
+            vehicles.leave(peer.id);
             peer.lastSeen = now;
             Player p = peer.player;
             if (p != null) {
@@ -164,6 +168,7 @@ public class PresenceSocket extends TextWebSocketHandler {
             peer.lastSeen = now;
             if (body.equals("leave")) {
                 peer.player = null;
+                vehicles.leave(peer.id);
                 store.remove(peer.id); // Una salida explícita, nunca por cada movimiento.
                 lastChange = now;
             }
@@ -206,6 +211,7 @@ public class PresenceSocket extends TextWebSocketHandler {
                 && now - lastExchange < 2_000_000_000L) return;
         List<Peer> local = new ArrayList<>(peers.values());
         for (String id : List.copyOf(departed)) {
+            vehicles.leave(id);
             store.remove(id);
             departed.remove(id);
         }
@@ -264,7 +270,7 @@ public class PresenceSocket extends TextWebSocketHandler {
         for (Peer peer : connected) {
             try {
                 if (!exchange.sessions().contains(peer.sessionId)) continue;
-                String payload = json.writeValueAsString(new Snapshot(peer.id, players));
+                String payload = json.writeValueAsString(new Snapshot(peer.id, players, vehicles.snapshot()));
                 if (payload.equals(peer.lastSnapshot) && now - peer.lastSent < 5_000_000_000L) continue;
                 peer.socket.sendMessage(new TextMessage(payload));
                 peer.lastSnapshot = payload;

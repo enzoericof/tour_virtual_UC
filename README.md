@@ -16,9 +16,11 @@ npm ci
 npm run dev
 ```
 
-Abrí la dirección que indica Vite, normalmente `http://127.0.0.1:5173/`. Podés explorar el modelo y recorrer el campus sin iniciar el servidor.
+Abrí la dirección que indica Vite, normalmente `http://127.0.0.1:5173/`. El acceso al recorrido requiere también el backend y una cuenta; seguí el apartado de multijugador.
 
-Para caminar, elegí **Recorrer** o hacé clic en un punto del modelo. Usá **WASD** o las **flechas** para moverte, el **mouse** para mirar y **Esc** para pausar y liberar el cursor. Mantené **Espacio** para usar el jetpack sin límite; al soltar, la gravedad y la inercia controlan la caída. **Más opciones → Ayuda** muestra los demás controles.
+Para caminar, elegí **Recorrer** o hacé clic en un punto del modelo. Usá **WASD** o las **flechas** para moverte, el **mouse** para mirar y **Esc** para pausar y liberar el cursor. Mantené **Espacio** para usar el jetpack sin límite; al soltar, la gravedad y la inercia controlan la caída. **Menú → Ayuda** muestra los demás controles.
+
+Las ocho Ranger Raptor del estacionamiento del LED se comparten entre jugadores. Acercate a la puerta del conductor y pulsá **F** para subir. **W/S** acelera, frena y retrocede; **A/D** gira; **Espacio** activa el freno de mano; **V** alterna cabina y cámara exterior. Detenete y pulsá **F** para bajar. **Esc** pausa y detiene la camioneta. La posición estacionada se conserva para los demás y para nuevas visitas.
 
 El recorrido y el editor requieren una PC o laptop. En celulares y tabletas se muestra un aviso con la tipografía del proyecto y no se inicia el motor 3D. Una ventana pequeña de escritorio no activa este bloqueo.
 

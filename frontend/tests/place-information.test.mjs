@@ -28,7 +28,7 @@ test("El aviso de Manfred se limita a su puerta y altura, sin activarse desde Be
 test("La información no se ofrece a través de muros, en pausa, ascensor o durante un gesto", () => {
   const [x, y, z] = informationPoints[0].position;
   const engine = { camera: { position: new T.Vector3(x + 1, y + 1.5, z) },
-    walker: { active: true, obstructs: () => false }, social: { busy: false },
+    walker: { active: true, obstructs: () => false }, vehicles:{driving:null}, social: { busy: false },
     elevatorPassenger: false, informationRay: new T.Ray() };
   const nearby = () => TourEngine.prototype.nearInformation.call(engine);
   assert.equal(nearby(), informationPoints[0]);
@@ -71,7 +71,7 @@ test("La historia del DEI–LED se activa en su galería de acceso y conserva su
 test("I abre solo la información cercana e ignora repetición, escritura, composición y modificadores", () => {
   const calls = [];
   const point = informationPoints[0];
-  const engine = { walker: { active: true }, social: { busy: false },
+  const engine = { walker: { active: true }, vehicles:{driving:null}, social: { busy: false },
     nearInformation: () => point, onInformation: info => calls.push(info) };
   const press = extra => TourEngine.prototype.interactionKey.call(engine, { code: "KeyI", preventDefault() {}, ...extra });
   press();
