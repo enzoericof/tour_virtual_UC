@@ -23,6 +23,14 @@ import { annexVisitTargets } from "../data/faculty-annexes";
 
 export type TourMode = "overview" | "walking" | "paused";
 
+export type TourEngineOptions = {
+  /**
+   * `false` deja las colocaciones del editor en manos de quien monta el motor:
+   * el editor de mapa 3D carga su borrador local en lugar del mapa publicado.
+   */
+  placements?: boolean;
+};
+
 export class TourEngine {
   readonly scene = new T.Scene();
   readonly remotePlayers = new RemotePlayers(this.scene);
@@ -76,7 +84,7 @@ export class TourEngine {
   onVisitPosition = (_now: number) => {};
   onStats = (_fps: number) => {};
   onError = (_message: string) => {};
-  constructor(container: HTMLElement, theme: CampusTheme = "light") {
+  constructor(container: HTMLElement, theme: CampusTheme = "light", options: TourEngineOptions = {}) {
     this.renderer = new T.WebGLRenderer({
       antialias: true,
       powerPreference: "high-performance",
@@ -142,9 +150,19 @@ export class TourEngine {
       const p = this.nearest();
       if (p) this.onLocation(p);
     };
-    void loadPlacementsInto(this.editorPlacements).then(() => {
+    if (options.placements === false) {
+      // El editor carga su propio borrador y avisa por su cuenta.
       this.walker.setEditorWorld(this.editorPlacements);
-    });
+    } else {
+      void loadPlacementsInto(this.editorPlacements).then(({ failed }) => {
+        this.walker.setEditorWorld(this.editorPlacements);
+        if (failed.length) {
+          this.onError(
+            `No se pudieron cargar ${failed.length} modelo(s) del mapa 3D: ${failed.join("; ")}.`,
+          );
+        }
+      });
+    }
     window.addEventListener("resize", () => this.resize(container));
     this.resize(container);
     this.canvas.addEventListener("webglcontextlost", (e) => {

@@ -1,0 +1,862 @@
+[
+  {
+    "id": "p-mwh9zztj-gmt1y",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      -0.9427074722526791,
+      0.932,
+      -155.48
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp3wotb-04z3w",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      -17.64,
+      0.93,
+      -147.87
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp3xu35-3wr6n",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      -14.266881250756088,
+      0.93,
+      -149.29
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp3z8ac-m9h2m",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      -14.93,
+      0.932,
+      -151.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp43bw2-pzlvq",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      10.283277774006459,
+      0.9319999999999998,
+      -160.54
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp442zd-24p8w",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      -10.009140987122462,
+      0.9320000000000004,
+      -153.98
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp44tvb-j3316",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      -9.01129222592446,
+      0.9320000000000002,
+      -151.61
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp45s33-mu1hi",
+    "name": "plantera_galeria",
+    "model": "plantera_galeria.glb",
+    "position": [
+      2.78,
+      1.03,
+      -160.02
+    ],
+    "rotation": [
+      0,
+      0.3665191429188092,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp45ync-xbk85",
+    "name": "plantera_galeria",
+    "model": "plantera_galeria.glb",
+    "position": [
+      6.91,
+      1.03,
+      -161.86
+    ],
+    "rotation": [
+      0,
+      0.24434609527920614,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp4azbf-5h139",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      0.6077929679708447,
+      0.9199999761581421,
+      -155.95
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp4bluj-9ucr3",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      5.79672982190746,
+      0.932,
+      -158.37714097176786
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp4fdxh-hyylv",
+    "name": "estante_verde",
+    "model": "estante_verde.glb",
+    "position": [
+      -10.97,
+      0.9320000000000002,
+      -153.84
+    ],
+    "rotation": [
+      0,
+      0.4363323129985824,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp4l796-ugcgp",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      -4.491389653029856,
+      0.9199999761581421,
+      -153.75
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp4m91a-he3z5",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      -5.299300270941457,
+      0.932,
+      -156.14
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp4mqzx-jq26p",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      4.91,
+      0.932,
+      -161.07
+    ],
+    "rotation": [
+      0,
+      0.10471975511965978,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp58bwf-x10sy",
+    "name": "banner_fcyt",
+    "model": "banner_fcyt.glb",
+    "position": [
+      5.16,
+      0.82,
+      -160.98
+    ],
+    "rotation": [
+      0,
+      1.1519173063162575,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp6t1bi-b5wxb",
+    "name": "tele_galeria",
+    "model": "tele_galeria.glb",
+    "position": [
+      -8.63,
+      0.66,
+      -154.49
+    ],
+    "rotation": [
+      0,
+      0.3665191429188092,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp796cr-u7kfs",
+    "name": "basurero_galeria",
+    "model": "basurero_galeria.glb",
+    "position": [
+      -14.61,
+      1.02,
+      -152.13
+    ],
+    "rotation": [
+      0,
+      0.5410520681182421,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp9ksfg-fsqrx",
+    "name": "pasto_cantero",
+    "model": "pasto_cantero.glb",
+    "position": [
+      8.43,
+      0.92,
+      -157.71
+    ],
+    "rotation": [
+      0,
+      3.5604716740684323,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwp9u6q0-3m1n2",
+    "name": "arbustos_lavanda",
+    "model": "arbustos_lavanda.glb",
+    "position": [
+      7.32,
+      0.92,
+      -156.57
+    ],
+    "rotation": [
+      0,
+      -0.5934119456780721,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpa8bcx-tckhz",
+    "name": "poste_reflector",
+    "model": "poste_reflector.glb",
+    "position": [
+      8.380647539692191,
+      0.9199999761581421,
+      -157.66499469479953
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpaas8g-8cuzk",
+    "name": "planta_dracaena",
+    "model": "planta_dracaena.glb",
+    "position": [
+      6.801898906966059,
+      0.9303553202003205,
+      -158.04471461931163
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpaavja-4ut63",
+    "name": "planta_dracaena",
+    "model": "planta_dracaena.glb",
+    "position": [
+      7.927374596182744,
+      0.9303553202003223,
+      -158.53515183234967
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpaax4j-llc3h",
+    "name": "planta_dracaena",
+    "model": "planta_dracaena.glb",
+    "position": [
+      8.936150446995626,
+      0.9303553202003259,
+      -158.97666341664652
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpaazc0-jxhbg",
+    "name": "planta_dracaena",
+    "model": "planta_dracaena.glb",
+    "position": [
+      9.924946411306635,
+      0.9303553202003205,
+      -159.48384402375416
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpab1su-qda4n",
+    "name": "planta_dracaena",
+    "model": "planta_dracaena.glb",
+    "position": [
+      7.324369940468884,
+      0.9303553202003223,
+      -158.54204710114135
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpab7h9-uvxju",
+    "name": "planta_dracaena",
+    "model": "planta_dracaena.glb",
+    "position": [
+      9.593994061795527,
+      0.9303553202003241,
+      -159.21565916768978
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpaln5t-kafq7",
+    "name": "pasto_cantero",
+    "model": "pasto_cantero.glb",
+    "position": [
+      -1.32,
+      0.92,
+      -153.21
+    ],
+    "rotation": [
+      0,
+      0.4363323129985824,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpan4g9-p6idz",
+    "name": "pasto_cantero",
+    "model": "pasto_cantero.glb",
+    "position": [
+      -0.94,
+      0.9199999761581421,
+      -153.31
+    ],
+    "rotation": [
+      0,
+      0.4188790204786391,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpaqatk-3xlq2",
+    "name": "poste_reflector",
+    "model": "poste_reflector.glb",
+    "position": [
+      -1.1657196950174082,
+      0.9199999761581421,
+      -153.22799838785613
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpaqica-4zbu6",
+    "name": "planta_dracaena",
+    "model": "planta_dracaena.glb",
+    "position": [
+      -2.4649698661301755,
+      0.9303553202003223,
+      -153.74528572803706
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpaqmi8-yv08y",
+    "name": "planta_dracaena",
+    "model": "planta_dracaena.glb",
+    "position": [
+      -1.5221284151523449,
+      0.9303553202003223,
+      -154.15860650510123
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpar3os-3qkpf",
+    "name": "arbustos_lavanda",
+    "model": "arbustos_lavanda.glb",
+    "position": [
+      -2.96,
+      0.92,
+      -152.05
+    ],
+    "rotation": [
+      0,
+      -0.9599310885968813,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpare9b-547u2",
+    "name": "planta_dracaena",
+    "model": "planta_dracaena.glb",
+    "position": [
+      -0.37599018754232105,
+      0.9303553202003241,
+      -154.6689648381145
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwparh4c-th696",
+    "name": "planta_dracaena",
+    "model": "planta_dracaena.glb",
+    "position": [
+      0.5497706062443726,
+      0.9303553202003241,
+      -155.2564503843756
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwparjwf-6qvaf",
+    "name": "planta_dracaena",
+    "model": "planta_dracaena.glb",
+    "position": [
+      -0.8964788999651461,
+      0.93,
+      -154.54826590132086
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpaw806-njmxg",
+    "name": "arbusto_flores",
+    "model": "arbusto_flores.glb",
+    "position": [
+      -3.1340596870070385,
+      1.0382031691074372,
+      -153.40094474177775
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpawit3-we22j",
+    "name": "techo_curvo_galeria",
+    "model": "techo_curvo_galeria.glb",
+    "position": [
+      3.48,
+      4.24,
+      -156.25
+    ],
+    "rotation": [
+      0,
+      0.4188790204786391,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpb18ym-jldm6",
+    "name": "arbustos_lavanda",
+    "model": "arbustos_lavanda.glb",
+    "position": [
+      1.2,
+      0.9199999761581417,
+      -153.76
+    ],
+    "rotation": [
+      0,
+      1.8500490071139892,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpbd5o7-0wvun",
+    "name": "columna_galeria",
+    "model": "columna_galeria.glb",
+    "position": [
+      1.379483467869517,
+      1.0199999999999998,
+      -160.0649962331213
+    ],
+    "rotation": [
+      0,
+      0,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpcrk2j-pc449",
+    "name": "puerta_blindex_esmerilada",
+    "model": "puerta_blindex_esmerilada.glb",
+    "position": [
+      1.58,
+      1.02,
+      -159.92
+    ],
+    "rotation": [
+      0,
+      0.4188790204786391,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpdmjlr-gcn6u",
+    "name": "puerta_sala_profesores",
+    "model": "puerta_sala_profesores.glb",
+    "position": [
+      -19.16,
+      1.02,
+      -155.19
+    ],
+    "rotation": [
+      0,
+      -1.1519173063162575,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "p-mwpmkpvi-37m2h",
+    "name": "sala_manfred_stark",
+    "model": "sala_manfred_stark.glb",
+    "position": [
+      -28.390440730355113,
+      0.015000000000007993,
+      -151.162225946017
+    ],
+    "rotation": [
+      0,
+      -1.9198621771937625,
+      0
+    ],
+    "scale": [
+      1,
+      1,
+      1
+    ]
+  }
+]

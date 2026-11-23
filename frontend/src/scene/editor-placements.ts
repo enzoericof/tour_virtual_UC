@@ -1,87 +1,94 @@
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import publishedMap from "../data/editor-placements.json";
+import { modelUrl } from "../editor/model-catalog";
+import { sanitizePlacements, type Placement } from "../editor/placements-schema";
 
 /**
  * Colocaciones del editor de mapa 3D.
  *
- * El editor experimental (fuera de Git) guarda acá los modelos que un
- * administrador arrastra sobre el campus. El visor principal solo los lee:
- * no ofrece ninguna herramienta para editarlos, de modo que un usuario normal
- * puede ver el mapa pero no tocarlo.
+ * El editor experimental (`frontend/editor/`) arma el mapa y el visor principal
+ * solo lo lee: no ofrece ninguna herramienta para editarlo, de modo que un
+ * usuario normal puede ver el mapa pero no tocarlo.
  *
- * Los datos viven en localStorage del navegador que ejecutó el editor; si no
- * hay datos o los modelos no existen, el visor arranca igual sin cambios.
+ * Hay dos copias de la misma lista:
+ *
+ * - **Publicada:** `src/data/editor-placements.json`, versionada en Git. Es lo
+ *   que ven todos los visitantes, incluidos el sitio desplegado y los equipos de
+ *   los compañeros, porque viaja con el código.
+ * - **Borrador:** `localStorage` del navegador donde se está editando. Solo lo ve
+ *   quien edita y se comparte al reemplazar el archivo publicado desde el editor
+ *   con «Publicar mapa». Antes el borrador era lo único que existía, así que los
+ *   modelos colocados no llegaban a los demás.
+ *
+ * Las colocaciones guardan el nombre del archivo del modelo y no su URL: Vite
+ * renombra cada `.glb` con un hash distinto en cada compilación.
  */
 
-export const PLACEMENTS_STORAGE_KEY = "cyt-editor-placements";
+/** Clave del borrador local. Se conserva la del editor anterior para poder migrarlo. */
+export const DRAFT_STORAGE_KEY = "cyt-editor-placements";
 
-export type Placement = {
-  id: string;
-  name: string;
-  url: string;
-  position: [number, number, number];
-  rotation: [number, number, number];
-  scale: [number, number, number];
-};
+/** Colocaciones publicadas: el mapa que ven todos los visitantes. */
+export const publishedPlacements: Placement[] = sanitizePlacements(publishedMap);
 
-const isTriple = (value: unknown): value is [number, number, number] =>
-  Array.isArray(value) &&
-  value.length === 3 &&
-  value.every((n) => typeof n === "number" && Number.isFinite(n));
-
-function isPlacement(value: unknown): value is Placement {
-  if (!value || typeof value !== "object") return false;
-  const item = value as Record<string, unknown>;
-  return (
-    typeof item.id === "string" &&
-    typeof item.name === "string" &&
-    typeof item.url === "string" &&
-    isTriple(item.position) &&
-    isTriple(item.rotation) &&
-    isTriple(item.scale)
-  );
-}
-
-/** Valida un valor externo (JSON importado) y devuelve solo colocaciones válidas. */
-export function sanitizePlacements(value: unknown): Placement[] {
-  return Array.isArray(value) ? value.filter(isPlacement) : [];
-}
-
-export function readPlacements(): Placement[] {
+/** Borrador guardado en este navegador, o `null` si todavía no hay uno. */
+export function readDraft(): Placement[] | null {
   try {
-    const raw = localStorage.getItem(PLACEMENTS_STORAGE_KEY);
-    if (!raw) return [];
+    const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!raw) return null;
     return sanitizePlacements(JSON.parse(raw));
   } catch {
-    return [];
+    return null;
   }
 }
 
-export function writePlacements(items: Placement[]): void {
+export function writeDraft(items: readonly Placement[]): void {
   try {
-    localStorage.setItem(PLACEMENTS_STORAGE_KEY, JSON.stringify(items));
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(items));
   } catch (error) {
-    console.warn("No se pudo guardar la disposición del editor 3D.", error);
+    console.warn("No se pudo guardar el borrador del editor 3D.", error);
   }
 }
 
-export function clearPlacements(): void {
+export function clearDraft(): void {
   try {
-    localStorage.removeItem(PLACEMENTS_STORAGE_KEY);
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
   } catch {
     // Sin almacenamiento disponible; no hay nada que limpiar.
   }
 }
 
-/** Carga los modelos guardados dentro de `group` y devuelve los que se pudieron leer. */
-export async function loadPlacementsInto(group: T.Group): Promise<Placement[]> {
-  const items = readPlacements();
+export type PlacementLoad = {
+  /** Colocaciones que se cargaron en la escena. */
+  loaded: Placement[];
+  /** Modelos que no se pudieron cargar, con el nombre del archivo y el motivo. */
+  failed: string[];
+};
+
+/**
+ * Carga las colocaciones dentro de `group` y devuelve las que fallaron.
+ *
+ * Un modelo que no existe en el catálogo o que no se puede leer se informa al
+ * llamador: antes se descartaba con un `console.warn`, así que desaparecía de la
+ * escena sin que nadie se enterara.
+ */
+export async function loadPlacementsInto(
+  group: T.Group,
+  items: readonly Placement[] = publishedPlacements,
+): Promise<PlacementLoad> {
   group.clear();
   const loader = new GLTFLoader();
+  const loaded: Placement[] = [];
+  const failed: string[] = [];
   await Promise.all(
     items.map(async (item) => {
+      const url = modelUrl(item.model);
+      if (!url) {
+        failed.push(`${item.model} (no está en frontend/editor-models/)`);
+        return;
+      }
       try {
-        const gltf = await loader.loadAsync(item.url);
+        const gltf = await loader.loadAsync(url);
         const model = gltf.scene;
         model.position.set(...item.position);
         model.rotation.set(...item.rotation);
@@ -94,14 +101,15 @@ export async function loadPlacementsInto(group: T.Group): Promise<Placement[]> {
           }
         });
         group.add(model);
+        loaded.push(item);
       } catch (error) {
-        console.warn(
-          `No se pudo cargar el modelo "${item.name}" (${item.url}).`,
-          error,
-        );
+        failed.push(`${item.model} (${(error as Error).message})`);
       }
     }),
   );
   group.updateMatrixWorld(true);
-  return items;
+  if (failed.length) {
+    console.warn("Modelos del mapa 3D que no se pudieron cargar:", failed.join("; "));
+  }
+  return { loaded, failed };
 }

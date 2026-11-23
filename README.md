@@ -76,7 +76,7 @@ Los datos se guardan en el volumen `pgdata`. Para detener sin borrarlos, usá `d
 Las credenciales por defecto son solo para desarrollo local; no deben usarse en un servidor público. Guía completa y solución de problemas: [Todo el proyecto en Docker](docs/docker-local.md).
 
 ## Editor de mapa 3D
-Con el frontend en marcha, abrí `/editor.html` con una cuenta administradora. Para una prueba local sin backend, usá `/editor.html?local=1`. El editor guarda las colocaciones en el navegador y permite exportarlas o importarlas en JSON. [Modelos del editor](frontend/editor-models/LEEME.txt).
+Con el frontend en marcha, abrí `/editor.html` con una cuenta administradora. Para una prueba local sin backend, usá `/editor.html?local=1`. El editor permite arrastrar modelos sobre el campus. Al presionar **Publicar mapa**, las colocaciones se guardan directamente en `frontend/src/data/editor-placements.json` (o se descargan si no está en modo desarrollo). Al hacer commit y push de ese archivo junto a los `.glb` de `frontend/editor-models/`, el mapa queda sincronizado automáticamente para todos los compañeros y en la nube (Vercel). [Modelos del editor](frontend/editor-models/LEEME.txt).
 
 ## Verificación
 Desde `frontend/`, ejecutá `npm test` y `npm run build`. Para verificar el backend, configurá PostgreSQL y ejecutá `.\mvnw.cmd verify` desde `campus-backend/` en PowerShell, o `sh ./mvnw verify` en Linux o macOS. [Registro de verificación](docs/verificacion.md).

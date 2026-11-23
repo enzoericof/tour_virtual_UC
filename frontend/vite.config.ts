@@ -1,6 +1,6 @@
 import { defineConfig, type Plugin } from "vite";
 import { execFileSync } from "node:child_process";
-import { readdir, stat } from "node:fs/promises";
+import { readdir, stat, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 const backend = process.env.CAMPUS_API_URL ?? "http://127.0.0.1:8080";
 
@@ -78,9 +78,53 @@ function editorModelDates(): Plugin {
   };
 }
 
+/**
+ * Endpoint de desarrollo para que el editor 3D guarde el mapa directamente en
+ * `frontend/src/data/editor-placements.json` al pulsar «Publicar mapa».
+ */
+function editorPlacementsApi(): Plugin {
+  const placementsPath = fileURLToPath(new URL("./src/data/editor-placements.json", import.meta.url));
+  return {
+    name: "cyt-editor-placements-api",
+    configureServer(server) {
+      server.middlewares.use("/api/editor-placements", (req, res, next) => {
+        if (req.method === "POST") {
+          let body = "";
+          req.setEncoding("utf8");
+          req.on("data", (chunk) => {
+            body += chunk;
+          });
+          req.on("end", async () => {
+            try {
+              const parsed = JSON.parse(body);
+              if (!Array.isArray(parsed)) {
+                res.statusCode = 400;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ error: "Expected JSON array" }));
+                return;
+              }
+              const formatted = JSON.stringify(parsed, null, 2) + "\n";
+              await writeFile(placementsPath, formatted, "utf8");
+              res.statusCode = 200;
+              res.setHeader("Content-Type", "application/json");
+              res.end(JSON.stringify({ ok: true, count: parsed.length }));
+            } catch (err) {
+              res.statusCode = 400;
+              res.setHeader("Content-Type", "application/json");
+              res.end(JSON.stringify({ error: (err as Error).message }));
+            }
+          });
+          return;
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
   input: ["index.html", "editor.html"],
-  plugins: [editorModelDates()],
+  plugins: [editorModelDates(), editorPlacementsApi()],
   server: {
     proxy: {
       "/api": backend,

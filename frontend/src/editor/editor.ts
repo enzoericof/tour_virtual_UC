@@ -3,38 +3,24 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import "./editor.css";
 import { TourEngine } from "../scene/engine";
 import { currentUser, type User } from "../services/api";
-import { sortModelsNewestFirst } from "./model-order";
-import modelDates from "virtual:editor-model-dates";
+import { findModel, normalizePlacement, paletteModels } from "./model-catalog";
 import {
-  clearPlacements,
-  loadPlacementsInto,
-  readPlacements,
+  clonePlacements,
+  newPlacementId,
   sanitizePlacements,
-  writePlacements,
+  serializePlacements,
   type Placement,
+} from "./placements-schema";
+import {
+  clearDraft,
+  loadPlacementsInto,
+  publishedPlacements,
+  readDraft,
+  writeDraft,
 } from "../scene/editor-placements";
 
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
   document.querySelector<T>(selector)!;
-
-type PaletteModel = { id: string; name: string; url: string };
-
-// La carpeta `frontend/editor-models/` está fuera de Git; Vite descubre los
-// archivos .glb/.gltf y devuelve su URL para cargarlos con GLTFLoader.
-const modelModules = import.meta.glob(
-  ["/editor-models/*.glb", "/editor-models/*.gltf"],
-  { query: "?url", import: "default", eager: true },
-) as Record<string, string>;
-
-// El último modelo agregado a la carpeta aparece primero en la paleta.
-const paletteModels: PaletteModel[] = sortModelsNewestFirst(
-  Object.entries(modelModules).map(([path, url]) => ({
-    id: path,
-    name: path.split("/").pop()!.replace(/\.(glb|gltf)$/i, ""),
-    url,
-  })),
-  modelDates,
-);
 
 const escapeHtml = (value: string) =>
   value.replace(
@@ -81,8 +67,9 @@ function renderApp(localMode: boolean) {
     <aside id="editor-panel" aria-label="Editor de mapa 3D">
       <header class="editor-header">
         <h1>Editor de mapa 3D</h1>
-        <p>Arrastrá un modelo al campus y soltalo donde quieras. La posición queda guardada en este navegador.</p>
+        <p>Arrastrá un modelo al campus y soltalo donde quieras. El borrador queda en este navegador hasta que publiques el mapa.</p>
         <span class="editor-badge">${localMode ? "Modo local · sin backend" : "Solo administradores"}</span>
+        <span class="editor-badge draft hidden" id="draft-badge">Borrador sin publicar</span>
       </header>
       <section class="editor-section"><h2>Modelos (${paletteModels.length})</h2></section>
       <div class="editor-scroll">
@@ -91,11 +78,14 @@ function renderApp(localMode: boolean) {
         <div class="placed-list" id="placed-list"></div>
       </div>
       <div class="editor-tools">
+        <button class="btn-primary" id="publish-map">Publicar mapa</button>
+        <button class="btn-ghost" id="discard-draft">Descartar borrador</button>
         <button class="btn-ghost" id="export-json">Exportar JSON</button>
         <button class="btn-ghost" id="import-json">Importar JSON</button>
         <input type="file" id="import-file" accept="application/json" hidden />
         <button class="btn-danger" id="delete-mode" aria-pressed="false">Eliminar objetos: desactivado</button>
         <button class="btn-danger" id="clear-all">Limpiar todo</button>
+        <p class="editor-hint">Publicar descarga <code>editor-placements.json</code>. Guardalo como <code>frontend/src/data/editor-placements.json</code> y hacé commit: recién entonces el mapa aparece para todos y en el sitio publicado.</p>
         <p class="editor-hint">Activá Eliminar objetos y hacé clic en un modelo colocado para quitarlo. Esc sale del modo. Solo se eliminan modelos agregados con el editor.</p>
       </div>
     </aside>
@@ -112,7 +102,7 @@ function paletteHtml() {
       (model) => `
         <button class="model-card" draggable="true" data-model="${escapeHtml(model.id)}" title="Arrastrar ${escapeHtml(model.name)}">
           <span class="model-icon">◧</span>
-          <span><strong>${escapeHtml(model.name)}</strong><small>${model.url.split("/").pop()}</small></span>
+          <span><strong>${escapeHtml(model.name)}</strong><small>${escapeHtml(model.file)}</small></span>
         </button>`,
     )
     .join("");
@@ -127,7 +117,8 @@ function toast(message: string) {
 
 function initEditor() {
   const viewport = $("#editor-viewport");
-  const engine = new TourEngine(viewport, "light");
+  // El editor carga su propio borrador; el motor no debe leer el mapa publicado.
+  const engine = new TourEngine(viewport, "light", { placements: false });
   const tourTools = $("#editor-tour-tools");
   const resumeButton = $("#editor-resume");
   const overviewButton = $("#editor-overview");
@@ -154,7 +145,12 @@ function initEditor() {
   });
 
   const loader = new GLTFLoader();
-  let placements: Placement[] = readPlacements();
+  // El borrador local manda; sin borrador se parte del mapa publicado.
+  const savedDraft = readDraft();
+  let hasDraft = savedDraft !== null;
+  // Los datos del editor anterior guardaban la URL con el hash de esa compilación:
+  // se vuelve al nombre del archivo para que la colocación siga siendo válida.
+  let placements: Placement[] = (savedDraft ?? clonePlacements(publishedPlacements)).map(normalizePlacement);
 
   const ghost = new T.Mesh(
     new T.RingGeometry(0.55, 0.8, 40).rotateX(-Math.PI / 2),
@@ -228,9 +224,8 @@ function initEditor() {
       object.position.copy(position);
       object.rotation.set(0, 0, 0);
       object.scale.set(1, 1, 1);
-      object.userData.editorPlacementId = `p-${Date.now().toString(36)}-${Math.random()
-        .toString(36)
-        .slice(2, 7)}`;
+      const placementId = newPlacementId();
+      object.userData.editorPlacementId = placementId;
       object.traverse((child) => {
         if ((child as T.Mesh).isMesh) {
           child.castShadow = true;
@@ -240,9 +235,9 @@ function initEditor() {
       engine.editorPlacements.add(object);
       engine.refreshPlacementCollisions();
       placements.push({
-        id: object.userData.editorPlacementId as string,
+        id: placementId,
         name: model.name,
-        url: model.url,
+        model: model.file,
         position: [position.x, position.y, position.z],
         rotation: [0, 0, 0],
         scale: [1, 1, 1],
@@ -256,8 +251,36 @@ function initEditor() {
     }
   }
 
+  // El borrador vive en este navegador; recién «Publicar mapa» lo comparte.
   function save() {
-    writePlacements(placements);
+    writeDraft(placements);
+    hasDraft = true;
+    renderDraftState();
+  }
+
+  function renderDraftState() {
+    $("#draft-badge").classList.toggle("hidden", !hasDraft);
+  }
+
+  async function applyMap(items: Placement[]) {
+    const { failed } = await loadPlacementsInto(engine.editorPlacements, items);
+    engine.refreshPlacementCollisions();
+    renderPlaced();
+    if (failed.length) {
+      toast(
+        `No se pudieron cargar ${failed.length} modelo(s): ${failed.join("; ")}. Revisá que el archivo esté en frontend/editor-models/.`,
+      );
+    }
+  }
+
+  function download(text: string, fileName: string) {
+    const blob = new Blob([text], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(url);
   }
 
   function findPlacedObject(id: string): T.Object3D | null {
@@ -432,16 +455,44 @@ function initEditor() {
     if (id) void placeModel(id, event.clientX, event.clientY);
   });
 
+  $("#publish-map").onclick = async () => {
+    const missing = placements.filter((placement) => !findModel(placement.model));
+    if (missing.length) {
+      toast(
+        `Faltan ${missing.length} archivo(s) en frontend/editor-models/: ${[...new Set(missing.map((item) => item.model))].join(", ")}. Publicá igual solo si los agregás.`,
+      );
+    }
+    const jsonText = serializePlacements(placements);
+    let savedDirectly = false;
+    try {
+      const res = await fetch("/api/editor-placements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: jsonText,
+      });
+      if (res.ok) {
+        savedDirectly = true;
+      }
+    } catch {
+      // Sin servidor de desarrollo con endpoint directo; se ofrece descarga.
+    }
+
+    if (savedDirectly) {
+      clearDraft();
+      hasDraft = false;
+      renderDraftState();
+      toast(
+        "¡Mapa publicado y guardado en frontend/src/data/editor-placements.json! Hacé commit y push para que aparezca en la nube y para tus compañeros.",
+      );
+    } else {
+      download(jsonText, "editor-placements.json");
+      toast(
+        "Guardá el archivo descargado como frontend/src/data/editor-placements.json y hacé commit: recién entonces el mapa aparece para todos y en el sitio publicado.",
+      );
+    }
+  };
   $("#export-json").onclick = () => {
-    const blob = new Blob([JSON.stringify(placements, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "editor-mapa-cyt.json";
-    anchor.click();
-    URL.revokeObjectURL(url);
+    download(serializePlacements(placements), "editor-mapa-cyt.json");
   };
   $("#import-json").onclick = () => $("#import-file").click();
   $("#import-file").addEventListener("change", () => {
@@ -452,11 +503,8 @@ function initEditor() {
         const valid = sanitizePlacements(JSON.parse(text));
         placements = valid;
         save();
-        void loadPlacementsInto(engine.editorPlacements).then(() =>
-          engine.refreshPlacementCollisions(),
-        );
-        renderPlaced();
-        toast(`Importados ${valid.length} modelos.`);
+        void applyMap(placements);
+        toast(`Importados ${valid.length} modelos como borrador.`);
       } catch (error) {
         toast(`No se pudo importar: ${(error as Error).message}`);
       }
@@ -467,16 +515,28 @@ function initEditor() {
       toast("No hay modelos para limpiar.");
       return;
     }
-    if (!window.confirm("¿Quitar todos los modelos colocados del mapa?")) return;
-    clearPlacements();
+    if (!window.confirm("¿Quitar todos los modelos colocados del borrador?")) return;
     placements = [];
-    engine.editorPlacements.clear();
-    engine.refreshPlacementCollisions();
-    renderPlaced();
-    toast("Mapa limpio.");
+    save();
+    void applyMap(placements);
+    toast("Borrador vacío. Publicá el mapa para aplicarlo a todos.");
+  };
+  $("#discard-draft").onclick = () => {
+    if (!hasDraft) {
+      toast("No hay borrador: ya ves el mapa publicado.");
+      return;
+    }
+    if (!window.confirm("¿Descartar el borrador y volver al mapa publicado?")) return;
+    clearDraft();
+    hasDraft = false;
+    placements = clonePlacements(publishedPlacements);
+    renderDraftState();
+    void applyMap(placements);
+    toast("Borrador descartado: se muestra el mapa publicado.");
   };
 
-  renderPlaced();
+  renderDraftState();
+  void applyMap(placements);
 }
 
 void (async () => {
