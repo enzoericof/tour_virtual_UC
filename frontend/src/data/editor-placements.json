@@ -838,25 +838,5 @@
       1,
       1
     ]
-  },
-  {
-    "id": "p-mwpmkpvi-37m2h",
-    "name": "sala_manfred_stark",
-    "model": "sala_manfred_stark.glb",
-    "position": [
-      -28.390440730355113,
-      0.015000000000007993,
-      -151.162225946017
-    ],
-    "rotation": [
-      0,
-      -1.9198621771937625,
-      0
-    ],
-    "scale": [
-      1,
-      1,
-      1
-    ]
   }
 ]
