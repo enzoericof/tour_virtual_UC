@@ -291,6 +291,26 @@ export const deiReception = {
   height: 3.15, counterHeight: 1.02,
   doorX: -16.5, doorWidth: 1.0, doorHeight: 2.32,
 };
+const officeInteriorX=led.mapCenter[0]-dei.mapCenter[0]+led.rect.size[1]/2-1.1;
+/** Vestíbulo según las fotos del 24/11. Derecha al entrar = X negativo del DEI. Cotas estimadas. */
+export const deiInterior = {
+  floor: .078, height: 3.15,
+  lobby: { minX:deiReception.minX,maxX:deiReception.maxX,minZ:deiSideDoor.center[1]-.035,maxZ:deiReception.backZ },
+  left: { frontX:deiReception.maxX,backX:-10.55,officeBackX:-8.35,
+    centerZ:annexEnclosedLink.portals[1].center[1],width:4.0,glassWidth:2.82,grilleWidth:.40,doorHeight:2.72 },
+  right: { startX:deiReception.minX-2.6,endX:officeInteriorX-2.3,minZ:deiReception.frontZ+.4,maxZ:deiReception.backZ,
+    doorX:-25.1,doorWidth:.91,doorHeight:2.24,returnX:officeInteriorX-1.65 },
+  women: { x:-25.1,z:deiReception.frontZ+.4,width:.91,height:2.24 },
+};
+/** Vestíbulo derecho abierto y corredor dentro del bloque de tejas, sin tabiques en zigzag. */
+export const deiOfficeInterior = (()=>{
+  const centerX=officeInteriorX,centerZ=annexEnclosedLink.portals[1].center[1],width=1.6;
+  const target=facultyAnnexes.find(b=>b.id==='da-cap')!;
+  const endZ=target.mapCenter[1]-dei.mapCenter[1]+target.rect.size[0]/2-1;
+  const minX=centerX-width/2,maxX=centerX+width/2,minZ=deiInterior.lobby.minZ,maxZ=deiInterior.right.maxZ,startX=deiReception.minX;
+  return {centerX,centerZ,width,minX,maxX,minZ,maxZ,startX,endZ,
+    route:[[startX+.6,(deiInterior.right.minZ+maxZ)/2],[centerX,(deiInterior.right.minZ+maxZ)/2],[centerX,endZ-.5]] as Vec2[]};
+})();
 /** Pasillo exterior marcado en rojo: salida lateral, frente corto y costado del bloque de tejas. */
 export const deiPerimeterWalk = (() => {
   const offices=facultyAnnexes.filter(b=>["led","da-cap","das","dg"].includes(b.id));
@@ -396,10 +416,9 @@ export const annexPaths: Vec2[][] = [
   [[officeWalkU,linkV+annexEnclosedLink.rect.size[1]/2],[officeWalkU,-18 + officeShiftV],[officeWalkU,-9 + officeShiftV],[officeWalkU,bypassV],[bypassU,bypassV]].map(([u,v])=>annexPoint(u,v)),
   [annexPoint(officeCenterU + 9.2 / 2 + 0.3, dg.mapCenter[1]), annexPoint(officeWalkU, dg.mapCenter[1]), annexPoint(officeWalkU, bypassV)],
   // Maquetas y DG ya tienen su punto de visita sobre los caminos principales.
-  ...facultyAnnexes.filter(b => b !== maquetas && b !== dg && b !== dicia && b !== kampusPrint).map((b): Vec2[] => {
+  ...facultyAnnexes.filter(b => b !== maquetas && b !== dg && b !== dicia && b !== kampusPrint && !officeIds.has(b.id)).map((b): Vec2[] => {
     const [u,v] = b.mapCenter;
     if (b === dei) return [b.entrance, annexPoint(u + deiSideDoor.center[0], outerWalkV - 0.4)];
-    if (officeIds.has(b.id)) return [b.entrance, annexPoint(officeWalkU,v)];
     return [b.entrance,annexPoint(officeWalkU,v+b.rect.size[1]/2+2.5)];
   }),
 ];

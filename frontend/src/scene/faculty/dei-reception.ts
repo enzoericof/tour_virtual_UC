@@ -1,9 +1,10 @@
 import * as T from "three";
-import { deiReception as plan, facultyAnnexes } from "../../data/faculty-annexes";
+import { deiReception as plan, deiInterior, facultyAnnexes } from "../../data/faculty-annexes";
 import type { FacultyBuilder } from "./builder";
+import { addDeiInterior, makeDeiInteriorMaterials } from './dei-interior';
 
 /** Frente de recepción según la foto: madera enmarcada, puerta izquierda y ventanilla derecha. */
-export function addDeiReception(builder:FacultyBuilder,brick:T.MeshStandardMaterial,paving:T.MeshStandardMaterial) {
+export function addDeiReception(builder:FacultyBuilder,brick:T.MeshStandardMaterial) {
   const {box,frame,prism,layers,beam,v3}=builder,dei=facultyAnnexes.find(b=>b.id==="dei-led")!;
   const canvas=document.createElement("canvas");canvas.width=128;canvas.height=512;const c=canvas.getContext("2d")!;
   c.fillStyle="#9b7147";c.fillRect(0,0,128,512);
@@ -15,20 +16,21 @@ export function addDeiReception(builder:FacultyBuilder,brick:T.MeshStandardMater
   const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;map.wrapS=map.wrapT=T.RepeatWrapping;
   const wood=new T.MeshStandardMaterial({map,bumpMap:map,bumpScale:.006,roughness:.66});wood.userData.tile=[1.7,2.5];
   const edging=wood.clone();edging.color.set("#bd9b77");
-  const pale=new T.MeshStandardMaterial({color:"#dad6bf",roughness:.96});
+  const interior=makeDeiInteriorMaterials(),pale=interior.plaster;
   const metal=new T.MeshStandardMaterial({color:"#999d94",roughness:.35,metalness:.7});
   const dark=new T.MeshStandardMaterial({color:"#242c2d",roughness:.7});
   const glass=new T.MeshStandardMaterial({color:"#839d98",transparent:true,opacity:.30,roughness:.19,metalness:.1,side:T.DoubleSide,depthWrite:false});
   const {minX,maxX,frontZ,backZ,height,counterHeight,doorX,doorWidth,doorHeight}=plan;
   const roomBack=backZ+1.8,midX=(minX+maxX)/2,width=maxX-minX;
   frame(dei.rect,()=>{
-    // La losa empieza en el canto del piso del enlace, sin dos tapas superpuestas.
-    prism([[minX,frontZ+.10],[maxX,frontZ+.10],[maxX,roomBack],[minX,roomBack]],-.10,.155,paving,true).name="Piso del vestíbulo y recepción LED";
+    // El terrazo continúa detrás de la madera, sin una tapa superpuesta en el vestíbulo.
+    const officeFloor=prism([[minX,backZ],[maxX,backZ],[maxX,roomBack],[minX,roomBack]],-.10,deiInterior.floor+.10,interior.terrazzo,true);officeFloor.name="Terrazo de la oficina de recepción LED";officeFloor.userData.keep=true;
     box(width+.2,.16,roomBack-frontZ+.3,midX,height+.20,(frontZ+roomBack)/2,builder.m.roof,true);
     box(width,.06,roomBack-frontZ,midX,height+.09,(frontZ+roomBack)/2,pale);
     for(const x of [minX,maxX]) {
-      box(.20,height+.14,roomBack-frontZ,x,(height+.14)/2,(frontZ+roomBack)/2,brick,true);
-      box(.018,height,roomBack-frontZ,x+(x===minX?.111:-.111),height/2,(frontZ+roomBack)/2,pale);
+      const start=x===minX?backZ:deiInterior.left.centerZ+deiInterior.left.width/2;
+      box(.20,height+.14,roomBack-start,x,(height+.14)/2,(start+roomBack)/2,brick,true);
+      box(.018,height,roomBack-start,x+(x===minX?.111:-.111),height/2,(start+roomBack)/2,pale);
     }
     box(width,height,.20,midX,height/2,roomBack,brick,true);
     box(width-.2,height,.018,midX,height/2,roomBack-.111,pale);
@@ -78,9 +80,18 @@ export function addDeiReception(builder:FacultyBuilder,brick:T.MeshStandardMater
     for(let i=0;i<3;i++)box(.25,.018,.32,deskX+.3,.90+i*.018,deskZ-.1,pale);
     box(.45,.61,.10,deskX-.45,1.14,roomBack-.5,dark);box(.47,.08,.45,deskX-.45,.54,roomBack-.65,dark);
     box(.06,.49,.06,deskX-.45,.26,roomBack-.65,metal);
-    const yellow=new T.MeshStandardMaterial({color:"#af9831",roughness:.95});
-    const bin=new T.Mesh(new T.CylinderGeometry(.23,.20,.58,16),yellow);bin.position.set(maxX-.3,.345,backZ-.6);layers.visual.add(bin);
-    const rim=new T.Mesh(new T.TorusGeometry(.225,.026,5,20),dark);rim.rotation.x=Math.PI/2;rim.position.set(maxX-.3,.64,backZ-.6);layers.visual.add(rim);
-    beam(v3(maxX-.6,.09,backZ-.35),v3(maxX-.71,1.8,backZ-.2),.013,metal);
+    const yellow=new T.MeshStandardMaterial({color:"#c2a831",roughness:.95});
+    const cartX=maxX-.57,cartZ=deiInterior.left.centerZ+deiInterior.left.width/2+.35;
+    const bin=new T.Mesh(new T.CylinderGeometry(.23,.20,.69,16),yellow);bin.position.set(cartX,.405,cartZ);layers.visual.add(bin);
+    const rim=new T.Mesh(new T.TorusGeometry(.225,.026,5,20),dark);rim.rotation.x=Math.PI/2;rim.position.set(cartX,.76,cartZ);layers.visual.add(rim);
+    box(.66,.045,.43,cartX,.79,cartZ,pale);box(.64,.035,.35,cartX-.12,.24,cartZ+.06,metal);
+    for(const x of[cartX-.29,cartX+.29])box(.03,.60,.035,x,.48,cartZ+.16,metal);
+    beam(v3(cartX-.28,.09,cartZ-.27),v3(cartX-.34,1.81,cartZ-.10),.014,dark);
+    box(.26,.06,.15,cartX-.28,.085,cartZ-.27,pale);
+    for(const [x,color]of[[cartX+.18,"#c9d8cc"],[cartX+.03,"#ba3f2c"]]as const) {
+      box(.07,.20,.07,x,.91,cartZ-.03,new T.MeshStandardMaterial({color,roughness:.7}));box(.045,.035,.045,x,1.025,cartZ-.03,dark);
+    }
+
   });
+  addDeiInterior(builder,interior,brick);
 }

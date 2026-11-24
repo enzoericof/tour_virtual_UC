@@ -2,7 +2,7 @@ import { manfredRampSection, manfredStairZ } from "../src/data/faculty-blueprint
 import { Box3, BoxGeometry, Mesh, Matrix4, PerspectiveCamera, Ray, Raycaster, Triangle, Vector2, Vector3 } from "three";
 import {facultyPose,facultyToWorld,insidePolygon} from "../src/data/campus-geometry.ts";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, blockG, classroomDoor, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
-import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, deiPerimeterWalk, deiReception, deiSidePassage, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
+import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, deiPerimeterWalk, deiReception, deiInterior, deiOfficeInterior, deiSidePassage, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { laboratoryGroundDetails } from "../src/data/faculty-annexes.ts";
 import { test } from "node:test";
@@ -384,8 +384,8 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     for (const [x,z] of [[deiSideDoor.center[0]-.32,-5], [deiSideDoor.center[0]-.32,-2], [deiSideDoor.center[0]-.32,2.6]]) {
       const p = fromRect(dei.rect,[x,z]);
       const hits = new Raycaster(new Vector3(p[0],2.2,p[1]),new Vector3(0,-1,0),0,3).intersectObject(colliders,true);
-      const t=Math.max(0,Math.min(1,(z-deiEntrancePaving.frontZ(x))/(deiSideDoor.center[1]+.3-deiEntrancePaving.frontZ(x))));
-      const expected=z<=deiSideDoor.center[1]+.3?.15*(1-t)+.075*t:.05;
+      const t=Math.max(0,Math.min(1,(z-deiEntrancePaving.frontZ(x))/(deiInterior.lobby.minZ-deiEntrancePaving.frontZ(x))));
+      const expected=z<=deiInterior.lobby.minZ?.15*(1-t)+.075*t:deiInterior.floor;
       assert.ok(hits[0] && Math.abs(hits[0].point.y-expected)<.012, "La entrada y la unión al corredor tienen piso continuo");
       assert.equal(new Raycaster(new Vector3(p[0],.15,p[1]),new Vector3(0,1,0),0,2.1).intersectObject(colliders,true).length,0,
         "La ampliación conserva altura libre para el visitante");
@@ -395,19 +395,19 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     for (const window of deiRightFacade.windows)
       assert.ok(traceDei(window.x, -7, -5).length, "Las ventanas con rejas conservan la colisión de fachada");
     const ledPortal = annexEnclosedLink.portals.find(p => p.annexId === "dei-led");
-    for (const offset of [-.3,0,.3]) {
+    for (const offset of [-.3,.12,.3]) {
       const a = fromRect(dei.rect,[deiSideDoor.center[0]-.32,ledPortal.center[1]+offset]);
       const b = fromRect(dei.rect,[ledPortal.center[0]+1,ledPortal.center[1]+offset]);
       const from = new Vector3(a[0],1.2,a[1]), to = new Vector3(b[0],1.2,b[1]);
-      assert.equal(new Raycaster(from,to.clone().sub(from).normalize(),0,from.distanceTo(to)).intersectObject(colliders,true).length,0,
-        "Desde la ampliación se puede girar y entrar al volumen principal del LED");
+      assert.ok(new Raycaster(from,to.clone().sub(from).normalize(),0,from.distanceTo(to)).intersectObject(colliders,true).length>0,
+        "El blindex interior cierra el acceso al volumen no visitable del LED");
     }
-    for (const offset of [-0.8, 0, 0.8]) {
+    for (const offset of [-0.8, .12, 0.8]) {
       const a = fromRect(dei.rect, [ledPortal.center[0] - 0.7, ledPortal.center[1] + offset]);
       const b = fromRect(dei.rect, [ledPortal.center[0] + 0.7, ledPortal.center[1] + offset]);
       const origin = new Vector3(a[0], 1.2, a[1]), target = new Vector3(b[0], 1.2, b[1]);
       const hits = new Raycaster(origin, target.clone().sub(origin).normalize(), 0, 1.4).intersectObject(colliders, true);
-      assert.equal(hits.length, 0, "El muro posterior conserva el paso al ala de oficinas");
+      assert.ok(hits.length>0,"Las dos hojas de vidrio cierran físicamente el frente izquierdo");
     }
     const exteriorSlabs=colliders.children.filter(o=>["Caminero exterior principal del LED","Ramal exterior derecho del LED"].includes(o.userData.segmentedWalk));
     assert.ok(exteriorSlabs.length>15,"La prolongación tiene losas reales segmentadas");
@@ -743,11 +743,10 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     }
     walkPerimeter([blueArrival,deiPerimeterWalk.orange,deiPerimeterWalk.route[0],insideEntry]);
     walkPerimeter([insideEntry,...deiPerimeterWalk.route,deiPerimeterWalk.route.at(-1)]);
-    // La medianera interior sigue comunicada detrás del nuevo cierre de ladrillo.
+    // La conexión al bloque de tejas se recorre por la L interior; se conserva también la salida exterior.
     for(const [start,end] of [
-      [[-24.7,.9],[-24.7,2.2]],
+      [[-24.7,(deiInterior.right.minZ+deiInterior.right.maxZ)/2],[-27.3,(deiInterior.right.minZ+deiInterior.right.maxZ)/2]],
       [[-24.6,-.8],[-27.3,-.8]],
-      [[-24.6,.8],[-27.3,.8]],
     ]) {
       const a=fromRect(dei.rect,start),b=fromRect(dei.rect,end);
       const direction=new Vector3(b[0]-a[0],0,b[1]-a[1]);
@@ -758,7 +757,7 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const wallDirection=new Vector3(wallB[0]-wallA[0],0,wallB[1]-wallA[1]);
     for(const model of [group,colliders])assert.ok(new Raycaster(new Vector3(wallA[0],1.6,wallA[1]),wallDirection.clone().normalize(),0,wallDirection.length()).intersectObject(model,true).length,
       "El cierre marcado es ladrillo visible y sólido, sin dejar el hueco de la unión");
-    walkPerimeter([[-24.6,.8],[-24.6,3],[-27.3,3]].map(p=>fromRect(dei.rect,p)),.02);
+    walkPerimeter([[-24.6,-.8],[-27.3,-.8]].map(p=>fromRect(dei.rect,p)),.02);
     walkPerimeter([deiForecourt.main.at(-1),deiForecourt.fork,deiPerimeterWalk.orange,deiPerimeterWalk.route[0],insideEntry]);
     const materialAt=(a,b)=>{
       const p=fromRect(dei.rect,a),q=fromRect(dei.rect,b),direction=new Vector3(q[0]-p[0],0,q[1]-p[1]);
@@ -778,6 +777,56 @@ test("The complete faculty scene starts with the current blueprint and valid geo
       const d=new Vector3(b[0]-a[0],0,b[1]-a[1]);
       assert.ok(new Raycaster(new Vector3(a[0],1.4,a[1]),d.clone().normalize(),0,d.length()).intersectObject(colliders,true).length,"La puerta y ventanilla de recepción cierran físicamente el frente");
     }
+    // Los tres destinos nuevos comparten el vestíbulo y conservan los pasos existentes.
+    const leftGlass=[];group.traverse(o=>{if(o.userData.deiInteriorGlass)leftGlass.push(o);});
+    assert.equal(leftGlass.length,2,"Dos hojas, una banda esmerilada y rejas azules en los laterales");
+    for(const name of ["Reja azul interior izquierda LED","Reja azul interior derecha LED","Ventanilla negra del vestíbulo interior LED","Puerta del baño de hombres LED","Puerta del baño de mujeres LED","Puerta de dirección DEI - LED","Cierre sólido del sector no visitable del DEI"])
+      assert.ok(group.getObjectByName(name),name);
+    const localRay=(a,b,y=1.4)=>{const p=fromRect(dei.rect,a),q=fromRect(dei.rect,b),d=new Vector3(q[0]-p[0],0,q[1]-p[1]);return new Raycaster(new Vector3(p[0],y,p[1]),d.clone().normalize(),0,d.length()).intersectObject(colliders,true);};
+    assert.equal(deiInterior.right.maxZ,deiReception.backZ,"El baño de hombres prolonga la misma pared de la recepción");
+    assert.ok(localRay([-23.1,6.3],[-23.1,7.8]).length,"Hombres queda a la izquierda del pasillo derecho y cerrado");
+    const bath=deiInterior.right,hall=deiOfficeInterior,bathCenter=(bath.minZ+bath.maxZ)/2;
+    assert.equal(deiInterior.women.z,bath.minZ,"Las dos puertas se enfrentan en las paredes del pasillo blanco");
+    for(const [z,name]of[[bath.minZ,'mujeres'],[bath.maxZ,'hombres']]) {
+      const p=fromRect(dei.rect,[deiInterior.women.x,bathCenter]),q=fromRect(dei.rect,[deiInterior.women.x,z+(z-bathCenter)*.15]),d=new Vector3(q[0]-p[0],0,q[1]-p[1]);
+      const hits=new Raycaster(new Vector3(p[0],1.4,p[1]),d.clone().normalize(),0,d.length()).intersectObject(group,true);
+      assert.equal(hits[0]?.object.name,`Puerta del baño de ${name} LED`,"El marco blanco deja cada puerta visible y el recinto cerrado");
+    }
+    for(const name of ['Pared blanca izquierda del acceso a baños','Pared blanca derecha del acceso a baños','Cierre integrado del sector no visitable LED'])
+      assert.equal(group.getObjectByName(name),undefined,"Se retiran los bloques y jambas salientes: "+name);
+    assert.ok(bath.startX<deiReception.minX-1.4,"El acceso de baños se retira hacia la derecha respecto de la recepción");
+    assert.ok(bath.endX<-28,"La puerta blanca del fondo queda más retirada");
+    for(const x of [-21.8,-23.5])assert.equal(localRay([x,1.2],[x,4.7]).length,0,"El vestíbulo derecho es un espacio unificado sin la L de tabiques");
+    assert.ok(localRay([bath.startX+.5,3],[bath.startX-.5,3]).length,"Una sola pared alineada al baño cierra el volumen no visitable");
+    const lateralDoor=group.getObjectByName("Puerta blanca lateral junto a dirección LED");assert.ok(lateralDoor);
+    const endDoor=group.getObjectByName("Puerta de dirección DEI - LED");
+    const mainSize=new Box3().setFromObject(endDoor).getSize(new Vector3()),sideSize=new Box3().setFromObject(lateralDoor).getSize(new Vector3());
+    assert.ok(mainSize.z>mainSize.x&&sideSize.x>sideSize.z,"Las dos puertas blancas quedan perpendiculares");
+    const floorNames=["Terrazo del vestíbulo LED","Terrazo del pasillo interior del bloque de tejas","Terrazo del acceso izquierdo LED","Terrazo del pasillo de baños LED","Terrazo de la oficina de recepción LED"];
+    const floorMaterial=group.getObjectByName(floorNames[0]).material;
+    for(const name of floorNames)assert.equal(group.getObjectByName(name)?.material,floorMaterial,"El mismo blanco con manchitas llega a todo el interior: "+name);
+    for(const point of [[-18.5,.4],[-18.5,1],[-18.5,6],[-22.1,hall.centerZ],[-23.1,5.8],[-25.0,6.2],[hall.centerX,8.8],[hall.centerX,12],[hall.centerX,16]]){
+      const p=fromRect(dei.rect,point),hits=new Raycaster(new Vector3(p[0],.6,p[1]),new Vector3(0,-1,0),0,1).intersectObject(group,true);
+      assert.equal(hits[0]?.object.material,floorMaterial,"No quedan cuadrados ni hormigón sobre el terrazo interior en "+point);
+      const exposed=hits.filter(h=>Math.abs(h.point.y-deiInterior.floor)<1e-6);
+      assert.equal(new Set(exposed.map(h=>h.object)).size,1,"El piso visible tiene una sola superficie, sin tapas superpuestas");
+    }
+    assert.ok(localRay([bath.endX+.4,bathCenter],[bath.endX-.4,bathCenter]).length,"Dirección cierra el fondo");
+    assert.ok(localRay([-8.8,3.3],[-7.8,3.3]).length,"La parte posterior no permite atravesar el edificio vacío");
+    walkPerimeter([[-18.52,2.6],[-18.52,6.15],[-20.8,6.15],[-24.85,6.15]].map(p=>fromRect(dei.rect,p)),.02);
+    walkPerimeter([[-18.52,bathCenter],[-23,bathCenter],[bath.endX+.6,bathCenter]].map(p=>fromRect(dei.rect,p)),.02);
+    const interiorRoute=hall.route.map(p=>fromRect(dei.rect,p));
+    walkPerimeter(interiorRoute,.02);
+    walkPerimeter([...interiorRoute].reverse(),.02);
+    walkPerimeter([[-18.52,1],[-23.4,1.3],[-23.4,4.6],[-22,4.6],[-22,bathCenter],[bath.endX+.6,bathCenter]].map(p=>fromRect(dei.rect,p)),.02);
+    const office=facultyAnnexes.find(b=>b.id==='led'),east=office.mapCenter[0]-dei.mapCenter[0]+office.rect.size[1]/2;
+    walkPerimeter([[east+1.1,8.5],[east+1.1,16],[east+1.1,25],[east+1.1,34]].map(p=>fromRect(dei.rect,p)));
+    assert.equal(group.getObjectByName('Piso de galería del patio LED')?.material,perimeterMesh.material,"Las dos galerías reutilizan los mismos baldosines");
+    assert.ok(group.getObjectByName('Pilar de ladrillo de la galería del patio LED'),"El patio tiene pilares de ladrillo, no postes cilíndricos blancos");
+    assert.equal(localRay([hall.centerX,7.9],[hall.centerX,9.6]).length,0,"El paso atraviesa la medianera del bloque de tejas, no el blindex ni la recepción");
+    for(const [a,b]of[[[hall.centerX,11],[hall.minX-.3,11]],[[hall.centerX,11],[hall.maxX+.3,11]],[[hall.centerX,hall.endZ-.5],[hall.centerX,hall.endZ+.3]]])
+      assert.ok(localRay(a,b).length,"El corredor cierra las oficinas no visitables y su extremo");
+    walkPerimeter([[-18.52,6.15],[-18.52,3.34],[-14.85,3.34]].map(p=>fromRect(dei.rect,p)),.02);
     {
       const gs=plan.blockGStair,entry=gs.start+gs.halfRun,arrival=gs.start-1.55-gs.halfRun,z=-blockG.depth/2-gs.width/2;
       const route=[[entry+.6,z,0],[gs.start-.7,z,FLOOR_HEIGHT/2],[arrival-.6,z,FLOOR_HEIGHT],

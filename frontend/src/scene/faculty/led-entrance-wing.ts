@@ -1,5 +1,5 @@
 import * as T from "three";
-import { annexEnclosedLink, facultyAnnexes, deiEntranceWing as wing, deiSideDoor, deiEntrancePaving, deiPerimeterWalk } from "../../data/faculty-annexes";
+import { annexEnclosedLink, facultyAnnexes, deiEntranceWing as wing, deiSideDoor, deiEntrancePaving, deiPerimeterWalk, deiInterior } from "../../data/faculty-annexes";
 import type { FacultyBuilder } from "./builder";
 import type { Vec2 } from "../../data/faculty-blueprint";
 import { subtractPaving } from "./paving-cutouts";
@@ -133,7 +133,7 @@ export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandar
 
   // Misma textura, escala y origen UV que la galería perimetral.
   const [tileX,tileZ]=paving.userData.tile;
-  const endZ=doorZ+.30,apron=deiEntrancePaving;
+  const endZ=deiInterior.lobby.minZ,apron=deiEntrancePaving;
   const outline=[[apron.minX,apron.frontZ(apron.minX)],[apron.maxX,apron.frontZ(apron.maxX)],
     [apron.maxX,endZ],[apron.minX,endZ]];
   const floorGeometry=new T.ExtrudeGeometry(new T.Shape(outline.map(([x,z])=>new T.Vector2(x,-z))),{depth:1,bevelEnabled:false});
@@ -155,7 +155,7 @@ export function addLedEntranceWing(builder: FacultyBuilder, brick: T.MeshStandar
     const lo=px-platformWidth/2,hi=px+platformWidth/2;
     for(const part of [0,1]) {
     const start=(x:number)=>apron.frontZ(x)+(part===0?.20:.60);
-    const end=(x:number)=>part===0?apron.frontZ(x)+.60:doorZ+.3;
+    const end=(x:number)=>part===0?apron.frontZ(x)+.60:deiInterior.lobby.minZ;
     const outline:Vec2[]=[[lo,start(lo)],[hi,start(hi)],[hi,end(hi)],[lo,end(lo)]];
     const cut:Vec2[]=[[lo-.1,portal.z-portal.width/2],[hi+.1,portal.z-portal.width/2],
       [hi+.1,portal.z+portal.width/2],[lo-.1,portal.z+portal.width/2]];
@@ -233,7 +233,7 @@ function addEntrancePlants(builder: FacultyBuilder,cx: number,frontZ: number,doo
   for(const side of [-1,1]) for(let j=0;j<5;j++) {
     const x=cx+side*([1.65,1.88,2.27,2.28,1.43][j]);
     const z=side<0 && j===2?frontZ-.35:[frontZ-2.9,frontZ-1.8,frontZ+.55,doorZ-.20,doorZ+.55][j];
-    const floor=j===4?.05:wing.sidePlatformHeight;
+    const floor=j===4?deiInterior.floor:wing.sidePlatformHeight;
     const radius=j===0?.27:j===3?.20:.22,h=j===0?.24:.35;
     const pot=new T.Mesh(potBody,clay);pot.position.set(x,floor+h/2,z);pot.scale.set(radius,h,radius);layers.visual.add(pot);
     const rim=new T.Mesh(potRim,clay);rim.rotation.x=Math.PI/2;rim.position.set(x,floor+h-.015,z);rim.scale.setScalar(radius);layers.visual.add(rim);

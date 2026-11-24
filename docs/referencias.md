@@ -225,3 +225,16 @@ La pickup toma proporciones y rasgos de la [ficha oficial Ford Ranger Raptor 202
 
 ### Ranger Raptor manejables (21/11/2026)
 Referencia visual: collage de Ford Ranger Raptor 2023 de varios colores aportado por Horacio (`codex-clipboard-8693c9c0-40fe-4ba3-9ee7-2051812a2ac8.png`). Se reconstruyen mediante geometría propia, sin descargar modelos externos: parrilla FORD, ópticas en C, caja abierta, neumáticos, llantas, estribos y cabina de cuatro puertas. Tablero, navegación esquemática, climatizador, volante, asientos con costuras y apoyacabezas, cinturones, consola, selector y pedales usan geometría y texturas procedurales compartidas. El mapa de la pantalla es una ilustración, no navegación real. Es una interpretación del vehículo adaptada al estilo del campus, no un modelo CAD oficial ni una reproducción fotogramétrica.
+
+
+### Interior del LED — 24/11/2026
+Tres fotos aportadas por Horacio: `codex-clipboard-c5d9a67b-4cb1-4e22-bb08-b9d1564f1443.png` (doble vidrio con banda DEI - LED, rejas, sala de espera y ventanilla), `codex-clipboard-4881e0da-e022-4e69-bdc0-3c6732ae9b3f.png` (baños enfrentados y paso a dirección) y `codex-clipboard-eb2f85c9-b414-4cb2-8395-93a093d9ffd1.png` (mampara y puerta de dirección). Las fotos originales permanecen fuera del repositorio. Geometría, pictogramas, franja de vidrio, terrazo y baldosas se construyen mediante código y texturas procedurales pequeñas, sin recursos externos ni nuevas dependencias. Las proporciones y el mobiliario visible son una interpretación aproximada de las referencias.
+
+
+La corrección posterior se basa en `codex-clipboard-6331b9a9-9f0c-4323-8ebf-df6c0884aefa.png` y la segunda vista con trazos rojos aportada en el mismo mensaje. Reubica el baño junto a la entrada principal, cierra el hueco posterior y agrega la puerta blanca del retorno; sustituye la primera interpretación de baños enfrentados y piso alternado.
+
+
+La vista interior con dos paredes pintadas en rojo y la última vista aérea del 24/11, que señala el bloque largo de tejas naranjas, sustituyen la interpretación anterior del enlace. El pasillo se modela dentro de ese bloque según el giro en L marcado; no se utiliza el blindex DEI-LED ni la recepción como destino. Referencias aportadas por Horacio, conservadas fuera del repositorio. Solo se reutilizan materiales propios de revoque y terrazo; no hay nuevas descargas, dependencias ni fotografías usadas como textura.
+
+
+24/11/2026: las capturas d5be082e, cf55ea86, de476f9b y 9cd6ae37 aportadas por Horacio guían la retirada de los carteles exteriores, la fachada de ladrillo con rejas y pilares, y la simplificación del vestíbulo derecho. Se reutiliza el mismo material del DEI y la galería ya modelada; no se añaden fotografías como texturas ni recursos descargados. Esta indicación sustituye el pasillo estrecho en zigzag del vestíbulo, manteniendo la conexión interior al bloque de tejas.

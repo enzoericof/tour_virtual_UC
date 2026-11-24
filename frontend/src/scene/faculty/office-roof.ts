@@ -3,6 +3,7 @@ import { annexPoint, facultyAnnexes } from "../../data/faculty-annexes";
 import type { Rect } from "../../data/faculty-blueprint";
 import type { FacultyBuilder } from "./builder";
 import { addDeiPerimeterWalk } from "./dei-perimeter-walk";
+import { addOfficeCourtyardWalk } from './office-courtyard-walk';
 
 const officeIds = new Set(["led", "da-cap", "das", "dg"]);
 export const isOfficeAnnex = (id: string) => officeIds.has(id);
@@ -57,5 +58,6 @@ export function addOfficeRoof(builder: FacultyBuilder, brick: T.MeshStandardMate
       v3(rect.size[0] / 2 + overhang, ridge + .06, 0), .14, clay);
   });
   addDeiPerimeterWalk(builder,tiles,brick,paving);
+  addOfficeCourtyardWalk(builder,tiles,brick,paving);
 }
 

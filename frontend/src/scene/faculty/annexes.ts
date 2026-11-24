@@ -1,6 +1,6 @@
 import { addKampusPrint } from "./kampus-print";
 import * as T from "three";
-import { annexCoveredPaths, annexEnclosedLink, annexPaths, annexWalkEnd, deiGardenPath, deiSideDoor, deiEntrancePaving, deiReception, diciaWalkExtension, facultyAnnexes, maquetasVolumes } from "../../data/faculty-annexes";
+import { annexEnclosedLink, annexPaths, annexWalkEnd, deiGardenPath, deiSideDoor, deiEntrancePaving, deiReception, deiInterior, deiOfficeInterior, diciaWalkExtension, facultyAnnexes, maquetasVolumes } from "../../data/faculty-annexes";
 import { facultyBlueprint as plan, fromRect, rectCorners, type Vec2 } from "../../data/faculty-blueprint";
 import type { FacultyBuilder, Range } from "./builder";
 import { addLedRightFacade } from "./led-right-facade";
@@ -161,15 +161,24 @@ export function addAnnexes(
         && Math.hypot(p.center[0] - cx, p.center[1] - cz) < length / 2);
       const openings: AnnexOpening[] = portal ? [{
         center: (portal.center[0] - cx) * Math.cos(angle) + (portal.center[1] - cz) * Math.sin(angle),
-        width: annexEnclosedLink.clearWidth, height: annexEnclosedLink.openingHeight,
+        width: isDei ? deiInterior.left.width : annexEnclosedLink.clearWidth, height: annexEnclosedLink.openingHeight,
       }] : isDei ? (a[1] === -maxZ && b[1] === -maxZ ? [{
         center: (deiSideDoor.center[0] - cx) * Math.cos(angle),
         width: deiSideDoor.width, height: deiSideDoor.height,
-      }] : []) : front ? [{ center: 0, width: 2.1, height: 2.5 }] : [];
+      }] : []) : front && !isOfficeAnnex(annex.id) ? [{ center: 0, width: 2.1, height: 2.5 }] : [];
       if (annex.id === "led" && front) {
         // El lateral compartido con el acceso queda abierto hasta el corredor interior.
-        const start = -annexEnclosedLink.rect.size[1]/2, end = annex.rect.size[0]/2;
-        openings.splice(0,openings.length,{center:-(start+end)/2,width:end-start,height:annexEnclosedLink.openingHeight});
+        const dei=facultyAnnexes.find(b=>b.id==='dei-led')!;
+        const start=annex.mapCenter[1]-dei.mapCenter[1]-deiInterior.right.maxZ-.10,end=annex.rect.size[0]/2;
+        openings.splice(0,openings.length,{center:-(start+end)/2,width:end-start,height:deiInterior.height+.14});
+      }
+      if (isOfficeAnnex(annex.id) && a[0]===b[0]) {
+        const dei=facultyAnnexes.find(b=>b.id==='dei-led')!;
+        const localDeiZ=annex.mapCenter[1]-dei.mapCenter[1]-a[0];
+        if(localDeiZ>deiOfficeInterior.centerZ+.1&&localDeiZ<deiOfficeInterior.endZ-.1) {
+          const localZ=deiOfficeInterior.centerX-(annex.mapCenter[0]-dei.mapCenter[0]);
+          openings.push({center:(localZ-cz)*Math.sin(angle),width:deiOfficeInterior.width+.04,height:deiInterior.height+.14});
+        }
       }
       if (isDei && a[0] === annex.rect.size[0] / 2 && b[0] === a[0]) {
         // Cabecera hacia el jardín: muro ciego de ladrillo como en la foto.
@@ -190,10 +199,12 @@ export function addAnnexes(
           box(0.045, top - bottom, 0.12, x, (top + bottom) / 2, cz + 0.23, deiLouver);
         }
         for (const y of [bottom, top]) box(length, 0.045, 0.13, cx, y, cz + 0.23, deiLouver);
+      } else if(isOfficeAnnex(annex.id)&&front) {
+        addOfficePerimeterFacade(builder,a,b,h,deiBrick,openings);
       } else {
         annexWall(a, b, h, openings, false, isOfficeAnnex(annex.id) ? deiBrick : m.brick);
       }
-      if (front && !isDei) {
+      if (front && !isDei && !isOfficeAnnex(annex.id)) {
         if (!portal) box(3.2,0.12,1.4,cx,2.9,cz+0.6,m.concrete,true);
         sign(annex.name.toUpperCase(),cx,portal ? 3.4 : 3.25,cz+0.13,portal ? 2.6 : Math.min(annex.rect.size[0]-1,9));
       }
@@ -202,7 +213,7 @@ export function addAnnexes(
     if (!isDei) box(annex.rect.size[0]+1,0.08,2.1,0,0.01,maxZ+1.1,m.stone);
   });
   addOfficeRoof(builder,deiBrick,ledPassageTile);
-  addDeiReception(builder,deiBrick,ledPassageTile);
+  addDeiReception(builder,deiBrick);
   annexPaths.forEach((points) => path(points, 2));
   addSegmentedGardenPath(builder, deiGardenPath, annexPavingHeight, gardenWalkMaterial, { startDistance: gardenJunctionReach,
     junctions:deiForecourtRoadJunctions(),pavingJoin: { rect: facultyAnnexes.find(a=>a.id === "dei-led")!.rect, ...deiEntrancePaving } });
@@ -238,27 +249,16 @@ export function addAnnexes(
     const galleryZ = (width - link.wallThickness) / 2;
     const dei=facultyAnnexes.find(b=>b.id==="dei-led")!;
     const centerInDei=-dei.rect.size[0]/2-length/2;
+    const bathStart=Math.max(deiInterior.right.endX,centerInDei-length/2);
+    const bathEnd=Math.min(deiInterior.lobby.minX,centerInDei+length/2);
     annexWall([-length / 2, -galleryZ], [length / 2, -galleryZ], link.height,
       [{ center: 0, width: length, height: link.openingHeight }],false,deiBrick);
     annexWall([-length / 2, galleryZ], [length / 2, galleryZ], link.height,
-      [{ center: link.sideDoorX, width: link.sideDoorWidth, height: link.openingHeight },
-        { center:(deiReception.minX+deiReception.maxX)/2-centerInDei,width:deiReception.maxX-deiReception.minX,height:deiReception.height }],false,deiBrick);
-    for (const edge of [-1, 1]) box(0.07, link.openingHeight, 0.24,
-      link.sideDoorX + edge * (link.sideDoorWidth / 2 + 0.035), link.openingHeight / 2, galleryZ, m.metal);
-    box(link.sideDoorWidth + 0.14, 0.07, 0.24,
-      link.sideDoorX, link.openingHeight + 0.035, galleryZ, m.metal);
+      [{ center: (bathStart+bathEnd)/2-centerInDei,
+          width:bathEnd-bathStart,height:deiInterior.height+.14 },
+        { center:(deiReception.minX+deiReception.maxX)/2-centerInDei,width:deiReception.maxX-deiReception.minX,height:deiReception.height+.14 }],false,deiBrick);
   });
-  // La galería exterior de oficinas continúa fuera del nuevo volumen cerrado.
-  for (const points of annexCoveredPaths) for (let i=1;i<points.length;i++) {
-    const [ax,az]=points[i-1], [bx,bz]=points[i], length=Math.hypot(bx-ax,bz-az);
-    box(2.3,0.14,length+0.2,(ax+bx)/2,3.05,(az+bz)/2,m.roof,true,{rotation:Math.atan2(bx-ax,bz-az)});
-    path([points[i-1],points[i]],2.3);
-    const count=Math.ceil(length/4);
-    for(let k=0;k<=count;k++) {
-      const t=k/count;
-      pole(0.09,3,ax+(bx-ax)*t+(bz-az)/length*1.05,1.5,az+(bz-az)*t-(bx-ax)/length*1.05,m.concrete,true);
-    }
-  }
+  // La galería del patio se construye con ladrillo, tejas y baldosines en office-courtyard-walk.
   // Suelo de colisión del sector añadido; el césped continuo ya pertenece al contexto.
   const annexCorners=facultyAnnexes.flatMap((a)=>rectCorners(a.rect));
   const xs=annexCorners.map((p)=>p[0]), zs=annexCorners.map((p)=>p[1]);

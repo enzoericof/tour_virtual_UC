@@ -4,10 +4,22 @@ import type { Vec2 } from "../../data/faculty-blueprint";
 import type { FacultyBuilder } from "./builder";
 
 /** Aberturas discretas y rejas del muro que acompaña el pasillo fotografiado. */
-export function addOfficePerimeterFacade(builder:FacultyBuilder,a:Vec2,b:Vec2,height:number,brick:T.MeshStandardMaterial) {
+export function addOfficePerimeterFacade(builder:FacultyBuilder,a:Vec2,b:Vec2,height:number,brick:T.MeshStandardMaterial,
+  openings:readonly {center:number;width:number;height:number}[] = []) {
   const {box,beam,v3,m}=builder;
   const dx=b[0]-a[0],dz=b[1]-a[1],length=Math.hypot(dx,dz),angle=Math.atan2(dz,dx);
-  const nx=dz/length,nz=-dx/length,count=Math.max(2,Math.floor(length/3)),bay=length/count;
+  if(openings.length) {
+    for(const [lo,hi]of builder.spans(-length/2,length/2,openings.map(o=>[o.center-o.width/2,o.center+o.width/2]))) {
+      const start:Vec2=[a[0]+dx*(lo+length/2)/length,a[1]+dz*(lo+length/2)/length];
+      const end:Vec2=[a[0]+dx*(hi+length/2)/length,a[1]+dz*(hi+length/2)/length];
+      addOfficePerimeterFacade(builder,start,end,height,brick);
+    }
+    for(const o of openings)box(o.width,height-o.height,.2,(a[0]+b[0])/2+o.center*Math.cos(angle),
+      (height+o.height)/2,(a[1]+b[1])/2+o.center*Math.sin(angle),brick,true,{rotation:-angle});
+    return;
+  }
+  if(length<1.8){box(length,height,.2,(a[0]+b[0])/2,height/2,(a[1]+b[1])/2,brick,true,{rotation:-angle});return;}
+  const nx=dz/length,nz=-dx/length,count=Math.max(1,Math.floor(length/3)),bay=length/count;
   const width=1.18,sill=1.08,windowHeight=1.32;
   function piece(w:number,h:number,d:number,at:number,y:number,material:T.Material,solid=false,out=0) {
     return box(w,h,d,a[0]+dx*at/length+nx*out,y,a[1]+dz*at/length+nz*out,material,solid,{rotation:-angle});
