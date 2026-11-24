@@ -80,13 +80,18 @@ function renderApp(localMode: boolean) {
       <div class="editor-tools">
         <button class="btn-primary" id="publish-map">Publicar mapa</button>
         <button class="btn-ghost" id="discard-draft">Descartar borrador</button>
-        <button class="btn-ghost" id="export-json">Exportar JSON</button>
-        <button class="btn-ghost" id="import-json">Importar JSON</button>
+        <div class="editor-tools-row">
+          <button class="btn-ghost" id="export-json">Exportar JSON</button>
+          <button class="btn-ghost" id="import-json">Importar JSON</button>
+        </div>
         <input type="file" id="import-file" accept="application/json" hidden />
         <button class="btn-danger" id="delete-mode" aria-pressed="false">Eliminar objetos: desactivado</button>
         <button class="btn-danger" id="clear-all">Limpiar todo</button>
-        <p class="editor-hint">Publicar descarga <code>editor-placements.json</code>. Guardalo como <code>frontend/src/data/editor-placements.json</code> y hacé commit: recién entonces el mapa aparece para todos y en el sitio publicado.</p>
-        <p class="editor-hint">Activá Eliminar objetos y hacé clic en un modelo colocado para quitarlo. Esc sale del modo. Solo se eliminan modelos agregados con el editor.</p>
+        <details class="editor-hints">
+          <summary>Ayuda e instrucciones</summary>
+          <p class="editor-hint">Publicar descarga <code>editor-placements.json</code>. Guardalo como <code>frontend/src/data/editor-placements.json</code> y hacé commit: recién entonces el mapa aparece para todos y en el sitio publicado.</p>
+          <p class="editor-hint">Activá Eliminar objetos y hacé clic en un modelo colocado para quitarlo. Esc sale del modo. Solo se eliminan modelos agregados con el editor.</p>
+        </details>
       </div>
     </aside>
     <div id="editor-toast" class="hidden" role="status"></div>`;
