@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import py.edu.uc.campus_backend.dto.VehicleState;
 import tools.jackson.databind.ObjectMapper;
 
-/** Ocho filas durables y reservas atómicas compartidas entre instancias. */
+/** Flota durable y reservas atómicas compartidas entre instancias. */
 @Repository
 public class VehicleStore {
     private final JdbcTemplate jdbc;
@@ -35,7 +35,7 @@ public class VehicleStore {
             """,json.writeValueAsString(state),id,UUID.fromString(driver),state.x(),state.z(),state.y())==1;
     }
     public void release(String driver,String id) {
-        jdbc.update("UPDATE campus_vehicles SET driver=NULL, pose=jsonb_set(pose,'{speed}','0'::jsonb), updated_at=clock_timestamp() WHERE driver=? AND (? IS NULL OR id=?)",
+        jdbc.update("UPDATE campus_vehicles SET driver=NULL, pose=jsonb_set(pose,'{speed}','0'::jsonb), updated_at=clock_timestamp() WHERE driver=? AND (?::text IS NULL OR id=?)",
             UUID.fromString(driver),id,id);
     }
     public List<VehicleState> snapshot() {

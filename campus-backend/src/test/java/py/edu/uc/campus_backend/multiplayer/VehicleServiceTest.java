@@ -8,6 +8,12 @@ class VehicleServiceTest {
     private final VehicleStore store=mock(VehicleStore.class);
     private final VehicleService service=new VehicleService(store);
     private final ObjectMapper json=new ObjectMapper();
+    @Test void acceptsNewParkingPlacesAndRejectsIdsOutsideTheFleet() {
+        service.bind(()->true);
+        service.handle("driver",json.readTree("{\"type\":\"vehicle.claim\",\"id\":\"raptor-15\"}"));
+        service.handle("driver",json.readTree("{\"type\":\"vehicle.claim\",\"id\":\"raptor-16\"}"));
+        service.synchronize();verify(store).claim("raptor-15","driver");verify(store,never()).claim(eq("raptor-16"),any());
+    }
     @Test void validatesIdsNumbersAndSpeedAndCoalescesFramesBeforeReleasing() {
         service.bind(()->true);
         service.handle("driver",json.readTree("{\"type\":\"vehicle.claim\",\"id\":\"raptor-99\"}"));

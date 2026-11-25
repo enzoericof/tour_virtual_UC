@@ -3,6 +3,7 @@ import { deiInterior as plan, deiOfficeInterior as hall, facultyAnnexes } from '
 import type { FacultyBuilder } from './builder';
 import type { makeDeiInteriorMaterials } from './dei-interior';
 import type { Vec2 } from '../../data/faculty-blueprint';
+import {addOfficeCarpentry} from './dei-office-carpentry';
 
 /** Vestíbulo derecho unificado, sin cajas interiores; el corredor continúa dentro del bloque de tejas. */
 export function addDeiOfficeInterior(builder:FacultyBuilder,materials:ReturnType<typeof makeDeiInteriorMaterials>,brick:T.Material) {
@@ -14,13 +15,16 @@ export function addDeiOfficeInterior(builder:FacultyBuilder,materials:ReturnType
       [[hall.startX,hall.minZ],[bath.startX,hall.minZ],[bath.startX,bath.maxZ],[hall.startX,bath.maxZ]],
       [[hall.minX,bath.maxZ],[hall.maxX,bath.maxZ],[hall.maxX,hall.endZ],[hall.minX,hall.endZ]],
     ];
-    for(const outline of outlines) {
-      const floor=prism(outline,-.08,plan.floor+.08,terrazzo,true);
-      floor.name='Terrazo del pasillo interior del bloque de tejas';floor.userData.keep=true;
-      prism(outline,plan.height,.12,plaster,true);
+    const corridorFloor=materials.officeFloor;
+    const corridorCeiling=new T.MeshStandardMaterial({color:'#eeede4',emissive:'#deded5',emissiveIntensity:.12,roughness:.95});
+    for(const [index,outline]of outlines.entries()) {
+      const floor=prism(outline,-.08,plan.floor+.08,index===0?terrazzo:corridorFloor,true);
+      floor.name=index===0?'Terrazo del pasillo interior del bloque de tejas':'Baldosas del pasillo de oficinas LED';floor.userData.keep=true;
+      if(index===1){const uv=floor.geometry.attributes.uv;for(let i=0;i<uv.count;i++){const u=uv.getX(i),v=uv.getY(i);uv.setXY(i,(u-v)*Math.SQRT1_2,(u+v)*Math.SQRT1_2);}}
+      prism(outline,plan.height,.12,index===0?plaster:corridorCeiling,true);
     }
     // El pasillo de baños cruza esta circulación: ambas medianeras dejan ese paso libre.
-    for(const x of[hall.minX,hall.maxX]) {
+    for(const x of[hall.maxX]) {
       const from=bath.maxZ;
       for(const [a,b]of spans(from,hall.endZ,[[bath.minZ-.10,bath.maxZ+.10]])) {
         box(.16,plan.height,b-a,x,plan.height/2,(a+b)/2,plaster,true);
@@ -30,7 +34,11 @@ export function addDeiOfficeInterior(builder:FacultyBuilder,materials:ReturnType
     box(hall.width+.16,plan.height,.16,hall.centerX,plan.height/2,hall.endZ,plaster,true);
     box(hall.width,.12,.19,hall.centerX,plan.floor+.06,hall.endZ,skirting);
     const light=new T.MeshStandardMaterial({color:'#edf2e9',emissive:'#edf2e9',emissiveIntensity:.5,roughness:.6});
-    for(let z=hall.maxZ+.6;z<hall.endZ;z+=2.4)box(.52,.025,.16,hall.centerX,plan.height-.02,z,light);
+    const disk=new T.CylinderGeometry(.115,.115,.02,16);
+    for(let z=hall.maxZ+.6;z<hall.endZ;z+=2.4) {
+      const lamp=new T.Mesh(disk,light);lamp.position.set(hall.centerX,plan.height-.02,z);layers.visual.add(lamp);
+    }
+    addOfficeCarpentry(builder);
     // Envolvente continua: ladrillo hacia afuera y revoque solo sobre la cara interior.
     const west=facultyAnnexes.find(b=>b.id==='led')!;
     const closedMinX=west.mapCenter[0]-dei.mapCenter[0]-west.rect.size[1]/2+.1;

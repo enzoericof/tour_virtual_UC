@@ -298,9 +298,10 @@ export const deiInterior = {
   lobby: { minX:deiReception.minX,maxX:deiReception.maxX,minZ:deiSideDoor.center[1]-.035,maxZ:deiReception.backZ },
   left: { frontX:deiReception.maxX,backX:-10.55,officeBackX:-8.35,
     centerZ:annexEnclosedLink.portals[1].center[1],width:4.0,glassWidth:2.82,grilleWidth:.40,doorHeight:2.72 },
-  right: { startX:deiReception.minX-2.6,endX:officeInteriorX-2.3,minZ:deiReception.frontZ+.4,maxZ:deiReception.backZ,
-    doorX:-25.1,doorWidth:.91,doorHeight:2.24,returnX:officeInteriorX-1.65 },
-  women: { x:-25.1,z:deiReception.frontZ+.4,width:.91,height:2.24 },
+  right: { startX:deiReception.minX-2.6,endX:officeInteriorX-2.3,minZ:deiReception.frontZ-1.75,maxZ:deiReception.backZ,
+    doorX:-25.1,doorWidth:.91,doorHeight:2.24,returnX:officeInteriorX,
+    portalX:led.mapCenter[0]-dei.mapCenter[0]+led.rect.size[1]/2 },
+  women: { x:-25.1,z:deiReception.frontZ-1.75,width:.91,height:2.24 },
 };
 /** Vestíbulo derecho abierto y corredor dentro del bloque de tejas, sin tabiques en zigzag. */
 export const deiOfficeInterior = (()=>{
@@ -308,7 +309,7 @@ export const deiOfficeInterior = (()=>{
   const target=facultyAnnexes.find(b=>b.id==='da-cap')!;
   const endZ=target.mapCenter[1]-dei.mapCenter[1]+target.rect.size[0]/2-1;
   const minX=centerX-width/2,maxX=centerX+width/2,minZ=deiInterior.lobby.minZ,maxZ=deiInterior.right.maxZ,startX=deiReception.minX;
-  return {centerX,centerZ,width,minX,maxX,minZ,maxZ,startX,endZ,
+  return {centerX,centerZ,width,minX,maxX,minZ,maxZ,startX,endZ,officeDoors:3,
     route:[[startX+.6,(deiInterior.right.minZ+maxZ)/2],[centerX,(deiInterior.right.minZ+maxZ)/2],[centerX,endZ-.5]] as Vec2[]};
 })();
 /** Pasillo exterior marcado en rojo: salida lateral, frente corto y costado del bloque de tejas. */
@@ -371,8 +372,17 @@ const parkingFront=(along:number,depth=0):Vec2=>[
   exteriorFork[1]+rightArm[1]*along+parkingOutside[1]*(2.15+depth),
 ];
 const bollards:Vec2[]=[];
-for(let i=0;i<=48;i++)bollards.push(parkingFront(1+i*26.8/48));
-for(let bay=0;bay<=8;bay++)for(let j=1;j<=10;j++)bollards.push(parkingFront(1+bay*3.35,j*6.2/10));
+for(let i=0;i<=28;i++)bollards.push(parkingFront(1+i*26.8/28));
+for(let bay=0;bay<=8;bay++)for(let j=1;j<=4;j++)bollards.push(parkingFront(1+bay*3.35,j*1.3));
+const pickupColors=["#c7d2d4","#242e32","#eeece5","#24618c","#ce5b28","#8c999e","#e7e9e8","#26343b"];
+const lawnParking:{center:Vec2;angle:number;color:string;row:string}[]=[];
+// Dos filas en el césped marcado, con hueco central y plazas de 3,80 × 6,20 m.
+for(const [row,startX,z]of[['patio-izquierdo',14,-29.6],['patio-derecho',-7.5,-31]]as const) {
+  const frontZ=z+3.1;
+  for(let i=0;i<4;i++)lawnParking.push({center:fromRect(dei.rect,[startX-i*3.8,z]),angle:dei.rect.angle+Math.PI/2,color:pickupColors[(i+(row==='patio-derecho'?4:0))%8],row});
+  for(let i=0;i<=16;i++)bollards.push([startX+1.9-i*.95,frontZ]);
+  for(let bay=0;bay<=4;bay++)for(let j=1;j<=4;j++)bollards.push([startX+1.9-bay*3.8,frontZ-j*1.3]);
+}
 export const deiForecourt = {
   width: 1.6, canopyWidth: 2.25, eave: 2.85, ridge: .46,
   main: [exteriorArrival,exteriorFork,exteriorStart].map(p=>fromRect(dei.rect,p)),
@@ -383,10 +393,10 @@ export const deiForecourt = {
   medianTree: fromRect(dei.rect,[-27.3,-15.5]),
   medianCrown: { spread: 1.5, density: 1.35, flatten: .90 },
   pickupScale: 1.0,
-  parking: ["#c7d2d4","#242e32","#eeece5","#24618c","#ce5b28","#8c999e","#e7e9e8","#26343b"].map((color,index)=>({
+  parking: [...pickupColors.map((color,index)=>({
     center:fromRect(dei.rect,parkingFront(2.675+index*3.35,3.1)),
-    angle:dei.rect.angle+Math.atan2(-rightArm[0],rightArm[1]),color,
-  })),
+    angle:dei.rect.angle+Math.atan2(-rightArm[0],rightArm[1]),color,row:'lateral',
+  })),...lawnParking],
   parkingBollards: bollards.map(p=>fromRect(dei.rect,p)),
 };
 /** Corte compartido entre el borde del caminero y el embaldosado de entrada. */

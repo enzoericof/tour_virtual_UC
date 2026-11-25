@@ -25,7 +25,7 @@ public class VehicleService {
     public void leave(String driver){commands.offer(new Command(driver,"vehicle.release",null));}
     public void handle(String driver,JsonNode node) {
         String type=node.path("type").asText(),id=node.path("id").asText();
-        if(!id.matches("raptor-[0-7]"))return;
+        if(!id.matches("raptor-(?:[0-9]|1[0-5])"))return;
         if(type.equals("vehicle.update")) {
             for(String key:List.of("x","y","z","yaw","speed","steer"))if(!node.path(key).isNumber()||!Double.isFinite(node.path(key).asDouble()))return;
             double x=node.path("x").asDouble(),y=node.path("y").asDouble(),z=node.path("z").asDouble(),yaw=node.path("yaw").asDouble(),speed=node.path("speed").asDouble(),steer=node.path("steer").asDouble();

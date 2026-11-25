@@ -5,6 +5,7 @@ import {Capsule} from 'three/addons/math/Capsule.js';
 import {driveStep} from '../src/navigation/vehicle-physics.ts';
 import {createServer} from 'vite';
 import {fileURLToPath} from 'node:url';
+import {readFile} from 'node:fs/promises';
 
 test('La Raptor acelera con inercia, frena antes de retroceder y no atraviesa una pared a velocidad máxima',()=>{
   const state={x:0,y:0,z:0,yaw:0,speed:0,steer:0};
@@ -56,7 +57,7 @@ test('La reserva confirmada monta la cabina, las réplicas interpolan y la salid
   fleet.disconnected();assert.equal(fleet.driving,null);
 });
 
-test('Las ocho camionetas del campus tienen índices separados y se puede salir de una plaza en reversa',async()=>{
+test('Las dieciséis camionetas tienen índices separados y se puede salir de las filas nuevas en reversa',async()=>{
   const previous=globalThis.document;
   const context=new Proxy({},{get:(_,key)=>String(key).includes('Gradient')?()=>({addColorStop(){}}):key==='measureText'?()=>({width:100}):()=>{},set:()=>true});
   globalThis.document={createElement:()=>({getContext:()=>context}),createElementNS:()=>({addEventListener(){},removeEventListener(){},set src(v){}})};
@@ -64,7 +65,17 @@ test('Las ocho camionetas del campus tienen índices separados y se puede salir 
     const {createCampus}=await server.ssrLoadModule('/src/scene/campus.ts');const campus=createCampus(),camera=new T.PerspectiveCamera();
     const walker=Object.assign(Object.create(Walker.prototype),{camera,world:buildCollisionWorld(campus.colliders),editorWorld:buildCollisionWorld(),barriers:[],moving:[],keys:new Set(),controls:{isLocked:true},enabled:true,frozen:false,velocity:new T.Vector3(),spawn:new T.Vector3(),body:new Capsule(new T.Vector3(),new T.Vector3(0,1.5,0),.28)});
     const fleet=new VehicleFleet(campus.vehicles,walker,camera,s=>assert.fail(s));fleet.send=()=>{};
-    assert.equal(fleet.cars.length,8);assert.equal(walker.moving.length,8);
+    assert.equal(fleet.cars.length,16);assert.equal(walker.moving.length,16);
+    const paintedBatch=c=>c.visual.children.find(o=>o.isMesh&&o.material.userData.raptorPaint&&!o.userData.deiParkedVehicle);
+    assert.equal(paintedBatch(fleet.cars[0]).geometry,paintedBatch(fleet.cars[1]).geometry,'La flota comparte las geometrías repetidas para limitar memoria y buffers');
+    const wheels=fleet.cars[0].wheels,front=wheels.filter(w=>w.userData.front),rear=wheels.filter(w=>!w.userData.front);
+    assert.ok(Math.abs(front[0].getWorldPosition(new T.Vector3()).distanceTo(front[1].getWorldPosition(new T.Vector3()))-1.71)<.01,'La vía coincide con la cota Ford');
+    const matchingRear=rear.find(w=>w.userData.side===front[0].userData.side);
+    assert.ok(Math.abs(front[0].getWorldPosition(new T.Vector3()).distanceTo(matchingRear.getWorldPosition(new T.Vector3()))-3.27)<.01,'La batalla coincide con la cota Ford');
+    const migration=await readFile(new URL('../../campus-backend/src/main/resources/db/migration/V14__plazas_adicionales_led.sql',import.meta.url),'utf8');
+    const persisted=new Map([...migration.matchAll(/VALUES \('([^']+)', '([^']+)'::jsonb\)/g)].map(m=>[m[1],JSON.parse(m[2])]));
+    assert.equal(persisted.size,8);
+    for(const c of fleet.cars.slice(8))for(const key of['x','y','z','yaw'])assert.ok(Math.abs(c.state[key]-persisted.get(c.id)[key])<1e-6,'La posición compartida coincide con la plaza visible');
     const remaining=[];campus.colliders.traverse(o=>{if(o.userData.vehicleId)remaining.push(o);});assert.equal(remaining.length,0,'Ningún automóvil queda en el índice estático');
     const car=fleet.cars[2],start={...car.state};walker.teleport(car.visual.localToWorld(new T.Vector3(.1,.03,-1.8)));
     fleet.receive(fleet.cars.map(c=>({...c.state})),'self');fleet.enter();assert.equal(fleet.driving,null);
@@ -79,5 +90,13 @@ test('Las ocho camionetas del campus tienen índices separados y se puede salir 
     // Cancelar la reserva al pasar a vista general tampoco monta una respuesta tardía.
     walker.teleport(fleet.cars[3].visual.localToWorld(new T.Vector3(.1,.03,-1.8)));fleet.enter();fleet.exit(true);
     const late=fleet.cars.map(c=>({...c.state,driver:c===fleet.cars[3]?'self':null}));fleet.receive(late,'self');assert.equal(fleet.driving,null);
+    for(const candidate of fleet.cars.slice(8)) {
+      const before={...candidate.state};fleet.receive(fleet.cars.map(c=>({...c.state,driver:null})),'self');
+      walker.teleport(candidate.visual.localToWorld(new T.Vector3(.1,.03,-1.8)));fleet.enter();
+      fleet.receive(fleet.cars.map(c=>({...c.state,driver:c===candidate?'self':null})),'self');assert.equal(fleet.driving,candidate);
+      walker.keys=new Set(['KeyS']);for(let i=0;i<75;i++)fleet.update(1/60);
+      assert.ok(Math.hypot(candidate.state.x-before.x,candidate.state.z-before.z)>3,'Las plazas nuevas dejan salir sin tocar postes ni árboles');
+      walker.keys=new Set(['Space']);for(let i=0;i<30;i++)fleet.update(1/60);assert.ok(fleet.exit());walker.keys.clear();
+    }
   }finally{globalThis.document=previous;}
 });

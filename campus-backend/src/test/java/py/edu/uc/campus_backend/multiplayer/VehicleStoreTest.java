@@ -26,8 +26,10 @@ class VehicleStoreTest {
         jdbc.execute("CREATE TABLE spring_session(session_id text PRIMARY KEY,expiry_time bigint)");
         jdbc.update("INSERT INTO spring_session VALUES ('test',?)",System.currentTimeMillis()+60000);
         jdbc.execute(Files.readString(Path.of("src/main/resources/db/migration/V12__camionetas_compartidas.sql")));
+        jdbc.execute(Files.readString(Path.of("src/main/resources/db/migration/V14__plazas_adicionales_led.sql")));
         var one=new VehicleStore(jdbc,new ObjectMapper());var two=new VehicleStore(jdbc,new ObjectMapper());
-        var initial=one.snapshot().getFirst();assertEquals(8,one.snapshot().size());
+        var initial=one.snapshot().getFirst();assertEquals(16,one.snapshot().size());
+        assertTrue(one.snapshot().stream().anyMatch(v->v.id().equals("raptor-15")));
         String a=UUID.randomUUID().toString(),b=UUID.randomUUID().toString();
         for(String id:new String[]{a,b})jdbc.update("INSERT INTO campus_presence(id,pose,session_id) VALUES (?,?::jsonb,'test')",UUID.fromString(id),"{\"x\":"+initial.x()+",\"y\":0,\"z\":"+initial.z()+",\"hidden\":false}");
         var start=new CountDownLatch(1);boolean first;
@@ -42,7 +44,7 @@ class VehicleStoreTest {
         assertFalse(two.claim("raptor-1",owner),"Una persona no posee dos camionetas");
         var teleported=new VehicleState(initial.id(),500,0,500,0,0,0,owner,0);assertFalse(one.move(initial.id(),owner,teleported));
         two.release(other,initial.id());assertEquals(owner,one.snapshot().getFirst().driver());
-        one.release(owner,initial.id());
+        one.release(owner,null);
         var late=new VehicleStore(jdbc,new ObjectMapper()).snapshot().getFirst();assertEquals(moved.x(),late.x());assertEquals(0,late.speed());assertNull(late.driver());
         assertTrue(two.claim(initial.id(),other));jdbc.update("UPDATE campus_vehicles SET updated_at=clock_timestamp()-interval '7 seconds' WHERE id=?",initial.id());
         assertNull(one.snapshot().getFirst().driver());assertEquals(moved.x(),one.snapshot().getFirst().x());

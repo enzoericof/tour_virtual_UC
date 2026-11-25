@@ -35,3 +35,7 @@ Prioridades indicadas por el usuario, en este orden.
 | Pruebas visuales de cuentas y biblioteca | Resultado registrado en verificacion.md (el backend ya tiene cobertura automática) |
 | Registrar los seis integrantes, sus roles y fechas | Nómina aportada por el equipo, sin asignaciones supuestas |
 | Nomenclatura del plano | Revisar el nombre `FACULTY_LABS` según el edificio que representa |
+
+
+### Historial de la base compartida — resuelto el 25/11/2026
+Se reconstruyó V13 a partir del esquema existente, se respaldó y realineó únicamente su checksum y se aplicó V14. Las dieciséis camionetas están habilitadas. La recuperación y las comprobaciones están registradas en [Verificación](verificacion.md). Mantener el archivo versionado al integrar cambios del equipo.

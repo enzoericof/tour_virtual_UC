@@ -2,8 +2,9 @@ import * as T from 'three';
 import { deiInterior as plan, deiOfficeInterior as hall, facultyAnnexes } from '../../data/faculty-annexes';
 import type { FacultyBuilder } from './builder';
 import { addDeiOfficeInterior } from './dei-office-interior';
+import {makeOfficeCorridorFloor} from './dei-office-carpentry';
 
-/** Texturas propias pequeñas y repetibles: revoque y un mismo terrazo blanco en todo el interior. */
+/** Texturas pequeñas compartidas: revoque, terrazo blanco y damero del pasillo de oficinas. */
 export function makeDeiInteriorMaterials() {
   const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const c=canvas.getContext('2d')!;
   c.fillStyle='#c5c7bf';c.fillRect(0,0,256,256);
@@ -18,7 +19,7 @@ export function makeDeiInteriorMaterials() {
   const terrazzo=new T.MeshStandardMaterial({map,bumpMap:map,bumpScale:.002,roughness:.34});terrazzo.userData.tile=[.80,.80];
   const plaster=new T.MeshStandardMaterial({color:'#f5ead7',emissive:'#c2b6a0',emissiveIntensity:.08,roughness:.94});
   const skirting=new T.MeshStandardMaterial({map,bumpMap:map,bumpScale:.001,roughness:.65,color:'#a8aa9c'});skirting.userData.tile=[.8,.8];
-  return {terrazzo,plaster,skirting};
+  return {terrazzo,plaster,skirting,officeFloor:makeOfficeCorridorFloor()};
 }
 
 /** Solo se reconstruyen los espacios visibles desde el vestíbulo; los recintos quedan cerrados. */
@@ -58,7 +59,9 @@ export function addDeiInterior(builder:FacultyBuilder,materials:ReturnType<typeo
     const mesh=new T.Mesh(new T.PlaneGeometry(w,h),mat);mesh.position.set(x,y,z);mesh.rotation.y=rotation;layers.visual.add(mesh);return mesh;
   }
   function floor(x0:number,x1:number,z0:number,z1:number,mat:T.Material,name:string) {
-    return named(prism([[x0,z0],[x1,z0],[x1,z1],[x0,z1]],-.08,plan.floor+.08,mat,true),name);
+    const mesh=prism([[x0,z0],[x1,z0],[x1,z1],[x0,z1]],-.08,plan.floor+.08,mat,true);
+    if(mat===materials.officeFloor){const uv=mesh.geometry.attributes.uv;for(let i=0;i<uv.count;i++){const u=uv.getX(i),v=uv.getY(i);uv.setXY(i,(u-v)*Math.SQRT1_2,(u+v)*Math.SQRT1_2);}}
+    return named(mesh,name);
   }
   function ceiling(x0:number,x1:number,z0:number,z1:number) {
     box(x1-x0,.12,z1-z0,(x0+x1)/2,plan.height+.06,(z0+z1)/2,plaster,true);
@@ -68,8 +71,10 @@ export function addDeiInterior(builder:FacultyBuilder,materials:ReturnType<typeo
   }
   function wallZ(x0:number,x1:number,z:number,opening?:{x:number;width:number;height:number}) {
     const openings=opening?[opening]:[];
-    if((z===plan.right.minZ||z===plan.right.maxZ)&&hall.minX>x0&&hall.maxX<x1)
+    if(z===plan.right.maxZ&&hall.minX>x0&&hall.maxX<x1)
       openings.push({x:hall.centerX,width:hall.width+.04,height:plan.height});
+    if(z===plan.right.minZ&&plan.right.returnX>x0&&plan.right.returnX<x1)
+      openings.push({x:plan.right.returnX,width:.96,height:2.36});
     const intervals=builder.spans(x0,x1,openings.map(o=>[o.x-o.width/2,o.x+o.width/2]));
     const outside=z===plan.right.maxZ;
     for(const [a,b]of intervals)if(b>a) {
@@ -156,8 +161,15 @@ export function addDeiInterior(builder:FacultyBuilder,materials:ReturnType<typeo
     box(.045,.24,.13,left.frontX-.14,2.62,lo+.14,new T.MeshStandardMaterial({color:'#9b3429',roughness:.72}));
     box(.05,.18,.14,left.frontX-.14,.96,lo+.14,new T.MeshStandardMaterial({color:'#b63d2b',roughness:.72}));
 
-    // El mismo terrazo llega hasta las dos puertas blancas del fondo.
-    floor(right.endX,right.startX,right.minZ,right.maxZ,terrazzo,'Terrazo del pasillo de baños LED');
+    // El terrazo llega al portal; el damero continúa hasta las puertas blancas del fondo.
+    floor(right.portalX,right.startX,right.minZ,right.maxZ,terrazzo,'Terrazo del pasillo de baños LED');
+    floor(right.endX,right.portalX,right.minZ,right.maxZ,materials.officeFloor,'Baldosas del acceso a dirección LED');
+    for(const [side,label]of[[-1,'derecho'],[1,'izquierdo']]as const) {
+      const z=side<0?right.minZ+.16:right.maxZ-.16;
+      named(box(.50,plan.height-plan.floor,.32,right.portalX,(plan.height+plan.floor)/2,z,plaster,true),`Pilar blanco ${label} del acceso a dirección LED`,'deiOfficePillar');
+      box(.53,.12,.35,right.portalX,plan.floor+.06,z,skirting,true);
+    }
+    box(.50,.42,right.maxZ-right.minZ,right.portalX,plan.height-.21,(right.minZ+right.maxZ)/2,plaster,true);
     // Un único vestíbulo abierto: se retiran los tres cuerpos salientes y las jambas aisladas.
     wallZ(right.startX,plan.lobby.minX,right.maxZ);
     ceiling(right.endX,right.startX,right.minZ,right.maxZ);

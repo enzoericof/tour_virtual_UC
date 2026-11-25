@@ -7,6 +7,7 @@ import { cantinaGardenFloor } from "./cantina-garden";
 /** Ranger Raptor de doble cabina, con cabina hueca y piezas móviles; geometrías y mapas compartidos. */
 export function addDeiParkedVehicles(builder:FacultyBuilder) {
   const {box,frame,layers,beam,v3}=builder,scale=deiForecourt.pickupScale;
+  const geometryCache=new Map<string,T.BufferGeometry>();
   const trim=new T.MeshStandardMaterial({color:"#22292c",roughness:.76,metalness:.23});
   const alloy=new T.MeshStandardMaterial({color:"#606b70",roughness:.37,metalness:.78});
   const steel=new T.MeshStandardMaterial({color:"#b8c1c3",roughness:.36,metalness:.7});
@@ -18,8 +19,14 @@ export function addDeiParkedVehicles(builder:FacultyBuilder) {
   for(let x=0;x<128;x+=16)for(let y=0;y<64;y+=16){tc.fillStyle="#101512";tc.fillRect(x+(y%32?6:0),y+2,11,11);}
   const tireMap=new T.CanvasTexture(tread);tireMap.wrapS=tireMap.wrapT=T.RepeatWrapping;
   const rubber=new T.MeshStandardMaterial({color:"#4b504d",map:tireMap,bumpMap:tireMap,bumpScale:.012,roughness:1});
-  const tireGeo=new T.CylinderGeometry(.44,.44,.30,24),rimGeo=new T.CylinderGeometry(.265,.265,.018,12);
-  const archGeo=new T.TorusGeometry(.47,.075,5,18,Math.PI);
+  const tireGeo=new T.CylinderGeometry(.42,.42,.285,28),rimGeo=new T.CylinderGeometry(.225,.225,.018,18);
+  const archGeo=new T.TorusGeometry(.46,.054,6,22,Math.PI);
+  const mirror=new T.MeshStandardMaterial({color:'#8399a3',metalness:.86,roughness:.15});
+  const boltGeo=new T.SphereGeometry(.017,6,4),hookGeo=new T.TorusGeometry(.047,.014,5,12);
+  const projectorGeo=new T.CylinderGeometry(.048,.048,.025,16);
+  const skidGeo=new T.ExtrudeGeometry(new T.Shape([[-.65,.55],[-.49,.36],[.49,.36],[.65,.55]].map(([z,y])=>new T.Vector2(z,y))),
+    {depth:.08,bevelEnabled:true,bevelSize:.018,bevelThickness:.012,bevelSegments:1});
+  skidGeo.rotateY(Math.PI/2);skidGeo.translate(2.61,0,0);
   function profile(points:number[][],width:number,bevel=true) {
     const geometry=new T.ExtrudeGeometry(new T.Shape(points.map(p=>new T.Vector2(p[0],p[1]))),{
       depth:width,bevelEnabled:bevel,bevelThickness:.018,bevelSize:.025,bevelSegments:1,curveSegments:1,
@@ -42,9 +49,10 @@ export function addDeiParkedVehicles(builder:FacultyBuilder) {
     c.fillStyle=bg;c.fillRect(0,0,width,64);c.fillStyle=color;c.font=text==="FORD"?"900 52px sans-serif":"italic 900 38px sans-serif";
     c.textAlign="center";c.textBaseline="middle";c.fillText(text,width/2,34,width-12);
     const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;
-    return new T.MeshStandardMaterial({map,roughness:.7,side:T.DoubleSide});
+    return new T.MeshStandardMaterial({map,roughness:.7,side:T.DoubleSide,transparent:bg==='#00000000',depthWrite:bg!=='#00000000'});
   }
   const ford=label("FORD","#b9c2c6","#1d262b"),raptor=label("RAPTOR","#a6b0b4","#263034");
+  const ranger=label('RANGER','#22292b','#00000000'),plate=label('RAPTOR','#232a2c','#deded5');
   const shadowCanvas=document.createElement("canvas");shadowCanvas.width=shadowCanvas.height=64;const sc=shadowCanvas.getContext("2d")!;
   const gradient=sc.createRadialGradient(32,32,3,32,32,32);gradient.addColorStop(0,"#00000065");gradient.addColorStop(1,"#00000000");
   sc.fillStyle=gradient;sc.fillRect(0,0,64,64);
@@ -54,10 +62,11 @@ export function addDeiParkedVehicles(builder:FacultyBuilder) {
     const g=new T.BufferGeometry();g.setAttribute("position",new T.Float32BufferAttribute(points.flat(),3));g.setIndex([0,1,2,0,2,3]);g.computeVertexNormals();layers.visual.add(new T.Mesh(g,glass));
   }
   for(const [index,parking] of deiForecourt.parking.entries())frame({center:parking.center,size:[4.5,1.9],angle:parking.angle},()=>{
-    layers.visual.scale.setScalar(scale);layers.solid.scale.setScalar(scale);
+    // Longitud y altura calibradas al dibujo Ford; batalla de 3,27 m y vía de 1,71 m.
+    layers.visual.scale.set(scale*.99,scale*.98,scale);layers.solid.scale.copy(layers.visual.scale);
     layers.visual.name=`Ranger Raptor ${index+1}`;layers.visual.userData.vehicleId=`raptor-${index}`;
     layers.solid.userData.vehicleId=`raptor-${index}`;
-    const paint=new T.MeshStandardMaterial({color:parking.color,roughness:.32,metalness:.54});
+    const paint=new T.MeshStandardMaterial({color:parking.color,roughness:.32,metalness:.54});paint.userData.raptorPaint=true;
     const shadow=new T.Mesh(shadowGeo,shadowMat);shadow.position.y=.012;layers.visual.add(shadow);
     const body=new T.Mesh(new T.BoxGeometry(5.25,.17,1.93),paint);body.position.y=.67;body.name=`Ford Ranger Raptor estacionada LED ${index+1}`;
     body.userData.deiParkedVehicle=true;body.userData.keep=true;body.castShadow=body.receiveShadow=true;layers.visual.add(body);
@@ -106,9 +115,10 @@ export function addDeiParkedVehicles(builder:FacultyBuilder) {
       beam(v3(-1.08,1.86,side*.78),v3(-1.55,1.30,side*.78),.045,trim);
       pane([[-1.01,1.23,side*.964],[-.85,1.83,side*.964],[-.20,1.83,side*.964],[-.20,1.23,side*.964]]);
       pane([[-.09,1.23,side*.964],[-.09,1.83,side*.964],[.61,1.83,side*.964],[1.15,1.23,side*.964]]);
-      for(const x of[-.72,.50]){box(.20,.035,.04,x,1.16,side*1.035,trim);box(.016,.48,.014,x-.30,.88,side*1.035,trim);}
-      box(.24,.15,.21,1.15,1.43,side*1.10,trim);box(2.6,.09,.16,.05,.53,side*1.07,trim);
-      box(.38,.12,.035,.72,1.07,side*1.065,trim);
+      for(const x of[-.72,.50]){box(.20,.035,.04,x,1.16,side*.994,trim);box(.016,.48,.014,x-.30,.88,side*.977,trim);}
+      box(.24,.15,.12,1.15,1.43,side*1.04,trim);box(.19,.105,.012,1.13,1.43,side*1.107,mirror);
+      box(2.6,.09,.16,.05,.53,side*1.02,trim);
+      box(.38,.12,.035,.72,1.07,side*.985,trim);
       const badge=new T.Mesh(new T.PlaneGeometry(.95,.19),raptor);badge.position.set(-1.92,1.10,side*1.032);if(side<0)badge.rotation.y=Math.PI;layers.visual.add(badge);
     }
     beam(v3(-1.08,1.86,-.78),v3(-1.08,1.86,.78),.045,trim);
@@ -117,26 +127,34 @@ export function addDeiParkedVehicles(builder:FacultyBuilder) {
     const hood=new T.Mesh(hoodGeometry,paint);layers.visual.add(hood);
     for(const side of[-1,1]){const ridge=box(.94,.022,.065,1.90,1.26,side*.52,paint);ridge.rotation.y=side*.08;}
     for(let row=0;row<4;row++)for(let col=0;col<12;col++)box(.017,.017,.075,2.663,.79+row*.065,-.64+col*.115,alloy);box(.10,.38,1.82,2.60,.92,0,trim);
-    const logo=new T.Mesh(new T.PlaneGeometry(1.16,.25),ford);logo.rotation.y=Math.PI/2;logo.position.set(2.657,1.02,0);layers.visual.add(logo);
+    const logo=new T.Mesh(new T.PlaneGeometry(1.30,.28),ford);logo.rotation.y=Math.PI/2;logo.position.set(2.674,1.04,0);layers.visual.add(logo);
     for(const side of[-1,1]){
       box(.03,.43,.38,2.645,1.04,side*.80,trim);
       box(.075,.37,.09,2.66,1.04,side*.90,lamp);
       for(const y of[.87,1.21])box(.075,.055,.30,2.66,y,side*.79,lamp);
+      for(const y of[.98,1.10]){const projector=new T.Mesh(projectorGeo,mirror);projector.rotation.z=-Math.PI/2;projector.position.set(2.697,y,side*.77);layers.visual.add(projector);}
       box(.075,.38,.15,-2.70,1.10,side*.88,tail);
-      box(.12,.075,.12,2.56,.46,side*.53,tail);
+      const hook=new T.Mesh(hookGeo,tail);hook.rotation.y=Math.PI/2;hook.position.set(2.68,.51,side*.53);layers.visual.add(hook);
     }
-    box(.16,.19,1.92,2.58,.62,0,trim);box(.13,.19,1.24,2.66,.47,0,steel);box(.12,.15,1.99,-2.70,.58,0,trim);
-    for(const x of[-1.65,1.65])for(const side of[-1,1]){
-      const oldLayer=layers.visual,wheelGroup=new T.Group();wheelGroup.userData.wheel=true;wheelGroup.userData.front=x>0;wheelGroup.userData.side=side;wheelGroup.position.set(x,.44,side*1.02);oldLayer.add(wheelGroup);const first=oldLayer.children.length;
-      const wheel=new T.Mesh(tireGeo,rubber);wheel.rotation.x=Math.PI/2;wheel.position.set(x,.44,side*1.02);wheel.castShadow=true;layers.visual.add(wheel);
-      const arch=new T.Mesh(archGeo,trim);arch.position.set(x,.44,side*1.08);layers.visual.add(arch);
-      const rim=new T.Mesh(rimGeo,alloy);rim.rotation.x=Math.PI/2;rim.position.set(x,.44,side*1.18);layers.visual.add(rim);
-      for(let j=0;j<6;j++){const a=j*Math.PI/3,spoke=box(.055,.43,.025,x,.44,side*1.20,trim);spoke.rotation.z=a;}
-      box(.11,.11,.03,x,.44,side*1.21,steel);
+    box(.16,.19,1.92,2.58,.62,0,trim);layers.visual.add(new T.Mesh(skidGeo,steel));box(.12,.15,1.99,-2.70,.58,0,trim);
+    box(.025,.10,.78,2.735,.64,0,trim);
+    const rearName=new T.Mesh(new T.PlaneGeometry(1.04,.16),ranger);rearName.rotation.y=-Math.PI/2;rearName.position.set(-2.688,1.08,0);layers.visual.add(rearName);
+    for(const side of[-1,1]){
+      const license=new T.Mesh(new T.PlaneGeometry(.34,.085),plate);license.rotation.y=side*Math.PI/2;license.position.set(side>0?2.736:-2.766,.64,0);layers.visual.add(license);
+    }
+    box(.04,.05,.27,-2.69,1.25,0,trim);
+    for(const x of[-1.6515,1.6515])for(const side of[-1,1]){
+      const oldLayer=layers.visual,wheelGroup=new T.Group();wheelGroup.userData.wheel=true;wheelGroup.userData.front=x>0;wheelGroup.userData.side=side;wheelGroup.position.set(x,.42,side*.855);oldLayer.add(wheelGroup);const first=oldLayer.children.length;
+      const wheel=new T.Mesh(tireGeo,rubber);wheel.rotation.x=Math.PI/2;wheel.position.set(x,.42,side*.855);wheel.castShadow=true;layers.visual.add(wheel);
+      const arch=new T.Mesh(archGeo,trim);arch.position.set(x,.42,side*.96);layers.visual.add(arch);
+      const rim=new T.Mesh(rimGeo,alloy);rim.rotation.x=Math.PI/2;rim.position.set(x,.42,side*1.008);layers.visual.add(rim);
+      for(let j=0;j<6;j++){const a=j*Math.PI/3,spoke=box(.043,.35,.018,x,.42,side*1.024,trim);spoke.rotation.z=a;
+        const bolt=new T.Mesh(boltGeo,steel);bolt.position.set(x+Math.cos(a)*.073,.42+Math.sin(a)*.073,side*1.041);layers.visual.add(bolt);}
+      box(.09,.09,.023,x,.42,side*1.032,steel);
       for(const piece of oldLayer.children.slice(first))if(piece!==arch){piece.position.sub(wheelGroup.position);wheelGroup.add(piece);}
-      batchParts(wheelGroup);
+      batchParts(wheelGroup,geometryCache,`wheel-${side}`);
     }
-    batchParts(layers.visual as T.Group);
+    batchParts(layers.visual as T.Group,geometryCache,'body');
   },cantinaGardenFloor(parking.center));
   addParkingBollards(builder);
 }
@@ -159,15 +177,20 @@ function addParkingBollards(builder:FacultyBuilder){
 }
 
 /** Agrupa piezas estáticas por material dentro de cada vehículo, sin perder su raíz móvil. */
-function batchParts(root:T.Group) {
+function batchParts(root:T.Group,cache:Map<string,T.BufferGeometry>,role:string) {
   const buckets=new Map<T.Material,T.Mesh[]>();
   for(const child of root.children)if(child instanceof T.Mesh&&!child.userData.keep&&!Array.isArray(child.material)) {
     if(child.material.transparent){child.userData.keep=true;continue;}
     const list=buckets.get(child.material)??[];list.push(child);buckets.set(child.material,list);
   }
   for(const [material,meshes]of buckets){
-    const parts=meshes.map(mesh=>{mesh.updateMatrix();const g=mesh.geometry.index?mesh.geometry.toNonIndexed():mesh.geometry.clone();return g.applyMatrix4(mesh.matrix);});
-    const geometry=mergeGeometries(parts,false);for(const part of parts)part.dispose();
+    const key=role+':'+(material.userData.raptorPaint?'paint':material.uuid);
+    let geometry=cache.get(key);
+    if(!geometry){
+      const parts=meshes.map(mesh=>{mesh.updateMatrix();const g=mesh.geometry.index?mesh.geometry.toNonIndexed():mesh.geometry.clone();return g.applyMatrix4(mesh.matrix);});
+      const merged=mergeGeometries(parts,false);for(const part of parts)part.dispose();
+      if(merged){geometry=merged;cache.set(key,geometry);}
+    }
     if(!geometry)continue;const batch=new T.Mesh(geometry,material);batch.userData.keep=true;batch.castShadow=batch.receiveShadow=true;root.add(batch);
     for(const mesh of meshes)root.remove(mesh);
   }

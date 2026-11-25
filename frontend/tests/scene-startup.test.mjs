@@ -447,7 +447,7 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const vehicles=[],medianTrees=[];
     colliders.traverse(o=>{if(o.userData.deiParkedVehicle)vehicles.push(o);});
     group.traverse(o=>{if(o.userData.deiMedianTree)medianTrees.push(o);});
-    assert.equal(vehicles.length,8,"Las ocho camionetas tienen carrocerías sólidas");
+    assert.equal(vehicles.length,16,"Las dieciséis camionetas tienen carrocerías sólidas");
     assert.equal(medianTrees.length,1,"El nuevo árbol se ubica en la divisoria");
     const median=medianTrees[0],sourceTree=group.getObjectByName("Árbol exterior nuevo del LED 1");
     const medianWood=median.getObjectByName("Tronco y ramas curvas"),sourceWood=sourceTree.getObjectByName("Tronco y ramas curvas");
@@ -462,7 +462,7 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     for(const post of bollardBodies){assert.ok(post.scale.y>.25&&post.scale.y<.32);assert.ok(Math.abs(post.position.y-post.scale.y/2-cantinaGardenFloor([post.position.x,post.position.z]))<1e-6,"Los postes están apoyados en el terreno");}
     for(const vehicle of deiForecourt.parking) {
       const [hit]=new Raycaster(new Vector3(vehicle.center[0],3,vehicle.center[1]),new Vector3(0,-1,0),0,4).intersectObject(colliders,true);
-      assert.ok(hit && Math.abs(hit.point.y-(cantinaGardenFloor(vehicle.center)+1.94*deiForecourt.pickupScale))<.015,"El techo sólido sigue la nueva escala de la pickup");
+      assert.ok(hit && Math.abs(hit.point.y-(cantinaGardenFloor(vehicle.center)+1.94*.98*deiForecourt.pickupScale))<.015,"El techo sólido sigue la altura corregida de la pickup");
     }
     for(const post of newPosts) {
       const p=post.getWorldPosition(new Vector3());p.y=1;
@@ -805,12 +805,25 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const floorNames=["Terrazo del vestíbulo LED","Terrazo del pasillo interior del bloque de tejas","Terrazo del acceso izquierdo LED","Terrazo del pasillo de baños LED","Terrazo de la oficina de recepción LED"];
     const floorMaterial=group.getObjectByName(floorNames[0]).material;
     for(const name of floorNames)assert.equal(group.getObjectByName(name)?.material,floorMaterial,"El mismo blanco con manchitas llega a todo el interior: "+name);
-    for(const point of [[-18.5,.4],[-18.5,1],[-18.5,6],[-22.1,hall.centerZ],[-23.1,5.8],[-25.0,6.2],[hall.centerX,8.8],[hall.centerX,12],[hall.centerX,16]]){
+    for(const point of [[-18.5,.4],[-18.5,1],[-18.5,6],[-22.1,hall.centerZ],[-23.1,5.8],[-25.0,6.2]]){
       const p=fromRect(dei.rect,point),hits=new Raycaster(new Vector3(p[0],.6,p[1]),new Vector3(0,-1,0),0,1).intersectObject(group,true);
       assert.equal(hits[0]?.object.material,floorMaterial,"No quedan cuadrados ni hormigón sobre el terrazo interior en "+point);
       const exposed=hits.filter(h=>Math.abs(h.point.y-deiInterior.floor)<1e-6);
       assert.equal(new Set(exposed.map(h=>h.object)).size,1,"El piso visible tiene una sola superficie, sin tapas superpuestas");
     }
+    const officeFloor=group.getObjectByName('Baldosas del pasillo de oficinas LED');assert.ok(officeFloor);
+    assert.equal(group.getObjectByName('Baldosas del acceso a dirección LED')?.material,officeFloor.material,'El damero se extiende hasta las puertas y comparte textura y escala');
+    for(const name of['Pilar blanco derecho del acceso a dirección LED','Pilar blanco izquierdo del acceso a dirección LED'])assert.ok(group.getObjectByName(name),name);
+    assert.notEqual(officeFloor.material,floorMaterial,'Solo el pasillo de oficinas cambia al damero de la foto');
+    assert.deepEqual(officeFloor.material.userData.tile,[.6,.6]);
+    for(const z of[8.8,12,16]){
+      const p=fromRect(dei.rect,[hall.centerX,z]);
+      const hits=new Raycaster(new Vector3(p[0],.6,p[1]),new Vector3(0,-1,0),0,1).intersectObject(group,true);
+      assert.equal(hits[0]?.object.material,officeFloor.material,'El damero llega hasta el fondo sin superponer el terrazo');
+      assert.ok(Math.abs(hits[0].point.y-deiInterior.floor)<1e-6,'El piso nuevo queda enrasado');
+    }
+    assert.ok(deiInterior.right.minZ<3.3,'La pared empieza en la nueva marca, abriendo el paso junto al baño');
+    for(let i=1;i<=3;i++)assert.ok(group.getObjectByName(`Puerta blanca de oficina LED ${i}`),'El frente tiene tres puertas de oficina');
     assert.ok(localRay([bath.endX+.4,bathCenter],[bath.endX-.4,bathCenter]).length,"Dirección cierra el fondo");
     assert.ok(localRay([-8.8,3.3],[-7.8,3.3]).length,"La parte posterior no permite atravesar el edificio vacío");
     walkPerimeter([[-18.52,2.6],[-18.52,6.15],[-20.8,6.15],[-24.85,6.15]].map(p=>fromRect(dei.rect,p)),.02);

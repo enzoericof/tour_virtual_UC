@@ -238,3 +238,9 @@ La vista interior con dos paredes pintadas en rojo y la última vista aérea del
 
 
 24/11/2026: las capturas d5be082e, cf55ea86, de476f9b y 9cd6ae37 aportadas por Horacio guían la retirada de los carteles exteriores, la fachada de ladrillo con rejas y pilares, y la simplificación del vestíbulo derecho. Se reutiliza el mismo material del DEI y la galería ya modelada; no se añaden fotografías como texturas ni recursos descargados. Esta indicación sustituye el pasillo estrecho en zigzag del vestíbulo, manteniendo la conexión interior al bloque de tejas.
+
+
+24/11/2026: nueva marca roja en el frente del baño, captura 88a2e001 del muro junto a dirección y foto fcfb8119 del pasillo real. Guían el inicio de la pared, los tres frentes blancos con ventanales y puertas, damero diagonal rojizo/gris verdoso, banco y cuadros. Las texturas pequeñas y el cuadro abstracto se construyen mediante canvas y geometría propia; no se incorpora la fotografía al repositorio ni se descargan recursos.
+
+
+25/11/2026: capturas del usuario 139f4c41 (paño residual y puerta), cb28407c (portal real), anotación de pilares y vista aérea de las plazas nuevas. Se reutilizan los mapas propios de revoque, terrazo y damero; no se incrustan las fotografías. Las cotas de la Raptor se contrastan con el manual oficial Ford: https://www.ford.co.nz/content/dam/Ford/website-assets/ap/nz/owner/body-equipment-manuals/2022-ranger-bemm-base-and-raptor.pdf, apartado 1.10.4: longitud 5425 mm, ancho sin espejos ni estribos 2028 mm, altura 1926 mm, batalla 3270 mm y vías 1710 mm. Se usan como referencia métrica del modelo propio; no se descarga ni redistribuye un modelo CAD o la fotografía.

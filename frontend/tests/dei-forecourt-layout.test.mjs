@@ -20,7 +20,7 @@ test("El árbol de la divisoria queda entre ambos ramales y fuera de sus carpas"
 });
 
 test("Las camionetas estacionadas dejan libres los camineros y quedan dentro del campus",()=>{
-  assert.equal(deiForecourt.parking.length,8);
+  assert.equal(deiForecourt.parking.length,16);
   for(const vehicle of deiForecourt.parking) {
     const rect={center:vehicle.center,size:[4.9,2.1],angle:vehicle.angle};
     for(const local of [[-2.5,-1.2],[-2.5,1.2],[2.5,-1.2],[2.5,1.2],[0,0]]) {
@@ -73,12 +73,17 @@ test("El recorte de la cabecera alinea el pasillo con los pilares y conserva el 
 
 test("Las pickups forman una fila paralela al caminero y miran hacia él",()=>{
   const [a,b]=deiForecourt.branch,axis=[b[0]-a[0],b[1]-a[1]],length=Math.hypot(...axis),u=axis.map(v=>v/length);
-  for(const [i,car]of deiForecourt.parking.entries()){
+  const lateral=deiForecourt.parking.filter(p=>p.row==='lateral');
+  for(const [i,car]of lateral.entries()){
     assert.ok(Math.abs(Math.cos(car.angle)*u[0]+Math.sin(car.angle)*u[1])<1e-8,"Los frentes quedan perpendiculares al caminero");
-    if(i){const previous=deiForecourt.parking[i-1],dx=car.center[0]-previous.center[0],dz=car.center[1]-previous.center[1];
+    if(i){const previous=lateral[i-1],dx=car.center[0]-previous.center[0],dz=car.center[1]-previous.center[1];
       assert.ok(Math.abs(dx*u[1]-dz*u[0])<1e-8);assert.ok(Math.abs(Math.hypot(dx,dz)-3.35)<1e-8);assert.equal(car.angle,previous.angle);}
   }
   assert.ok(deiForecourt.pickupScale===1,"Las Raptor recuperan su tamaño de doble cabina");
+  for(const row of['patio-izquierdo','patio-derecho']){
+    const cars=deiForecourt.parking.filter(p=>p.row===row);assert.equal(cars.length,4);
+    for(let i=1;i<cars.length;i++)assert.ok(Math.abs(Math.hypot(cars[i].center[0]-cars[i-1].center[0],cars[i].center[1]-cars[i-1].center[1])-3.8)<1e-8,'Las plazas nuevas tienen margen para maniobrar');
+  }
 });
 
 test("Los postes bajos delimitan los frentes y laterales sin atravesar las carrocerías",()=>{
