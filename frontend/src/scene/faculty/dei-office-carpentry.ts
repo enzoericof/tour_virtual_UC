@@ -22,7 +22,7 @@ export function addOfficeCarpentry(builder:FacultyBuilder) {
   const x=plan.minX,bottom=deiInterior.floor,top=2.35,height=deiInterior.height,bay=(end-start)/plan.officeDoors;
   const panel=new T.MeshStandardMaterial({color:'#d8d8c7',roughness:.74});
   const frame=new T.MeshStandardMaterial({color:'#eeebdb',roughness:.68});
-  const glass=new T.MeshStandardMaterial({color:'#b6c8c0',transparent:true,opacity:.32,roughness:.2,metalness:.05,side:T.DoubleSide,depthWrite:false});
+  const glass=new T.MeshStandardMaterial({color:'#b6c8c0',roughness:.85,metalness:.05,side:T.DoubleSide});
   const brass=new T.MeshStandardMaterial({color:'#a59b6d',roughness:.37,metalness:.58});
   const wood=new T.MeshStandardMaterial({color:'#604b36',roughness:.85});
   const dark=new T.MeshStandardMaterial({color:'#252c2b',roughness:.82});
@@ -60,10 +60,7 @@ export function addOfficeCarpentry(builder:FacultyBuilder) {
   box(.035,.14,.035,plan.centerX+.28,1.05,endZ-.055,brass);
   box(.12,.025,.035,plan.centerX+.25,1.1,endZ-.09,brass);
   box(plan.width-.08,height-top-.08,.025,plan.centerX,top+(height-top)/2,endZ,glass);
-  // Respaldo y techo someros: los ventanales no muestran el cascarón vacío del edificio.
-  box(.12,height,end-start,x-1.3,height/2,(start+end)/2,panel,true);
-  box(1.3,.12,end-start,x-.65,height+.06,(start+end)/2,panel,true);
-  for(let i=0;i<=plan.officeDoors;i++)box(1.3,height,.10,x-.65,height/2,start+i*bay,panel,true);
+  // Un solo recinto detrás de la carpintería opaca; no se agregan cajas por oficina.
   for(const side of[-1,1])box(.045,.12,end-start,side<0?plan.minX+.09:plan.maxX-.09,bottom+.06,(start+end)/2,wood);
   // Banco y cuadros contra la pared opuesta; el eje del caminante queda libre.
   const benchZ=start+2.1,benchX=plan.maxX-.19;

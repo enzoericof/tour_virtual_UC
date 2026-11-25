@@ -179,6 +179,8 @@ export function addDeiInterior(builder:FacultyBuilder,materials:ReturnType<typeo
       wallZ(right.endX,right.startX,z,{x:doorX,width:w,height:h});
       const door=box(w-.02,h-plan.floor,.055,doorX,(h+plan.floor)/2,z,doorPanel,true);
       named(door,`Puerta del baño de ${name} LED`,`deiRestroom${side>0?'Men':'Women'}`);
+      // El baño sigue teniendo su puerta por dentro, con ladrillo continuo hacia el patio.
+      if(side>0){const back=box(w+.16,plan.height,.14,doorX,plan.height/2,z+.16,brick,true);named(back,'Cierre exterior de ladrillo detrás del baño LED');}
       for(const x of[doorX-w/2,doorX+w/2])box(.055,h+.025,.13,x,h/2,z,metal);
       box(w+.10,.055,.13,doorX,h,z,metal);
       const front=z-side*.083;

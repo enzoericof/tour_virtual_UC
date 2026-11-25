@@ -2,7 +2,7 @@ import { manfredRampSection, manfredStairZ } from "../src/data/faculty-blueprint
 import { Box3, BoxGeometry, Mesh, Matrix4, PerspectiveCamera, Ray, Raycaster, Triangle, Vector2, Vector3 } from "three";
 import {facultyPose,facultyToWorld,insidePolygon} from "../src/data/campus-geometry.ts";
 import { facultyBlueprint as plan, fromRect, towerEntrance, towerRoomOutline, block1, blockG, classroomDoor, PLAZA_LEVEL, FLOOR_HEIGHT, STEPS_RUN } from "../src/data/faculty-blueprint.ts";
-import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, deiPerimeterWalk, deiReception, deiInterior, deiOfficeInterior, deiSidePassage, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
+import { facultyAnnexes, deiSideDoor, deiEntranceWing, deiEntrancePaving, deiGardenPath, deiRightFacade, deiForecourt, deiPerimeterWalk, deiReception, deiInterior, deiOfficeInterior, deiCourtyardAccess, officeEndRestrooms, officeCourtyardAwnings, deiSidePassage, annexEnclosedLink } from "../src/data/faculty-annexes.ts";
 import { coveredWalkSurface } from "../src/data/cantina-terrain.ts";
 import { laboratoryGroundDetails } from "../src/data/faculty-annexes.ts";
 import { test } from "node:test";
@@ -312,7 +312,7 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     const { EntranceDoors } = await server.ssrLoadModule("/src/scene/entrance-doors.ts");
     const automaticDoors = new EntranceDoors(group), barriers=[];
     automaticDoors.register({addBarrier:(mesh,blocked)=>barriers.push({mesh,blocked})});
-    assert.equal(automaticDoors.doors.length,1,"Hay un único frente de acceso, sin segunda puerta detrás");
+    assert.equal(automaticDoors.doors.length,2,"El blindex principal y el nuevo acceso del patio son frentes separados");
     assert.equal(automaticDoors.doors[0].leaves.length,2,"El blindex tiene dos hojas juntas");
     const sideWindows=[],blueGrilles=[],middlePillars=[];
     group.traverse(o=>{
@@ -837,6 +837,59 @@ test("The complete faculty scene starts with the current blueprint and valid geo
     assert.equal(group.getObjectByName('Piso de galería del patio LED')?.material,perimeterMesh.material,"Las dos galerías reutilizan los mismos baldosines");
     assert.ok(group.getObjectByName('Pilar de ladrillo de la galería del patio LED'),"El patio tiene pilares de ladrillo, no postes cilíndricos blancos");
     assert.equal(localRay([hall.centerX,7.9],[hall.centerX,9.6]).length,0,"El paso atraviesa la medianera del bloque de tejas, no el blindex ni la recepción");
+    // Patio: la puerta nueva atraviesa las dos caras de fachada y llega al corredor real.
+    const access=deiCourtyardAccess,accessRoot=group.getObjectByName('Acceso exterior al pasillo LED');
+    assert.ok(accessRoot&&group.getObjectByName('Umbral enrasado del acceso exterior LED'));
+    assert.equal(localRay([access.x+1.4,access.z],[hall.centerX,access.z]).length,0,'El hueco no conserva vidrios, rejas ni una segunda pared detrás');
+    const courtyardDoor=automaticDoors.doors.find(d=>d.barrier.userData.entranceDoorBarrierId==='led-courtyard');
+    const courtyardBarrier=barriers.find(b=>b.mesh===courtyardDoor.barrier);
+    assert.equal(courtyardDoor.leaves.length,1);
+    for(const x of[access.x+1.0,hall.centerX]) {
+      const p=fromRect(dei.rect,[x,access.z]);
+      for(let i=0;i<120;i++)automaticDoors.update(1/60,new Vector3(p[0],1.65,p[1]));
+      assert.ok(!courtyardBarrier.blocked(),'La puerta del patio libera su barrera al acercarse desde ambos lados');
+    }
+    for(let i=0;i<180;i++)automaticDoors.update(1/60,new Vector3(0,1.65,0));
+    assert.ok(courtyardBarrier.blocked(),'La puerta vuelve a cerrar al alejarse');
+    walkPerimeter([[access.x+1.2,access.z],[hall.centerX,access.z],[hall.centerX,hall.maxZ+1]].map(p=>fromRect(dei.rect,p)),.02);
+    assert.equal(localRay([-32,8],[-32,35.1]).length,0,'El recinto cerrado ya no contiene medianeras entre los cuatro módulos');
+    const exteriorWindows=[];group.traverse(o=>{if(o.userData.officePerimeterWindow)exteriorWindows.push(o);});
+    for(const [z,expected]of[[10.3,false],[13.3,false],[16.3,false],[20.05,false],[24.35,true],[29.05,true],[33.35,true]]) {
+      const a=fromRect(dei.rect,[access.x+2,z]),b=fromRect(dei.rect,[access.x-.2,z]),d=new Vector3(b[0]-a[0],0,b[1]-a[1]);
+      const windows=new Raycaster(new Vector3(a[0],1.7,a[1]),d.clone().normalize(),0,d.length()).intersectObjects(exteriorWindows,false);
+      assert.equal(windows.length>0,expected,'Solo se retiran las ventanas del paño mostrado, z='+z);
+    }
+    const backClosure=group.getObjectByName('Cierre exterior de ladrillo detrás del baño LED');assert.ok(backClosure);
+    const from=fromRect(dei.rect,[bath.doorX,bath.maxZ+.6]);
+    const to=fromRect(dei.rect,[bath.doorX,bath.maxZ-.2]),direction=new Vector3(to[0]-from[0],0,to[1]-from[1]);
+    assert.equal(new Raycaster(new Vector3(from[0],1.4,from[1]),direction.clone().normalize(),0,direction.length()).intersectObject(group,true)[0]?.object,backClosure,'Desde afuera se ve ladrillo; la puerta interior permanece detrás');
+    const exteriorFloor=group.getObjectByName('Piso exterior de los baños del bloque LED');
+    assert.equal(exteriorFloor?.material,perimeterMesh.material,'La explanada de baños prolonga el mismo baldosín exterior');
+    const exteriorDoorAxes=[];
+    for(const spec of officeEndRestrooms.doors) {
+      const door=group.getObjectByName(`Puerta cerrada del baño exterior LED ${spec.label}`);assert.ok(door);
+      const [x,z]=spec.center,nx=Math.sin(spec.angle),nz=Math.cos(spec.angle);
+      assert.ok(localRay([x+nx,z+nz],[x-nx*.1,z-nz*.1]).length,'Cada baño exterior tiene cierre sólido en su propia fachada');
+      const a=fromRect(dei.rect,[x+nx,z+nz]),b=fromRect(dei.rect,[x,z]),d=new Vector3(b[0]-a[0],0,b[1]-a[1]);
+      assert.equal(new Raycaster(new Vector3(a[0],1.4,a[1]),d.clone().normalize(),0,1.2).intersectObject(group,true)[0]?.object,door,'La puerta queda visible y no tapada por el ladrillo');
+      exteriorDoorAxes.push(new Vector3(1,0,0).transformDirection(door.matrixWorld));
+    }
+    assert.ok(Math.abs(exteriorDoorAxes[0].dot(exteriorDoorAxes[1]))<1e-6,'Una puerta mira al frente y la otra a la pared derecha');
+    assert.ok(localRay([officeEndRestrooms.maxX-.9,officeEndRestrooms.endZ+.4],[officeEndRestrooms.maxX-.9,officeEndRestrooms.endZ-.1]).length,'El vano frontal anterior se repone con ladrillo');
+    for(const awning of officeCourtyardAwnings) {
+      const mesh=group.getObjectByName(`Alero perimetral ${awning.id}`);assert.ok(mesh);
+      const x=awning.points.reduce((n,p)=>n+p[0],0)/4,z=awning.points.reduce((n,p)=>n+p[1],0)/4,p=fromRect(dei.rect,[x,z]);
+      const hits=new Raycaster(new Vector3(p[0],7,p[1]),new Vector3(0,-1,0),0,7).intersectObject(colliders,true);
+      assert.ok(hits[0]&&hits[0].point.y>=Math.min(...awning.heights)-.10&&hits[0].point.y<=Math.max(...awning.heights)+.1,'El alero es sólido en su cota: '+awning.id);
+    }
+    const patio=fromRect(dei.rect,[-31,41.5]);
+    assert.equal(new Raycaster(new Vector3(patio[0],1,patio[1]),new Vector3(0,1,0),0,7).intersectObject(colliders,true).length,0,'El centro del patio sigue a cielo abierto');
+    const locked=officeEndRestrooms.closedOfficeDoor;
+    assert.ok(localRay([locked.x,locked.z+1],[locked.x,locked.z-.2]).length,'La puerta de servicio del recinto unificado no permite entrar');
+    const corner=officeEndRestrooms.apron;
+    walkPerimeter([[access.x+1.1,34],[access.x+1.1,corner.maxZ-.6],[locked.x,corner.maxZ-.6]].map(p=>fromRect(dei.rect,p)));
+    const women=officeEndRestrooms.doors[1].center;
+    walkPerimeter([[women[0]+.7,corner.maxZ-.6],[women[0]+.7,women[1]]].map(p=>fromRect(dei.rect,p)));
     for(const [a,b]of[[[hall.centerX,11],[hall.minX-.3,11]],[[hall.centerX,11],[hall.maxX+.3,11]],[[hall.centerX,hall.endZ-.5],[hall.centerX,hall.endZ+.3]]])
       assert.ok(localRay(a,b).length,"El corredor cierra las oficinas no visitables y su extremo");
     walkPerimeter([[-18.52,6.15],[-18.52,3.34],[-14.85,3.34]].map(p=>fromRect(dei.rect,p)),.02);

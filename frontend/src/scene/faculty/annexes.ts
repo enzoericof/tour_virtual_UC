@@ -1,6 +1,6 @@
 import { addKampusPrint } from "./kampus-print";
 import * as T from "three";
-import { annexEnclosedLink, annexPaths, annexWalkEnd, deiGardenPath, deiSideDoor, deiEntrancePaving, deiReception, deiInterior, deiOfficeInterior, diciaWalkExtension, facultyAnnexes, maquetasVolumes } from "../../data/faculty-annexes";
+import { annexEnclosedLink, annexPaths, annexWalkEnd, deiGardenPath, deiSideDoor, deiEntrancePaving, deiReception, deiInterior, deiOfficeInterior, deiCourtyardAccess, diciaWalkExtension, facultyAnnexes, maquetasVolumes } from "../../data/faculty-annexes";
 import { facultyBlueprint as plan, fromRect, rectCorners, type Vec2 } from "../../data/faculty-blueprint";
 import type { FacultyBuilder, Range } from "./builder";
 import { addLedRightFacade } from "./led-right-facade";
@@ -15,6 +15,7 @@ import { addOfficeRoof, isOfficeAnnex } from "./office-roof";
 import { addOfficePerimeterFacade } from "./dei-perimeter-walk";
 import { makeLedPassageTile } from "./led-passage-tile";
 import { addDeiReception } from "./dei-reception";
+import {addOfficeCourtyardEntrance} from './office-courtyard-access';
 
 // ---- Anexos del plano general: exteriores provisionales, sin interiores relevados ----
 export function addAnnexes(
@@ -147,6 +148,17 @@ export function addAnnexes(
       const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
       const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
       const front = a[1] === maxZ && b[1] === maxZ;
+      if(isOfficeAnnex(annex.id)&&a[0]===b[0]) {
+        const offices=facultyAnnexes.filter(b=>isOfficeAnnex(b.id));
+        const minV=Math.min(...offices.map(b=>b.mapCenter[1]-b.rect.size[0]/2));
+        const maxV=Math.max(...offices.map(b=>b.mapCenter[1]+b.rect.size[0]/2));
+        const endV=annex.mapCenter[1]-a[0];
+        // Las divisiones transversales anteriores se retiran en todo su ancho.
+        if(endV>minV+.001&&endV<maxV-.001)continue;
+        if(annex.id==='dg'&&endV>maxV-.001) {
+          box(.20,h,length,a[0],h/2,(a[1]+b[1])/2,deiBrick,true);continue;
+        }
+      }
       if(isOfficeAnnex(annex.id) && ((a[1]===-maxZ && b[1]===-maxZ)
         || (annex.id==="led" && a[0]===annex.rect.size[0]/2 && b[0]===a[0]))) {
         addOfficePerimeterFacade(builder,a,b,h,deiBrick);continue;
@@ -200,7 +212,9 @@ export function addAnnexes(
         }
         for (const y of [bottom, top]) box(length, 0.045, 0.13, cx, y, cz + 0.23, deiLouver);
       } else if(isOfficeAnnex(annex.id)&&front) {
-        addOfficePerimeterFacade(builder,a,b,h,deiBrick,openings);
+        if(annex.id===deiCourtyardAccess.annexId)addOfficeCourtyardEntrance(builder,annex,deiBrick,ledPassageTile);
+        else if(annex.id==='da-cap')box(length,h,.20,cx,h/2,cz,deiBrick,true);
+        else addOfficePerimeterFacade(builder,a,b,h,deiBrick,openings);
       } else {
         annexWall(a, b, h, openings, false, isOfficeAnnex(annex.id) ? deiBrick : m.brick);
       }

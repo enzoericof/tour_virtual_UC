@@ -31,6 +31,8 @@ export function addOfficePerimeterFacade(builder:FacultyBuilder,a:Vec2,b:Vec2,he
     piece(width,height-sill-windowHeight,.20,center,(height+sill+windowHeight)/2,brick,true);
     const window=piece(width,windowHeight,.045,center,sill+windowHeight/2,m.glass,true,.025);
     window.name="Ventana enrejada del pasillo exterior LED";window.userData.officePerimeterWindow=true;
+    // Conserva la ventana y su reja, sin vistas al recinto que queda fuera del recorrido.
+    piece(width,windowHeight,.025,center,sill+windowHeight/2,m.metal,false,-.065);
     piece(width+.12,.07,.28,center,sill-.035,m.concrete,false,.015);
     for(const at of [center-width/2,center+width/2])
       piece(.045,windowHeight+.08,.10,at,sill+windowHeight/2,m.metal,false,.13);
@@ -86,7 +88,8 @@ export function addDeiPerimeterWalk(builder:FacultyBuilder,tiles:T.MeshStandardM
     }
     const high=3.61,low=3.08,insideX=plan.wallX+.18,outsideX=plan.outerX-.22;
     const innerZ=plan.wallFrontZ+.18,outerZ=plan.wallFrontZ-plan.width-.22;
-    roof([[insideX,high,innerZ],[outsideX,low,outerZ],[outsideX,low,plan.endZ+.25],[insideX,high,plan.endZ+.25]]);
+    // El extremo se une al nuevo faldón de esquina de la cabecera de DG.
+    roof([[insideX,high,innerZ],[outsideX,low,outerZ],[outsideX,low,plan.endZ-.25],[insideX,high,plan.endZ-.25]]);
     roof([[plan.portal.x+.04,high,innerZ],[insideX,high,innerZ],[outsideX,low,outerZ],[plan.portal.x+.04,low,outerZ]],true);
     function column(x:number,z:number) {
       const mesh=box(.24,2.95,.24,x,1.625,z,brick,true);

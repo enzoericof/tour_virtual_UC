@@ -306,11 +306,26 @@ export const deiInterior = {
 /** Vestíbulo derecho abierto y corredor dentro del bloque de tejas, sin tabiques en zigzag. */
 export const deiOfficeInterior = (()=>{
   const centerX=officeInteriorX,centerZ=annexEnclosedLink.portals[1].center[1],width=1.6;
-  const target=facultyAnnexes.find(b=>b.id==='da-cap')!;
+  const target=facultyAnnexes.find(b=>b.id==='das')!;
   const endZ=target.mapCenter[1]-dei.mapCenter[1]+target.rect.size[0]/2-1;
   const minX=centerX-width/2,maxX=centerX+width/2,minZ=deiInterior.lobby.minZ,maxZ=deiInterior.right.maxZ,startX=deiReception.minX;
   return {centerX,centerZ,width,minX,maxX,minZ,maxZ,startX,endZ,officeDoors:3,
     route:[[startX+.6,(deiInterior.right.minZ+maxZ)/2],[centerX,(deiInterior.right.minZ+maxZ)/2],[centerX,endZ-.5]] as Vec2[]};
+})();
+/** Correcciones del patio del 25/11: cotas estimadas sobre los pabellones existentes. */
+export const deiCourtyardAccess = {
+  annexId:'das', z:20.05, width:1.24, height:2.55,
+  x:led.mapCenter[0]-dei.mapCenter[0]+led.rect.size[1]/2,
+};
+export const officeEndRestrooms = (()=>{
+  const end=dg.mapCenter[1]-dei.mapCenter[1]+dg.rect.size[0]/2;
+  const east=deiCourtyardAccess.x;
+  const minX=east-3.6,endZ=end+2.7;
+  return {minX,maxX:east,startZ:end,endZ,height:2.75,
+    doors:[{label:'HOMBRES',center:[minX+.9,endZ] as Vec2,angle:0},
+      {label:'MUJERES',center:[east,end+1.35] as Vec2,angle:Math.PI/2}],
+    apron:{minX:east-9.325,maxX:east+2.4,minZ:end,maxZ:end+4.2},
+    closedOfficeDoor:{x:east-6.25,z:end,width:1.0,height:2.35}};
 })();
 /** Pasillo exterior marcado en rojo: salida lateral, frente corto y costado del bloque de tejas. */
 export const deiPerimeterWalk = (() => {
@@ -334,6 +349,32 @@ export const deiPerimeterWalk = (() => {
       [portal.x+.08,portal.z],orange,[orange[0],endZ-.25],
     ].map(p=>fromRect(dei.rect,p as Vec2)),
   };
+})();
+/** Aleros perimetrales de la marca azul: el patio central permanece a cielo abierto. */
+export const officeCourtyardAwnings = (()=>{
+  type Awning={id:string;finish:'tiles'|'metal';points:Vec2[];heights:number[];braces?:boolean};
+  const roofs:Awning[]=[],b=officeEndRestrooms;
+  function strip(id:string,a:Vec2,end:Vec2,out:Vec2,depth:number,high:number,low:number,finish:'tiles'|'metal',braces=false) {
+    roofs.push({id,finish,points:[a,end,[end[0]+out[0]*depth,end[1]+out[1]*depth],[a[0]+out[0]*depth,a[1]+out[1]*depth]],heights:[high,high,low,low],braces});
+  }
+  const innerX=deiPerimeterWalk.wallX+.18,outerX=deiPerimeterWalk.outerX-.22;
+  roofs.push({id:'esquina DG',finish:'tiles',points:[[innerX,b.startZ],[outerX,b.startZ],[outerX,b.startZ+1.6],[innerX,b.startZ+1.6]],heights:[3.61,3.08,3.08,3.08]});
+  strip('frente DG',[innerX,b.startZ],[b.minX,b.startZ],[0,1],1.6,3.61,3.08,'tiles',true);
+  strip('lateral izquierdo de baños',[b.minX,b.startZ+1.6],[b.minX,b.endZ],[-1,0],1.25,3.02,2.87,'tiles');
+  strip('frente de baños',[b.minX,b.endZ],[b.maxX,b.endZ],[0,1],1.25,3.02,2.87,'tiles');
+  strip('lateral derecho de baños',[b.maxX,b.startZ],[b.maxX,b.endZ],[1,0],1.25,3.02,2.87,'tiles');
+  roofs.push({id:'esquina izquierda de baños',finish:'tiles',points:[[b.minX,b.endZ],[b.minX-1.25,b.endZ],[b.minX-1.25,b.endZ+1.25],[b.minX,b.endZ+1.25]],heights:[3.02,2.87,2.87,2.87]});
+  roofs.push({id:'esquina derecha de baños',finish:'tiles',points:[[b.maxX,b.endZ],[b.maxX,b.endZ+1.25],[b.maxX+1.25,b.endZ+1.25],[b.maxX+1.25,b.endZ]],heights:[3.02,2.87,2.87,2.87]});
+  const civil=facultyAnnexes.find(a=>a.id==='lab-maquetas')!,dicia=facultyAnnexes.find(a=>a.id==='cta-dicia')!;
+  const wallX=civil.mapCenter[0]-dei.mapCenter[0]-civil.rect.size[0]/2;
+  const civilEnd=civil.mapCenter[1]-dei.mapCenter[1]+civil.rect.size[1]/2;
+  const diciaStart=dicia.mapCenter[1]-dei.mapCenter[1]+diciaStructure.nave.minZ;
+  const endZ=dicia.mapCenter[1]-dei.mapCenter[1]+diciaStructure.nave.maxZ;
+  // En Civil se pasa por encima de los equipos de aire; la unión baja hasta DICIA.
+  strip('Civil',[wallX,b.startZ],[wallX,civilEnd],[-1,0],1.8,4.70,4.45,'metal');
+  roofs.push({id:'enlace Civil DICIA',finish:'metal',points:[[wallX,civilEnd],[wallX,diciaStart],[wallX-1.8,diciaStart],[wallX-1.8,civilEnd]],heights:[4.70,4.03,3.78,4.45]});
+  strip('DICIA',[wallX,diciaStart],[wallX,endZ],[-1,0],1.8,4.03,3.78,'metal',true);
+  return roofs;
 })();
 // Sendero desde la galería azul, junto a la fachada exterior del DEI–LED.
 const coveredWalkU = annexCoordinates(plan.coveredWalk[0])[0];

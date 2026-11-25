@@ -1,5 +1,5 @@
 import * as T from 'three';
-import { deiInterior as plan, deiOfficeInterior as hall, facultyAnnexes } from '../../data/faculty-annexes';
+import { deiInterior as plan, deiOfficeInterior as hall, deiCourtyardAccess as access, facultyAnnexes } from '../../data/faculty-annexes';
 import type { FacultyBuilder } from './builder';
 import type { makeDeiInteriorMaterials } from './dei-interior';
 import type { Vec2 } from '../../data/faculty-blueprint';
@@ -26,10 +26,11 @@ export function addDeiOfficeInterior(builder:FacultyBuilder,materials:ReturnType
     // El pasillo de baños cruza esta circulación: ambas medianeras dejan ese paso libre.
     for(const x of[hall.maxX]) {
       const from=bath.maxZ;
-      for(const [a,b]of spans(from,hall.endZ,[[bath.minZ-.10,bath.maxZ+.10]])) {
+      for(const [a,b]of spans(from,hall.endZ,[[access.z-access.width/2,access.z+access.width/2]])) {
         box(.16,plan.height,b-a,x,plan.height/2,(a+b)/2,plaster,true);
         box(.19,.12,b-a,x,plan.floor+.06,(a+b)/2,skirting);
       }
+      box(.16,plan.height-access.height,access.width,x,(plan.height+access.height)/2,access.z,plaster,true);
     }
     box(hall.width+.16,plan.height,.16,hall.centerX,plan.height/2,hall.endZ,plaster,true);
     box(hall.width,.12,.19,hall.centerX,plan.floor+.06,hall.endZ,skirting);

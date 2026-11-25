@@ -3,7 +3,8 @@ import { annexPoint, facultyAnnexes } from "../../data/faculty-annexes";
 import type { Rect } from "../../data/faculty-blueprint";
 import type { FacultyBuilder } from "./builder";
 import { addDeiPerimeterWalk } from "./dei-perimeter-walk";
-import { addOfficeCourtyardWalk } from './office-courtyard-walk';
+import { addOfficeCourtyardWalk, addOfficeCourtyardAwnings } from './office-courtyard-walk';
+import {addOfficeEndRestrooms} from './office-courtyard-access';
 
 const officeIds = new Set(["led", "da-cap", "das", "dg"]);
 export const isOfficeAnnex = (id: string) => officeIds.has(id);
@@ -59,5 +60,18 @@ export function addOfficeRoof(builder: FacultyBuilder, brick: T.MeshStandardMate
   });
   addDeiPerimeterWalk(builder,tiles,brick,paving);
   addOfficeCourtyardWalk(builder,tiles,brick,paving);
+  addOfficeEndRestrooms(builder,brick,paving,tiles);
+  addOfficeCourtyardAwnings(builder,tiles);
+  // El cascarón es continuo también en las juntas de 10 y 40 cm entre módulos.
+  const dei=facultyAnnexes.find(b=>b.id==='dei-led')!,ordered=[...offices].sort((a,b)=>a.mapCenter[1]-b.mapCenter[1]);
+  frame(dei.rect,()=>{
+    const centerX=ordered[0].mapCenter[0]-dei.mapCenter[0];
+    for(let i=1;i<ordered.length;i++) {
+      const start=ordered[i-1].mapCenter[1]-dei.mapCenter[1]+ordered[i-1].rect.size[0]/2;
+      const end=ordered[i].mapCenter[1]-dei.mapCenter[1]-ordered[i].rect.size[0]/2;
+      if(end-start<.001)continue;
+      for(const side of[-1,1])box(.20,3.7,end-start,centerX+side*4.6,1.85,(start+end)/2,brick,true);
+    }
+  });
 }
 
