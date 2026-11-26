@@ -1,5 +1,18 @@
 # Verificación (versión 0.1.0)
 
+## Docker local y arranque sin Docker - 26/11/2026
+
+- `docker compose build` y `docker compose up -d` sobre Docker 29.10.0 con Compose 5.8.0: se construyeron las imágenes de `db` (postgres:17), `backend` (temurin 21 con `Containerfile.vercel`) y `frontend` (node:24-alpine más nginx 1.27). El backend quedó listo unos 13 s después de que la base pasara a `healthy`.
+- Se comprobó `GET /api/health` en el puerto 8080 y a través de nginx en el 5173, con `{"status":"ok"}` en ambos. `/` y `/editor.html` responden 200. Con la cookie `JSESSIONID` y el token CSRF del mismo origen: registro 201, login 200 y 200 en `/api/auth/me`, `/api/materias` y `/api/trabajos`.
+- `WebSocket /ws/presence` por el proxy de nginx: el handshake devuelve 401 si la cookie pertenece a un proceso del backend anterior y entrega el mensaje inicial (`self`, `players` y las dieciséis camionetas) con una sesión recién creada. Se repitió con el proxy de Vite en la vía sin Docker, con el mismo resultado.
+- La promoción de administrador con `docker compose exec db psql` sobre la tabla `usuarios` funciona y la cuenta ascendida abre el editor. Las dos cuentas de prueba usadas se eliminaron al terminar y la base quedó con los registros previos.
+- El volumen `tour-virtual-uc_pgdata` conservó sus datos al recrear los contenedores. Compose toma `POSTGRES_USER` y `POSTGRES_PASSWORD` de un `.env` en la raíz; se comprobó con `docker compose config`, sin iniciar servicios.
+- Las versiones que usa el proyecto quedaron dentro de los contenedores: Temurin 21.0.13.1, nginx 1.27.5 y PostgreSQL 17.12. El equipo no tiene `psql`, `postgres` ni `mvn` instalados y el arranque funcionó igual, así que la vía con Docker no depende ni modifica las herramientas del sistema. La huella en disco medida fue de 1,3 GB de imágenes, 66 MB de volumen y 7,2 GB de caché de compilación, liberable con `docker system prune`.
+- Compatibilidad con PostgreSQL 16: se levantó `postgres:16` (16.16) en una red aparte y se ejecutó la imagen del backend contra ella. Flyway aplicó las catorce migraciones, el catálogo quedó con 70 materias y `/api/health` respondió `{"status":"ok"}`. Por eso el README acepta el PostgreSQL 16 que entrega Linux Mint 22 sin exigir el repositorio PGDG.
+- Vía sin Docker: JDK 21.0.13.1 y Maven Wrapper 3.10.0 con `sh ./mvnw spring-boot:run` contra PostgreSQL 17.12 en contenedor, usando `campus-backend/.env`. Confirma que la carga `optional:file:./.env[.properties]` del backend funciona. Vite sirvió el visor y el editor en 5173 y redirigió `/api` y `/ws` al 8080.
+- `npm test`: 130 de 131 aprobadas. El único fallo es la separación adicional de Sala Manfred, previo y ajeno a este cambio. `npm run build` aprobado. `npm ci` y el build del visor también se ejecutaron dentro de `node:24-alpine` al compilar la imagen del frontend.
+- No se probó una instalación nativa de PostgreSQL en el equipo, que no la tiene, ni un arranque de Vite con Node 24 en el sistema: el equipo usa Node 26.13.1, fuera del rango `>=24 <25` de `package.json`. Esos pasos del README quedan para confirmar por el equipo. La revisión en navegador del recorrido y la prueba con dos cuentas simultáneas siguen pendientes.
+
 ## Historia del DEI–LED - 20/11/2026
 
 Nuevo punto con I en la galería del acceso del DEI–LED, antes del blindex, derivado de la geometría de `deiEntranceWing` y `deiSideDoor`. El panel compartido presenta la llegada de Carmelo De Blasi en 1982, el financiamiento italiano a través de la Asociación de Voluntarios para el Servicio Internacional y la creación del LED (1985) y el DEI (1987), con enlace a la historia institucional. No cambia la escena.

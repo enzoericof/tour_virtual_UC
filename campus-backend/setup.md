@@ -191,7 +191,7 @@ Esta configuración utiliza las opciones del [depurador Java](https://code.visua
 
 Configurar `$env:DB_USER` y `$env:DB_PASSWORD` en la terminal integrada **no modifica el entorno del proceso VS Code ya abierto**. Por eso, esta alternativa proporciona las credenciales mediante `env` en `launch.json`, independientemente de la terminal.
 
-El proyecto no tiene configurada la carga automática de archivos `.env`: crear uno por sí solo no sustituye estos pasos.
+`application.properties` declara `spring.config.import=optional:file:./.env[.properties]`, así que un archivo `.env` **dentro de `campus-backend/`** (la carpeta desde la que se ejecuta el Wrapper) también aporta `DB_URL`, `DB_USER`, `DB_PASSWORD` y `CAMPUS_FRONTEND_ORIGINS`, con una línea `CLAVE=valor` por variable. Ese archivo está en `.gitignore` y no se versiona; las credenciales no deben guardarse en archivos compartidos. La carga automática no alcanza al depurador: la configuración de `launch.json` anterior define las variables en `env` y no lee `.env`.
 
 ## 6. Qué sucede durante el primer arranque
 

@@ -1,5 +1,14 @@
 # Correcciones documentales
 
+## Ejecución local — 26/11/2026
+
+| Documento | Incorrecto | Correcto | Fuente de verdad |
+| --- | --- | --- | --- |
+| `campus-backend/setup.md` | «El proyecto no tiene configurada la carga automática de archivos `.env`» | `application.properties` declara `spring.config.import=optional:file:./.env[.properties]`: un `.env` dentro de `campus-backend/` sí aporta `DB_URL`, `DB_USER` y `DB_PASSWORD`. La configuración de `launch.json` del depurador sigue siendo independiente | `campus-backend/src/main/resources/application.properties`, comprobado con `spring-boot:run` contra PostgreSQL 17 |
+| `README.md` | «Inicio con Docker» sin usuarios, sin estado de los contenedores ni comandos de día a día; y la vía sin Docker repartida entre el inicio rápido y el apartado de multijugador | Pasos numerados para las dos vías, con comprobaciones, credenciales, cuenta administradora y problemas frecuentes | `compose.yaml`, `frontend/Containerfile`, `campus-backend/Containerfile.vercel`, pruebas del 26/11/2026 |
+| `README.md` | La instalación solo detallaba Arch Linux y exigía PostgreSQL 17 | Se agregó Linux Mint, Ubuntu y Debian en las dos vías, con los paquetes de Mint 22 (`docker.io`, `docker-compose-v2`, `openjdk-21-jdk`), Node 24 por nvm y PostgreSQL 16 del sistema, que se verificó contra las migraciones. Mint no tiene repositorio propio en Docker ni en PGDG: se usa `UBUNTU_CODENAME` y no `VERSION_CODENAME` | Prueba con `postgres:16` en [Verificación](verificacion.md); documentación de Docker y de PGDG |
+| `docs/docker-local.md` | Instruía crear la rama `feat/docker-local` y no mencionaba el `.env` de la raíz, el editor en modo compilado ni que el 5432 no se publica | Pasos de ejecución sin el flujo de ramas, más esas aclaraciones | `compose.yaml`, `frontend/src/editor/editor.ts` |
+
 ## Limpieza de archivos versionados
 
 `IMG_5659.HEIC` y `Pasillo - Piso 3.glb` salen de la versión actual. Se conservan las fotos y texturas usadas por el visor y las referencias de procedencia. El extractor recibe ahora la ruta al escaneo local. Los archivos de Docker y Compose retirados pertenecían a `backend/`, que dejó de existir en `9c5d019`. La guía vigente está en [campus-backend/setup.md](../campus-backend/setup.md).

@@ -8,6 +8,7 @@ Estas instrucciones se aplican a todo el repositorio. El proyecto corresponde al
 | --- | --- |
 | Arranque, controles y comandos | [README](README.md) |
 | Estructura, API y servicios activos | [Arquitectura](docs/arquitectura.md) |
+| Reparto del código y archivos principales | [Estructura del código](docs/estructura.md) |
 | Medidas, coordenadas y alcance del escenario | [Geografía y reconstrucción](docs/base-geografica.md) |
 | Procedencia y preparación de recursos | [Referencias](docs/referencias.md) |
 | Pruebas y revisión en navegador | [Verificación](docs/verificacion.md) y [revisión visual](design-qa.md) |

@@ -31,7 +31,7 @@ Prioridades indicadas por el usuario, en este orden.
 | En pantallas angostas, el logo («Inicio») abre el panel Explorar encima de la portada y tapa «Comenzar recorrido» (comportamiento anterior a esta rama) | El botón queda visible y utilizable en 390 px de ancho |
 | Rendimiento en móviles y sesión con seis usuarios simultáneos | Medición registrada en verificacion.md |
 | Avatares, gestos y chat grupal: aceptación en la nube | Verificar dos cuentas, consentimiento, caída en escaleras/rampas, archivo a los cinco minutos, historial y entrega entre dos instancias; implementados el 19/11/2026 |
-| Empaquetado de la aplicación actual con Docker y PostgreSQL, configuración de producción y HTTPS | `docker compose up --build` funcionando con `campus-backend/` y datos persistentes tras reiniciar |
+| Empaquetado de la aplicación actual con Docker y PostgreSQL, configuración de producción y HTTPS | El compose local ya construye y levanta los tres servicios (26/11/2026, [Verificación](verificacion.md)); faltan la configuración de producción, TLS y el despliegue fuera del equipo |
 | Pruebas visuales de cuentas y biblioteca | Resultado registrado en verificacion.md (el backend ya tiene cobertura automática) |
 | Registrar los seis integrantes, sus roles y fechas | Nómina aportada por el equipo, sin asignaciones supuestas |
 | Nomenclatura del plano | Revisar el nombre `FACULTY_LABS` según el edificio que representa |
