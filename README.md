@@ -74,16 +74,12 @@ Los tres servicios corren en contenedores: la base PostgreSQL 17, el backend Spr
 
 ### 1. Instalar Docker
 
-**Linux Mint** (21 o 22). La vía corta usa los paquetes del propio sistema:
+**Linux Mint** (21 o 22). La vía corta usa los paquetes del propio sistema(https://docs.docker.com/engine/install/ubuntu/):
 
+Eliminar los paquetes obsoletos de docker:
 ```sh
-sudo apt update
-sudo apt install docker.io docker-compose-v2
-sudo systemctl enable --now docker
-sudo usermod -aG docker "$USER"
+sudo apt remove $(dpkg --get-selections docker.io docker-compose docker-compose-v2 docker-doc docker-buildx podman-docker containerd runc | cut -f1)
 ```
-
-La vía recomendada por Docker instala una versión más nueva del motor. Linux Mint no tiene repositorio propio en Docker: se usa el de la versión de Ubuntu en la que se basa, que está en la variable `UBUNTU_CODENAME` (`jammy` en Mint 21, `noble` en Mint 22). No sirve `VERSION_CODENAME`, que devuelve el nombre de Mint (`virginia`, `wilma`, `xia`) y no existe en ese repositorio.
 
 ```sh
 sudo apt update
@@ -91,26 +87,24 @@ sudo apt install ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
-https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$UBUNTU_CODENAME") stable" |
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
 sudo apt update
 sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-sudo systemctl enable --now docker
+sudo systemctl start --now docker
+sudo systemctl status docker
 sudo usermod -aG docker "$USER"
 ```
 
-Elegí una sola de las dos: mezclan `containerd` y `runc` y entran en conflicto. Si ya estaba `docker.io` instalado y se pasa a la vía oficial, primero se desinstala.
-
-**Ubuntu y Debian** siguen los mismos dos caminos con `docker.io` y `docker-compose-v2`, o el repositorio oficial de Docker. En **Arch Linux**:
-
-```sh
-sudo pacman -S --needed docker docker-compose docker-buildx
-sudo systemctl enable --now docker
-sudo usermod -aG docker "$USER"
-```
-
-En **Windows 11 o macOS** conviene Docker Desktop con el motor WSL 2; hay que abrirlo y esperar a que indique que el motor está en ejecución.
 
 En todos los casos, cerrá la sesión y volvé a entrar, o ejecutá `newgrp docker`, para que el grupo `docker` tenga efecto. Si el demonio está detenido, se inicia con `sudo systemctl start docker`.
 
