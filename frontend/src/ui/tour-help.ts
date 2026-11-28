@@ -20,6 +20,7 @@ export function openTourHelp({ openDialog }: TourShell) {
           <dt><kbd>Espacio</kbd></dt><dd>Mantener para usar el jetpack. Al soltar, caés por gravedad.</dd>
           <dt><kbd>E</kbd></dt><dd>Sentarte en un asiento cercano o levantarte.</dd>
           <dt><kbd>I</kbd></dt><dd>Leer información del lugar cuando aparezca el aviso al acercarte.</dd>
+          <dt><kbd>T</kbd></dt><dd>Abrir la biblioteca de trabajos prácticos dentro de la Sala Manfred.</dd>
           <dt><kbd>G</kbd></dt><dd>Abrir gestos. Mirá a otro visitante de cerca para interactuar con él.</dd>
           <dt><kbd>C</kbd></dt><dd>Abrir el chat. Enviar con Enter y cerrar con Esc.</dd>
           <dt><kbd>WASD</kbd> / <kbd>Espacio</kbd> al caerte</dt><dd>Dar impulsos al cuerpo. Se levanta automáticamente.</dd>

@@ -17,6 +17,7 @@ import { Walker } from "../navigation/walker";
 import { pickDestination, pointerOnCanvas } from "../navigation/pick-destination";
 import { places, type Place } from "../data/places";
 import { nearbyInformation, type PlaceInformation } from "../data/place-information";
+import { campusZoneAt } from "../data/campus-zones";
 import { campusBounds, facultyToWorld, insidePolygon, layout } from "../data/campus-geometry";
 import { facultyVisitTargets, FLOOR_HEIGHT } from "../data/faculty-blueprint";
 import { annexVisitTargets } from "../data/faculty-annexes";
@@ -42,6 +43,7 @@ export class TourEngine {
   readonly social: SocialPerformance;
   onSocialMenu = (_player: Player | null) => {};
   onInformation = (_information: PlaceInformation) => {};
+  onOpenWorks?: () => void;
   private readonly informationRay = new T.Ray();
   readonly campus = createCampus();
   readonly cats: CampusCats;
@@ -206,9 +208,15 @@ export class TourEngine {
     this.animate();
   }
   private interactionKey(event: KeyboardEvent) {
-    if (!["KeyE", "KeyG", "KeyI", "KeyF", "KeyV"].includes(event.code) || event.repeat || event.ctrlKey || event.metaKey || event.altKey
+    if (!["KeyE", "KeyG", "KeyI", "KeyF", "KeyV", "KeyT"].includes(event.code) || event.repeat || event.ctrlKey || event.metaKey || event.altKey
       || event.isComposing || !this.walker.active || this.social.busy) return;
     if (event.target instanceof Element && event.target.closest("input,textarea,select,[contenteditable],dialog")) return;
+    if (event.code === "KeyT") {
+      if (!this.canOpenWorks()) return;
+      event.preventDefault();
+      this.onOpenWorks?.();
+      return;
+    }
     event.preventDefault();
     if(event.code==="KeyF"){
       if(this.vehicles.driving)this.vehicles.exit();
@@ -227,6 +235,12 @@ export class TourEngine {
     } else {
       this.sit();
     }
+  }
+  private canOpenWorks() {
+    if (!this.onOpenWorks || this.vehicles.driving || this.elevatorPassenger) return false;
+    const { x, y, z } = this.camera.position;
+    const feetY = this.seated ? this.seatReturn.y : y - 1.5;
+    return campusZoneAt(x, feetY, z).name === "Sala Manfred";
   }
   private nearInformation() {
     if (!this.walker.active || this.social.busy || this.elevatorPassenger) return null;
@@ -327,8 +341,10 @@ export class TourEngine {
       const available = this.walker.active ? this.nearSeat() : null;
       const information = this.nearInformation();
       const seatText = this.seated ? 'E · Levantarse' : available ? 'E · Sentarse' : '';
+      const worksText = this.walker.active && !this.social.busy && this.canOpenWorks()
+        ? 'T · Biblioteca de trabajos prácticos' : '';
       const hint = !this.walker.active ? '' : this.social.busy ? 'Interacción en curso · Esc para pausar'
-        : this.vehicles.driving ? this.vehicles.hint() : [this.vehicles.hint(),information ? `I · ${information.information.label}` : '', seatText].filter(Boolean).join('\n');
+        : this.vehicles.driving ? this.vehicles.hint() : [this.vehicles.hint(),information ? `I · ${information.information.label}` : '', seatText, worksText].filter(Boolean).join('\n');
       if (this.seatHint.textContent !== hint) this.seatHint.textContent = hint;
     }
     if(!this.vehicles.driving)this.updateElevator(elapsed);

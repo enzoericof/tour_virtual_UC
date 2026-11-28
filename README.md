@@ -504,6 +504,8 @@ En el backend: `CAMPUS_FRONTEND_ORIGINS=http://127.0.0.1:5173,http://localhost:5
 
 Para caminar, elegí **Recorrer** o hacé clic en un punto del modelo. Usá **WASD** o las **flechas** para moverte, el **mouse** para mirar y **Esc** para pausar y liberar el cursor. Mantené **Espacio** para usar el jetpack sin límite; al soltar, la gravedad y la inercia controlan la caída. **Menú → Ayuda** muestra los demás controles.
 
+Al entrar a la Sala Manfred, aparece el aviso para pulsar **T** y abrir la biblioteca de trabajos prácticos en **Todos los trabajos**.
+
 Las dieciséis Ranger Raptor del estacionamiento del LED se comparten entre jugadores. Acercate a la puerta del conductor y pulsá **F** para subir. **W/S** acelera, frena y retrocede; **A/D** gira; **Espacio** activa el freno de mano; **V** alterna cabina y cámara exterior. Detenete y pulsá **F** para bajar. **Esc** pausa y detiene la camioneta. La posición estacionada se conserva para los demás y para nuevas visitas.
 
 En el recorrido, acercate y mirá un banco o silla: **E** permite sentarte y vuelve a levantarte. Cada banco tiene dos plazas y cada silla una. Sentado podés mirar alrededor; Esc pausa y conserva el asiento.

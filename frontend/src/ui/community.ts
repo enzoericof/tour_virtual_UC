@@ -43,6 +43,7 @@ export function mountCommunity(
     presence.onVehicleDisconnect=()=>engine.vehicles.disconnected();
   }
   const library = createLibrary(shell, () => user, account);
+  if (engine) engine.onOpenWorks = () => void library("all");
 
   function account() {
     if (user) {
